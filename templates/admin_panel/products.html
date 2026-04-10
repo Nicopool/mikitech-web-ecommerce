@@ -1,0 +1,196 @@
+{% extends "admin_panel/base_admin.html" %}
+{% load miki_filters %}
+
+{% block page_title %}Gestión de Productos — MIKITECH{% endblock %}
+
+{% block admin_content %}
+<style>
+  .p-img { width: 5rem; height: 5rem; border-radius: 0.8rem; object-fit: contain; background: #F8FAFC; display:flex; align-items:center; justify-content:center; font-size: 2.2rem; border: 1px solid #E2E8F0; overflow: hidden; }
+  .p-img img { width: 100%; height: 100%; object-fit: contain; }
+</style>
+
+<div class="u-flex u-justify-between u-align-center u-mb-4">
+  <div>
+    <h2 style="font-size:2.2rem; font-weight:800;">📦 Gestión de Inventario</h2>
+    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">{{ productos|length }} producto{% if productos|length != 1 %}s{% endif %} registrados</p>
+  </div>
+  <a href="{% url 'admin_product_create' %}" class="g-btn-primary">
+    + Nuevo Producto
+  </a>
+</div>
+
+<!-- MINI ESTADÍSTICAS -->
+<div class="g-row u-mb-4">
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="font-size:1.2rem; color:#64748B; margin-bottom: 0.5rem;">Unidades Totales</div>
+      <div style="font-size:3rem; font-weight:800;">{{ productos|length }}</div>
+    </div>
+  </div>
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="font-size:1.2rem; color:#64748B; margin-bottom: 0.5rem;">Valor Inventario</div>
+      <div style="font-size:2.2rem; font-weight:800; color:#2563EB;">Estimado</div>
+    </div>
+  </div>
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="font-size:1.2rem; color:#64748B; margin-bottom: 0.5rem;">Alertas Stock</div>
+      <div style="font-size:3rem; font-weight:800; color:#EF4444;">⚠️</div>
+    </div>
+  </div>
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="font-size:1.2rem; color:#64748B; margin-bottom: 0.5rem;">Acción</div>
+      <a href="{% url 'admin_reports' %}" class="g-action-btn" style="margin-top:0.5rem;">Generar Informe</a>
+    </div>
+  </div>
+</div>
+
+<!-- TABLA DE PRODUCTOS -->
+<div class="mpro-card" style="padding:0; overflow:visible;">
+  <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <span style="font-weight: 700; color: var(--ds-text);">📋 Catálogo de Hardware</span>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <div class="g-search-wrapper">
+        <span><span class="material-symbols-outlined">search</span></span>
+        <input type="text" id="buscadorProductos" class="g-search" placeholder="Filtrar por nombre, marca...">
+      </div>
+      <select id="filtroEstado" style="padding: 10px 15px; border-radius: 8px; border: 1px solid var(--ds-border); outline: none; font-size: 13px; background: var(--ds-bg); color: var(--ds-text);">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activos</option>
+        <option value="inactivo">Inactivos</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none;">
+    <table class="g-table" id="tablaProductos">
+      <thead>
+        <tr>
+          <th style="width:6rem;">IMG</th>
+          <th>NOMBRE</th>
+          <th>CATEGORÍA</th>
+          <th>MARCA</th>
+          <th>PRECIO (COP)</th>
+          <th>EXISTENCIAS</th>
+          <th>ESTADO</th>
+          <th class="u-text-center">ACCIONES</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoTablaProductos">
+        {% for producto in productos %}
+        <tr data-search="{{ producto.nombre|lower }} {{ producto.marca|lower }} {{ producto.categoria.nombre|lower }}">
+          <td class="ps-4">
+            <div class="p-img">
+              {% if producto.url_imagen_principal %}
+              <img src="{{ producto.url_imagen_principal }}" alt="{{ producto.nombre }}">
+              {% else %}📦{% endif %}
+            </div>
+          </td>
+          <td>
+            <div style="font-weight: 600; font-size: 1.4rem;">{{ producto.nombre|truncatechars:50 }}</div>
+            <div style="font-size:1.1rem; color:#94A3B8;">ENLACE: {{ producto.enlace }}</div>
+          </td>
+          <td style="color:#64748B;">{{ producto.categoria.nombre|default:"Sin categoría" }}</td>
+          <td style="color:#64748B;">{{ producto.marca|default:"—" }}</td>
+          <td style="font-weight: 700;">{{ producto.precio|currency_cop }}</td>
+          <td>
+            {% if producto.existencias <= 5 %}
+            <span class="mpro-badge" style="background:#FEE2E2; color:#DC2626;">⚠️ {{ producto.existencias }}</span>
+            {% else %}
+            <span class="mpro-badge" style="background:#DCFCE7; color:#16A34A;">{{ producto.existencias }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if producto.esta_activo %}
+            <span class="mpro-badge g-badge-active">Activo</span>
+            {% else %}
+            <span class="mpro-badge g-badge-inactive">Inactivo</span>
+            {% endif %}
+            {% if producto.es_destacado %}
+            <span class="mpro-badge" style="background:#EDE9FE; color:#7C3AED; margin-left:0.4rem;">⭐ Dest.</span>
+            {% endif %}
+          </td>
+
+          <td class="u-text-center">
+            <a href="{% url 'admin_product_edit' producto.id %}" class="g-action-btn">✏️</a>
+            <button class="g-action-btn g-action-disable" onclick="confirmarEliminacion('{{ producto.id }}', '{{ producto.nombre|escapejs }}')">🗑️</button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="u-text-center" style="padding: 50px; color:#64748B; font-size:1.4rem;">
+            No hay productos registrados. <a href="{% url 'admin_product_create' %}" style="color:var(--ds-primary); font-weight:600;">Crea el primero aquí</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal de Eliminación -->
+<div id="modalEliminar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+  <div class="mpro-card" style="width:400px; max-width:90%; animation: slideUp 0.3s ease;">
+    <div style="background:#DC2626; color:white; padding:15px 25px; margin:-25px -25px 25px -25px; border-radius:16px 16px 0 0; font-weight:700;">
+      ⚠️ Confirmar Eliminación
+    </div>
+    <div id="cuerpo-modal-eliminar" style="font-size:1.4rem; color:var(--ds-text);"></div>
+    <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="document.getElementById('modalEliminar').style.display='none'" class="g-btn-primary" style="background:#F1F5F9; color:var(--ds-text); box-shadow:none;">Cancelar</button>
+      <form id="formularioEliminar" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="g-btn-primary" style="background:#DC2626;">Confirmar Borrado</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Filtrado interactivo
+document.getElementById('buscadorProductos').addEventListener('input', filtrarTabla);
+document.getElementById('filtroEstado').addEventListener('change', filtrarTabla);
+
+function filtrarTabla() {
+  var query = document.getElementById('buscadorProductos').value.toLowerCase();
+  var estadoFiltro = document.getElementById('filtroEstado').value.toLowerCase();
+  var filas = document.querySelectorAll('#cuerpoTablaProductos tr[data-search]');
+  
+  filas.forEach(function(fila) {
+    var texto = fila.dataset.search.toLowerCase();
+    var celdaEstado = fila.querySelector('td:nth-child(7)');
+    var textoEstado = celdaEstado ? celdaEstado.textContent.toLowerCase() : '';
+    
+    var coincideBusqueda = texto.includes(query);
+    var coincideEstado = !estadoFiltro || textoEstado.includes(estadoFiltro);
+    
+    fila.style.display = (coincideBusqueda && coincideEstado) ? '' : 'none';
+  });
+}
+
+function confirmarEliminacion(idProducto, nombreProducto) {
+  var modal = document.getElementById('modalEliminar');
+  var cuerpo = document.getElementById('cuerpo-modal-eliminar');
+  cuerpo.innerHTML = '';
+  
+  var p = document.createElement('p');
+  p.textContent = '¿Estás completamente seguro de eliminar este producto del inventario?';
+  
+  var detalle = document.createElement('div');
+  detalle.style.cssText = 'background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:15px; font-weight:700; margin:15px 0; color:var(--ds-primary);';
+  detalle.textContent = '📦 ' + nombreProducto;
+  
+  var alerta = document.createElement('p');
+  alerta.style.cssText = 'color:#DC2626; font-size:1.2rem; margin-top:10px; font-weight:600;';
+  alerta.textContent = 'Esta acción eliminará permanentemente el registro de la base de datos.';
+  
+  cuerpo.appendChild(p);
+  cuerpo.appendChild(detalle);
+  cuerpo.appendChild(alerta);
+  
+  document.getElementById('formularioEliminar').action = '/panel-admin/productos/eliminar/' + idProducto + '/';
+  modal.style.display = 'flex';
+}
+</script>
+{% endblock %}

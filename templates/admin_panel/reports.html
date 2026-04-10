@@ -1,0 +1,211 @@
+{% extends "admin_panel/base_admin.html" %}
+{% load miki_filters %}
+{% block page_title %}Reportes y Análisis — MIKITECH{% endblock %}
+
+{% block admin_content %}
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 40px;">
+  <div>
+    <h2 style="font-size:2.4rem; font-weight:800; margin:0;">📊 Inteligencia de Negocio</h2>
+    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Métricas clave de rendimiento y herramientas de extracción de datos.</p>
+  </div>
+  <div style="display:flex; gap: 15px;">
+    <form method="GET" action="" style="margin:0; display:flex; align-items:center; gap:10px;">
+      <span style="font-size:1.2rem; color:var(--ds-text-soft);">Filtro temporal:</span>
+      <select name="dias" onchange="this.form.submit()" style="padding: 10px 15px; border-radius: 8px; border: 1px solid var(--ds-border); outline: none; font-size: 13px; background: var(--ds-bg); color: var(--ds-text); font-weight:600;">
+        <option value="all" {% if estadisticas.filtro_actual == 'all' %}selected{% endif %}>Análisis Global Histórico</option>
+        <option value="7" {% if estadisticas.filtro_actual == '7' %}selected{% endif %}>Última Semana (7D)</option>
+        <option value="30" {% if estadisticas.filtro_actual == '30' %}selected{% endif %}>Último Mes (30D)</option>
+        <option value="90" {% if estadisticas.filtro_actual == '90' %}selected{% endif %}>Último Trimestre (90D)</option>
+      </select>
+    </form>
+    <button class="g-btn-primary" onclick="window.print()">📥 GENERAR PDF</button>
+  </div>
+</div>
+
+<!-- PANEL DE MÉTRICAS GLOBALES -->
+<div class="g-row u-mb-4" style="margin-bottom: 40px;">
+  <div class="g-col-3">
+    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #2563EB;">
+      <div style="font-size:3rem; margin-bottom:1rem;">📦</div>
+      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Hardware Total</div>
+      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_productos }}</div>
+    </div>
+  </div>
+  <div class="g-col-3">
+    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #7C3AED;">
+      <div style="font-size:3rem; margin-bottom:1rem;">👥</div>
+      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Audiencia</div>
+      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_usuarios }}</div>
+    </div>
+  </div>
+  <div class="g-col-3">
+    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #10B981;">
+      <div style="font-size:3rem; margin-bottom:1rem;">📂</div>
+      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Líneas Base</div>
+      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_categorias }}</div>
+    </div>
+  </div>
+  <div class="g-col-3">
+    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #F59E0B;">
+      <div style="font-size:3rem; margin-bottom:1rem;">💬</div>
+      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Feedback</div>
+      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_resenas }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- GRÁFICO DE RENDIMIENTO -->
+<div class="mpro-card u-mb-4" style="margin-bottom: 40px; padding: 30px;">
+  <div style="border-bottom:1px solid #E2E8F0; padding-bottom:1.5rem; margin-bottom:2rem; display: flex; justify-content: space-between; align-items: center;">
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);">📈 Rendimiento Comercial (Últimos 6 Meses)</h3>
+  </div>
+  <div style="position: relative; height: 350px; width: 100%;">
+    <canvas id="ventasChart"></canvas>
+  </div>
+</div>
+
+<!-- HERRAMIENTAS DE EXPORTACIÓN -->
+<div class="mpro-card" style="margin-bottom: 40px;">
+  <div style="border-bottom:1px solid #E2E8F0; padding-bottom:1.5rem; margin-bottom:3rem;">
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);">📂 Exportación Estratégica</h3>
+  </div>
+  <div class="g-row">
+    <div class="g-col-4">
+      <div style="border:1px solid #E2E8F0; border-radius:1.2rem; padding:2rem; background:#F8FAFC; height: 100%; display: flex; flex-direction: column; transition: all 0.3s ease;">
+        <h4 style="font-size:1.5rem; font-weight:800; margin-bottom:1rem; color: #1E293B;">Inventario Crítico</h4>
+        <p style="font-size:1.2rem; color:#64748B; margin-bottom:2rem; flex: 1; line-height: 1.5;">Relación detallada de existencias, precios y márgenes de hardware activo.</p>
+        <button class="g-btn-primary u-w-full" style="background:#1E293B; box-shadow: none;">Descargar CSV</button>
+      </div>
+    </div>
+    <div class="g-col-4">
+        <div style="border:1px solid #E2E8F0; border-radius:1.2rem; padding:2rem; background:#F8FAFC; height: 100%; display: flex; flex-direction: column; transition: all 0.3s ease;">
+          <h4 style="font-size:1.5rem; font-weight:800; margin-bottom:1rem; color: #1E293B;">Directorio de Clientes</h4>
+          <p style="font-size:1.2rem; color:#64748B; margin-bottom:2rem; flex: 1; line-height: 1.5;">Base de datos de contacto para segmentación de campañas y CRM.</p>
+          <button class="g-btn-primary u-w-full" style="background:#1E293B; box-shadow: none;">Descargar CSV</button>
+        </div>
+      </div>
+      <div class="g-col-4">
+        <div style="border:1px solid #E2E8F0; border-radius:1.2rem; padding:2rem; background:#F8FAFC; height: 100%; display: flex; flex-direction: column; transition: all 0.3s ease;">
+          <h4 style="font-size:1.5rem; font-weight:800; margin-bottom:1rem; color: #1E293B;">Análisis de Opinión</h4>
+          <p style="font-size:1.2rem; color:#64748B; margin-bottom:2rem; flex: 1; line-height: 1.5;">Compilación de reseñas y calificaciones para control de calidad.</p>
+          <button class="g-btn-primary u-w-full" style="background:#1E293B; box-shadow: none;">Descargar CSV</button>
+        </div>
+      </div>
+  </div>
+</div>
+
+<!-- TABLA DE REPORTES DETALLADA -->
+<div class="mpro-card" style="padding:0; overflow:hidden; margin-bottom: 40px;">
+  <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center;">
+    <span style="font-weight: 700; color: var(--ds-text);">📋 Registro Extendido de Transacciones (Pedidos)</span>
+    <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8;">{{ pedidos|length }} Registros</span>
+  </div>
+  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none;">
+    <table class="g-table">
+      <thead>
+        <tr>
+          <th>ID REFERENCIA</th>
+          <th>FECHA</th>
+          <th>CLIENTE</th>
+          <th>MONTO TOTAL</th>
+          <th>ESTADO OPERATIVO</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pedido in pedidos %}
+        <tr>
+          <td style="font-family:monospace; color:#64748B;">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</td>
+          <td style="color:#64748B; font-weight:500;">{{ pedido.creado_el|date:"d M Y, h:i A" }}</td>
+          <td style="font-weight:600; color:var(--ds-primary);">@{{ pedido.usuario.nombre_usuario }}</td>
+          <td style="font-weight:700;">{{ pedido.monto_total|currency_cop }}</td>
+          <td>
+            {% if pedido.estado == 'Pendiente' %}
+              <span class="mpro-badge" style="background:#FEF3C7; color:#D97706;">Pendiente</span>
+            {% elif pedido.estado == 'Enviado' %}
+              <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8;">Enviado</span>
+            {% elif pedido.estado == 'Entregado' %}
+              <span class="mpro-badge" style="background:#D1FAE5; color:#059669;">Entregado</span>
+            {% else %}
+              <span class="mpro-badge" style="background:#F3F4F6; color:#4B5563;">{{ pedido.estado }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="u-text-center" style="padding:50px; color:#64748B; font-size:1.4rem;">
+            No hay transacciones registradas para este periodo.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  @media print {
+    .g-sidebar, .g-topbar, .g-btn-primary { display: none !important; }
+    .g-main-wrapper { margin-left: 0 !important; width: 100% !important; }
+    .mpro-card { border: 1px solid #E2E8F0 !important; box-shadow: none !important; padding: 20px !important; }
+    body { background: white !important; }
+    h2, h3 { color: black !important; }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('ventasChart').getContext('2d');
+    
+    // Gradiente para las barras
+    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, '#3B82F6');   
+    gradient.addColorStop(1, '#1D4ED8');   
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Febrero', 'Marzo'],
+        datasets: [{
+          label: 'Ingresos Mensuales (COP Millones)',
+          data: [18.2, 25.4, 42.5, 30.1, 28.5, 35.8],
+          backgroundColor: gradient,
+          borderRadius: 8,
+          borderSkipped: false,
+          barPercentage: 0.55
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0F172A',
+            titleFont: { family: 'Inter', size: 13 },
+            bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: function(context) { return '$ ' + context.raw + ' Millones'; }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: '#F1F5F9', borderDash: [5, 5], drawBorder: false },
+            ticks: { font: { family: 'Inter', size: 12 }, color: '#64748B', callback: function(val) { return '$' + val + 'M'; } }
+          },
+          x: {
+            grid: { display: false, drawBorder: false },
+            ticks: { font: { family: 'Inter', size: 12, weight: '600' }, color: '#475569' }
+          }
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

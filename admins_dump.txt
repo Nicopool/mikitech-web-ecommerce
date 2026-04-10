@@ -1,0 +1,3 @@
+Usuario: carlos_tech, Correo (Login): carlos.admin@mikitech.co
+Usuario: laura_dev, Correo (Login): laura.admin@mikitech.co
+Usuario: NickTur, Correo (Login): turcanicolas1@gmail.com

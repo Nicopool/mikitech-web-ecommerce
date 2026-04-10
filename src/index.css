@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&family=Inter:wght@300;400;500;600&family=Manrope:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #a9c8fc;
+  --color-on-primary: #09305c;
+  --color-primary-container: #001c3c;
+  --color-on-primary-container: #6785b6;
+  --color-secondary: #bbc5eb;
+  --color-secondary-container: #3b4665;
+  --color-on-secondary-container: #aab4d9;
+  --color-surface: #111125;
+  --color-on-surface: #e2e0fc;
+  --color-on-surface-variant: #c8c5cd;
+  --color-surface-container-lowest: #0c0c1f;
+  --color-surface-container-low: #1a1a2e;
+  --color-surface-container: #1e1e32;
+  --color-surface-container-high: #28283d;
+  --color-surface-container-highest: #333348;
+  --color-outline: #929097;
+  --color-outline-variant: #47464c;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+  --color-tertiary-container: #191d1f;
+  --color-on-tertiary-container: #818588;
+
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Manrope", sans-serif;
+
+  --radius-sm: 0.125rem;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+}
+
+.glass-panel {
+  background: rgba(51, 51, 72, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(169, 200, 252, 0.1);
+}

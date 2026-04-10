@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .contact-container {
+    max-width: 600px;
+    margin: 100px auto 60px;
+    padding: 0 20px;
+  }
+  
+  .page-title {
+    font-size: 3rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #111;
+  }
+  
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 40px;
+    line-height: 1.5;
+  }
+  
+  .contact-form {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  
+  textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+  }
+  
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .btn-submit:hover {
+    background: #000;
+  }
+</style>
+
+<div class="contact-container">
+  <h1 class="page-title">Contacto</h1>
+  <p class="page-subtitle">¿Tienes alguna duda sobre un producto o un pedido? Escríbenos y nuestro equipo te responderá lo antes posible.</p>
+  
+  {% if messages %}
+    <div style="margin-bottom: 20px;">
+      {% for message in messages %}
+        <div style="padding: 15px; border-radius: 8px; background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-size: 0.95rem; text-align: center;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  
+  <form class="contact-form" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="form-label" for="name">Nombre completo</label>
+      <input type="text" id="name" name="name" class="form-control" required placeholder="Ej. Juan Pérez">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="email">Correo electrónico</label>
+      <input type="email" id="email" name="email" class="form-control" required placeholder="Ej. juan@ejemplo.com">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="subject">Asunto</label>
+      <select id="subject" name="subject" class="form-control" required>
+        <option value="">Selecciona un motivo</option>
+        <option value="Soporte técnico">Soporte técnico</option>
+        <option value="Garantías">Garantías y devoluciones</option>
+        <option value="Estado de pedido">Estado de mi pedido</option>
+        <option value="Cotizaciones">Cotizaciones al por mayor</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="message">Mensaje</label>
+      <textarea id="message" name="message" class="form-control" required placeholder="Describe detalladamente cómo podemos ayudarte..."></textarea>
+    </div>
+    
+    <button type="submit" class="btn-submit">Enviar Mensaje</button>
+  </form>
+</div>
+{% endblock %}

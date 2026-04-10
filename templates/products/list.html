@@ -1,0 +1,5 @@
+{% if request.session.usuario_id %}
+    {% include 'products/catalog_dashboard.html' %}
+{% else %}
+    {% include 'products/catalog_public.html' %}
+{% endif %}

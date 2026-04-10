@@ -1,0 +1,42 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block nav_categories %}active{% endblock %}
+
+{% block admin_content %}
+<div class="u-flex u-justify-between u-align-center u-mb-4">
+  <div>
+    <h2 style="font-size:2.2rem; font-weight:800;">{% if category %}✏️ Editar Categoría{% else %}➕ Nueva Categoría{% endif %}</h2>
+    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Organiza tus productos mediante categorías claras.</p>
+  </div>
+  <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:#E2E8F0; color:var(--ds-text); box-shadow:none;">← Volver</a>
+</div>
+
+{% if error %}
+<div class="g-alert g-alert-error" style="margin-bottom: 25px;">
+  <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="mpro-card" style="max-width:600px;">
+  <form method="POST">
+    {% csrf_token %}
+    <div style="margin-bottom: 20px;">
+      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-name">Nombre *</label>
+      <input type="text" id="cat-name" name="name" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem;" required value="{{ category.name|default:'' }}" placeholder="Ej: Procesadores">
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-icon">Emoji / Icono</label>
+      <input type="text" id="cat-icon" name="icon" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem;" value="{{ category.icon|default:'' }}" placeholder="🔷">
+    </div>
+    <div style="margin-bottom: 25px;">
+      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-desc">Descripción</label>
+      <textarea id="cat-desc" name="description" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem; resize:vertical;" rows="3">{{ category.description|default:'' }}</textarea>
+    </div>
+    <div style="display:flex; gap:15px; border-top: 1px solid var(--ds-border); padding-top: 25px;">
+      <button type="submit" class="g-btn-primary" style="padding: 14px 40px; font-size: 1.4rem;">
+        {% if category %}💾 Guardar cambios{% else %}➕ Crear categoría{% endif %}
+      </button>
+      <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:transparent; border:1px solid var(--ds-border); color:var(--ds-text); box-shadow:none;">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

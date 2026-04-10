@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="layout-sidebar">
+
+      <!-- SIDEBAR FILTROS -->
+      <aside class="filter-sidebar" aria-label="Filtros de búsqueda">
+        <h2 class="filter-sidebar__title">🔧 Filtros</h2>
+        <form method="GET" action="/buscar/" id="filter-form">
+          {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+
+          <!-- Categoría -->
+          <div class="filter-group">
+            <div class="filter-group__label">Categoría</div>
+            <select name="categoria" class="form-select" onchange="document.getElementById('filter-form').submit()" id="filter-category">
+              <option value="">Todas las categorías</option>
+              {% for cat in categories %}
+              <option value="{{ cat.slug }}" {% if cat.slug == category_slug %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Rango de precio -->
+          <div class="filter-group">
+            <div class="filter-group__label">Rango de precio (COP)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)">
+              <input type="number" name="precio_min" id="filter-price-min" class="form-input" placeholder="Mín." value="{{ min_price }}" min="0" step="1">
+              <input type="number" name="precio_max" id="filter-price-max" class="form-input" placeholder="Máx." value="{{ max_price }}" min="0" step="1">
+            </div>
+          </div>
+
+          <!-- Marca -->
+          <div class="filter-group">
+            <div class="filter-group__label">Marca</div>
+            <select name="marca" class="form-select" id="filter-brand">
+              <option value="">Todas las marcas</option>
+              {% for b in brands %}
+              <option value="{{ b }}" {% if b == brand %}selected{% endif %}>{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Orden -->
+          <div class="filter-group">
+            <div class="filter-group__label">Ordenar por</div>
+            <select name="orden" class="form-select" id="filter-sort">
+              <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Más recientes</option>
+              <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Precio: menor a mayor</option>
+              <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Precio: mayor a menor</option>
+              <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Nombre A–Z</option>
+            </select>
+          </div>
+
+          <div style="display:flex;gap:var(--sp-2)">
+            <button type="submit" class="btn btn--primary w-full" id="apply-filters-btn">Aplicar filtros</button>
+            <a href="/buscar/" class="btn btn--secondary" id="clear-filters-btn" title="Limpiar filtros">✕</a>
+          </div>
+        </form>
+      </aside>
+
+      <!-- RESULTADOS -->
+      <div>
+        <div class="section__header">
+          <div>
+            {% if query %}
+            <h1 class="section__title">Resultados para <span>"{{ query }}"</span></h1>
+            {% elif current_category %}
+            <h1 class="section__title">{{ current_category.icon|default:"📦" }} <span>{{ current_category.name }}</span></h1>
+            {% else %}
+            <h1 class="section__title">Catálogo de <span>Productos</span></h1>
+            {% endif %}
+            <p class="text-muted" style="margin-top:var(--sp-2);">{{ total }} producto{{ total|pluralize:"s" }} encontrado{{ total|pluralize:"s" }}</p>
+          </div>
+        </div>
+
+        {% if products %}
+        <div class="products-grid">
+          {% for product in products %}
+          {% include 'products/_product_card.html' with product=product %}
+          {% endfor %}
+        </div>
+
+        <!-- PAGINACIÓN -->
+        {% if total_pages > 1 %}
+        <nav class="pagination" aria-label="Paginación">
+          {% if page > 1 %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}pagina={{ page|add:"-1" }}" class="pagination__btn" aria-label="Página anterior">←</a>
+          {% endif %}
+          {% for i in "x"|rjust:total_pages %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}pagina={{ forloop.counter }}"
+             class="pagination__btn {% if forloop.counter == page %}active{% endif %}"
+             aria-label="Página {{ forloop.counter }}"
+             aria-current="{% if forloop.counter == page %}page{% endif %}">
+            {{ forloop.counter }}
+          </a>
+          {% endfor %}
+          {% if page < total_pages %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}pagina={{ page|add:"1" }}" class="pagination__btn" aria-label="Página siguiente">→</a>
+          {% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-state__icon">🔍</div>
+          <h2 class="empty-state__title">Sin resultados</h2>
+          <p class="empty-state__text">No encontramos productos con esos filtros. Intenta con otros términos.</p>
+          <a href="/buscar/" class="btn btn--primary" id="clear-search-btn">Limpiar búsqueda</a>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

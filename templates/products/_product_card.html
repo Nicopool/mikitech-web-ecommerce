@@ -1,0 +1,36 @@
+{% load miki_filters %}
+<div class="wix-product" id="product-{{ product.id }}">
+  <div class="badge-cat">{{ product.categoria.nombre|default:"General" }}</div>
+  <a href="{% url 'products:detail' product.enlace %}" class="wix-img-wrapper">
+    {% if product.url_imagen_principal %}
+      <img src="{{ product.url_imagen_principal }}" alt="{{ product.nombre }}">
+    {% else %}
+      <div style="display:flex; align-items:center; justify-content:center; height:100%; font-size: 4.8rem; color:#CBD5E1;">
+        <span class="material-symbols-outlined">inventory_2</span>
+      </div>
+    {% endif %}
+  </a>
+  
+  <div class="wix-p-info">
+    <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.8rem;">
+      {% if product.existencias > 0 %}
+        <div style="width:0.8rem; height:0.8rem; border-radius:50%; background-color:#10B981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);"></div>
+        <span style="font-size:1.1rem; color:#10B981; font-weight:700; text-transform:uppercase; letter-spacing:1px;">En Existencia</span>
+      {% else %}
+        <div style="width:0.8rem; height:0.8rem; border-radius:50%; background-color:#EF4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);"></div>
+        <span style="font-size:1.1rem; color:#EF4444; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Agotado</span>
+      {% endif %}
+    </div>
+    <a href="{% url 'products:detail' product.enlace %}" class="wix-p-title" style="font-size: 1.4rem; font-weight: 500; color: #0F172A; margin-bottom: 0.6rem; text-decoration: none; display: block; min-height: 4.2rem; overflow: hidden;">
+      {{ product.nombre|truncatechars:45 }}
+    </a>
+    <div class="wix-p-price" style="font-family: 'Oswald', sans-serif; font-size: 1.6rem; color: #3B82F6; margin-bottom: 0.8rem;">
+      {{ product.precio|currency_cop }}
+    </div>
+    
+    <div class="p-actions">
+      <a href="{% url 'products:detail' product.enlace %}" class="btn-action btn-view" title="Ver Detalles">Detalles</a>
+      <a href="{% url 'core:add_to_cart' product.id %}" class="btn-action btn-buy" title="Añadir al Carrito">Agregar</a>
+    </div>
+  </div>
+</div>

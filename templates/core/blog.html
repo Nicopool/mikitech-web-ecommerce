@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  .blog-container {
+    max-width: 800px;
+    margin: 120px auto 80px;
+    padding: 0 20px;
+    text-align: center;
+  }
+  
+  .blog-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+  
+  .page-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: #111;
+  }
+  
+  .page-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+  
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 30px;
+    background: #111;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
+  
+  .btn-back:hover {
+    background: #000;
+  }
+</style>
+
+<div class="blog-container">
+  <div class="blog-icon">📝</div>
+  <h1 class="page-title">Blog en Construcción</h1>
+  <p class="page-subtitle">
+    Estamos preparando contenido increíble sobre hardware, optimización, guías de ensamble y las últimas novedades tecnológicas. 
+    Vuelve pronto para leer nuestros artículos.
+  </p>
+  
+  <a href="/productos/" class="btn-back">Explorar Tienda Mientras Tanto →</a>
+</div>
+{% endblock %}

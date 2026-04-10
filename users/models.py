@@ -1,0 +1,37 @@
+"""Modelos de usuarios — mapeados a la tabla 'profiles' en Supabase"""
+
+import uuid
+from django.db import models
+
+
+class Perfil(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    nombre_completo = models.CharField(max_length=200, blank=True, null=True, db_column='full_name')
+    nombre_usuario = models.CharField(max_length=50, unique=True, blank=True, null=True, db_column='username')
+    biografia = models.TextField(blank=True, null=True, db_column='bio')
+    url_avatar = models.TextField(blank=True, null=True, db_column='avatar_url')
+    telefono = models.CharField(max_length=20, blank=True, null=True, db_column='phone')
+    direccion = models.TextField(blank=True, null=True, db_column='address')
+    ciudad = models.CharField(max_length=100, blank=True, null=True, db_column='city')
+    pais = models.CharField(max_length=100, default='Colombia', db_column='country')
+    rol = models.CharField(max_length=20, default='client', choices=[('admin', 'Administrador'), ('client', 'Cliente')], db_column='role')
+    esta_activo = models.BooleanField(default=True, db_column='is_active')
+    creado_el = models.DateTimeField(auto_now_add=True, db_column='created_at')
+    actualizado_el = models.DateTimeField(auto_now=True, db_column='updated_at')
+
+    class Meta:
+        db_table = 'profiles'
+        managed = False
+        verbose_name = 'Perfil'
+        verbose_name_plural = 'Perfiles'
+
+    def __str__(self):
+        return self.nombre_completo or self.nombre_usuario or str(self.id)
+
+    @property
+    def es_administrador(self):
+        return self.rol == 'admin'
+
+    @property
+    def nombre_mostrado(self):
+        return self.nombre_completo or self.nombre_usuario or 'Usuario'

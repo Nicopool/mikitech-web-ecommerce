@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Jost', sans-serif; background: #FFFFFF; color:#111; }
+    
+    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; }
+    .auth-box { width: 100%; max-width: 480px; text-align: center; padding: 30px; }
+    .auth-brand { font-family: 'Oswald', sans-serif; font-size: 44px; font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; }
+    .auth-subtitle { font-family: 'Jost', sans-serif; font-size: 15px; color: #666; margin-bottom: 40px; text-transform: uppercase; }
+    
+    .wix-input-group { margin-bottom: 30px; text-align: left; }
+    .wix-label { display: block; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .wix-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #111; background: transparent; font-family: 'Jost', sans-serif; font-size: 16px; outline: none; transition: border-width 0.3s; color:#111; }
+    .wix-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; } 
+    
+    .wix-btn-solid { width: 100%; background: #111; color: white; border: none; padding: 18px; font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; margin-top: 10px; text-transform:uppercase;}
+    .wix-btn-solid:hover { background: #444; }
+    
+    .wix-links { margin-top: 30px; font-family: 'Jost', sans-serif; font-size: 14px; text-align: center;}
+    .wix-links a { color: #111; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; font-weight:600;}
+    .wix-links a:hover { border-bottom: 1px solid #111; }
+    
+    .alert-wix { padding: 15px; margin-bottom: 25px; border: 1px solid; font-family: 'Jost', sans-serif; font-size: 14px; text-align:left;}
+    .alert-wix.error { border-color: #EF4444; color: #EF4444; }
+    .alert-wix.info { border-color: #3B82F6; color: #3B82F6; }
+    
+  </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="auth-box">
+    <h1 class="auth-brand">ÁREA RESTRINGIDA</h1>
+    <p class="auth-subtitle">INGRESA EL CÓDIGO DE SEGURIDAD PARA ACCEDER.</p>
+    
+    {% if error %}
+    <div class="alert-wix error">⚠️ {{ error }}</div>
+    {% else %}
+    <div class="alert-wix info">ℹ️ Esta área está protegida. Solo personal autorizado de MIKITECH puede continuar.</div>
+    {% endif %}
+    
+    <form method="POST" action="/admin-panel/pasarela/" id="gateway-form">
+      {% csrf_token %}
+      
+      <div class="wix-input-group">
+        <label class="wix-label">CÓDIGO DE ACCESO</label>
+        <input type="password" name="codigo_secreto" class="wix-input" required placeholder="•••••••••" autofocus>
+      </div>
+      
+      <button type="submit" class="wix-btn-solid" onclick="this.textContent='VERIFICANDO...'">VERIFICAR ACCESO</button>
+    </form>
+    
+    <div class="wix-links">
+      <a href="/">← Volver a la tienda pública</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

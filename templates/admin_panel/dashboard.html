@@ -1,0 +1,200 @@
+{% extends "admin_panel/base_admin.html" %}
+{% load miki_filters %}
+
+{% block page_title %}Panel Admin — Resumen General{% endblock %}
+
+{% block admin_content %}
+  <h2 class="g-page-title">Panel de Control 
+    <span style="font-size:13px; font-weight:500; color:var(--ds-text-soft); padding:6px 12px; border-radius:6px;">Visión Global</span>
+  </h2>
+
+  <!-- Fila 1: Estadísticas Rápidas -->
+  <div class="g-row u-mb-4" style="margin-bottom: 30px;">
+    
+    <!-- Resumen Ingresos (Estático por ahora, a futuro dinámico) -->
+    <div class="g-col-6">
+      <div style="background: var(--grad-accent, linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)); color: white; border-radius: 16px; padding: 25px; height: 100%; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25); display: flex; flex-direction: column;">
+        <h3 style="font-size:1.4rem; font-weight:600; opacity:0.9; margin-bottom:10px;">Ingresos Estimados (Mes)</h3>
+        <div style="font-size:3.4rem; font-weight:800; margin-bottom:15px;">$42.500.000</div>
+        
+        <!-- Contenedor del mini gráfico -->
+        <div style="flex-grow: 1; min-height: 80px; position: relative;">
+          <canvas id="miniDashboardChart"></canvas>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top: 15px;">
+          <div>
+            <div style="font-weight:700; font-size:1.4rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px;">+12.4% vs mes anterior</div>
+          </div>
+          <div style="font-size:2.8rem; font-weight:900; opacity:0.15; position: absolute; right: 20px; top: 20px;">MIKI</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas dinámicas -->
+    <div class="g-col-6">
+      <div class="mpro-card" style="height: 100%; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="display:flex; gap: 20px;">
+          <div style="flex:1; background:var(--ds-bg); border-radius:12px; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h3 style="font-size:1.3rem; color:var(--ds-text-soft); font-weight:600; margin-bottom:10px;">Usuarios Totales</h3>
+              <div style="font-size:2.4rem; font-weight:800;">{{ estadisticas.total_usuarios }}</div>
+            </div>
+            <span class="mpro-badge" style="background:#DCFCE7; color:#16A34A;">Global</span>
+          </div>
+          <div style="flex:1; background:var(--ds-bg); border-radius:12px; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+               <h3 style="font-size:1.3rem; color:var(--ds-text-soft); font-weight:600; margin-bottom:10px;">Productos Activos</h3>
+               <div style="font-size:2.4rem; font-weight:800;">{{ estadisticas.productos_activos }}</div>
+            </div>
+            <span class="mpro-badge" style="background:#DBEAFE; color:#2563EB;">Online</span>
+          </div>
+        </div>
+        
+        <div style="display:flex; gap: 15px; margin-top:20px;">
+           <a href="{% url 'admin_product_create' %}" class="g-btn-primary" style="flex:1; text-align:center;">+ NUEVO PRODUCTO</a>
+           <a href="{% url 'admin_reports' %}" class="g-btn-primary" style="flex:1; background:white; color:var(--ds-text); border:1px solid var(--ds-border); box-shadow:none; text-align:center;">VER REPORTES</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila 2: Listados Recientes -->
+  <div class="g-row">
+    
+    <!-- Productos Recientes -->
+    <div class="g-col-6" style="flex: 0 0 calc(66.666666% - 12px); max-width: calc(66.666666% - 12px);">
+      <div class="mpro-card" style="padding:0; height: 100%;">
+        <div style="padding:25px; border-bottom:1px solid var(--ds-border); display:flex; justify-content:space-between; align-items:center;">
+           <h2 style="font-size:1.8rem; font-weight:800; color:var(--ds-text);">Nuevos Ingresos de Hardware</h2>
+           <a href="{% url 'admin_products' %}" style="font-size:1.4rem; font-weight:700; color:var(--ds-primary); text-decoration:none;">Gestionar Todo ›</a>
+        </div>
+        <table class="g-table">
+          <thead>
+            <tr>
+              <th>PRODUCTO</th>
+              <th>CATEGORÍA</th>
+              <th>PRECIO</th>
+              <th>STOCK</th>
+              <th class="u-text-center">GESTIÓN</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for producto in productos_recientes %}
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <img src="{{ producto.url_imagen_principal }}" alt="{{ producto.nombre }}" style="width:32px; height:32px; object-fit:contain; border-radius:4px; background:#f8fafc;">
+                  <div style="font-weight:600; font-size:1.3rem;">{{ producto.nombre }}</div>
+                </div>
+              </td>
+              <td style="color:var(--ds-text-soft);">{{ producto.categoria.nombre }}</td>
+              <td style="font-weight:700;">{{ producto.precio|currency_cop }}</td>
+              <td>
+                {% if producto.existencias <= 5 %}
+                <span class="mpro-badge" style="background:#FEE2E2; color:#DC2626;">Bajo: {{ producto.existencias }}</span>
+                {% else %}
+                <span class="mpro-badge" style="background:#DCFCE7; color:#16A34A;">{{ producto.existencias }} ud.</span>
+                {% endif %}
+              </td>
+              <td class="u-text-center">
+                <a href="{% url 'admin_product_edit' producto.id %}" class="g-action-btn" title="Editar">✏️</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="u-text-center u-p-4">No hay productos registrados recientemente.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reseñas Recientes -->
+    <div class="g-col-6" style="flex: 0 0 calc(33.333333% - 12px); max-width: calc(33.333333% - 12px);">
+      <div class="mpro-card" style="height: 100%;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h2 style="font-size:1.8rem; font-weight:800; color:var(--ds-text);">Reseñas Recientes</h2>
+          <a href="{% url 'admin_reviews' %}" style="font-size:1.2rem; color:var(--ds-primary); text-decoration:none;">Moderación</a>
+        </div>
+
+        <div class="u-mb-4" style="display:flex; flex-direction:column; gap:15px;">
+          {% for resena in resenas_recientes %}
+          <div style="padding:12px; background:var(--ds-bg); border-radius:10px; border:1px solid var(--ds-border);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+              <span style="font-weight:700; font-size:1.2rem;">{{ resena.usuario.nombre_mostrado }}</span>
+              <span style="color:#F59E0B; font-size:1.2rem;">{{ resena.calificacion }}★</span>
+            </div>
+            <div style="font-size:1.2rem; color:var(--ds-text-soft); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:5px;">
+              "{{ resena.comentario }}"
+            </div>
+            <div style="font-size:1rem; opacity:0.7; font-weight:600; text-transform:uppercase;">
+              En: {{ resena.producto.nombre|truncatechars:20 }}
+            </div>
+          </div>
+          {% empty %}
+          <p style="text-align:center; opacity:0.6; padding:20px;">Sin comentarios nuevos.</p>
+          {% endfor %}
+        </div>
+        
+        <div style="padding:15px; background:var(--ds-bg-alt); border-radius:12px; margin-top:10px;">
+          <h3 style="font-size:1.3rem; font-weight:700; margin-bottom:10px;">Estado de Interacciones</h3>
+          <div style="font-size:1.2rem; display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span>Total Reseñas:</span>
+            <span style="font-weight:700;">{{ estadisticas.total_resenas }}</span>
+          </div>
+          <div style="font-size:1.2rem; display:flex; justify-content:space-between;">
+            <span>Categorías:</span>
+            <span style="font-weight:700;">{{ estadisticas.total_categorias }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const ctxMini = document.getElementById('miniDashboardChart').getContext('2d');
+    
+    // Un gráfico de línea sencillo y elegante sobre fondo azul
+    new Chart(ctxMini, {
+      type: 'line',
+      data: {
+        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+        datasets: [{
+          data: [12, 19, 15, 25],
+          borderColor: 'rgba(255, 255, 255, 0.9)',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderWidth: 3,
+          pointBackgroundColor: '#FFFFFF',
+          pointBorderColor: '#3B82F6',
+          pointRadius: 4,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            titleFont: { family: 'Inter', size: 12 },
+            bodyFont: { family: 'Inter', size: 13, weight: 'bold' },
+            displayColors: false,
+          }
+        },
+        scales: {
+          x: { display: false },
+          y: { display: false, min: 0 }
+        },
+        layout: { padding: 0 }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,401 @@
+"""Vistas de la aplicación usuarios — ingreso, registro y área privada — MIKITECH"""
+
+import uuid
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .supabase_auth import iniciar_sesion_usuario, registrar_usuario
+from .models import Perfil
+from interactions.models import Favorito
+
+
+def vista_ingreso(petición):
+    """Iniciar sesión con Supabase Auth."""
+    if petición.session.get('usuario_id'):
+        return redirect('users:profile')
+
+    if petición.method == 'POST':
+        correo = petición.POST.get('correo', '').strip()
+        clave = petición.POST.get('clave', '')
+
+        if not correo or not clave:
+            return render(petición, 'users/login.html', {'error': 'Por favor completa todos los campos.'})
+
+        datos, error = iniciar_sesion_usuario(correo, clave)
+
+        if error:
+            return render(petición, 'users/login.html', {
+                'error': 'Correo o contraseña incorrectos.',
+                'correo': correo,
+            })
+
+        # Guardar sesión
+        id_usuario = datos.get('user', {}).get('id')
+        petición.session['usuario_id'] = id_usuario
+        petición.session['token_acceso'] = datos.get('access_token')
+
+        # Obtener o crear perfil
+        try:
+            perfil = Perfil.objects.get(id=id_usuario)
+            petición.session['rol_usuario'] = perfil.rol
+            petición.session['nombre_usuario'] = perfil.nombre_usuario
+            petición.session['avatar_url'] = perfil.url_avatar or ''
+        except Perfil.DoesNotExist:
+            petición.session['rol_usuario'] = 'client'
+            petición.session['avatar_url'] = ''
+
+        proxima_url = petición.GET.get('next', '/cuenta/perfil/')
+        messages.success(petición, '¡Bienvenido de nuevo!')
+        return redirect(proxima_url)
+
+    return render(petición, 'users/login.html', {'titulo_pagina': 'Iniciar Sesión — MIKITECH'})
+
+
+def vista_registro(petición):
+    """Registrar nuevo usuario mediante el formulario público."""
+    if petición.session.get('usuario_id'):
+        return redirect('users:profile')
+
+    if petición.method == 'POST':
+        nombre_completo = petición.POST.get('nombre_completo', '').strip()
+        nombre_usuario = petición.POST.get('nombre_usuario', '').strip()
+        correo = petición.POST.get('correo', '').strip()
+        clave = petición.POST.get('clave', '')
+        clave2 = petición.POST.get('clave2', '')
+
+        contexto = {
+            'nombre_completo': nombre_completo,
+            'nombre_usuario': nombre_usuario,
+            'correo': correo,
+            'titulo_pagina': 'Crear Cuenta — MIKITECH',
+        }
+
+        if not all([nombre_completo, nombre_usuario, correo, clave]):
+            contexto['error'] = 'Por favor completa todos los campos del formulario.'
+            return render(petición, 'users/register.html', contexto)
+
+        if clave != clave2:
+            contexto['error'] = 'Las contraseñas no coinciden.'
+            return render(petición, 'users/register.html', contexto)
+
+        import re
+        patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$"
+        if not re.match(patron, clave):
+            contexto['error'] = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial (@$!%*?&).'
+            return render(petición, 'users/register.html', contexto)
+
+        if Perfil.objects.filter(nombre_usuario=nombre_usuario).exists():
+            contexto['error'] = 'Ese nombre de usuario ya está registrado.'
+            return render(petición, 'users/register.html', contexto)
+
+        from .supabase_auth import registrar_usuario, registrar_usuario_sql
+        datos, error = registrar_usuario(correo, clave, nombre_completo, nombre_usuario)
+
+        # Si el error es específicamente por el envío de correo de confirmación de Supabase,
+        # intentamos registrar al usuario directamente en la base de datos (fallback de emergencia).
+        if error and "confirmation email" in error.lower():
+            print("⚠️ Supabase SMTP falló. Iniciando registro directo vía SQL...")
+            datos, error = registrar_usuario_sql(correo, clave, nombre_completo, nombre_usuario)
+
+        if error:
+            contexto['error'] = f'Error en el registro: {error}'
+            return render(petición, 'users/register.html', contexto)
+
+        id_usuario = datos.get('user', {}).get('id')
+        
+        # Sincronizar el perfil local inmediatamente.
+        # Usamos update_or_create porque un trigger en Supabase puede haber creado ya el registro.
+        Perfil.objects.update_or_create(
+            id=id_usuario,
+            defaults={
+                'nombre_completo': nombre_completo,
+                'nombre_usuario': nombre_usuario,
+                'rol': 'client'
+            }
+        )
+
+        return render(petición, 'users/login.html', {
+            'success': '¡Cuenta creada con éxito!',
+            'titulo_pagina': 'Iniciar Sesión — MIKITECH'
+        })
+
+    return render(petición, 'users/register.html', {'titulo_pagina': 'Crear Cuenta — MIKITECH'})
+
+
+def vista_cerrar_sesion(petición):
+    """Limpia la sesión de Django y redirige al inicio."""
+    petición.session.flush()
+    return redirect('core:home')
+
+
+def mi_perfil(petición):
+    """Área privada: Tablero principal del perfil del usuario."""
+    if not petición.session.get('usuario_id'):
+        return redirect(f'/cuenta/login/?next=/cuenta/perfil/')
+
+    try:
+        perfil = Perfil.objects.get(id=petición.session['usuario_id'])
+    except Perfil.DoesNotExist:
+        petición.session.flush()
+        return redirect('users:login')
+
+    from interactions.models import Reseña
+    from django.db import connection
+    
+    conteo_resenas = Reseña.objects.filter(usuario=perfil).count()
+    
+    # Consulta directa para pedidos en Supabase
+    from interactions.models import Pedido
+    pedidos_qs = Pedido.objects.filter(usuario=perfil).order_by('-creado_el')
+    conteo_pedidos = pedidos_qs.count()
+    pedidos_recientes = pedidos_qs[:3]
+
+    # Datos para Chart.js (ordenados cronológicamente)
+    pedidos_cronologicos = list(pedidos_qs)[::-1]
+    fechas_chart = [p.creado_el.strftime("%d/%m") for p in pedidos_cronologicos]
+    montos_chart = [float(p.monto_total) for p in pedidos_cronologicos]
+
+    reseñas_recientes = Reseña.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')[:3]
+    
+    from interactions.models import Favorito
+    favoritos_recientes = Favorito.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')[:4]
+
+    return render(petición, 'users/profile.html', {
+        'perfil': perfil,
+        'titulo_pagina': f'Mi Panel — {perfil.nombre_mostrado} | MIKITECH',
+        'conteo_resenas': conteo_resenas,
+        'conteo_pedidos': conteo_pedidos,
+        'resenas_recientes': reseñas_recientes,
+        'pedidos_recientes': pedidos_recientes,
+        'favoritos_recientes': favoritos_recientes,
+        'fechas_chart': fechas_chart,
+        'montos_chart': montos_chart,
+    })
+
+
+def editar_perfil(petición):
+    """Formulario para actualizar los datos personales y avatar."""
+    if not petición.session.get('usuario_id'):
+        return redirect(f'/cuenta/login/?next=/cuenta/perfil/editar/')
+
+    try:
+        perfil = Perfil.objects.get(id=petición.session['usuario_id'])
+    except Perfil.DoesNotExist:
+        return redirect('users:login')
+
+    if petición.method == 'POST':
+        perfil.nombre_completo = petición.POST.get('nombre_completo', perfil.nombre_completo)
+        perfil.biografia = petición.POST.get('biografia', perfil.biografia)
+        perfil.telefono = petición.POST.get('telefono', perfil.telefono)
+        perfil.ciudad = petición.POST.get('ciudad', perfil.ciudad)
+        perfil.pais = petición.POST.get('pais', perfil.pais)
+
+        # Avatar
+        if 'avatar' in petición.FILES:
+            import os
+            archivo_avatar = petición.FILES['avatar']
+            extension = os.path.splitext(archivo_avatar.name)[1].lower()
+            if extension in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                nombre_archivo = f"avatars/{perfil.id}{extension}"
+                from django.core.files.storage import default_storage
+                default_storage.save(nombre_archivo, archivo_avatar)
+                perfil.url_avatar = f'/media/{nombre_archivo}'
+
+        # Actualizar Contraseña si se solicita
+        nueva_clave = petición.POST.get('nueva_clave')
+        if nueva_clave:
+            import re
+            patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$"
+            if not re.match(patron, nueva_clave):
+                contexto_error = {'perfil': perfil, 'error': 'La nueva contraseña no es segura (8+ caracteres, Mayúscula, Número y Símbolo).'}
+                return render(petición, 'users/edit_profile.html', contexto_error)
+            
+            from .supabase_auth import actualizar_contraseña
+            token = petición.session.get('access_token')
+            _, error_pass = actualizar_contraseña(token, nueva_clave)
+            if error_pass:
+                contexto_error = {'perfil': perfil, 'error': f'Error al cambiar contraseña: {error_pass}'}
+                return render(petición, 'users/edit_profile.html', contexto_error)
+
+        perfil.save()
+        messages.success(petición, "Perfil y seguridad actualizados correctamente.")
+        return redirect('users:profile')
+
+    return render(petición, 'users/edit_profile.html', {
+        'perfil': perfil,
+        'titulo_pagina': 'Editar Perfil — MIKITECH',
+    })
+
+
+def mis_favoritos(petición):
+    """Lista de productos marcados como favoritos por el usuario."""
+    if not petición.session.get('usuario_id'):
+        return redirect(f'/cuenta/login/?next=/cuenta/favoritos/')
+
+    try:
+        perfil = Perfil.objects.get(id=petición.session['usuario_id'])
+        favoritos = Favorito.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
+    except Perfil.DoesNotExist:
+        favoritos = []
+
+    return render(petición, 'users/favorites.html', {
+        'perfil': perfil,
+        'favoritos': favoritos,
+        'titulo_pagina': 'Mis Favoritos — MIKITECH',
+    })
+
+
+def mis_pedidos(petición):
+    """Historial de transacciones y estados de envío."""
+    if not petición.session.get('usuario_id'):
+        return redirect(f'/cuenta/login/?next=/cuenta/pedidos/')
+
+    try:
+        from users.models import Perfil
+        perfil = Perfil.objects.get(id=petición.session['usuario_id'])
+        from interactions.models import Pedido
+        pedidos = Pedido.objects.filter(usuario=perfil).order_by('-creado_el').values_list(
+            'id', 'estado', 'monto_total', 'creado_el', 'actualizado_el', 'direccion_envio', 'notas'
+        )
+    except Exception as e:
+        print("Error obteniendo pedidos:", e)
+        pedidos = []
+
+    pedidos_entregados = sum(1 for p in pedidos if 'Entregado' in p[1])
+    pedidos_en_transito = sum(1 for p in pedidos if 'Entregado' not in p[1] and 'Cancelado' not in p[1])
+
+    return render(petición, 'users/orders.html', {
+        'perfil': perfil,
+        'orders': pedidos,
+        'orders_delivered': pedidos_entregados,
+        'orders_transit': pedidos_en_transito,
+        'page_title': 'Mis Pedidos — MIKITECH',
+    })
+
+
+def olvide_contraseña(petición):
+    """Página para iniciar la recuperación de cuenta."""
+    if petición.method == 'POST':
+        correo = petición.POST.get('correo', '').strip()
+        if not correo:
+            return render(petición, 'users/forgot_password.html', {'error': 'Ingresa tu correo.', 'titulo_pagina': 'Recuperar Contraseña'})
+
+        from .supabase_auth import enviar_recuperacion_contraseña
+        datos, error = enviar_recuperacion_contraseña(correo)
+
+        if error:
+            # Supabase retorna éxito incluso si el email no existe (por seguridad)
+            # Solo mostramos error en fallos de red reales
+            pass
+
+        # Siempre redirigir al formulario de código (por seguridad no revelamos si el email existe)
+        petición.session['correo_recuperacion'] = correo
+        messages.success(petición, f'¡Listo! Si {correo} está registrado, recibirás un enlace en tu correo. Abre el enlace, copia el código largo que aparece y pégalo aquí. Revisa también spam.')
+        return redirect('users:reset_password')
+
+    return render(petición, 'users/forgot_password.html', {'titulo_pagina': 'Recuperar Contraseña'})
+
+
+def restablecer_contraseña(petición):
+    """Verifica el código OTP y actualiza la contraseña del usuario."""
+    correo = petición.session.get('correo_recuperacion', '')
+
+    if petición.method == 'GET' and not correo:
+        return redirect('users:forgot_password')
+
+    if petición.method == 'POST':
+        correo_post = petición.POST.get('correo', '').strip()
+        correo = correo or correo_post
+
+        token = petición.POST.get('token', '').strip()
+        clave = petición.POST.get('clave', '')
+        confirmar_clave = petición.POST.get('confirmar_clave', '')
+
+        contexto = {'email': correo, 'titulo_pagina': 'Ingresar Código'}
+
+        if not correo or not token or not clave:
+            contexto['error'] = 'Completa todos los campos.'
+            return render(petición, 'users/reset_password.html', contexto)
+
+        if clave != confirmar_clave:
+            contexto['error'] = 'Las contraseñas no coinciden.'
+            return render(petición, 'users/reset_password.html', contexto)
+
+        import re
+        patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$"
+        if not re.match(patron, clave):
+            contexto['error'] = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial.'
+            return render(petición, 'users/reset_password.html', contexto)
+
+        from .supabase_auth import verificar_otp_recuperacion
+        datos, error = verificar_otp_recuperacion(correo, token, clave)
+
+        if error:
+            contexto['error'] = 'Código inválido o expirado. Solicita uno nuevo.'
+            return render(petición, 'users/reset_password.html', contexto)
+
+        if 'correo_recuperacion' in petición.session:
+            del petición.session['correo_recuperacion']
+
+        messages.success(petición, '¡Contraseña actualizada correctamente! Ya puedes ingresar.')
+        return redirect('users:login')
+
+    return render(petición, 'users/reset_password.html', {'email': correo, 'titulo_pagina': 'Ingresar Código'})
+
+
+def mi_historial(petición):
+    """Resumen de toda la actividad del usuario en la plataforma."""
+    if not petición.session.get('usuario_id'):
+        return redirect('users:login')
+
+    try:
+        perfil = Perfil.objects.get(id=petición.session['usuario_id'])
+    except Perfil.DoesNotExist:
+        return redirect('users:login')
+
+    from interactions.models import Favorito, Voto, Reseña
+    reseñas = Reseña.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
+    votos = Voto.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
+    favoritos = Favorito.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
+
+    return render(petición, 'users/history.html', {
+        'perfil': perfil,
+        'titulo_pagina': 'Mi Historial — MIKITECH',
+        'resenas': reseñas,
+        'votos': votos,
+        'favoritos': favoritos,
+        'conteo_resenas': reseñas.count(),
+        'conteo_votos': votos.count(),
+        'conteo_favoritos': favoritos.count(),
+    })
+
+
+def mis_reportes(petición):
+    """Acceso a archivos PDF y estadísticas descargables."""
+    if not petición.session.get('usuario_id'):
+        return redirect('users:login')
+
+    try:
+        perfil = Perfil.objects.get(id=petición.session['usuario_id'])
+    except Perfil.DoesNotExist:
+        return redirect('users:login')
+
+    from interactions.models import Voto, Reseña
+    from django.db import connection
+
+    conteo_resenas = Reseña.objects.filter(usuario=perfil).count()
+    conteo_votos = Voto.objects.filter(usuario=perfil).count()
+    reseñas = Reseña.objects.filter(usuario=perfil).select_related('producto')
+    
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, status, total_amount, created_at FROM public.orders WHERE user_id = %s ORDER BY created_at DESC", [str(perfil.id)])
+        pedidos = cursor.fetchall()
+
+    return render(petición, 'users/reports.html', {
+        'perfil': perfil,
+        'titulo_pagina': 'Mis Reportes — MIKITECH',
+        'conteo_resenas': conteo_resenas,
+        'conteo_votos': conteo_votos,
+        'resenas': reseñas,
+        'pedidos': pedidos,
+        'conteo_pedidos': len(pedidos),
+    })

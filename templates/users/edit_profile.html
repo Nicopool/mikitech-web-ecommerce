@@ -1,0 +1,424 @@
+{% load miki_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ titulo_pagina }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <style>
+    html { font-size: 10px; }
+    :root {
+      --ds-bg: #F8FAFC; --ds-surface: #FFFFFF; --ds-text: #0F172A;
+      --ds-text-soft: #64748B; --ds-border: #E2E8F0;
+      --ds-primary: #1D4ED8; --ds-primary-light: #EFF6FF;
+      --ds-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Jost', sans-serif; font-size:1.4rem; background:var(--ds-bg); color:var(--ds-text); display:flex; height:100vh; overflow:hidden; }
+
+    .sidebar { width:26rem; background:var(--ds-surface); border-right:1px solid var(--ds-border); display:flex; flex-direction:column; flex-shrink:0; }
+    .sb-logo { padding:3rem; display:flex; align-items:center; gap:1rem; border-bottom:1px solid var(--ds-border); font-family:'Inter', sans-serif; font-weight:800; font-size:2.4rem; letter-spacing:-0.5px; }
+    .sb-logo-icon { width:3.4rem; height:3.4rem; background:var(--ds-primary); color:white; border-radius:1rem; display:flex; align-items:center; justify-content:center; font-size:1.8rem; }
+    .sb-user { padding:2rem 3rem; display:flex; align-items:center; gap:1.2rem; border-bottom:1px solid var(--ds-border); }
+    .sb-avatar-wrap { width:4.4rem; height:4.4rem; border-radius:50%; object-fit:cover; background:var(--ds-primary-light); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.8rem; color:var(--ds-primary); flex-shrink:0; overflow:hidden; }
+    .sb-user-name { font-weight:700; font-size:1.4rem; }
+    .sb-user-role { font-size:1.1rem; color:var(--ds-primary); background:var(--ds-primary-light); padding:0.2rem 0.8rem; border-radius:2rem; font-weight:600; display:inline-block; margin-top:0.3rem; }
+    .sb-nav { padding:1.5rem 0; flex:1; overflow-y:auto; }
+    .sb-section { padding:1rem 3rem 0.5rem; font-size:1.1rem; font-weight:700; color:var(--ds-text-soft); letter-spacing:0.1em; text-transform:uppercase; }
+    .sb-link { display:flex; align-items:center; gap:1.2rem; padding:1.1rem 3rem; color:var(--ds-text-soft); text-decoration:none; font-weight:500; font-size:1.4rem; position:relative; transition:all 0.2s; }
+    .sb-link:hover { color:var(--ds-primary); background:var(--ds-primary-light); }
+    .sb-link.active { background:var(--ds-primary-light); color:var(--ds-primary); font-weight:600; }
+    .sb-link.active::before { content:""; position:absolute; left:0; top:0; bottom:0; width:0.4rem; background:var(--ds-primary); border-radius:0 0.4rem 0.4rem 0; }
+    .sb-icon { font-size:1.8rem; width:2rem; text-align:center; }
+    .sb-logout { padding:2rem 3rem; border-top:1px solid var(--ds-border); }
+    .sb-logout a { display:flex; align-items:center; gap:1rem; color:#DC2626; text-decoration:none; font-size:1.4rem; font-weight:600; padding:1rem 1.5rem; border-radius:1rem; transition:background 0.2s; }
+    .sb-logout a:hover { background:#FEE2E2; }
+
+    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .topbar { height:7rem; background:var(--ds-surface); border-bottom:1px solid var(--ds-border); display:flex; align-items:center; justify-content:space-between; padding:0 4rem; flex-shrink:0; }
+    .topbar h1 { font-size:2rem; font-weight:800; }
+    .topbar p { font-size:1.2rem; color:var(--ds-text-soft); margin-top:0.3rem; }
+
+    .content-area { flex:1; overflow-y:auto; padding:3rem 4rem; }
+
+    /* FORM LAYOUT */
+    .edit-grid { display:grid; grid-template-columns:30rem 1fr; gap:3rem; }
+
+    /* AVATAR CARD */
+    .avatar-card { background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:1.6rem; padding:3rem; text-align:center; box-shadow:var(--ds-shadow); position:sticky; top:0; height:fit-content; }
+    .avatar-display { width:12rem; height:12rem; border-radius:50%; margin:0 auto 2rem; background:var(--ds-primary-light); display:flex; align-items:center; justify-content:center; font-size:5rem; font-weight:700; color:var(--ds-primary); overflow:hidden; border:4px solid var(--ds-border); position:relative; cursor:pointer; transition: border-color 0.2s; }
+    .avatar-display:hover { border-color:var(--ds-primary); }
+    .avatar-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; border-radius:50%; }
+    .avatar-display:hover .avatar-overlay { opacity:1; }
+    .avatar-overlay-text { color:white; font-size:1.2rem; font-weight:700; }
+    .avatar-name { font-size:2rem; font-weight:800; margin-bottom:0.4rem; }
+    .avatar-handle { font-size:1.4rem; color:var(--ds-text-soft); margin-bottom:2rem; }
+    .avatar-file-input { display:none; }
+    .btn-change-avatar { display:flex; align-items:center; justify-content:center; gap:0.8rem; width:100%; padding:1.2rem; border:2px dashed var(--ds-border); border-radius:1.2rem; cursor:pointer; font-size:1.3rem; font-weight:600; color:var(--ds-text-soft); transition:all 0.2s; background:none; }
+    .btn-change-avatar:hover { border-color:var(--ds-primary); color:var(--ds-primary); background:var(--ds-primary-light); }
+
+    /* FORM CARD */
+    .form-card { background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:1.6rem; padding:3rem; box-shadow:var(--ds-shadow); }
+    .form-card h2 { font-size:1.8rem; font-weight:800; margin-bottom:0.5rem; }
+    .form-card .subtitle { font-size:1.3rem; color:var(--ds-text-soft); margin-bottom:3rem; padding-bottom:2rem; border-bottom:1px solid var(--ds-border); }
+
+    .form-section-title { font-size:1.3rem; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1.5rem; margin-top:2.5rem; }
+    .form-section-title:first-of-type { margin-top:0; }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+    .form-group { display:flex; flex-direction:column; gap:0.8rem; margin-bottom:2rem; }
+    .form-group label { font-size:1.3rem; font-weight:600; }
+    .form-group .hint { font-size:1.2rem; color:var(--ds-text-soft); }
+    .form-control { padding:1.2rem 1.6rem; border:1px solid var(--ds-border); border-radius:1rem; font-size:1.4rem; font-family:inherit; color:var(--ds-text); background:var(--ds-bg); transition:border-color 0.2s, box-shadow 0.2s; width:100%; }
+    .form-control:focus { outline:none; border-color:var(--ds-primary); box-shadow:0 0 0 0.3rem rgba(29,78,216,0.1); background:white; }
+    textarea.form-control { resize:vertical; min-height:10rem; }
+
+    .btn-save { background:var(--ds-primary); color:white; border:none; padding:1.4rem 3rem; border-radius:1.2rem; font-size:1.5rem; font-weight:700; cursor:pointer; transition:opacity 0.2s; display:inline-flex; align-items:center; gap:1rem; }
+    .btn-save:hover { opacity:0.9; }
+    .btn-cancel { background:var(--ds-bg); color:var(--ds-text-soft); border:1px solid var(--ds-border); padding:1.4rem 2rem; border-radius:1.2rem; font-size:1.5rem; font-weight:600; cursor:pointer; transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; }
+    .btn-cancel:hover { color:var(--ds-text); border-color:var(--ds-text); }
+    .form-actions { display:flex; gap:1.5rem; align-items:center; padding-top:2rem; border-top:1px solid var(--ds-border); margin-top:1rem; }
+
+    /* ALERT */
+    .alert { padding:1.5rem 2rem; border-radius:1.2rem; font-size:1.4rem; font-weight:500; margin-bottom:2rem; }
+    .alert-success { background:#DCFCE7; color:#16A34A; border:1px solid #86EFAC; }
+    .alert-error { background:#FEE2E2; color:#DC2626; border:1px solid #FCA5A5; }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:2.5rem; right:2.5rem; background:#16A34A; color:white; padding:1.5rem 2.5rem; border-radius:1.2rem; font-size:1.4rem; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.15); transform:translateY(6rem); opacity:0; transition:all 0.4s cubic-bezier(0.16,1,0.3,1); z-index:999; }
+    .toast.show { transform:translateY(0); opacity:1; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo" style="font-family: 'Oswald', sans-serif; color: var(--ds-text); border-bottom: 1px solid var(--ds-border);">
+    <a href="/" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
+      <span class="material-symbols-outlined" style="color:var(--ds-primary); font-size:2.8rem;">bolt</span> MIKITECH
+    </a>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar-wrap" id="sb-avatar-wrap">
+      {% if perfil.url_avatar %}
+      <img id="sb-avatar-img" src="{{ perfil.url_avatar }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">
+      {% else %}
+      <span id="sb-avatar-letter">{{ perfil.nombre_mostrado|first|upper }}</span>
+      {% endif %}
+    </div>
+    <div>
+      <div class="sb-user-name">{{ perfil.nombre_mostrado }}</div>
+      <div class="sb-user-role">User</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Principal</div>
+    <a href="{% url 'users:profile' %}" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">grid_view</span></span> Dashboard</a>
+    <a href="{% url 'products:list' %}" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">shopping_cart</span></span> Catálogo</a>
+    <div class="sb-section" style="margin-top:1.5rem;">Mi Cuenta</div>
+
+    <a href="{% url 'users:orders' %}" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">receipt_long</span></span> Mis Pedidos</a>
+    <a href="{% url 'users:history' %}" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">inventory_2</span></span> Historial</a>
+    <a href="{% url 'users:reports' %}" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">bar_chart</span></span> Reportes</a>
+    <a href="{% url 'users:edit_profile' %}" class="sb-link active"><span class="sb-icon"><span class="material-symbols-outlined">settings</span></span> Editar Perfil</a>
+  </nav>
+  <div class="sb-logout"><a href="{% url 'users:logout' %}"><span><span class="material-symbols-outlined">logout</span></span> Cerrar Sesión</a></div>
+</aside>
+
+<main class="main-area">
+  <header class="topbar">
+    <div>
+      <h1><span class="material-symbols-outlined" style="font-size:inherit;">settings</span> Editar Perfil</h1>
+      <p>Actualiza tu información personal</p>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'success' %}success{% else %}error{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if success %}<div class="alert alert-success">✅ {{ success }}</div>{% endif %}
+    {% if error %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}
+
+    <div class="edit-grid">
+
+      <!-- AVATAR COLUMN -->
+      <div>
+        <div class="avatar-card">
+          <div class="avatar-display" id="avatar-display" onclick="document.getElementById('avatar-file').click()">
+            {% if perfil.url_avatar %}
+            <img id="avatar-preview-img" src="{{ perfil.url_avatar }}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;">
+            {% else %}
+            <span id="avatar-preview-letter">{{ perfil.nombre_mostrado|first|upper }}</span>
+            {% endif %}
+            <div class="avatar-overlay">
+              <span class="avatar-overlay-text">📷 Cambiar</span>
+            </div>
+          </div>
+          <div class="avatar-name">{{ perfil.nombre_mostrado }}</div>
+          <div class="avatar-handle">@{{ perfil.nombre_usuario }}</div>
+
+          <form id="avatar-form" method="post" enctype="multipart/form-data" action="{% url 'users:edit_profile' %}">
+            {% csrf_token %}
+            <input type="hidden" name="avatar_only" value="1">
+            <input type="file" id="avatar-file" name="avatar" class="avatar-file-input" accept="image/*">
+            <button type="button" class="btn-change-avatar" onclick="document.getElementById('avatar-file').click()">
+              📷 Cambiar Foto
+            </button>
+          </form>
+
+          <div id="avatar-status" style="margin-top:1.5rem; font-size:1.2rem; color:var(--ds-text-soft); display:none;"></div>
+        </div>
+      </div>
+
+      <!-- FORM COLUMN -->
+      <div class="form-card">
+        <h2>Información Personal</h2>
+        <p class="subtitle">Los cambios se aplicarán inmediatamente en tu perfil público.</p>
+
+        <form method="post" action="{% url 'users:edit_profile' %}" id="profile-form">
+          {% csrf_token %}
+
+          <div class="form-section-title">Datos Básicos</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="full_name">Nombre Completo</label>
+              <input type="text" id="full_name" name="nombre_completo" class="form-control" value="{{ perfil.nombre_completo|default:'' }}" placeholder="Tu nombre completo">
+            </div>
+            <div class="form-group">
+              <label for="username">Nombre de Usuario</label>
+              <input type="text" id="username" name="nombre_usuario" class="form-control" value="{{ perfil.nombre_usuario|default:'' }}" placeholder="@usuario" readonly style="background:#F1F5F9; cursor:not-allowed;">
+              <span class="hint">El usuario no se puede cambiar</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="bio">Biografía</label>
+            <textarea id="bio" name="biografia" class="form-control" placeholder="Cuéntanos sobre ti...">{{ perfil.biografia|default:'' }}</textarea>
+          </div>
+
+          <div class="form-section-title">Contacto y Ubicación</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Teléfono</label>
+              <input type="text" id="phone" name="telefono" class="form-control" value="{{ perfil.telefono|default:'' }}" placeholder="+57 300 000 0000">
+            </div>
+            <div class="form-group">
+              <label for="city">Ciudad</label>
+              <input type="text" id="city" name="ciudad" class="form-control" value="{{ perfil.ciudad|default:'' }}" placeholder="Bogotá">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="country">País</label>
+            <select id="country" name="pais" class="form-control">
+              <option value="Colombia" {% if perfil.pais == 'Colombia' or not perfil.pais %}selected{% endif %}>🇨🇴 Colombia</option>
+              <option value="México" {% if perfil.pais == 'México' %}selected{% endif %}>🇲🇽 México</option>
+              <option value="Argentina" {% if perfil.pais == 'Argentina' %}selected{% endif %}>🇦🇷 Argentina</option>
+              <option value="España" {% if perfil.pais == 'España' %}selected{% endif %}>🇪🇸 España</option>
+              <option value="Chile" {% if perfil.pais == 'Chile' %}selected{% endif %}>🇨🇱 Chile</option>
+              <option value="Perú" {% if perfil.pais == 'Perú' %}selected{% endif %}>🇵🇪 Perú</option>
+              <option value="Venezuela" {% if perfil.pais == 'Venezuela' %}selected{% endif %}>🇻🇪 Venezuela</option>
+              <option value="Ecuador" {% if perfil.pais == 'Ecuador' %}selected{% endif %}>🇪🇨 Ecuador</option>
+              <option value="Otro">🌍 Otro</option>
+            </select>
+          </div>
+
+          <div class="form-section-title">Seguridad de la Cuenta</div>
+          <div class="form-group">
+            <label for="new_password">Nueva Contraseña</label>
+            <input type="password" id="password" name="nueva_clave" class="form-control" placeholder="Dejar en blanco para no cambiar">
+            <span class="hint">Mínimo 8 caracteres, incluyendo mayúsculas, números y símbolos.</span>
+          </div>
+
+          <div class="password-feedback" id="password-meter" style="text-align:left; margin-bottom: 25px; display:none;">
+            <div style="height:4px; background:#EEE; border-radius:2px; margin-bottom:8px; overflow:hidden;">
+              <div id="meter-bar" style="width:0; height:100%; transition:all 0.3s;"></div>
+            </div>
+            <ul id="password-check-list" style="list-style:none; padding:0; margin:0; font-size:11px; color:#666;">
+              <li data-check="length">○ Mínimo 8 caracteres</li>
+              <li data-check="upper">○ Una letra mayúscula</li>
+              <li data-check="number">○ Un número</li>
+              <li data-check="special">○ Un carácter especial (@$!%*?&)</li>
+            </ul>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirmar Nueva Contraseña</label>
+            <input type="password" id="password2" name="confirmar_nueva_clave" class="form-control" placeholder="••••••••">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save" id="btn-save">✅ Guardar Cambios</button>
+            <a href="{% url 'users:profile' %}" class="btn-cancel">Cancelar</a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg, isError) {
+  var t = document.getElementById('toast');
+  t.style.background = isError ? '#DC2626' : '#16A34A';
+  var node = document.createTextNode(msg);
+  t.replaceChildren(node);
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+
+document.getElementById('profile-form').addEventListener('submit', function(e) {
+  var fullName = document.getElementById('full_name').value.trim();
+  if (!fullName) {
+    e.preventDefault();
+    showToast('El nombre completo es requerido', true);
+    document.getElementById('full_name').focus();
+    return;
+  }
+
+  // Validar contraseña solo si se escribió algo
+  const pass = document.getElementById('password');
+  const pass2 = document.getElementById('password2');
+  if (pass.value) {
+    const val = pass.value;
+    const isSecure = val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[@$!%*?&]/.test(val);
+    
+    if (!isSecure) {
+      e.preventDefault();
+      showToast('⚠️ La nueva contraseña no es segura', true);
+      return;
+    }
+
+    if (pass.value !== pass2.value) {
+      e.preventDefault();
+      showToast('⚠️ Las contraseñas no coinciden', true);
+      return;
+    }
+  }
+
+  var btn = document.getElementById('btn-save');
+  btn.textContent = 'Guardando...';
+  btn.style.opacity = '0.7';
+});
+
+// Password Meter Logic
+const pass = document.getElementById('password');
+const meter = document.getElementById('password-meter');
+const bar = document.getElementById('meter-bar');
+const list = document.getElementById('password-check-list');
+
+pass.addEventListener('focus', () => meter.style.display = 'block');
+pass.addEventListener('input', function() {
+  const val = this.value;
+  if(!val) { meter.style.display = 'none'; return; }
+  meter.style.display = 'block';
+  
+  let score = 0;
+  const checks = {
+    length: val.length >= 8,
+    upper: /[A-Z]/.test(val),
+    number: /[0-9]/.test(val),
+    special: /[@$!%*?&]/.test(val)
+  };
+
+  Object.keys(checks).forEach(c => {
+    const li = list.querySelector(`[data-check="${c}"]`);
+    if(checks[c]) {
+      li.style.color = '#10B981';
+      li.innerHTML = '● ' + li.textContent.substring(2);
+      score++;
+    } else {
+      li.style.color = '#666';
+      li.innerHTML = '○ ' + li.textContent.substring(2);
+    }
+  });
+
+  const colors = ['#EF4444', '#F59E0B', '#3B82F6', '#10B981'];
+  bar.style.width = (score / 4 * 100) + '%';
+  bar.style.background = colors[score-1] || '#EEE';
+});
+
+document.getElementById('avatar-file').addEventListener('change', function() {
+  var file = this.files[0];
+  if (!file) return;
+
+  var allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowed.includes(file.type)) {
+    showToast('Formato no permitido. Usa JPG, PNG, GIF o WebP', true);
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('La imagen es muy grande (máx. 5MB)', true);
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(evt) {
+    var displayEl = document.getElementById('avatar-display');
+    var letterEl = document.getElementById('avatar-preview-letter');
+    var imgEl = document.getElementById('avatar-preview-img');
+    var sbWrap = document.getElementById('sb-avatar-wrap');
+
+    if (!imgEl) {
+      imgEl = document.createElement('img');
+      imgEl.id = 'avatar-preview-img';
+      imgEl.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      if (letterEl) { letterEl.style.display = 'none'; }
+      displayEl.insertBefore(imgEl, displayEl.firstChild);
+    }
+    imgEl.src = evt.target.result;
+
+    var sbImg = sbWrap.querySelector('img');
+    if (sbImg) {
+      sbImg.src = evt.target.result;
+    } else {
+      var newSbImg = document.createElement('img');
+      newSbImg.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      newSbImg.src = evt.target.result;
+      var sbLetter = sbWrap.querySelector('span');
+      if (sbLetter) sbLetter.style.display = 'none';
+      sbWrap.appendChild(newSbImg);
+    }
+
+    showToast('✅ Imagen lista — Guarda los cambios para confirmar');
+  };
+  reader.readAsDataURL(file);
+
+  var formData = new FormData();
+  formData.append('avatar', file);
+  formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  formData.append('avatar_only', '1');
+
+  var statusEl = document.getElementById('avatar-status');
+  statusEl.style.display = 'block';
+  statusEl.textContent = 'Subiendo imagen...';
+
+  fetch('{% url "users:edit_profile" %}', {
+    method: 'POST',
+    body: formData
+  }).then(function(r) {
+    if (r.ok) {
+      statusEl.textContent = '✅ Avatar actualizado';
+      setTimeout(function() { statusEl.style.display = 'none'; }, 2500);
+    }
+  }).catch(function() {
+    statusEl.textContent = '⚠️ Error al subir. Intenta de nuevo.';
+  });
+});
+</script>
+</body>
+</html>
+</body>
+</html>

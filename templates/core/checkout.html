@@ -1,0 +1,475 @@
+{% extends 'base.html' %}
+{% load miki_filters %}
+
+{% block content %}
+<style>
+  /* ESTILOS ESPECÍFICOS PARA CHECKOUT PREMIUM MINIMALISTA */
+  .ck-container {
+    max-width: 1200px; margin: 0 auto; padding: 60px 20px;
+    font-family: 'Jost', sans-serif;
+    color: #111;
+  }
+  .ck-header {
+    margin-bottom: 50px;
+    text-align: center;
+  }
+  .ck-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .ck-subtitle {
+    font-size: 14px;
+    color: #666;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .ck-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 50px;
+  }
+
+  @media (max-width: 992px) {
+    .ck-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SECCIONES (TARJETAS MINIMALISTAS) */
+  .ck-section {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    padding: 40px;
+    margin-bottom: 30px;
+  }
+  .ck-section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #111;
+    padding-bottom: 15px;
+  }
+  .ck-icon { font-size: 24px; }
+
+  /* FORMULARIOS WIX STYLE */
+  .ck-row { display: flex; gap: 20px; margin-bottom: 20px; }
+  .ck-group { flex: 1; margin-bottom: 20px; }
+  .ck-row .ck-group { margin-bottom: 0; }
+  
+  .ck-label {
+    display: block; font-size: 13px; font-weight: 600;
+    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; color: #444;
+  }
+  .ck-input {
+    width: 100%; padding: 12px 0; border: none; border-bottom: 1px solid #CCC;
+    background: transparent; font-family: 'Jost', sans-serif; font-size: 16px;
+    outline: none; transition: border-color 0.3s;
+  }
+  .ck-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; }
+
+  /* MÉTODOS DE PAGO */
+  .ck-methods {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;
+  }
+  .ck-method {
+    border: 1px solid #CCC; padding: 20px 10px; text-align: center;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .ck-method:hover { border-color: #111; background: #FAFAFA; }
+  .ck-method.active { border: 2px solid #111; background: #111; color: #FFF; padding: 19px 9px;}
+  .ck-method-icon { font-size: 26px; margin-bottom: 8px; }
+  .ck-method-name { font-size: 12px; font-weight: 600; letter-spacing: 1px; }
+
+  /* RESUMEN ORDEN */
+  .ck-summary {
+    background: #FAFAFA;
+    padding: 40px;
+    position: sticky;
+    top: 100px;
+  }
+  .ck-summary-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px; font-weight: 700; letter-spacing: 1px;
+    margin-bottom: 30px; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 15px;
+  }
+
+  .ck-item {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #E5E7EB; padding-bottom: 20px; margin-bottom: 20px;
+  }
+  .ck-item-info { display: flex; gap: 15px; align-items: center; }
+  .ck-item-img {
+    width: 60px; height: 60px; background: #FFF; border: 1px solid #E5E7EB;
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .ck-item-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; color:#111;}
+  .ck-item-desc { color: #666; font-size: 13px; }
+  .ck-item-price { font-weight: 700; font-size: 16px; font-family: 'Oswald', sans-serif; }
+
+  .ck-totals { margin-bottom: 30px; font-size: 14px; color: #444; }
+  .ck-totals-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+  .ck-totals-val { font-weight: 600; font-family: 'Oswald', sans-serif; font-size: 16px;}
+  
+  .ck-grand-total {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 2px solid #111; padding-top: 20px; margin-bottom: 30px;
+  }
+  .ck-grand-label { font-weight: 700; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; }
+  .ck-grand-val { font-size: 28px; font-weight: 700; font-family: 'Oswald', sans-serif; color: #111;}
+
+  .ck-btn {
+    width: 100%; background: #111; color: white; border: none; padding: 20px;
+    font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px;
+    cursor: pointer; transition: background 0.3s; text-transform: uppercase;
+  }
+  .ck-btn:hover { background: #444; }
+
+  .ck-trust {
+    text-align: center; color: #10B981; font-weight: 600; font-size: 12px;
+    margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 8px;
+    letter-spacing: 1px;
+  }
+</style>
+
+<div class="ck-container">
+
+  {% if exito %}
+  <div class="ck-section" style="text-align: center; padding: 80px 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+    <div style="font-size: 80px; margin-bottom: 30px; animation: scaleIn 0.5s ease-out;">✨</div>
+    <h1 class="ck-title" style="font-size: 42px; margin-bottom: 20px;">¡PEDIDO RECIBIDO!</h1>
+    <p class="ck-subtitle" style="font-size: 16px; margin-bottom: 40px; color:#444;">Tu hardware de alto rendimiento está en camino.</p>
+    <div style="display:flex; justify-content:center; gap:20px;">
+      <a href="/" class="ck-btn" style="display:inline-block; width:auto; padding: 18px 45px; text-decoration:none;">VOLVER A LA TIENDA</a>
+      <a href="/cuenta/pedidos/" class="ck-btn" style="display:inline-block; width:auto; padding: 18px 45px; text-decoration:none; background:#FFF; color:#111; border:1px solid #111;">VER MIS PEDIDOS</a>
+    </div>
+  </div>
+  <style>
+    @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
+  {% else %}
+  
+  <div class="ck-header">
+    <h1 class="ck-title">Finalizar Compra</h1>
+    <p class="ck-subtitle">Verifica tus datos y confirma tu pedido</p>
+  </div>
+
+  <form method="POST" action="{% url 'core:checkout' %}" class="ck-grid">
+    {% csrf_token %}
+    
+    <!-- COLUMNA IZQUIERDA: FORMULARIOS -->
+    <div>
+      
+      <!-- DIRECCIÓN DE ENVÍO -->
+      <div class="ck-section">
+        <h2 class="ck-section-title">
+          <span class="ck-icon">📍</span> Datos de Envío
+        </h2>
+
+        <div class="ck-row">
+          <div class="ck-group">
+            <label class="ck-label">Nombre Completo</label>
+            <input type="text" name="name" class="ck-input" required placeholder="Ej. Juan Pérez">
+          </div>
+          <div class="ck-group">
+            <label class="ck-label">Correo Electrónico</label>
+            <input type="email" name="email" class="ck-input" required placeholder="usuario@email.com">
+          </div>
+        </div>
+
+        <div class="ck-group">
+          <label class="ck-label">Dirección Exacta</label>
+          <div style="position:relative;">
+            <input type="text" id="address-input" name="address" class="ck-input" required autocomplete="off" placeholder="Ingresa tu calle o edificio">
+            <!-- Menú desplegable para sugerencias -->
+            <ul id="address-suggestions" style="display:none; position:absolute; top:100%; left:0; right:0; background:#FFF; border:1px solid #E5E7EB; border-top:none; z-index:1000; list-style:none; padding:0; margin:0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"></ul>
+          </div>
+        </div>
+
+        <!-- MAPA DE UBICACIÓN REAL -->
+        <div id="checkout-map" style="height:250px; width:100%; border-radius:12px; margin:20px 0; border:1px solid #E5E7EB; background:#F9FAFB; z-index:1;"></div>
+        <p style="font-size:11px; color:#666; margin-bottom:20px;">* Escribe tu dirección y selecciona una sugerencia o mueve el marcador azul para afinar tu ubicación.</p>
+
+        <div class="ck-row">
+          <div class="ck-group">
+            <label class="ck-label">Ciudad</label>
+            <input type="text" id="city-input" name="city" class="ck-input" required placeholder="Bogotá" value="Bogotá">
+          </div>
+          <div class="ck-group">
+            <label class="ck-label">Código Postal</label>
+            <input type="text" id="zip-input" name="zip" class="ck-input" required placeholder="110011">
+          </div>
+        </div>
+      </div>
+
+      <!-- LEAFLET MAP & CUSTOM AUTOCOMPLETE SCRIPT -->
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          let map = L.map('checkout-map').setView([4.6097, -74.0817], 13);
+          
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+          }).addTo(map);
+
+          let marker = L.marker([4.6097, -74.0817], {draggable: true}).addTo(map);
+
+          const input = document.getElementById('address-input');
+          const suggestionsBox = document.getElementById('address-suggestions');
+          let debounceTimer;
+
+          // 1. AUTOCOMPLETADO (Simulando Google Places)
+          input.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value;
+            
+            if (query.length < 4) {
+              suggestionsBox.style.display = 'none';
+              return;
+            }
+
+            debounceTimer = setTimeout(() => {
+              // Búsqueda orientada a Colombia
+              fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=co&addressdetails=1&limit=5`)
+                .then(res => res.json())
+                .then(data => {
+                  suggestionsBox.innerHTML = '';
+                  if (data.length > 0) {
+                    data.forEach(place => {
+                      const li = document.createElement('li');
+                      li.style.padding = '12px 15px';
+                      li.style.borderBottom = '1px solid #F3F4F6';
+                      li.style.cursor = 'pointer';
+                      li.style.fontSize = '14px';
+                      li.style.transition = 'background 0.2s';
+                      
+                      // Icono y texto
+                      li.innerHTML = `<strong>📍 ${place.address.road || place.name || place.display_name.split(',')[0]}</strong> <br><span style="font-size:12px; color:#6B7280; margin-left:18px;">${place.display_name}</span>`;
+                      
+                      li.onmouseover = () => li.style.background = '#F9FAFB';
+                      li.onmouseout = () => li.style.background = 'transparent';
+                      
+                      li.onclick = () => {
+                        input.value = place.address.road || place.name || place.display_name.split(',')[0];
+                        suggestionsBox.style.display = 'none';
+                        
+                        const lat = parseFloat(place.lat);
+                        const lon = parseFloat(place.lon);
+                        
+                        // Mover mapa y marcador
+                        map.setView([lat, lon], 17);
+                        marker.setLatLng([lat, lon]);
+
+                        // Autocompletar ciudad y zip
+                        const city = place.address.city || place.address.town || place.address.county || 'Bogotá';
+                        document.getElementById('city-input').value = city;
+                        if (place.address.postcode) {
+                          document.getElementById('zip-input').value = place.address.postcode;
+                        }
+                      };
+                      suggestionsBox.appendChild(li);
+                    });
+                    suggestionsBox.style.display = 'block';
+                  } else {
+                    suggestionsBox.style.display = 'none';
+                  }
+                });
+            }, 500); // Esperar medio segundo tras escribir
+          });
+
+          // Ocultar sugerencias si se hace clic fuera
+          document.addEventListener('click', function(e) {
+            if (e.target !== input && e.target !== suggestionsBox) {
+              suggestionsBox.style.display = 'none';
+            }
+          });
+
+          // 2. REVERSE GEOCODING (Al arrastrar el marcador)
+          marker.on('dragend', function() {
+            let pos = marker.getLatLng();
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}&addressdetails=1`)
+              .then(res => res.json())
+              .then(data => {
+                if(data.display_name) {
+                  input.value = data.address.road || data.name || data.display_name.split(',')[0];
+                  
+                  const city = data.address.city || data.address.town || data.address.county || 'Bogotá';
+                  document.getElementById('city-input').value = city;
+                  if (data.address.postcode) {
+                    document.getElementById('zip-input').value = data.address.postcode;
+                  }
+                }
+              });
+          });
+        });
+      </script>
+
+      <!-- PAGO -->
+      <div class="ck-section">
+        <h2 class="ck-section-title">
+          <span class="ck-icon">💳</span> Método de Pago
+        </h2>
+
+        <div class="ck-methods" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="ck-method active" id="btn-tarjeta">
+            <div class="ck-method-icon">💳</div>
+            <div class="ck-method-name">TARJETA</div>
+          </div>
+          <div class="ck-method" id="btn-efectivo">
+            <div class="ck-method-icon">💵</div>
+            <div class="ck-method-name">EFECTIVO (TEST)</div>
+          </div>
+        </div>
+
+        <div id="card-details">
+          <div class="ck-group">
+            <label class="ck-label">Número de Tarjeta</label>
+            <input type="text" class="ck-input" placeholder="0000 0000 0000 0000" style="font-family: monospace; font-size:18px; letter-spacing: 2px;">
+          </div>
+
+          <div class="ck-row">
+            <div class="ck-group">
+              <label class="ck-label">Expiración</label>
+              <input type="text" class="ck-input" placeholder="MM/YY" style="font-family: monospace; font-size:16px;">
+            </div>
+            <div class="ck-group">
+              <label class="ck-label">CVV</label>
+              <input type="text" class="ck-input" placeholder="***" style="font-family: monospace; font-size:16px;">
+            </div>
+          </div>
+        </div>
+
+        <div id="cash-details" style="display: none; background: #FAFAFA; border: 1px dashed #111; padding: 20px; text-align: center;">
+            <span style="font-size: 30px; display: block; margin-bottom: 10px;">📦</span>
+            <p style="font-size: 14px; font-weight: 600; margin:0; text-transform: uppercase;">PAGO CONTRA ENTREGA</p>
+            <p style="font-size: 13px; color: #666; margin-top: 5px;">Pagarás el pedido en efectivo al momento de recibirlo en tu puerta.</p>
+        </div>
+        <input type="hidden" name="metodo_pago" id="payment_method" value="tarjeta">
+      </div>
+      
+      <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const btnTarjeta = document.getElementById('btn-tarjeta');
+          const btnEfectivo = document.getElementById('btn-efectivo');
+          const cardDetails = document.getElementById('card-details');
+          const cashDetails = document.getElementById('cash-details');
+          const paymentMethodInput = document.getElementById('payment_method');
+
+          btnTarjeta.addEventListener('click', () => {
+              btnTarjeta.classList.add('active');
+              btnEfectivo.classList.remove('active');
+              cardDetails.style.display = 'block';
+              cashDetails.style.display = 'none';
+              paymentMethodInput.value = 'tarjeta';
+          });
+
+          btnEfectivo.addEventListener('click', () => {
+              btnEfectivo.classList.add('active');
+              btnTarjeta.classList.remove('active');
+              cardDetails.style.display = 'none';
+              cashDetails.style.display = 'block';
+              paymentMethodInput.value = 'efectivo';
+          });
+      });
+      </script>
+
+    </div>
+
+    <!-- COLUMNA DERECHA: RESUMEN -->
+    <div>
+      <div class="ck-summary">
+        <h2 class="ck-summary-title">Resumen del Pedido</h2>
+
+        <div style="margin-bottom: 30px;">
+          {% for item in articulos %}
+          <div class="ck-item">
+            <div class="ck-item-info">
+              <div class="ck-item-img">
+                {% if item.producto.url_imagen_principal %}
+                <img src="{{ item.producto.url_imagen_principal }}" alt="{{ item.producto.nombre }}" style="width:100%; height:100%; object-fit:contain;">
+                {% else %}
+                📦
+                {% endif %}
+              </div>
+              <div>
+                <div class="ck-item-name">{{ item.producto.nombre }}</div>
+                <div class="ck-item-desc">Cantidad: {{ item.cantidad }} — {{ item.producto.marca|default:"MIKITECH" }}</div>
+              </div>
+            </div>
+            <div class="ck-item-price">{{ item.total_linea|currency_cop }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="ck-totals">
+          <div class="ck-totals-row">
+            <span>Subtotal</span>
+            <span class="ck-totals-val">{{ subtotal|currency_cop }}</span>
+          </div>
+          <div class="ck-totals-row">
+            <span>IVA Incluido (19%)</span>
+            <span class="ck-totals-val" style="color:#666;">{{ iva|currency_cop }}</span>
+          </div>
+          <div class="ck-totals-row">
+            <span>Costo de Envío</span>
+            <span class="ck-totals-val" style="color:#10B981;">GRATIS</span>
+          </div>
+        </div>
+
+        <div class="ck-grand-total">
+          <span class="ck-grand-label">Total a Pagar</span>
+          <span class="ck-grand-val">{{ total|currency_cop }}</span>
+        </div>
+
+        <button type="button" class="ck-btn" onclick="confirmarCompra(this)">
+          Pagar y Confirmar Pedido
+        </button>
+
+        <script>
+          function confirmarCompra(btn) {
+            Swal.fire({
+              title: '¿Confirmar Pedido?',
+              text: "Estás a punto de finalizar tu compra.",
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonColor: '#1d4ed8',
+              cancelButtonColor: '#e2e8f0',
+              confirmButtonText: 'Sí, Pagar',
+              cancelButtonText: '<span style="color:#0f172a">Revisar de nuevo</span>',
+              background: '#ffffff',
+              customClass: {
+                title: 'text-dark fw-bold fs-3',
+                popup: 'rounded-4 border-0 shadow-lg',
+                confirmButton: 'fw-bold px-4 rounded-3',
+                cancelButton: 'fw-bold px-4 shadow-none rounded-3'
+              }
+            }).then((result) => {
+              if (result.isConfirmed) {
+                btn.textContent = 'PROCESANDO PAGO...';
+                btn.disabled = true;
+                btn.closest('form').submit();
+              }
+            });
+          }
+        </script>
+
+        <div class="ck-trust">
+          <span>🔒</span> PAGO 100% SEGURO Y ENCRIPTADO
+        </div>
+      </div>
+    </div>
+
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

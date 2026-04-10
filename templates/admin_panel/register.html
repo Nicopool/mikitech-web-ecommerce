@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Jost', sans-serif; background: #FFFFFF; color:#111; }
+    
+    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; }
+    .auth-box { width: 100%; max-width: 550px; text-align: center; padding: 30px; }
+    .auth-brand { font-family: 'Oswald', sans-serif; font-size: 44px; font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; }
+    .auth-subtitle { font-family: 'Jost', sans-serif; font-size: 15px; color: #666; margin-bottom: 40px; text-transform: uppercase; }
+    
+    .wix-row { display: flex; gap: 20px; margin-bottom: 30px; }
+    .wix-input-group { flex: 1; text-align: left; margin-bottom: 30px; }
+    .wix-row .wix-input-group { margin-bottom: 0; }
+    
+    .wix-label { display: block; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .wix-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #111; background: transparent; font-family: 'Jost', sans-serif; font-size: 16px; outline: none; transition: border-width 0.3s; color:#111; }
+    .wix-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; } 
+    
+    .wix-btn-solid { width: 100%; background: #111; color: white; border: none; padding: 18px; font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; margin-top: 20px; text-transform:uppercase;}
+    .wix-btn-solid:hover { background: #444; }
+    
+    .wix-links { margin-top: 30px; font-family: 'Jost', sans-serif; font-size: 14px; text-align: center; display: flex; flex-direction: column; gap: 15px;}
+    .wix-links a { color: #111; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; font-weight:600;}
+    .wix-links a:hover { border-bottom: 1px solid #111; }
+    
+    .alert-wix { padding: 15px; margin-bottom: 25px; border: 1px solid; font-family: 'Jost', sans-serif; font-size: 14px; text-align:left;}
+    .alert-wix.error { border-color: #EF4444; color: #EF4444; }
+    
+  </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="auth-box">
+    <h1 class="auth-brand">ADMINISTRADOR</h1>
+    <p class="auth-subtitle">REGISTRA TU CUENTA CON PRIVILEGIOS.</p>
+    
+    {% if error %}
+    <div class="alert-wix error">⚠️ {{ error }}</div>
+    {% endif %}
+    
+    <form method="POST" action="/admin-panel/registro/" id="admin-register-form">
+      {% csrf_token %}
+      
+      <div class="wix-row">
+        <div class="wix-input-group">
+          <label class="wix-label">NOMBRE COMPLETO</label>
+          <input type="text" name="nombre_completo" class="wix-input" required autocomplete="off" autofocus>
+        </div>
+        <div class="wix-input-group">
+          <label class="wix-label">USUARIO ADMIN</label>
+          <input type="text" name="nombre_usuario" class="wix-input" required autocomplete="off">
+        </div>
+      </div>
+      
+      <div class="wix-input-group">
+        <label class="wix-label">CORREO INSTITUCIONAL</label>
+        <input type="email" name="correo" class="wix-input" required autocomplete="off" placeholder="tu_correo@admin.com">
+      </div>
+      
+      <div class="wix-row">
+        <div class="wix-input-group">
+          <label class="wix-label">CONTRASEÑA (MÍN. 6)</label>
+          <input type="password" name="clave" id="password" class="wix-input" required autocomplete="new-password">
+        </div>
+        <div class="wix-input-group">
+          <label class="wix-label">CONFIRMAR</label>
+          <input type="password" name="confirmar_clave" id="password_confirm" class="wix-input" required autocomplete="new-password">
+        </div>
+      </div>
+      
+      <button type="submit" class="wix-btn-solid" id="admin-register-submit">CREAR ACCESO</button>
+    </form>
+    
+    <div class="wix-links">
+      <a href="/admin-panel/login/">¿Ya tienes cuenta de admin? Iniciar sesión</a>
+      <a href="/">← Volver a la tienda pública</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('admin-register-form').addEventListener('submit', function(e) {
+  if (document.getElementById('password').value !== document.getElementById('password_confirm').value) {
+    e.preventDefault();
+    alert('Las contraseñas no coinciden.');
+    return;
+  }
+  var btn = document.getElementById('admin-register-submit');
+  btn.textContent = 'REGISTRANDO...';
+  btn.disabled = true;
+});
+</script>
+
+</body>
+</html>

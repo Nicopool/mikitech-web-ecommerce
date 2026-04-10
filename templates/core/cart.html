@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load miki_filters %}
+
+{% block title %}Tu Carrito — MIKITECH{% endblock %}
+
+{% block extra_head %}
+<style>
+  .cart-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    font-family: 'Jost', sans-serif;
+  }
+
+  .cart-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    color: #111;
+  }
+
+  .cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+  }
+  .cart-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+    padding: 10px 0;
+    border-bottom: 1px solid #EEE;
+  }
+  .cart-table th:last-child,
+  .cart-table td:last-child { text-align: right; }
+
+  .cart-table td {
+    padding: 20px 0;
+    border-bottom: 1px solid #F5F5F5;
+    vertical-align: middle;
+  }
+
+  .cart-product {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .cart-thumb {
+    width: 60px;
+    height: 60px;
+    background: #FAFAFA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .cart-thumb img {
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: contain;
+  }
+  .cart-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #111;
+    text-decoration: none;
+  }
+  .cart-name:hover { text-decoration: underline; }
+  .cart-brand {
+    font-size: 11px;
+    color: #999;
+    margin-top: 3px;
+  }
+
+  .qty-box {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #DDD;
+  }
+  .qty-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: #FAFAFA;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qty-btn:hover { background: #EEE; }
+  .qty-num {
+    width: 35px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+    border-left: 1px solid #DDD;
+    border-right: 1px solid #DDD;
+  }
+
+  .cart-price { font-weight: 600; font-size: 14px; color: #111; }
+
+  .cart-remove {
+    font-size: 11px;
+    color: #CCC;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    background: none;
+    transition: color 0.2s;
+  }
+  .cart-remove:hover { color: #EF4444; }
+
+  .cart-summary {
+    border-top: 2px solid #111;
+    padding-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .cart-summary-box { width: 300px; }
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #666;
+  }
+  .summary-line span:last-child { font-weight: 600; color: #111; }
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #EEE;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .cart-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+  }
+  .btn-back {
+    font-size: 13px;
+    color: #666;
+    text-decoration: none;
+  }
+  .btn-back:hover { color: #111; }
+  .btn-checkout {
+    padding: 14px 40px;
+    background: #111;
+    color: white;
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .btn-checkout:hover { background: #333; }
+
+  .cart-empty {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .cart-empty-icon { font-size: 50px; margin-bottom: 20px; opacity: 0.3; }
+  .cart-empty h2 { font-family: 'Oswald', sans-serif; font-size: 22px; margin-bottom: 10px; }
+  .cart-empty p { color: #999; font-size: 14px; margin-bottom: 25px; }
+  .btn-shop {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #111;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .btn-shop:hover { background: #333; }
+
+  /* Transición suave al eliminar */
+  .cart-row-removing {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.3s;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+
+  <h1 class="cart-title">Tu Carrito</h1>
+
+  {% if articulos %}
+  <table class="cart-table">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="cart-body">
+      {% for item in articulos %}
+      <tr id="row-{{ item.producto.id }}" data-id="{{ item.producto.id }}" data-precio="{{ item.producto.precio }}">
+        <td>
+          <div class="cart-product">
+            <a href="{% url 'products:detail' item.producto.enlace %}" class="cart-thumb">
+              {% if item.producto.url_imagen_principal %}
+              <img src="{{ item.producto.url_imagen_principal }}" alt="{{ item.producto.nombre }}">
+              {% else %}
+              <span style="font-size:1.5rem; opacity:0.3;">📦</span>
+              {% endif %}
+            </a>
+            <div>
+              <a href="{% url 'products:detail' item.producto.enlace %}" class="cart-name">{{ item.producto.nombre }}</a>
+              <div class="cart-brand">{{ item.producto.marca|default:"" }} · {{ item.producto.precio|currency_cop }}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="qty-box">
+            <button type="button" class="qty-btn" onclick="actualizarCantidad('{{ item.producto.id }}', 'restar')">−</button>
+            <div class="qty-num" id="qty-{{ item.producto.id }}">{{ item.cantidad }}</div>
+            <button type="button" class="qty-btn" onclick="actualizarCantidad('{{ item.producto.id }}', 'sumar')">+</button>
+          </div>
+        </td>
+        <td>
+          <span class="cart-price" id="precio-{{ item.producto.id }}">{{ item.total_linea|currency_cop }}</span>
+        </td>
+        <td>
+          <button type="button" class="cart-remove" onclick="eliminarItem('{{ item.producto.id }}')">✕</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="cart-summary">
+    <div class="cart-summary-box">
+      <div class="summary-line">
+        <span>Subtotal</span>
+        <span id="resumen-subtotal">{{ subtotal|currency_cop }}</span>
+      </div>
+      <div class="summary-line">
+        <span>IVA Incluido (19%)</span>
+        <span id="resumen-iva">{{ iva|currency_cop }}</span>
+      </div>
+      <div class="summary-line">
+        <span>Envío</span>
+        <span style="color:#10B981;">Gratis</span>
+      </div>
+      <div class="summary-total">
+        <span>Total</span>
+        <span id="resumen-total">{{ total|currency_cop }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cart-actions">
+    <a href="{% url 'products:list' %}" class="btn-back">← Seguir comprando</a>
+    <a href="{% url 'core:checkout' %}" class="btn-checkout">Proceder al pago</a>
+  </div>
+
+  {% else %}
+  <div class="cart-empty">
+    <div class="cart-empty-icon">🛒</div>
+    <h2>Tu carrito está vacío</h2>
+    <p>Explora nuestro catálogo y agrega productos.</p>
+    <a href="{% url 'products:list' %}" class="btn-shop">Ver catálogo</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+var csrfToken = '{{ csrf_token }}';
+
+/* Mapa de precios unitarios por ID (cargado desde data-attributes) */
+var precios = {};
+document.querySelectorAll('[data-precio]').forEach(function(el) {
+  precios[el.getAttribute('data-id')] = parseFloat(el.getAttribute('data-precio'));
+});
+
+function formatearCOP(num) {
+  var n = Math.round(num);
+  var str = n.toString();
+  var partes = [];
+  while (str.length > 3) {
+    partes.unshift(str.slice(-3));
+    str = str.slice(0, -3);
+  }
+  partes.unshift(str);
+  return '$ ' + partes.join('.') + ' COP';
+}
+
+function recalcularTotales() {
+  var subtotal = 0;
+  document.querySelectorAll('[data-precio]').forEach(function(fila) {
+    var id = fila.getAttribute('data-id');
+    var qtyEl = document.getElementById('qty-' + id);
+    if (qtyEl) {
+      var cant = parseInt(qtyEl.textContent);
+      var lineaTotal = precios[id] * cant;
+      subtotal += lineaTotal;
+      var precioEl = document.getElementById('precio-' + id);
+      if (precioEl) precioEl.textContent = formatearCOP(lineaTotal);
+    }
+  });
+  var iva = subtotal - (subtotal / 1.19);
+  var total = subtotal;
+  document.getElementById('resumen-subtotal').textContent = formatearCOP(subtotal);
+  document.getElementById('resumen-iva').textContent = formatearCOP(iva);
+  document.getElementById('resumen-total').textContent = formatearCOP(total);
+}
+
+function actualizarCantidad(idProducto, accion) {
+  /* 1. Actualizar UI INMEDIATAMENTE (sin esperar servidor) */
+  var qtyEl = document.getElementById('qty-' + idProducto);
+  if (!qtyEl) return;
+  var cantActual = parseInt(qtyEl.textContent);
+  
+  if (accion === 'sumar') {
+    cantActual++;
+  } else {
+    cantActual--;
+  }
+  
+  if (cantActual <= 0) {
+    var fila = document.getElementById('row-' + idProducto);
+    if (fila) {
+      fila.classList.add('cart-row-removing');
+      setTimeout(function() { fila.remove(); verificarVacio(); }, 300);
+    }
+  } else {
+    qtyEl.textContent = cantActual;
+    recalcularTotales();
+  }
+  
+  /* Actualizar contador del header */
+  var totalItems = 0;
+  document.querySelectorAll('.qty-num').forEach(function(el) {
+    totalItems += parseInt(el.textContent) || 0;
+  });
+  var counter = document.getElementById('cart-counter');
+  if (counter) counter.textContent = totalItems;
+  
+  /* 2. Enviar al servidor en segundo plano (fire & forget) */
+  var formData = new FormData();
+  formData.append('accion', accion);
+  fetch('/carrito/actualizar/' + idProducto + '/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: formData
+  });
+}
+
+function eliminarItem(idProducto) {
+  var fila = document.getElementById('row-' + idProducto);
+  if (fila) {
+    fila.classList.add('cart-row-removing');
+    setTimeout(function() {
+      fila.remove();
+      recalcularTotales();
+      verificarVacio();
+    }, 300);
+  }
+  
+  fetch('/carrito/eliminar/' + idProducto + '/', {
+    method: 'GET',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  });
+}
+
+function verificarVacio() {
+  var tbody = document.getElementById('cart-body');
+  if (tbody && tbody.children.length === 0) {
+    location.reload();
+  }
+}
+</script>
+{% endblock %}
+

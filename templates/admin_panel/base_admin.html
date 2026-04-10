@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ titulo_pagina|default:"Administración — MIKITECH" }}{% endblock %}</title>
+  {% load static %}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.0">
+  <style>
+    .material-symbols-outlined { font-size: inherit; vertical-align: bottom; }
+  </style>
+</head>
+<body class="g-admin-layout">
+<aside class="g-sidebar">
+  <div class="g-sidebar-header">
+    <div class="g-sidebar-icon">📊</div>
+    <div class="g-sidebar-logo">Panel Admin</div>
+  </div>
+  
+  <nav class="g-nav">
+    <a href="{% url 'admin_dashboard' %}" class="g-nav-item"><span class="material-symbols-outlined">home</span> Dashboard</a>
+    <a href="{% url 'admin_products' %}" class="g-nav-item"><span class="material-symbols-outlined">inventory_2</span> Inventario</a>
+    <a href="{% url 'admin_users' %}" class="g-nav-item"><span class="material-symbols-outlined">group</span> Clientes</a>
+    <a href="{% url 'admin_categories' %}" class="g-nav-item"><span class="material-symbols-outlined">folder</span> Categorías</a>
+    <a href="{% url 'admin_reviews' %}" class="g-nav-item"><span class="material-symbols-outlined">chat</span> Reseñas</a>
+    <a href="{% url 'admin_reports' %}" class="g-nav-item"><span class="material-symbols-outlined">bar_chart</span> Reportes</a>
+  </nav>
+
+  <div class="g-sidebar-footer">
+    <div class="g-s-avatar">{{ request.session.nombre_usuario|first|upper|default:"A" }}</div>
+    <div class="g-s-info">
+      <h4>{{ request.session.nombre_usuario|default:"Administrador" }}</h4>
+      <p>Gerente de Sistema</p>
+    </div>
+  </div>
+</aside>
+
+<main class="g-main-wrapper">
+  
+  <header class="g-topbar">
+    <div class="g-top-title">
+      <h1>¡Hola, {{ request.session.nombre_usuario|default:"Admin" }}!</h1>
+      <p>Bienvenido al panel central de control técnico.</p>
+    </div>
+    <div class="g-top-actions">
+      <a href="{% url 'admin_logout' %}" style="border:1px solid #E2E8F0; padding:8px 15px; border-radius:20px; font-size:13px; font-weight:600; text-decoration:none; color:#DC2626; display:flex; align-items:center;">Cerrar Sesión</a>
+    </div>
+  </header>
+
+  <div class="g-content">
+    {% if messages %}
+    <div class="g-messages">
+      {% for message in messages %}
+      <div class="g-alert g-alert-{{ message.tags }}">
+        <span>{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% block admin_content %}{% endblock %}
+  </div>
+
+</main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll(".g-nav-item");
+    links.forEach(link => {
+      const href = link.getAttribute("href");
+      if(href === currentPath || (currentPath.includes(href) && href !== "/panel-admin/")) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+</body>
+</html>

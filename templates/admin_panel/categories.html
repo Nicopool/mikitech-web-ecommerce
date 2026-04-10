@@ -1,0 +1,116 @@
+{% extends "admin_panel/base_admin.html" %}
+
+{% block page_title %}Gestión de Categorías — MIKITECH{% endblock %}
+
+{% block admin_content %}
+<style>
+  .cat-icon { width: 5rem; height: 5rem; border-radius: 1.2rem; background: var(--grad-tech); display:flex; align-items:center; justify-content:center; font-size:2.4rem; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+</style>
+
+<div class="u-flex u-justify-between u-align-center u-mb-4">
+  <div>
+    <h2 style="font-size:2.2rem; font-weight:800;">📂 Clasificación de Productos</h2>
+    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">{{ categorias|length }} categoría{% if categorias|length != 1 %}s{% endif %} activa{% if categorias|length != 1 %}s{% endif %}</p>
+  </div>
+  <a href="{% url 'admin_category_create' %}" class="g-btn-primary">
+    + Nueva Categoría
+  </a>
+</div>
+
+<div class="mpro-card" style="padding:0; overflow:visible;">
+  <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <span style="font-weight: 700; color: var(--ds-text);">📋 Lista de Categorías</span>
+    <div class="g-search-wrapper">
+      <span><span class="material-symbols-outlined">search</span></span>
+      <input type="text" id="buscadorCategorias" class="g-search" placeholder="Buscar categoría...">
+    </div>
+  </div>
+  
+  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none;">
+    <table class="g-table" id="tablaCategorias">
+      <thead>
+        <tr>
+          <th style="width:7rem;">ICONO</th>
+          <th>NOMBRE</th>
+          <th>ENLACE (SLUG)</th>
+          <th>DESCRIPCIÓN</th>
+          <th class="u-text-center">GESTIÓN</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoTablaCategorias">
+        {% for categoria in categorias %}
+        <tr data-search="{{ categoria.nombre|lower }} {{ categoria.enlace|lower }}">
+          <td class="ps-4">
+            <div class="cat-icon">{{ categoria.icono|default:"📂" }}</div>
+          </td>
+          <td style="font-weight: 700; font-size: 1.5rem;">{{ categoria.nombre }}</td>
+          <td><code style="font-size:1.2rem; background:var(--ds-bg); padding:0.4rem 0.8rem; border-radius:0.6rem; color:#2563EB; font-weight: 600;">{{ categoria.enlace }}</code></td>
+          <td style="color:#64748B; font-size:1.3rem;">{{ categoria.descripcion|truncatechars:100|default:"Sin descripción" }}</td>
+          <td class="u-text-center">
+            <a href="{% url 'admin_category_edit' categoria.id %}" class="g-action-btn" title="Editar">✏️</a>
+            <button class="g-action-btn g-action-disable" onclick="confirmarEliminarCat('{{ categoria.id }}', '{{ categoria.nombre|escapejs }}')" title="Eliminar">🗑️</button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="u-text-center" style="padding: 50px; color:#64748B; font-size:1.4rem;">
+            No hay categorías definidas. <a href="{% url 'admin_category_create' %}" style="color:var(--ds-primary); font-weight:600;">Crea la primera aquí</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal de Eliminación -->
+<div id="modalEliminarCat" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+  <div class="mpro-card" style="width:400px; max-width:90%; animation: slideUp 0.2s ease-out;">
+    <div style="background:#DC2626; color:white; padding:15px 25px; margin:-25px -25px 25px -25px; border-radius:16px 16px 0 0; font-weight:700;">
+      ⚠️ Eliminar Categoría
+    </div>
+    <div id="cuerpo-modal-cat" style="font-size:1.4rem; color:var(--ds-text);"></div>
+    <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="document.getElementById('modalEliminarCat').style.display='none'" class="g-btn-primary" style="background:#F1F5F9; color:var(--ds-text); box-shadow:none;">Regresar</button>
+      <form id="formularioEliminarCat" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="g-btn-primary" style="background:#DC2626;">Confirmar Borrado</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Buscador dinámico
+document.getElementById('buscadorCategorias').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  document.querySelectorAll('#cuerpoTablaCategorias tr[data-search]').forEach(function(row) {
+    row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+  });
+});
+
+function confirmarEliminarCat(id, nombre) {
+  var modal = document.getElementById('modalEliminarCat');
+  var cuerpo = document.getElementById('cuerpo-modal-cat');
+  cuerpo.innerHTML = '';
+  
+  var p = document.createElement('p');
+  p.textContent = '¿Estás seguro de que deseas eliminar permanentemente esta categoría?';
+  
+  var detalle = document.createElement('div');
+  detalle.style.cssText = 'background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:15px; font-weight:700; margin:15px 0; color:var(--ds-primary);';
+  detalle.textContent = '📁 ' + nombre;
+  
+  var aviso = document.createElement('p');
+  aviso.style.cssText = 'color:#DC2626; font-size:1.2rem; font-weight:600;';
+  aviso.textContent = '⚠️ Nota: Los productos vinculados a esta categoría quedarán sin clasificación.';
+  
+  cuerpo.appendChild(p); 
+  cuerpo.appendChild(detalle); 
+  cuerpo.appendChild(aviso);
+  
+  document.getElementById('formularioEliminarCat').action = '/panel-admin/categorias/eliminar/' + id + '/';
+  modal.style.display = 'flex';
+}
+</script>
+{% endblock %}

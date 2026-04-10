@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load miki_filters %}
+
+{% block extra_head %}
+<style>
+  :root {
+    font-size: 10px;
+    --navy: #0F172A;
+    --blue: #3B82F6;
+    --slate: #64748B;
+    --emerald: #10B981;
+    --border: #E2E8F0;
+    --bg-soft: #F8FAFC;
+  }
+  
+  .section { padding: 6rem 0; }
+  .container { max-width: 120rem; margin: 0 auto; padding: 0 3rem; }
+  
+  .product-detail { display: grid; grid-template-columns: 1.2fr 1fr; gap: 6rem; margin-bottom: 8rem; }
+  @media (max-width: 80rem) { .product-detail { grid-template-columns: 1fr; } }
+  
+  /* GALLERY */
+  .p-gallery { position: sticky; top: 12rem; align-self: start; }
+  .p-main-img { background: #FFFFFF; border: 1px solid var(--border); border-radius: 1.6rem; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .p-main-img img { width: 100%; height: 100%; object-fit: contain; padding: 4rem; }
+  
+  .p-thumbs { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .p-thumb { width: 8rem; height: 8rem; border-radius: 0.8rem; border: 2px solid transparent; overflow: hidden; cursor: pointer; transition: all 0.2s; background: white; }
+  .p-thumb.active { border-color: var(--blue); }
+  .p-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  
+  /* INFO */
+  .p-brand { font-size: 1.2rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; }
+  .p-title { font-family: 'Oswald', sans-serif; font-size: 3.6rem; font-weight: 700; color: var(--navy); line-height: 1.1; margin-bottom: 2rem; text-transform: uppercase; }
+  
+  .p-stats { display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem; font-size: 1.4rem; color: var(--slate); }
+  .p-stars { display: flex; color: #F59E0B; }
+  
+  .p-desc { font-size: 1.6rem; line-height: 1.8; color: #475569; margin-bottom: 4rem; }
+  
+  .p-price-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 1.2rem; padding: 3rem; margin-bottom: 4rem; display: flex; justify-content: space-between; align-items: center; }
+  .p-price { font-family: 'Oswald', sans-serif; font-size: 3.2rem; font-weight: 700; color: var(--navy); }
+  .stock-tag { font-size: 1.2rem; font-weight: 700; padding: 0.6rem 1.4rem; border-radius: 0.4rem; text-transform: uppercase; }
+  .stock-tag.in { background: #DCFCE7; color: #166534; }
+  .stock-tag.low { background: #FEF3C7; color: #92400E; }
+  .stock-tag.out { background: #FEE2E2; color: #991B1B; }
+  
+  .p-actions { display: flex; gap: 1.5rem; margin-bottom: 5rem; }
+  .btn-p { height: 5.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; border-radius: 0.6rem; font-family: 'Jost', sans-serif; font-size: 1.4rem; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s; border: none; flex: 1; text-decoration: none; }
+  .btn-cart { background: var(--navy); color: white; }
+  .btn-cart:hover { background: var(--blue); }
+  .btn-fav { width: 5.5rem; flex: 0 0 5.5rem; background: transparent; border: 1px solid var(--border); color: var(--navy); }
+  .btn-fav:hover { border-color: #EF4444; color: #EF4444; }
+  .btn-fav.active { background: #FEE2E2; border-color: #EF4444; color: #EF4444; }
+
+  /* SPECS */
+  .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .spec-row { display: flex; justify-content: space-between; padding: 1.5rem 2rem; background: white; border: 1px solid var(--border); border-radius: 0.8rem; }
+  .spec-k { font-size: 1.2rem; color: var(--slate); font-weight: 500; }
+  .spec-v { font-size: 1.2rem; font-weight: 700; color: var(--navy); }
+
+  /* REVIEWS */
+  .rev-card { background: white; border: 1px solid var(--border); border-radius: 1.2rem; padding: 3rem; margin-bottom: 2rem; }
+  .rev-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+  .rev-user { display: flex; align-items: center; gap: 1.5rem; }
+  .rev-avatar { width: 4.5rem; height: 4.5rem; border-radius: 50%; background: #F1F5F9; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.6rem; color: var(--blue); }
+  .rev-name { font-size: 1.5rem; font-weight: 700; color: var(--navy); text-decoration: none; }
+  .rev-content { font-size: 1.5rem; line-height: 1.7; color: #475569; }
+
+  /* FORM */
+  .rev-form { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 1.6rem; padding: 4rem; margin-top: 5rem; }
+  .form-control { width: 100%; padding: 1.5rem; border: 1px solid var(--border); border-radius: 0.8rem; font-family: 'Jost', sans-serif; font-size: 1.4rem; margin-top: 0.8rem; }
+  
+  .material-symbols-outlined { font-size: 2rem; vertical-align: middle; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="container">
+    <div class="product-detail">
+
+      <!-- GALLERY -->
+      <div class="p-gallery">
+        <div class="p-main-img" id="gallery-main">
+          {% if producto.url_imagen_principal %}
+            <img src="{{ producto.url_imagen_principal }}" alt="{{ producto.nombre }}" id="main-img">
+          {% else %}
+            <span class="material-symbols-outlined" style="font-size: 12rem; color: #CBD5E1;">inventory_2</span>
+          {% endif %}
+        </div>
+        {% if producto.imagenes.all %}
+        <div class="p-thumbs">
+          {% for img in producto.imagenes.all %}
+          <div class="p-thumb {% if forloop.first %}active{% endif %}" onclick="switchMainImg(this, '{{ img.url_imagen }}')">
+            <img src="{{ img.url_imagen }}" alt="{{ producto.nombre }}">
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- PRODUCT INFO -->
+      <div class="p-info">
+        <div class="p-brand">{{ producto.marca|default:"MIKITECH" }} — {{ producto.categoria.nombre }}</div>
+        <h1 class="p-title">{{ producto.nombre }}</h1>
+
+        <div class="p-stats">
+          <div class="p-stars">
+            {% for i in "12345" %}
+              <span class="material-symbols-outlined" style="font-size:1.8rem; {% if forloop.counter <= producto.calificacion_promedio %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
+            {% endfor %}
+          </div>
+          <span>({{ producto.conteo_reseñas }} Reseñas)</span>
+          <span>|</span>
+          <span style="display:flex; align-items:center; gap:0.5rem;"><span class="material-symbols-outlined">thumb_up</span> {{ producto.conteo_votos }}</span>
+        </div>
+
+        <p class="p-desc">{{ producto.descripcion }}</p>
+
+        <div class="p-price-card">
+          <div>
+            <div style="font-size:1.2rem; color:var(--slate); margin-bottom:0.5rem; text-transform:uppercase; font-weight:700;">Precio Premium</div>
+            <div class="p-price">{{ producto.precio|currency_cop }}</div>
+          </div>
+          <div>
+            {% if producto.existencias == 0 %}
+              <div class="stock-tag out">Agotado</div>
+            {% elif producto.existencias <= 5 %}
+              <div class="stock-tag low">Últimas {{ producto.existencias }} unidades</div>
+            {% else %}
+              <div class="stock-tag in">En Existencia</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="p-actions">
+          <a href="{% url 'core:add_to_cart' producto.id %}" class="btn-p btn-cart">
+            <span class="material-symbols-outlined">shopping_cart</span> Añadir al Carrito
+          </a>
+          <button class="btn-p btn-fav {% if es_favorito %}active{% endif %}" id="fav-btn" data-product-id="{{ producto.id }}">
+            <span class="material-symbols-outlined" style="{% if es_favorito %}font-variation-settings: 'FILL' 1;{% endif %}">favorite</span>
+          </button>
+        </div>
+
+        <!-- SPECS -->
+        {% if producto.especificaciones %}
+        <div style="margin-top: 4rem;">
+          <h2 style="font-family:'Oswald', sans-serif; font-size:2rem; text-transform:uppercase; margin-bottom:2rem;">Especificaciones Técnicas</h2>
+          <div class="spec-grid">
+            {% for key, val in producto.especificaciones.items %}
+            <div class="spec-row">
+              <span class="spec-k">{{ key|title }}</span>
+              <span class="spec-v">{{ val }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div style="margin-top: 3rem; font-size: 1.2rem; color: var(--slate); border-top: 1px dashed var(--border); padding-top: 2rem;">
+          SKU: #{{ producto.codigo_sku|default:"N/A" }} | Modelo: {{ producto.modelo|default:"2026-X" }}
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEWS SECTION -->
+    <div class="reviews-section" id="resenas">
+      <h2 style="font-family:'Oswald', sans-serif; font-size:2.8rem; text-transform:uppercase; margin-bottom:3rem;">
+        Reseñas de la Comunidad <span style="color:var(--slate); font-weight:400;">({{ producto.conteo_reseñas }})</span>
+      </h2>
+
+      {% for reseña in reseñas %}
+      <div class="rev-card">
+        <div class="rev-header">
+          <div class="rev-user">
+            <div class="rev-avatar">
+              {% if reseña.usuario.url_avatar %}
+                <img src="{{ reseña.usuario.url_avatar }}" alt="{{ reseña.usuario.nombre_mostrado }}" style="width:100%; height:100%; object-fit:cover;">
+              {% else %}
+                {{ reseña.usuario.nombre_mostrado|first|upper }}
+              {% endif %}
+            </div>
+            <div>
+              <a href="{% url 'core:public_profile' reseña.usuario.nombre_usuario %}" class="rev-name">{{ reseña.usuario.nombre_mostrado }}</a>
+              <div style="font-size:1.1rem; color:var(--slate); margin-top:0.3rem;">{{ reseña.creado_el|date:"d M, Y" }}</div>
+            </div>
+          </div>
+          <div class="p-stars">
+            {% for i in "12345" %}
+              <span class="material-symbols-outlined" style="font-size:1.6rem; {% if forloop.counter <= reseña.calificacion %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
+            {% endfor %}
+          </div>
+        </div>
+        <p class="rev-content">{{ reseña.comentario }}</p>
+
+        {% if request.session.usuario_id %}
+        <details style="margin-top: 1.5rem;">
+          <summary style="cursor:pointer; font-size:1.2rem; color:var(--blue); font-weight:700;">Responder</summary>
+          <form method="POST" action="{% url 'interactions:add_reply' reseña.id %}" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <textarea name="content" class="form-control" placeholder="Escribe tu respuesta..." rows="2" required></textarea>
+            <button type="submit" class="btn-p btn-cart" style="height:3.5rem; margin-top:1rem; width:auto; padding:0 2rem;">Enviar</button>
+          </form>
+        </details>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <!-- FORM -->
+      {% if request.session.usuario_id %}
+      <div class="rev-form">
+        <h3 style="font-family:'Oswald', sans-serif; font-size:2.2rem; margin-bottom:2.5rem; text-transform:uppercase;">Escribir una reseña</h3>
+        <form method="POST" action="{% url 'interactions:add_review' producto.id %}">
+          {% csrf_token %}
+          <div style="margin-bottom: 2rem;">
+            <label style="font-size:1.2rem; font-weight:700; text-transform:uppercase; color:var(--slate);">Calificación</label>
+            <select name="rating" class="form-control">
+              <option value="5">Excelente (5 Estrellas)</option>
+              <option value="4">Muy Bueno (4 Estrellas)</option>
+              <option value="3">Bueno (3 Estrellas)</option>
+              <option value="2">Regular (2 Estrellas)</option>
+              <option value="1">Malo (1 Estrella)</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 2.5rem;">
+            <label style="font-size:1.2rem; font-weight:700; text-transform:uppercase; color:var(--slate);">Comentario</label>
+            <textarea name="comment" class="form-control" rows="4" placeholder="¿Qué te pareció este producto?" required></textarea>
+          </div>
+          <button type="submit" class="btn-p btn-cart" style="width:25rem;">Publicar Reseña</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- RELATED -->
+    {% if productos_relacionados %}
+    <div style="margin-top: 10rem;">
+      <h2 style="font-family:'Oswald', sans-serif; font-size:2.8rem; text-transform:uppercase; margin-bottom:4rem;">Productos Relacionados</h2>
+      <div class="wix-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr)); gap:3rem;">
+        {% for rp in productos_relacionados %}
+          {% include 'products/_product_card.html' with product=rp %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchMainImg(thumb, url) {
+    document.getElementById('main-img').src = url;
+    document.querySelectorAll('.p-thumb').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+  }
+
+  const favBtn = document.getElementById('fav-btn');
+  if (favBtn) {
+    favBtn.addEventListener('click', function() {
+      fetch('{% url "interactions:toggle_favorite" producto.id %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const icon = this.querySelector('.material-symbols-outlined');
+          this.classList.toggle('active', data.is_favorite);
+          icon.style.fontVariationSettings = data.is_favorite ? "'FILL' 1" : "'FILL' 0";
+        } else {
+          window.toast.aviso('Inicia sesión para esta acción');
+        }
+      });
+    });
+  }
+</script>
+{% endblock %}
