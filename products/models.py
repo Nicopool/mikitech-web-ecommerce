@@ -2,6 +2,7 @@
 
 import uuid
 from django.db import models
+from django.utils import timezone
 
 
 class Categoria(models.Model):
@@ -39,6 +40,8 @@ class Producto(models.Model):
     codigo_sku = models.CharField(max_length=100, unique=True, blank=True, null=True, db_column='sku')
     especificaciones = models.JSONField(default=dict, blank=True, db_column='specifications')
     url_imagen_principal = models.TextField(blank=True, null=True, db_column='main_image_url')
+    descuento_porcentaje = models.IntegerField(default=0, db_column='discount_percentage')
+    descuento_expira_el = models.DateTimeField(null=True, blank=True, db_column='discount_expires_at')
     esta_activo = models.BooleanField(default=True, db_column='is_active')
     es_destacado = models.BooleanField(default=False, db_column='is_featured')
     conteo_vistas = models.IntegerField(default=0, db_column='views_count')
@@ -69,6 +72,22 @@ class Producto(models.Model):
         if not reseñas:
             return 0
         return sum(r.calificacion for r in reseñas if r.calificacion) / reseñas.count()
+
+    @property
+    def descuento_activo(self):
+        """Retorna True si hay un descuento activo y no expirado."""
+        if not self.descuento_porcentaje or self.descuento_porcentaje <= 0:
+            return False
+        if self.descuento_expira_el and timezone.now() > self.descuento_expira_el:
+            return False
+        return True
+
+    @property
+    def precio_con_descuento(self):
+        """Retorna el precio final tras aplicar el descuento activo."""
+        if self.descuento_activo:
+            return round(float(self.precio) * (1 - self.descuento_porcentaje / 100))
+        return self.precio
 
     def en_existencia(self):
         return self.existencias > 0

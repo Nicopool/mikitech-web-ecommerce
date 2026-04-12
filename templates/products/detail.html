@@ -166,9 +166,22 @@
         </div>
 
         <div class="p-price-block">
+          {% if producto.descuento_activo %}
+          <div style="font-size:1.2rem; color:var(--slate); text-transform:uppercase; font-weight:700; letter-spacing:1px; margin-bottom:0.5rem;">Precio Exclusivo MIKITECH</div>
+          <div style="font-size:1.6rem; color:#94A3B8; text-decoration:line-through; margin-bottom:0.5rem;">{{ producto.precio|currency_cop }}</div>
+          <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:0.5rem;">
+            <span style="font-family:'Oswald',sans-serif; font-size:4.8rem; font-weight:900; color:#EF4444; line-height:1;">{{ producto.precio_con_descuento|currency_cop }}</span>
+            <div>
+              <span style="background:#EF4444; color:white; font-weight:900; font-size:2rem; padding:0.6rem 1.2rem; border-radius:0.8rem; display:inline-block;">-{{ producto.descuento_porcentaje }}%</span>
+              <div style="font-size:1.4rem; color:#EF4444; font-weight:700; margin-top:0.4rem;">Precio de Hoy</div>
+            </div>
+          </div>
+          <div style="font-size:1.1rem; color:var(--slate); margin-top:0.5rem;">IVA del 19% incluido • Garantía oficial de 1 año</div>
+          {% else %}
           <div class="price-label">Precio Exclusivo MIKITECH</div>
           <div class="price-main">{{ producto.precio|currency_cop }}</div>
           <div style="font-size:1.1rem; color:var(--slate); margin-top:0.5rem;">IVA del 19% incluido • Garantía oficial de 1 año</div>
+          {% endif %}
         </div>
 
         <div class="actions-row">

@@ -1,6 +1,11 @@
 {% load miki_filters %}
 <div class="wix-product" id="product-{{ product.id }}">
   <div class="badge-cat">{{ product.categoria.nombre|default:"General" }}</div>
+  {% if product.descuento_activo %}
+  <div style="position:absolute; top:1.2rem; right:1.2rem; background:#EF4444; color:white; font-family:'Jost',sans-serif; font-weight:900; font-size:1.3rem; padding:0.5rem 1rem; border-radius:0.6rem; z-index:2; line-height:1;">
+    -{{ product.descuento_porcentaje }}%
+  </div>
+  {% endif %}
   <a href="{% url 'products:detail' product.enlace %}" class="wix-img-wrapper">
     {% if product.url_imagen_principal %}
       <img src="{{ product.url_imagen_principal }}" alt="{{ product.nombre }}">
@@ -24,9 +29,25 @@
     <a href="{% url 'products:detail' product.enlace %}" class="wix-p-title" style="font-size: 1.4rem; font-weight: 500; color: #0F172A; margin-bottom: 0.6rem; text-decoration: none; display: block; min-height: 4.2rem; overflow: hidden;">
       {{ product.nombre|truncatechars:45 }}
     </a>
-    <div class="wix-p-price" style="font-family: 'Oswald', sans-serif; font-size: 1.6rem; color: #000000; margin-bottom: 0.8rem;">
+
+    <!-- PRECIO CON O SIN DESCUENTO -->
+    {% if product.descuento_activo %}
+    <div style="margin-bottom:0.8rem;">
+      <div style="font-family:'Jost',sans-serif; font-size:1.2rem; color:#94A3B8; text-decoration:line-through; line-height:1.2;">
+        {{ product.precio|currency_cop }}
+      </div>
+      <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+        <span style="font-family:'Oswald',sans-serif; font-size:2rem; font-weight:900; color:#EF4444;">
+          {{ product.precio_con_descuento|currency_cop }}
+        </span>
+        <span style="font-family:'Jost',sans-serif; font-size:1.2rem; font-weight:700; color:#EF4444;">Hoy</span>
+      </div>
+    </div>
+    {% else %}
+    <div class="wix-p-price" style="font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: #000000; margin-bottom: 0.8rem; font-weight:700;">
       {{ product.precio|currency_cop }}
     </div>
+    {% endif %}
     
     <div class="p-actions">
       <a href="{% url 'products:detail' product.enlace %}" class="btn-action btn-view" title="Ver Detalles">Detalles</a>

@@ -12,14 +12,17 @@ import os
 from django.core.files.storage import default_storage
 
 
+from functools import wraps
+
 CODIGO_ADMIN = getattr(settings, 'ADMIN_GATEWAY_CODE', 'SENA-2026')
 
 
 def requerir_administrador(función_vista):
     """Decorador que requiere rol admin (administrador)."""
+    @wraps(función_vista)
     def envoltura(petición, *args, **kwargs):
         if not petición.session.get('usuario_id') or petición.session.get('rol_usuario') != 'admin':
-            return redirect('/admin-panel/pasarela/')
+            return redirect('core:admin_gateway') if 'core' in petición.resolver_match.namespaces else redirect('/admin-panel/pasarela/')
         return función_vista(petición, *args, **kwargs)
     return envoltura
 
@@ -232,6 +235,16 @@ def crear_producto(petición):
         descripcion = petición.POST.get('descripcion', '').strip()
         descripcion_corta = petición.POST.get('descripcion_corta', '').strip()
         es_destacado = petición.POST.get('es_destacado') == 'on'
+        descuento_porcentaje = int(petición.POST.get('descuento_porcentaje', '0') or '0')
+        descuento_expira_str = petición.POST.get('descuento_expira_el', '').strip()
+        descuento_expira_el = None
+        if descuento_expira_str:
+            from django.utils import timezone
+            from datetime import datetime
+            try:
+                descuento_expira_el = datetime.fromisoformat(descuento_expira_str).astimezone(timezone.utc)
+            except ValueError:
+                pass
 
         if nombre:
             from django.utils.text import slugify
@@ -256,6 +269,8 @@ def crear_producto(petición):
                     descripcion_corta=descripcion_corta,
                     url_imagen_principal=petición.POST.get('url_imagen_principal', '').strip(),
                     es_destacado=es_destacado,
+                    descuento_porcentaje=descuento_porcentaje,
+                    descuento_expira_el=descuento_expira_el,
                     esta_activo=True,
                 )
                 
@@ -308,6 +323,18 @@ def editar_producto(petición, id_producto):
             producto.url_imagen_principal = petición.POST.get('url_imagen_principal', producto.url_imagen_principal).strip()
         producto.es_destacado = petición.POST.get('es_destacado') == 'on'
         producto.esta_activo = petición.POST.get('esta_activo') == 'on'
+        # Descuento
+        producto.descuento_porcentaje = int(petición.POST.get('descuento_porcentaje', '0') or '0')
+        desc_exp_str = petición.POST.get('descuento_expira_el', '').strip()
+        if desc_exp_str:
+            from django.utils import timezone
+            from datetime import datetime
+            try:
+                producto.descuento_expira_el = datetime.fromisoformat(desc_exp_str).astimezone(timezone.utc)
+            except ValueError:
+                producto.descuento_expira_el = None
+        else:
+            producto.descuento_expira_el = None
         id_cat = petición.POST.get('id_categoria')
         if id_cat:
             try:

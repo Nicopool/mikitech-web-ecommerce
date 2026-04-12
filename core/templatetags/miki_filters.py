@@ -7,15 +7,16 @@ register = template.Library()
 @register.filter(name='cop_format')
 def cop_format(value):
     """
-    Formatea un número con el estilo americano:
-    - Coma (,) como separador de miles
+    Formatea un número con el estilo colombiano:
+    - Punto (.) como separador de miles
     - Sin decimales
-    Ejemplo: 1250000 → 1,250,000
+    Ejemplo: 1250000 → 1.250.000
     """
     try:
         if value is None: return "0"
         value = int(round(float(value)))
-        return "{:,}".format(value)
+        # Formato con punto colombiano
+        return "{:,}".format(value).replace(",", ".")
     except (ValueError, TypeError):
         return value
 
@@ -23,14 +24,25 @@ def cop_format(value):
 @register.filter(name='currency_cop')
 def currency_cop(value):
     """
-    Formatea un precio como moneda con estilo Americano.
-    Ejemplo: 231280.00 → $231,280.00 COP
+    Formatea un precio como moneda colombiana.
+    Ejemplo: 2199900 → $2.199.900
     """
     try:
-        if value is None: return "$0.00 COP"
+        if value is None: return "$0"
+        val = int(round(float(value)))
+        formatted = "{:,}".format(val).replace(",", ".")
+        return f"${formatted}"
+    except (ValueError, TypeError):
+        return value
+
+
+@register.filter(name='precio_con_descuento')
+def precio_con_descuento(value, porcentaje):
+    """Calcula el precio con descuento aplicado."""
+    try:
         val = float(value)
-        # Formateo estándar americano: comas para miles, punto para decimales
-        formatted = "{:,.2f}".format(val)
-        return f"${formatted} COP"
+        desc = float(porcentaje)
+        resultado = val * (1 - desc / 100)
+        return int(round(resultado))
     except (ValueError, TypeError):
         return value

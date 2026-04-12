@@ -18,7 +18,10 @@ def vista_ingreso(petición):
         clave = petición.POST.get('clave', '')
 
         if not correo or not clave:
-            return render(petición, 'users/login.html', {'error': 'Por favor completa todos los campos.'})
+            return render(petición, 'users/login.html', {
+                'error': 'Por favor completa todos los campos.',
+                'next': petición.POST.get('next', '')
+            })
 
         datos, error = iniciar_sesion_usuario(correo, clave)
 
@@ -26,6 +29,7 @@ def vista_ingreso(petición):
             return render(petición, 'users/login.html', {
                 'error': 'Correo o contraseña incorrectos.',
                 'correo': correo,
+                'next': petición.POST.get('next', '')
             })
 
         # Guardar sesión
@@ -47,7 +51,10 @@ def vista_ingreso(petición):
         messages.success(petición, '¡Bienvenido de nuevo!')
         return redirect(proxima_url)
 
-    return render(petición, 'users/login.html', {'titulo_pagina': 'Iniciar Sesión — MIKITECH'})
+    return render(petición, 'users/login.html', {
+        'titulo_pagina': 'Iniciar Sesión — MIKITECH',
+        'next': petición.GET.get('next', '')
+    })
 
 
 def vista_registro(petición):
@@ -124,6 +131,7 @@ def vista_registro(petición):
 def vista_cerrar_sesion(petición):
     """Limpia la sesión de Django y redirige al inicio."""
     petición.session.flush()
+    messages.info(petición, 'Has cerrado tu sesión correctamente. ¡Vuelve pronto!')
     return redirect('core:home')
 
 

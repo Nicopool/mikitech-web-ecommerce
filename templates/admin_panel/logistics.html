@@ -59,6 +59,7 @@
         <th>Fecha</th>
         <th>Destino</th>
         <th>Total</th>
+        <th>Repartidor</th>
         <th>Estado Actual</th>
         <th>Acciones</th>
       </tr>
@@ -85,6 +86,13 @@
         <td style="font-size: 1.2rem;">{{ p.creado_el|date:"d M Y, h:i A" }}</td>
         <td style="max-width: 200px; font-size: 1.2rem; white-space: normal;">{{ p.direccion_envio }}</td>
         <td style="font-weight: 700;">{{ p.monto_total|currency_cop }}</td>
+        <td>
+          {% if p.repartidor %}
+          <span style="background:#DBEAFE; color:#1D4ED8; padding:0.4rem 1rem; border-radius:20px; font-size:1rem; font-weight:700;">{{ p.repartidor.nombre_usuario }}</span>
+          {% else %}
+          <span style="color:#94A3B8; font-size:1.1rem; font-style:italic;">Sin asignar</span>
+          {% endif %}
+        </td>
         <td>
           <span class="g-badge {% if p.estado == 'delivered' %}badge-success{% elif p.estado == 'shipped' %}badge-info{% elif p.estado == 'pending' or p.estado == 'processing' %}badge-pending{% else %}badge-error{% endif %}">
             {% if p.estado == 'delivered' %}Entregado{% elif p.estado == 'shipped' %}Enviado{% elif p.estado == 'pending' or p.estado == 'processing' %}Pendiente{% else %}Cancelado{% endif %}

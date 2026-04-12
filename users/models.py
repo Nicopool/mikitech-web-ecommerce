@@ -14,7 +14,7 @@ class Perfil(models.Model):
     direccion = models.TextField(blank=True, null=True, db_column='address')
     ciudad = models.CharField(max_length=100, blank=True, null=True, db_column='city')
     pais = models.CharField(max_length=100, default='Colombia', db_column='country')
-    rol = models.CharField(max_length=20, default='client', choices=[('admin', 'Administrador'), ('client', 'Cliente')], db_column='role')
+    rol = models.CharField(max_length=20, default='client', choices=[('admin', 'Administrador'), ('client', 'Cliente'), ('repartidor', 'Repartidor')], db_column='role')
     esta_activo = models.BooleanField(default=True, db_column='is_active')
     creado_el = models.DateTimeField(auto_now_add=True, db_column='created_at')
     actualizado_el = models.DateTimeField(auto_now=True, db_column='updated_at')

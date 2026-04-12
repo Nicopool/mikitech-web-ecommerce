@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load miki_filters %}
+
+{% block content %}
+<div style="background: #F1F5F9; min-height: 100vh; padding: 4rem 2rem;">
+  <div style="max-width: 1000px; margin: 0 auto;">
+    
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+      <div>
+        <h1 style="font-size: 3.2rem; font-weight: 900; color: #0F172A; margin:0;">🚚 Mis Rutas</h1>
+        <p style="font-size: 1.5rem; color: #64748B; margin-top:0.5rem;">Piloto: {{ repartidor_actual.nombre_completo }}</p>
+      </div>
+      <div>
+        <a href="{% url 'core:repartidor_logout' %}" style="background: #EF4444; color: white; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-size: 1.3rem; font-weight: 600;">Terminar Turno</a>
+      </div>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+      <div style="background:{% if 'error' in message.tags %}#EF4444{% else %}#10B981{% endif %}; color:white; padding:1.5rem 2rem; border-radius:12px; margin-bottom:2rem; font-size:1.4rem; font-weight:600; display:flex; align-items:center; gap:1rem;">
+        <span class="material-symbols-outlined">{% if 'error' in message.tags %}error{% else %}check_circle{% endif %}</span>
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- SECCIÓN: MIS PEDIDOS ASIGNADOS -->
+    <h2 style="font-size: 2rem; font-weight: 800; color: #0F172A; margin: 3rem 0 1.5rem 0;">📦 Mis Asignaciones</h2>
+    {% if mis_pedidos %}
+      <div style="display:grid; gap: 2rem;">
+        {% for pedido in mis_pedidos %}
+        <div style="background:white; border-radius:16px; padding:2rem; border:2px solid #0284C7; box-shadow:0 4px 10px rgba(2, 132, 199, 0.1); display:grid; grid-template-columns: 1fr 300px; gap:2rem;">
+          
+          <div>
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+              <span style="background:#0284C7; color:white; padding:0.4rem 1rem; border-radius:20px; font-size:1.2rem; font-weight:700;">PROPIO #{pedido.id|truncatechars:10}</span>
+              <span style="color:#64748B; font-size:1.3rem;"><span class="material-symbols-outlined" style="font-size:1.6rem; vertical-align:middle;">schedule</span> Creado: {{ pedido.creado_el|date:"d/m/Y h:i A" }}</span>
+            </div>
+            
+            <h3 style="font-size: 1.8rem; font-weight: 700; color: #0F172A; margin-bottom: 0.5rem;"><span class="material-symbols-outlined" style="vertical-align:text-bottom; color:#64748B;">person</span> {{ pedido.usuario.nombre_completo|default:pedido.usuario.nombre_usuario }}</h3>
+            <p style="font-size: 1.5rem; color: #475569; margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;">
+              <span class="material-symbols-outlined" style="color:#EF4444;">location_on</span> {{ pedido.direccion_envio }}
+            </p>
+
+            <div style="display:flex; gap: 2rem; margin-top:2rem;">
+              <div>
+                <span style="display:block; font-size:1.2rem; color:#94A3B8; font-weight:600; text-transform:uppercase;">Contacto</span>
+                <span style="font-size:1.6rem; font-weight:700; color:#0F172A;">{{ pedido.telefono|default:'No Registrado' }}</span>
+              </div>
+              <div>
+                <span style="display:block; font-size:1.2rem; color:#94A3B8; font-weight:600; text-transform:uppercase;">Total a Cobrar</span>
+                <span style="font-size:1.6rem; font-weight:900; color:#10B981;">{{ pedido.monto_total|currency_cop }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#F8FAFC; padding:2rem; border-radius:12px; border:1px solid #E2E8F0;">
+            <h4 style="font-size: 1.4rem; font-weight: 700; color: #0F172A; margin-bottom: 1.5rem;">Validar Entrega</h4>
+            <form method="POST" action="{% url 'core:entregar_pedido' pedido.id %}">
+              {% csrf_token %}
+              <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:1.2rem; color:#64748B; font-weight:600; margin-bottom:0.5rem;">Cédula del Cliente *</label>
+                <input type="text" name="cedula_cliente" required placeholder="Ej: 1020304050" 
+                       style="width: 100%; padding: 1rem; border-radius:8px; border:1px solid #CBD5E1; font-size:1.4rem; outline:none;"
+                       {% if pedido_error_id == pedido.id|stringformat:"s" %}style="border-color:#EF4444;"{% endif %}>
+                {% if pedido_error_id == pedido.id|stringformat:"s" %}
+                <span style="color:#EF4444; font-size:1.2rem; font-weight:600; margin-top:0.4rem; display:block;">{{ error_modal }}</span>
+                {% endif %}
+              </div>
+              <div style="margin-bottom: 1.5rem;">
+                <label style="display:block; font-size:1.2rem; color:#64748B; font-weight:600; margin-bottom:0.5rem;">Notas (Opcional)</label>
+                <input type="text" name="notas" placeholder="Entregado a portería..." 
+                       style="width: 100%; padding: 1rem; border-radius:8px; border:1px solid #CBD5E1; font-size:1.3rem; outline:none;">
+              </div>
+              <button type="submit" style="width: 100%; padding: 1.2rem; background: #10B981; color: white; border: none; border-radius: 8px; font-size: 1.4rem; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: background 0.2s;">
+                <span class="material-symbols-outlined">check_circle</span> Registrar Entrega
+              </button>
+            </form>
+          </div>
+          
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px dashed #CBD5E1;">
+        <p style="font-size: 1.5rem; color: #64748B; margin: 0;">No te has asignado ningún pedido todavía.</p>
+      </div>
+    {% endif %}
+
+    <!-- SECCIÓN: PEDIDOS DISPONIBLES EN CENTRAL -->
+    <h2 style="font-size: 2rem; font-weight: 800; color: #0F172A; margin: 5rem 0 1.5rem 0;">📡 En Central (Sin Asignar)</h2>
+    {% if pedidos_sin_asignar %}
+      <div style="display:grid; gap: 1.5rem;">
+        {% for pedido in pedidos_sin_asignar %}
+        <div style="background:white; border-radius:12px; padding:1.5rem 2rem; border:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+          
+          <div>
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.5rem;">
+              <span style="font-size:1.2rem; color:#64748B; font-weight:700;">#{pedido.id|truncatechars:8}</span>
+              <span style="color:#0F172A; font-weight:700; font-size:1.4rem;">{{ pedido.usuario.nombre_completo|default:pedido.usuario.nombre_usuario }}</span>
+            </div>
+            <p style="font-size: 1.3rem; color: #475569; margin: 0;">
+              <span class="material-symbols-outlined" style="font-size:1.4rem; vertical-align:middle;">location_on</span> {{ pedido.direccion_envio|truncatechars:40 }}
+            </p>
+          </div>
+
+          <div style="text-align:right; display:flex; align-items:center; gap:3rem;">
+            <div>
+              <span style="display:block; font-size:1rem; color:#94A3B8; text-transform:uppercase;">A cobrar</span>
+              <span style="font-size:1.5rem; font-weight:900; color:#10B981;">{{ pedido.monto_total|currency_cop }}</span>
+            </div>
+            
+            <a href="{% url 'core:asignar_pedido' pedido.id %}" style="background:#0F172A; color:white; padding:1.2rem 2rem; border-radius:8px; text-decoration:none; font-size:1.3rem; font-weight:700; display:inline-block; transition: background 0.2s;">
+              Asignarme este pedido
+            </a>
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+    <div style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px; border: 1px dashed #CBD5E1;">
+      <span class="material-symbols-outlined" style="font-size: 4rem; color: #94A3B8; margin-bottom: 1rem;">sentiment_satisfied</span>
+      <p style="font-size: 1.5rem; color: #64748B;">No hay pedidos nuevos en central listos para reparto.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

@@ -132,6 +132,12 @@
         {% endif %}
         <span>Dashboard</span>
       </a>
+      {% if request.session.rol_usuario == 'repartidor' %}
+      <a href="{% url 'core:repartidor' %}" class="nav-action" style="color:#0284C7;">
+        <span class="material-symbols-outlined" style="font-size:2.4rem;">local_shipping</span>
+        <span>Rutas</span>
+      </a>
+      {% endif %}
       {% else %}
       <a href="{% url 'users:login' %}" class="nav-action">
         <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -268,6 +274,7 @@
     async function updateCartDrawer() {
         try {
             const response = await fetch('/api/cart-status/');
+            if (!response.ok) { console.error('Cart API error:', response.status); return; }
             const data = await response.json();
             
             const container = document.getElementById('cart-drawer-items');
@@ -275,43 +282,112 @@
             const subtotalEl = document.getElementById('cd-subtotal');
             const counter = document.getElementById('cart-counter');
 
+            // Limpiar sin innerHTML
+            while (container.firstChild) container.removeChild(container.firstChild);
+
             if (data.total_articulos > 0) {
-                let html = '';
                 data.articulos.forEach(item => {
-                    html += `
-                        <div class="cd-item">
-                            <img src="${item.producto.url_imagen || '/static/img/placeholder.png'}" class="cd-item-img">
-                            <div class="cd-item-info">
-                                <span class="cd-item-name">${item.producto.nombre}</span>
-                                <span class="cd-item-price">${item.cantidad} x ${item.precio_formateado}</span>
-                            </div>
-                        </div>
-                    `;
+                    const div = document.createElement('div');
+                    div.className = 'cd-item';
+
+                    const img = document.createElement('img');
+                    img.src = item.producto.url_imagen || '/static/img/placeholder.png';
+                    img.className = 'cd-item-img';
+                    img.alt = item.producto.nombre;
+
+                    const info = document.createElement('div');
+                    info.className = 'cd-item-info';
+
+                    const name = document.createElement('span');
+                    name.className = 'cd-item-name';
+                    name.textContent = item.producto.nombre;
+
+                    const price = document.createElement('span');
+                    price.className = 'cd-item-price';
+                    price.textContent = item.cantidad + ' x ' + item.precio_formateado;
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">delete</span>';
+                    deleteBtn.style.cssText = 'background:none; border:none; color:#EF4444; cursor:pointer; margin-left: auto;';
+                    deleteBtn.onclick = () => removeFromCartAjax(item.producto.id);
+
+                    const rightPanel = document.createElement('div');
+                    rightPanel.style.cssText = 'display:flex; flex-direction:column; justify-content:space-between; margin-left:auto; text-align:right; align-items:flex-end;';
+                    rightPanel.appendChild(deleteBtn);
+                    rightPanel.appendChild(price);
+
+                    info.appendChild(name);
+                    div.appendChild(img);
+                    div.appendChild(info);
+                    div.appendChild(rightPanel);
+                    container.appendChild(div);
                 });
-                container.innerHTML = html;
-                footer.style.display = 'block';
-                subtotalEl.textContent = data.total_formateado;
-                counter.textContent = data.total_articulos;
+
+                if (footer) footer.style.display = 'block';
+                if (subtotalEl) subtotalEl.textContent = data.total_formateado;
+                if (counter) counter.textContent = data.total_articulos;
             } else {
-                container.innerHTML = `
-                  <div style="text-align:center; padding-top:10rem; color:#94A3B8;">
-                    <span class="material-symbols-outlined" style="font-size:5rem; margin-bottom:1rem;">shopping_basket</span>
-                    <p>Tu bolsa está vacía.</p>
-                  </div>
-                `;
-                footer.style.display = 'none';
-                counter.textContent = '0';
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.cssText = 'text-align:center; padding-top:10rem; color:#94A3B8;';
+
+                const icon = document.createElement('span');
+                icon.className = 'material-symbols-outlined';
+                icon.style.cssText = 'font-size:5rem; display:block; margin-bottom:1rem;';
+                icon.textContent = 'shopping_basket';
+
+                const msg = document.createElement('p');
+                msg.textContent = 'Tu bolsa está vacía.';
+
+                emptyDiv.appendChild(icon);
+                emptyDiv.appendChild(msg);
+                container.appendChild(emptyDiv);
+
+                if (footer) footer.style.display = 'none';
+                if (counter) counter.textContent = '0';
             }
-        } catch (e) { console.error("Error al cargar carrito drawer", e); }
+        } catch (e) { console.error('Error al cargar carrito drawer:', e); }
     }
 
     async function addToCartAjax(productId) {
         try {
+            // Obtener CSRF token de la cookie
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
             const response = await fetch(`/carrito/agregar/${productId}/`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                }
             });
+
+            if (!response.ok) {
+                console.error('Error al agregar al carrito:', response.status);
+                return;
+            }
+
             const data = await response.json();
             if (data.ok) {
+                if (window.toast) {
+                    window.toast.exito("Producto agregado al carrito");
+                }
+                // Actualizar contador inmediatamente
+                const counter = document.getElementById('cart-counter');
+                if (counter) counter.textContent = data.total_items;
+
+                // Abrir drawer o actualizarlo
                 if (!document.body.classList.contains('cart-open')) {
                     toggleCartDrawer();
                 } else {
@@ -319,7 +395,46 @@
                 }
             }
         } catch (error) {
-            console.error("Error adding to cart:", error);
+            console.error('Error adding to cart:', error);
+        }
+    }
+
+    async function removeFromCartAjax(productId) {
+        try {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            const response = await fetch(`/carrito/eliminar/${productId}/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                }
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (data.ok) {
+                if (window.toast) {
+                    window.toast.aviso("Producto removido del carrito");
+                }
+                // Update overall UI
+                updateCartDrawer();
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
   </script>

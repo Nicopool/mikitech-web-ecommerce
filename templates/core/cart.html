@@ -339,11 +339,13 @@ function actualizarCantidad(idProducto, accion) {
     var fila = document.getElementById('row-' + idProducto);
     if (fila) {
       fila.classList.add('cart-row-removing');
+      if (window.toast) window.toast.aviso('Producto eliminado del carrito');
       setTimeout(function() { fila.remove(); verificarVacio(); }, 300);
     }
   } else {
     qtyEl.textContent = cantActual;
     recalcularTotales();
+    if (window.toast) window.toast.info('Cantidad actualizada');
   }
   
   /* Actualizar contador del header */
@@ -371,6 +373,7 @@ function eliminarItem(idProducto) {
   var fila = document.getElementById('row-' + idProducto);
   if (fila) {
     fila.classList.add('cart-row-removing');
+    if (window.toast) window.toast.error('Producto removido completamente');
     setTimeout(function() {
       fila.remove();
       recalcularTotales();

@@ -80,7 +80,11 @@ class Pedido(models.Model):
     monto_total = models.DecimalField(max_digits=10, decimal_places=2, db_column='total_amount')
     direccion_envio = models.TextField(db_column='shipping_address')
     cedula = models.CharField(max_length=50, null=True, blank=True, db_column='document_id')
+    telefono = models.CharField(max_length=30, null=True, blank=True, db_column='phone')
+    repartidor = models.ForeignKey('users.Perfil', on_delete=models.SET_NULL, null=True, blank=True, related_name='entregas', db_column='driver_id')
     notas = models.TextField(null=True, blank=True, db_column='notes')
+    entregado_el = models.DateTimeField(null=True, blank=True, db_column='delivered_at')
+    notas_repartidor = models.TextField(null=True, blank=True, db_column='delivery_notes')
     creado_el = models.DateTimeField(auto_now_add=True, db_column='created_at')
     actualizado_el = models.DateTimeField(auto_now=True, db_column='updated_at')
 

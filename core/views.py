@@ -259,21 +259,25 @@ def ver_carrito(petición):
 def cart_status_api(petición):
     """Retorna el estado del carrito en formato JSON para el Mini-Carrito Drawer."""
     from django.http import JsonResponse
-    from products.templatetags.product_filters import currency_cop
+    from core.templatetags.miki_filters import currency_cop
     
     datos = _obtener_datos_carrito(petición)
     
     articulos_json = []
     for item in datos['articulos']:
+        prod = item['producto']
+        precio_final = prod.precio_con_descuento if prod.descuento_activo else prod.precio
         articulos_json.append({
             'producto': {
-                'id': str(item['producto'].id),
-                'nombre': item['producto'].nombre,
-                'url_imagen': item['producto'].url_imagen_principal,
+                'id': str(prod.id),
+                'nombre': prod.nombre,
+                'url_imagen': prod.url_imagen_principal,
+                'descuento_activo': prod.descuento_activo,
+                'porcentaje': prod.descuento_porcentaje if prod.descuento_activo else 0,
             },
             'cantidad': item['cantidad'],
             'total_linea': float(item['total_linea']),
-            'precio_formateado': currency_cop(item['producto'].precio),
+            'precio_formateado': currency_cop(precio_final),
         })
     
     return JsonResponse({
@@ -304,6 +308,7 @@ def carrito(petición):
         estado = 'pending' if metodo == 'efectivo' else 'processing'
         
         cedula_id = petición.POST.get('cedula', '')
+        telefono = petición.POST.get('telefono', '')
         
         pedido = Pedido.objects.create(
             usuario_id=usuario_id,
@@ -311,6 +316,7 @@ def carrito(petición):
             monto_total=datos['total'],
             direccion_envio=direccion,
             cedula=cedula_id,
+            telefono=telefono,
             notas=f"Método de pago: {metodo.upper()}"
         )
         

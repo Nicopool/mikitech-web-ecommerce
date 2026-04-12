@@ -78,15 +78,46 @@
       <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="prod-desc">Descripción completa</label>
       <textarea id="prod-desc" name="descripcion" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem; resize:vertical;" rows="5" placeholder="Descripción detallada del producto...">{{ producto.descripcion|default:'' }}</textarea>
     </div>
+    <!-- SECCIÓN DE DESCUENTO -->
+    <div style="margin-bottom: 30px; padding: 24px; border-radius: 16px; background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%); border: 1px solid #FDE68A;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+        <span style="font-size:2rem;">%</span>
+        <div>
+          <h3 style="font-size:1.6rem; font-weight:800; color:#92400E; margin:0;">Configurar Descuento</h3>
+          <p style="font-size:1.2rem; color:#B45309; margin:0;">Este descuento aparecerá en el catálogo y en la página del producto</p>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; align-items:end;">
+        <div>
+          <label style="display:block; font-size:1.3rem; font-weight:700; color:#92400E; margin-bottom:8px;">% de Descuento</label>
+          <input type="number" id="desc-porcentaje" name="descuento_porcentaje" min="0" max="90" step="1"
+            value="{{ producto.descuento_porcentaje|default:'0' }}"
+            style="width:100%; padding:12px; border-radius:8px; border:2px solid #FDE68A; outline:none; font-size:1.8rem; font-weight:800; color:#92400E; background:white; text-align:center;"
+            oninput="actualizarPrevistaDescuento()">
+        </div>
+        <div>
+          <label style="display:block; font-size:1.3rem; font-weight:700; color:#92400E; margin-bottom:8px;">Válido hasta (opcional)</label>
+          <input type="datetime-local" name="descuento_expira_el" id="desc-expira"
+            value="{% if producto.descuento_expira_el %}{{ producto.descuento_expira_el|date:'Y-m-d' }}T{{ producto.descuento_expira_el|date:'H:i' }}{% endif %}"
+            style="width:100%; padding:12px; border-radius:8px; border:2px solid #FDE68A; outline:none; font-size:1.3rem; background:white;">
+        </div>
+        <div id="preview-descuento" style="background:white; border-radius:12px; padding:16px; border:1px solid #FDE68A; display:none;">
+          <div style="font-size:1.1rem; color:#94A3B8; text-decoration:line-through;" id="prev-original">$0</div>
+          <div style="font-size:2rem; font-weight:900; color:#EF4444;" id="prev-desc-badge">-0%</div>
+          <div style="font-size:2.2rem; font-weight:900; color:#15803D;" id="prev-final">$0</div>
+        </div>
+      </div>
+    </div>
+
     <div style="display:flex; gap: 25px; margin-bottom: 30px;">
       <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
         <input type="checkbox" name="es_destacado" id="prod-featured" {% if producto and producto.es_destacado %}checked{% endif %}>
-        <span style="font-size:1.3rem; font-weight:600; color:var(--ds-text);">⭐ Destacado</span>
+        <span style="font-size:1.3rem; font-weight:600; color:var(--ds-text);">Destacado</span>
       </label>
       {% if producto %}
       <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
         <input type="checkbox" name="esta_activo" id="prod-active" {% if producto.esta_activo %}checked{% endif %}>
-        <span style="font-size:1.3rem; font-weight:600; color:var(--ds-text);">✅ Activo</span>
+        <span style="font-size:1.3rem; font-weight:600; color:var(--ds-text);">Activo</span>
       </label>
       {% endif %}
     </div>
@@ -98,4 +129,34 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function formatColombianPrice(n) {
+    const num = parseInt(n);
+    return '$' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function actualizarPrevistaDescuento() {
+    const pct = parseInt(document.getElementById('desc-porcentaje').value) || 0;
+    const precioInput = parseFloat(document.getElementById('prod-price').value) || 0;
+    const preview = document.getElementById('preview-descuento');
+
+    if (pct > 0 && precioInput > 0) {
+        const finalPrice = Math.round(precioInput * (1 - pct / 100));
+        preview.style.display = 'block';
+        document.getElementById('prev-original').textContent = formatColombianPrice(precioInput);
+        document.getElementById('prev-desc-badge').textContent = '-' + pct + '%';
+        document.getElementById('prev-final').textContent = formatColombianPrice(finalPrice) + ' Hoy';
+    } else {
+        preview.style.display = 'none';
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarPrevistaDescuento();
+    var priceInput = document.getElementById('prod-price');
+    if (priceInput) priceInput.addEventListener('input', actualizarPrevistaDescuento);
+});
+</script>
 {% endblock %}
