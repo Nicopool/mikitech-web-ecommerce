@@ -14,14 +14,16 @@
 </head>
 <body class="g-admin-layout">
 <aside class="g-sidebar">
-  <div class="g-sidebar-header">
-    <div class="g-sidebar-icon">📊</div>
-    <div class="g-sidebar-logo">Panel Admin</div>
+  <div class="g-sidebar-header" style="flex-direction: column; height: auto; padding: 4rem 1rem;">
+    <img src="{% static 'img/logo.png' %}" alt="MIKITECH Logo" style="width: 90%; max-width: 18rem; margin-bottom: 2rem; filter: drop-shadow(0 0 10px rgba(29, 78, 216, 0.2));">
+    <div class="g-sidebar-logo" style="font-family: 'Oswald', sans-serif; font-size: 2.6rem; margin-bottom: 0.5rem; letter-spacing: 3px; color: #FFFFFF; font-weight: 700;">MIKITECH</div>
+    <div style="font-size: 1.2rem; color: #94A3B8; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">Admin Nicolas</div>
   </div>
   
   <nav class="g-nav">
     <a href="{% url 'admin_dashboard' %}" class="g-nav-item"><span class="material-symbols-outlined">home</span> Dashboard</a>
     <a href="{% url 'admin_products' %}" class="g-nav-item"><span class="material-symbols-outlined">inventory_2</span> Inventario</a>
+    <a href="{% url 'admin_logistics' %}" class="g-nav-item"><span class="material-symbols-outlined">local_shipping</span> Logística</a>
     <a href="{% url 'admin_users' %}" class="g-nav-item"><span class="material-symbols-outlined">group</span> Clientes</a>
     <a href="{% url 'admin_categories' %}" class="g-nav-item"><span class="material-symbols-outlined">folder</span> Categorías</a>
     <a href="{% url 'admin_reviews' %}" class="g-nav-item"><span class="material-symbols-outlined">chat</span> Reseñas</a>
@@ -29,7 +31,11 @@
   </nav>
 
   <div class="g-sidebar-footer">
-    <div class="g-s-avatar">{{ request.session.nombre_usuario|first|upper|default:"A" }}</div>
+    {% if request.session.avatar_url %}
+      <img src="{{ request.session.avatar_url }}" class="g-s-avatar" style="width:4rem; height:4rem; border-radius:50%; object-fit:cover; border:2px solid #3B82F6;" alt="Avatar">
+    {% else %}
+      <div class="g-s-avatar">{{ request.session.nombre_usuario|first|upper|default:"A" }}</div>
+    {% endif %}
     <div class="g-s-info">
       <h4>{{ request.session.nombre_usuario|default:"Administrador" }}</h4>
       <p>Gerente de Sistema</p>

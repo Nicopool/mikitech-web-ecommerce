@@ -22,8 +22,31 @@
     .nav-action { display: flex; align-items: center; gap: 0.8rem; cursor: pointer; transition: opacity 0.2s; }
     .nav-action:hover { opacity: 0.7; }
     .nav-action svg { width: 1.8rem; height: 1.8rem; fill: #111; }
-    .nav-avatar { width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover; border: 0.2rem solid #111; flex-shrink: 0; }
-    .nav-avatar-placeholder { width: 3rem; height: 3rem; border-radius: 50%; background: #111; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Jost', sans-serif; font-size: 1.2rem; font-weight: 700; flex-shrink: 0; }
+    .nav-avatar { width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; border: 0.2rem solid #1D4ED8; flex-shrink: 0; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2); }
+    .nav-avatar-placeholder { width: 4.5rem; height: 4.5rem; border-radius: 50%; background: #111; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Jost', sans-serif; font-size: 1.6rem; font-weight: 700; flex-shrink: 0; }
+    
+    /* CART DRAWER (MINI-CARRITO) */
+    .cart-drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.6); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(4px); }
+    .cart-drawer { position: fixed; top: 0; right: -45rem; width: 45rem; max-width: 100%; height: 100vh; background: #FFFFFF; z-index: 1001; display: flex; flex-direction: column; transition: right 0.5s cubic-bezier(0.8, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
+    
+    body.cart-open .cart-drawer-overlay { opacity: 1; visibility: visible; }
+    body.cart-open .cart-drawer { right: 0; }
+    
+    .cd-header { padding: 3rem; border-bottom: 1px solid #EEE; display: flex; justify-content: space-between; align-items: center; }
+    .cd-header h3 { font-family: 'Oswald', sans-serif; font-size: 2.2rem; text-transform: uppercase; letter-spacing: 1px; }
+    .cd-close { cursor: pointer; color: #111; font-size: 3rem; }
+    
+    .cd-items { flex: 1; overflow-y: auto; padding: 2rem 3rem; }
+    .cd-item { display: flex; gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid #FAF9F6; align-items: center; }
+    .cd-item-img { width: 7rem; height: 7rem; background: #F8FAFC; border-radius: 0.8rem; object-fit: contain; }
+    .cd-item-info { flex: 1; }
+    .cd-item-name { font-size: 1.4rem; font-weight: 600; color: #111; margin-bottom: 0.4rem; display: block; }
+    .cd-item-price { font-size: 1.3rem; color: #64748B; font-weight: 500; }
+    
+    .cd-footer { padding: 3rem; border-top: 1px solid #EEE; background: #F8FAFC; }
+    .cd-total { display: flex; justify-content: space-between; margin-bottom: 2.5rem; font-family: 'Oswald', sans-serif; font-size: 1.8rem; font-weight: 700; text-transform: uppercase; }
+    .cd-btn { display: block; width: 100%; padding: 1.8rem; background: #111; color: white; text-align: center; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 1.5rem; letter-spacing: 1.5px; border-radius: 0.4rem; transition: all 0.3s; }
+    .cd-btn:hover { background: #333; transform: translateY(-2px); }
     
     /* HAMBURGER */
     .hamburger { width: 3rem; height: 2rem; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; margin-left: 1rem; }
@@ -57,15 +80,47 @@
 
   <!-- NAVBAR -->
   <nav class="nav-wix">
-    <a href="{% url 'core:home' %}" class="nav-logo">
-      MIKITECH
+    <a href="{% url 'core:home' %}" class="nav-logo" style="display: flex; align-items: center; gap: 1.5rem;">
+      <img src="{% static 'img/logo.png' %}" alt="MIKITECH" style="height: 5rem; width: auto; filter: drop-shadow(0 0 8px rgba(29, 78, 216, 0.1)); transition: all 0.3s ease;" class="miki-logo-img">
+      <span style="font-family: 'Oswald', sans-serif; font-size: 2.8rem; font-weight: 700; color: #0F172A; letter-spacing: 2px;">MIKITECH</span>
     </a>
     
     <div class="nav-right">
-      <!-- Carrito -->
-      <a href="{% url 'core:checkout' %}" class="nav-action">
-        <span style="font-family: 'Jost', sans-serif; font-size:12px; letter-spacing:1px; text-transform:uppercase;">CARRITO <strong id="cart-counter" style="background:#111; color:white; border-radius:50%; min-width:18px; height:18px; padding: 0 5px; display:inline-flex; align-items:center; justify-content:center; margin-left:4px;">{{ request.session.cart|length|default:0 }}</strong></span>
+      <a href="javascript:void(0)" class="nav-action" onclick="toggleCartDrawer()">
+        <span class="material-symbols-outlined" style="font-size: 2.4rem; color: #111;">shopping_cart</span>
+        <strong id="cart-counter" style="background:#111; color:white; border-radius:50%; min-width:1.8rem; height:1.8rem; padding: 0 0.5rem; display:inline-flex; align-items:center; justify-content:center; font-size:1rem; position:relative; top:-0.8rem; left:-0.8rem;">{{ conteo_carrito }}</strong>
       </a>
+
+      <!-- Notificaciones -->
+      {% if request.session.usuario_id %}
+      <div class="nav-action nav-notif" style="position:relative; cursor:pointer;" onclick="toggleNotifDropdown()">
+        <span class="material-symbols-outlined" style="font-size:2.2rem; color:#111;">notifications</span>
+        {% if conteo_notificaciones > 0 %}
+          <span style="position:absolute; top:-5px; right:-5px; background:#DC2626; color:white; border-radius:50%; min-width:1.6rem; height:1.6rem; font-size:1rem; display:flex; align-items:center; justify-content:center; font-weight:700;">{{ conteo_notificaciones }}</span>
+        {% endif %}
+        
+        <!-- Dropdown Notificaciones -->
+        <div id="notif-dropdown" style="display:none; position:absolute; top:4rem; right:0; width:28rem; background:white; border:1px solid #EEE; box-shadow:0 10px 25px rgba(0,0,0,0.1); border-radius:8px; z-index:1000; padding:1.5rem;">
+          <h4 style="font-size:1.4rem; margin-bottom:1.5rem; border-bottom:1px solid #F1F5F9; padding-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+            Notificaciones
+            {% if conteo_notificaciones > 0 %}
+            <a href="{% url 'users:mark_notifications_read' %}" style="font-size:1.1rem; color:#2563EB; font-weight:400;">Limpiar todo</a>
+            {% endif %}
+          </h4>
+          <div style="max-height:30rem; overflow-y:auto;">
+            {% for n in ultimas_notificaciones %}
+            <div style="padding:1rem; border-bottom:1px solid #F8FAFC; {% if not n.esta_leida %}background:#F0F9FF;{% endif %} border-radius:4px; margin-bottom:0.5rem;">
+              <p style="font-size:1.2rem; line-height:1.4; color:#1E293B; margin:0;">{{ n.mensaje }}</p>
+              <small style="font-size:1rem; color:#94A3B8; display:block; margin-top:0.4rem;">{{ n.creado_el|timesince }}</small>
+            </div>
+            {% empty %}
+            <p style="text-align:center; padding:2rem; color:#94A3B8; font-size:1.3rem;">No tienes nuevos avisos.</p>
+            {% endfor %}
+          </div>
+          <a href="{% url 'users:profile' %}" style="display:block; text-align:center; padding-top:1.5rem; font-size:1.2rem; color:#64748B; border-top:1px solid #F1F5F9; margin-top:1rem;">Ver todo en mi perfil</a>
+        </div>
+      </div>
+      {% endif %}
       
       <!-- Login / Cuenta -->
       {% if request.session.usuario_id %}
@@ -112,6 +167,29 @@
     
     <div class="drawer-social">
       <!-- Íconos sociales simplificados -->
+    </div>
+  </div>
+
+  <!-- MINI-CARRITO DRAWER -->
+  <div class="cart-drawer-overlay" onclick="toggleCartDrawer()"></div>
+  <div class="cart-drawer">
+    <div class="cd-header">
+      <h3>Tu Carrito</h3>
+      <span class="material-symbols-outlined cd-close" onclick="toggleCartDrawer()">close</span>
+    </div>
+    <div class="cd-items" id="cart-drawer-items">
+      <!-- AJAX Se encarga de llenar esto -->
+      <div style="text-align:center; padding-top:10rem; color:#94A3B8;">
+        <span class="material-symbols-outlined" style="font-size:5rem; margin-bottom:1rem;">shopping_basket</span>
+        <p>Tu bolsa está vacía.</p>
+      </div>
+    </div>
+    <div class="cd-footer" id="cart-drawer-footer" style="display:none;">
+      <div class="cd-total">
+        <span>Subtotal</span>
+        <span id="cd-subtotal">$0.00</span>
+      </div>
+      <a href="{% url 'core:cart' %}" class="cd-btn">Ir al Pago</a>
     </div>
   </div>
 
@@ -164,6 +242,87 @@
     });
   </script>
   {% endif %}
+
+  <script>
+    function toggleNotifDropdown() {
+      const dropdown = document.getElementById('notif-dropdown');
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      
+      // Cerrar al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        const notifArea = document.querySelector('.nav-notif');
+        if (notifArea && !notifArea.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      }, { once: true });
+    }
+
+    /* LÓGICA MINI-CARRITO AJAX */
+    function toggleCartDrawer() {
+      document.body.classList.toggle('cart-open');
+      if (document.body.classList.contains('cart-open')) {
+        updateCartDrawer();
+      }
+    }
+
+    async function updateCartDrawer() {
+        try {
+            const response = await fetch('/api/cart-status/');
+            const data = await response.json();
+            
+            const container = document.getElementById('cart-drawer-items');
+            const footer = document.getElementById('cart-drawer-footer');
+            const subtotalEl = document.getElementById('cd-subtotal');
+            const counter = document.getElementById('cart-counter');
+
+            if (data.total_articulos > 0) {
+                let html = '';
+                data.articulos.forEach(item => {
+                    html += `
+                        <div class="cd-item">
+                            <img src="${item.producto.url_imagen || '/static/img/placeholder.png'}" class="cd-item-img">
+                            <div class="cd-item-info">
+                                <span class="cd-item-name">${item.producto.nombre}</span>
+                                <span class="cd-item-price">${item.cantidad} x ${item.precio_formateado}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                footer.style.display = 'block';
+                subtotalEl.textContent = data.total_formateado;
+                counter.textContent = data.total_articulos;
+            } else {
+                container.innerHTML = `
+                  <div style="text-align:center; padding-top:10rem; color:#94A3B8;">
+                    <span class="material-symbols-outlined" style="font-size:5rem; margin-bottom:1rem;">shopping_basket</span>
+                    <p>Tu bolsa está vacía.</p>
+                  </div>
+                `;
+                footer.style.display = 'none';
+                counter.textContent = '0';
+            }
+        } catch (e) { console.error("Error al cargar carrito drawer", e); }
+    }
+
+    async function addToCartAjax(productId) {
+        try {
+            const response = await fetch(`/carrito/agregar/${productId}/`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+            if (data.ok) {
+                if (!document.body.classList.contains('cart-open')) {
+                    toggleCartDrawer();
+                } else {
+                    updateCartDrawer();
+                }
+            }
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+        }
+    }
+  </script>
 
   {% block extra_js %}{% endblock %}
 

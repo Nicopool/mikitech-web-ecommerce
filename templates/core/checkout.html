@@ -201,6 +201,13 @@
 
         <div class="ck-row">
           <div class="ck-group">
+            <label class="ck-label">Número de Cédula</label>
+            <input type="text" name="cedula" class="ck-input" required placeholder="1234567890">
+          </div>
+        </div>
+
+        <div class="ck-row">
+          <div class="ck-group">
             <label class="ck-label">Ciudad</label>
             <input type="text" id="city-input" name="city" class="ck-input" required placeholder="Bogotá" value="Bogotá">
           </div>
@@ -218,8 +225,8 @@
         document.addEventListener('DOMContentLoaded', () => {
           let map = L.map('checkout-map').setView([4.6097, -74.0817], 13);
           
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors, &copy; CARTO'
           }).addTo(map);
 
           let marker = L.marker([4.6097, -74.0817], {draggable: true}).addTo(map);
@@ -239,8 +246,11 @@
             }
 
             debounceTimer = setTimeout(() => {
-              // Búsqueda orientada a Colombia
-              fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=co&addressdetails=1&limit=5`)
+              // Parsear notación colombiana (ej. Calle 67 # 67 - 92 -> Calle 67 67 92)
+              const cleanQuery = query.replace(/[#-]/g, ' ').replace(/\s+/g, ' ').trim();
+
+              // Búsqueda orientada a Colombia con email para evitar bloqueo de API
+              fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery)}&countrycodes=co&addressdetails=1&limit=5&email=soporte@mikitech.com`)
                 .then(res => res.json())
                 .then(data => {
                   suggestionsBox.innerHTML = '';
@@ -260,7 +270,10 @@
                       li.onmouseout = () => li.style.background = 'transparent';
                       
                       li.onclick = () => {
-                        input.value = place.address.road || place.name || place.display_name.split(',')[0];
+                        // Preservar la notación exacta (ej. #68b) que escribió el usuario y añadir el resto (barrio, ciudad)
+                        let fullParts = place.display_name.split(',');
+                        fullParts.shift(); // Remover solo el nombre genérico de la calle
+                        input.value = query.trim() + ',' + fullParts.join(',');
                         suggestionsBox.style.display = 'none';
                         
                         const lat = parseFloat(place.lat);
@@ -297,11 +310,11 @@
           // 2. REVERSE GEOCODING (Al arrastrar el marcador)
           marker.on('dragend', function() {
             let pos = marker.getLatLng();
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}&addressdetails=1`)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}&addressdetails=1&email=soporte@mikitech.com`)
               .then(res => res.json())
               .then(data => {
                 if(data.display_name) {
-                  input.value = data.address.road || data.name || data.display_name.split(',')[0];
+                  input.value = data.display_name;
                   
                   const city = data.address.city || data.address.town || data.address.county || 'Bogotá';
                   document.getElementById('city-input').value = city;
@@ -334,17 +347,17 @@
         <div id="card-details">
           <div class="ck-group">
             <label class="ck-label">Número de Tarjeta</label>
-            <input type="text" class="ck-input" placeholder="0000 0000 0000 0000" style="font-family: monospace; font-size:18px; letter-spacing: 2px;">
+            <input type="text" id="cc-number" class="ck-input" placeholder="0000 0000 0000 0000" style="font-family: monospace; font-size:18px; letter-spacing: 2px;">
           </div>
 
           <div class="ck-row">
             <div class="ck-group">
               <label class="ck-label">Expiración</label>
-              <input type="text" class="ck-input" placeholder="MM/YY" style="font-family: monospace; font-size:16px;">
+              <input type="text" id="cc-exp" class="ck-input" placeholder="MM/YY" style="font-family: monospace; font-size:16px;">
             </div>
             <div class="ck-group">
               <label class="ck-label">CVV</label>
-              <input type="text" class="ck-input" placeholder="***" style="font-family: monospace; font-size:16px;">
+              <input type="password" id="cc-cvv" class="ck-input" placeholder="***" style="font-family: monospace; font-size:16px;" maxlength="4">
             </div>
           </div>
         </div>
@@ -431,20 +444,59 @@
           <span class="ck-grand-val">{{ total|currency_cop }}</span>
         </div>
 
-        <button type="button" class="ck-btn" onclick="confirmarCompra(this)">
+        <button type="button" class="ck-btn" onclick="confirmarCompra(this, event)">
           Pagar y Confirmar Pedido
         </button>
 
         <script>
-          function confirmarCompra(btn) {
+          function confirmarCompra(btn, event) {
+            event.preventDefault();
+            const form = btn.closest('form');
+            const paymentMethod = document.getElementById('payment_method').value;
+            
+            // 1. Verificar HTML5 Validation (Datos y Ubicación)
+            if (!form.checkValidity()) {
+              form.reportValidity();
+              return;
+            }
+
+            // 2. Verificar datos de tarjeta si aplica
+            if (paymentMethod === 'tarjeta') {
+              const ccNum = document.getElementById('cc-number').value.trim();
+              const ccExp = document.getElementById('cc-exp').value.trim();
+              const ccCvv = document.getElementById('cc-cvv').value.trim();
+              
+              if (!ccNum || !ccExp || !ccCvv) {
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Faltan datos',
+                  text: 'Por favor completa todos los campos numéricos de tu tarjeta de crédito o débito antes de continuar.',
+                  confirmButtonColor: '#111'
+                });
+                return;
+              }
+            }
+
+            // 3. Textos dinámicos de confirmación
+            let swalTitle, swalText, swalConfirmBtn;
+            if (paymentMethod === 'tarjeta') {
+              swalTitle = '¿Procesar Cargo a Tarjeta?';
+              swalText = 'Se realizará un cargo seguro a tu tarjeta para procesar tu pedido. Verifica que la dirección de domicilio en el mapa sea la correcta.';
+              swalConfirmBtn = 'Sí, Pagar y Autorizar';
+            } else {
+              swalTitle = '¿Confirmar Contra Entrega?';
+              swalText = 'Has seleccionado pago en efectivo contra entrega. Pagarás al recibir el paquete en tu dirección especificada.';
+              swalConfirmBtn = 'Sí, Confirmar Pedido';
+            }
+
             Swal.fire({
-              title: '¿Confirmar Pedido?',
-              text: "Estás a punto de finalizar tu compra.",
+              title: swalTitle,
+              text: swalText,
               icon: 'question',
               showCancelButton: true,
-              confirmButtonColor: '#1d4ed8',
+              confirmButtonColor: '#111',
               cancelButtonColor: '#e2e8f0',
-              confirmButtonText: 'Sí, Pagar',
+              confirmButtonText: swalConfirmBtn,
               cancelButtonText: '<span style="color:#0f172a">Revisar de nuevo</span>',
               background: '#ffffff',
               customClass: {
@@ -455,9 +507,9 @@
               }
             }).then((result) => {
               if (result.isConfirmed) {
-                btn.textContent = 'PROCESANDO PAGO...';
+                btn.textContent = 'PROCESANDO...';
                 btn.disabled = true;
-                btn.closest('form').submit();
+                form.submit();
               }
             });
           }

@@ -42,11 +42,27 @@
           </td>
           <td style="font-size:1.2rem; color:var(--ds-text-soft);">{{ r.creado_el|date:"d M Y" }}</td>
           <td class="u-text-center">
-            <form method="POST" action="{% url 'admin_review_delete' r.id %}" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar permanentemente esta reseña?')">
-              {% csrf_token %}
-              <button type="submit" class="g-action-btn g-action-disable" style="background:#FEE2E2; color:#DC2626; border:1px solid #FECACA;">
+            <div style="display:flex; gap:0.5rem; justify-content:center;">
+              <!-- Notificar -->
+              <button type="button" class="g-action-btn" style="background:#DBEAFE; color:#2563EB; border:1px solid #BFDBFE;" onclick="notificarResena('{{ r.id }}', '{{ r.usuario.nombre_usuario }}')">
+                ✉️ Notificar
+              </button>
+              
+              <!-- Eliminar -->
+              <button type="button" class="g-action-btn" style="background:#FEE2E2; color:#DC2626; border:1px solid #FECACA;" onclick="confirmarEliminarResena('{{ r.id }}')">
                 🗑️ Eliminar
               </button>
+              
+              <!-- Formulario oculto para eliminación -->
+              <form id="form-eliminar-{{ r.id }}" method="POST" action="{% url 'admin_review_delete' r.id %}" style="display:none;">
+                {% csrf_token %}
+              </form>
+            </div>
+            
+            <!-- Formulario oculto para notificación -->
+            <form id="form-notificar-{{ r.id }}" method="POST" action="{% url 'admin_review_notify' r.id %}" style="display:none;">
+              {% csrf_token %}
+              <input type="hidden" name="mensaje" id="mensaje-{{ r.id }}">
             </form>
           </td>
         </tr>
@@ -60,5 +76,52 @@
       </tbody>
     </table>
   </div>
-</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function notificarResena(id, usuario) {
+    Swal.fire({
+      title: '✉️ Enviar Notificación',
+      text: `Escribe el motivo de la notificación para ${usuario}:`,
+      input: 'textarea',
+      inputPlaceholder: 'Tu reseña contiene lenguaje inadecuado. Por favor edítala...',
+      inputAttributes: {
+        'aria-label': 'Motivo de la notificación'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Enviar Notificación',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2563EB',
+      showLoaderOnConfirm: true,
+      inputValidator: (value) => {
+        if (!value) {
+          return '¡Debes escribir un mensaje!'
+        }
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById(`mensaje-${id}`).value = result.value;
+        document.getElementById(`form-notificar-${id}`).submit();
+      }
+    });
+  }
+
+  function confirmarEliminarResena(id) {
+    Swal.fire({
+      title: '🗑️ ¿Eliminar esta reseña?',
+      text: "Esta acción es irreversible y el comentario desaparecerá del hardware asociado.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#DC2626',
+      cancelButtonColor: '#64748B',
+      confirmButtonText: 'Sí, eliminar permanentemente',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById(`form-eliminar-${id}`).submit();
+      }
+    });
+  }
+</script>
 {% endblock %}

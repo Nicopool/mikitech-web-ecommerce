@@ -173,18 +173,20 @@
 
             <tbody>
               {% for order in orders %}
-              <tr data-date="{{ order.3|date:'Y-m-d' }}" style="transition:background 0.2s;">
-                <td class="fw-bold" style="color:var(--ds-primary); padding:1.5rem 2rem;">#{{ order.0|stringformat:"s"|upper|truncatechars:12 }}</td>
+              <tr data-date="{{ order.creado_el|date:'Y-m-d' }}" style="transition:background 0.2s;">
+                <td class="fw-bold" style="color:var(--ds-primary); padding:1.5rem 2rem;">#{{ order.id|stringformat:"s"|upper|truncatechars:12 }}</td>
                 <td>
-                  {% if order.1 == 'delivered' %}<span class="badge-status status-completed" style="font-size:1rem;">Entregado</span>
-                  {% elif order.1 == 'shipped' %}<span class="badge-status status-shipped" style="font-size:1rem;">En camino</span>
-                  {% else %}<span class="badge-status status-pending" style="font-size:1rem;">Pendiente</span>{% endif %}
+                  {% if order.estado == 'delivered' %}<span class="badge-status status-completed" style="font-size:1rem;">Entregado</span>
+                  {% elif order.estado == 'shipped' %}<span class="badge-status status-shipped" style="font-size:1rem;">En camino</span>
+                  {% elif order.estado == 'pending' or order.estado == 'processing' %}<span class="badge-status status-pending" style="font-size:1rem;">Pendiente</span>
+                  {% else %}<span class="badge-status status-pending">{{ order.estado }}</span>{% endif %}
                 </td>
 
-                <td style="color:var(--ds-text-soft); font-weight:500;">{{ order.3|date:"d M Y" }}</td>
-                <td class="fw-bold" style="font-size:1.5rem;">{{ order.2|currency_cop }}</td>
+                <td style="color:var(--ds-text-soft); font-weight:500;">{{ order.creado_el|date:"d M Y" }}</td>
+                <td class="fw-bold" style="font-size:1.5rem;">{{ order.monto_total|currency_cop }}</td>
                 <td class="text-center">
-                  <button class="btn btn-sm" style="background:var(--ds-primary-light); color:var(--ds-primary); font-weight:700; border:1px solid var(--ds-primary); border-radius:0.8rem; padding:0.6rem 1.2rem; display:inline-flex; align-items:center; gap:0.5rem;" onclick="generateInvoice('{{ order.0 }}', '{{ order.3|date:'d/m/Y' }}', '{{ order.2 }}')">
+                  <button class="btn btn-sm" style="background:var(--ds-primary-light); color:var(--ds-primary); font-weight:700; border:1px solid var(--ds-primary); border-radius:0.8rem; padding:0.6rem 1.2rem; display:inline-flex; align-items:center; gap:0.5rem;" 
+                    onclick="generateInvoice('{{ order.id|stringformat:'s' }}', '{{ order.creado_el|date:'d/m/Y' }}', '{{ order.monto_total }}', [ {% for det in order.detalles.all %}{ 'nombre': '{{ det.producto.nombre|escapejs }}', 'cantidad': {{ det.cantidad }}, 'precio': {{ det.precio_unitario }} }{% if not forloop.last %},{% endif %}{% endfor %} ])">
                     <span style="font-size:1.4rem;">📄</span> Factura PDF
                   </button>
                 </td>
@@ -245,7 +247,6 @@ function confirmarSalida(e, url) {
       window.location.href = url;
     }
   });
-}, 3000);
 }
 
 var profileData = {
@@ -266,7 +267,7 @@ var reportsData = {
   },
   pedidos: {
     title: 'Historial de Pedidos',
-    note: {% if orders_count > 0 %}'Has realizado {{ orders_count }} pedidos. (Los detalles completos de la orden requieren integración de facturación).'{% else %}'No se han registrado pedidos aún.'{% endif %}
+    note: {% if conteo_pedidos > 0 %}'Has realizado {{ conteo_pedidos }} pedidos.'{% else %}'No se han registrado pedidos aún.'{% endif %}
   }
 };
 
@@ -370,10 +371,18 @@ function generatePDF(type) {
   }
 
   preview.scrollIntoView({ behavior: 'smooth' });
-  showToast('✅ Reporte listo — usa el botón Imprimir para guardarlo como PDF');
+  generateReport();
 }
 
-function generateInvoice(orderId, orderDate, orderTotal) {
+function showInvoiceToast(msg) {
+  showToast(msg.replace('✅', '[OK]'));
+}
+
+function generateReport() {
+  showInvoiceToast('[OK] Reporte listo — usa el botón Imprimir para guardarlo como PDF');
+}
+
+function generateInvoice(orderId, orderDate, orderTotal, items) {
   var preview = document.getElementById('pdf-preview');
   var content = document.getElementById('pdf-content');
   var titleEl = document.getElementById('pdf-preview-title');
@@ -381,97 +390,114 @@ function generateInvoice(orderId, orderDate, orderTotal) {
   preview.style.display = 'block';
   if (titleEl) titleEl.textContent = 'Factura Comercial - Pedido #' + orderId.substring(0,8).toUpperCase();
   
-  // Limpiar valor para cálculos  
-  var amount = parseFloat(orderTotal);
+  const amount = parseFloat(orderTotal.toString().replace(',', '.'));
   var tax = amount * 0.19;
   var subtotal = amount - tax;
 
   var fmt = new Intl.NumberFormat('es-CO');
 
+  // Construir filas de la tabla - ESTILO CRUD
+  let itemsHtml = '';
+  items.forEach((item, index) => {
+    let itemTotal = item.cantidad * item.precio;
+    itemsHtml += `
+      <tr style="border-bottom:1px solid #E2E8F0;">
+        <td style="padding:15px 12px; font-size:12px; color:#444;">${(index+1).toString().padStart(2, '0')}</td>
+        <td style="padding:15px 12px; font-size:12px; color:#444; font-weight:600;">${item.nombre}</td>
+        <td style="padding:15px 12px; font-size:12px; color:#444; text-align:center;">$${fmt.format(item.precio)}</td>
+        <td style="padding:15px 12px; font-size:12px; color:#444; text-align:center; font-weight:700;">${item.cantidad}</td>
+        <td style="padding:15px 12px; font-size:12px; color:#111; text-align:right; font-weight:700;">$${fmt.format(itemTotal)}</td>
+      </tr>
+    `;
+  });
+
   var html = `
-    <div style="font-family:'Inter', sans-serif; background:white; color:#333; padding: 20px;">
-      <!-- CABECERA DE FACTURA -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 50px; position:relative;">
-        <div>
-          <h1 style="font-size: 48px; font-weight:800; letter-spacing: 2px; color: #111; margin:0;">INVOICE</h1>
-        </div>
-        <div style="text-align:right;">
-          <div style="background:#EF4444; width:150px; height:150px; border-radius:0 0 0 100px; position:absolute; top:-20px; right:-20px; z-index:0;"></div>
-          <div style="background:#1D4ED8; width:100px; height:100px; border-radius:50%; position:absolute; top:40px; right:60px; z-index:0;"></div>
-          <div style="position:relative; z-index:1; margin-top: 20px;">
-            <div style="color:#666; font-size:12px; margin-bottom: 4px;">Invoice No: ${orderId.substring(0,8).toUpperCase()}</div>
-            <div style="color:#666; font-size:12px; margin-bottom: 4px;">Account: {{ profile.id|stringformat:"s"|slice:":8" }}</div>
-            <div style="color:#666; font-size:12px;">Date: ${orderDate}</div>
+    <div style="font-family:'Jost', sans-serif; background:white; color:#333; padding: 30px; border: 1px solid #EEE;">
+      <!-- CABECERA: LOGO A LA DERECHA -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 40px; border-bottom: 2px solid #1D4ED8; padding-bottom: 20px;">
+        <div style="flex:1;">
+          <h1 style="font-size: 36px; font-weight:800; color: #111; margin:0; font-family:'Oswald', sans-serif;">FACTURA</h1>
+          <div style="margin-top:20px;">
+            <div style="font-size:13px; color:#666; font-weight:600;">FECHA DE EMISIÓN:</div>
+            <div style="font-size:16px; font-weight:700; color:#111;">${orderDate}</div>
+            <div style="font-size:13px; color:#666; font-weight:600; margin-top:10px;">REFERENCIA:</div>
+            <div style="font-size:16px; font-weight:700; color:#1D4ED8;">#${orderId.substring(0,8).toUpperCase()}</div>
           </div>
+        </div>
+        
+        <div style="text-align: right;">
+          <img src="/static/img/logo.png" alt="MIKITECH" style="height: 60px; margin-bottom: 10px;">
+          <div style="font-family: 'Oswald', sans-serif; font-size: 24px; font-weight: 700; color: #1D4ED8; letter-spacing: 2px;">MIKITECH</div>
+          <div style="font-size: 12px; color: #64748B;">Hardware de Alto Rendimiento</div>
         </div>
       </div>
 
       <!-- DATOS DEL CLIENTE -->
-      <div style="margin-bottom: 40px;">
-        <div style="font-size: 14px; font-weight:600; color:#111; margin-bottom:8px;">Invoice To:</div>
-        <div style="font-size: 16px; font-weight:700; color:#111; margin-bottom:5px;">${profileData.name}</div>
-        <div style="font-size: 12px; color:#666; margin-bottom:3px;">${profileData.username}</div>
-        <div style="font-size: 12px; color:#666;">{% if profile.phone %}{{ profile.phone }}{% else %}+57 000 0000{% endif %}</div>
+      <div style="display:flex; justify-content:space-between; margin-bottom: 40px;">
+        <div style="flex:1;">
+          <div style="font-size: 13px; font-weight:700; color:#666; margin-bottom:8px; text-transform:uppercase;">Facturar a:</div>
+          <div style="font-size: 18px; font-weight:800; color:#1D4ED8; margin-bottom:5px;">${profileData.name}</div>
+          <div style="font-size: 13px; color:#444; font-weight:500;">Email: {{ profile.email }}</div>
+          <div style="font-size: 13px; color:#444; font-weight:500;">Tel: {% if profile.phone %}{{ profile.phone }}{% else %}+57 300 000 0000{% endif %}</div>
+        </div>
+        <div style="text-align:right; flex:1;">
+           <div style="font-size: 13px; font-weight:700; color:#666; margin-bottom:8px; text-transform:uppercase;">Información adicional:</div>
+           <div style="font-size: 13px; color:#444; font-weight:500;">Puntos ganados: ${Math.floor(amount/100000)} pts</div>
+           <div style="font-size: 13px; color:#16A34A; font-weight:700;">Envío: GRATIS</div>
+        </div>
       </div>
 
-      <!-- TABLA DE ITEMS -->
-      <table style="width:100%; border-collapse: collapse; margin-bottom: 40px;">
+      <!-- TABLA DE ITEMS (ESTILO CRUD) -->
+      <table style="width:100%; border-collapse: collapse; margin-bottom: 30px;">
         <thead>
-          <tr style="background:#222; color:white;">
-            <th style="padding:12px; text-align:left; font-size:12px; font-weight:600;">SL</th>
-            <th style="padding:12px; text-align:left; font-size:12px; font-weight:600;">Item Description</th>
-            <th style="padding:12px; text-align:center; font-size:12px; font-weight:600;">Price</th>
-            <th style="padding:12px; text-align:center; font-size:12px; font-weight:600;">QTY</th>
-            <th style="padding:12px; text-align:right; font-size:12px; font-weight:600;">Total</th>
+          <tr style="background:#1D4ED8; color:white;">
+            <th style="padding:15px 12px; text-align:left; font-size:12px; font-weight:700; border-radius:8px 0 0 0;">ITEM</th>
+            <th style="padding:15px 12px; text-align:left; font-size:12px; font-weight:700;">DESCRIPCIÓN</th>
+            <th style="padding:15px 12px; text-align:center; font-size:12px; font-weight:700;">UNITARIO</th>
+            <th style="padding:15px 12px; text-align:center; font-size:12px; font-weight:700;">CANT.</th>
+            <th style="padding:15px 12px; text-align:right; font-size:12px; font-weight:700; border-radius:0 8px 0 0;">SUBTOTAL</th>
           </tr>
         </thead>
         <tbody>
-          <!-- En una app real iteraríamos los order_items, aquí simulamos el total del pedido -->
-          <tr style="border-bottom:1px solid #E2E8F0;">
-            <td style="padding:15px 12px; font-size:12px; color:#444;">01</td>
-            <td style="padding:15px 12px; font-size:12px; color:#444;">Componentes y Productos Tecnológicos MIKITECH (Pedido #${orderId.substring(0,8).toUpperCase()})</td>
-            <td style="padding:15px 12px; font-size:12px; color:#444; text-align:center;">$${fmt.format(amount)}</td>
-            <td style="padding:15px 12px; font-size:12px; color:#444; text-align:center;">01</td>
-            <td style="padding:15px 12px; font-size:12px; color:#444; text-align:right;">$${fmt.format(amount)}</td>
-          </tr>
+          ${itemsHtml}
         </tbody>
       </table>
 
       <!-- TOTALES -->
-      <div style="display:flex; justify-content:flex-end; margin-bottom: 50px;">
-        <div style="width: 250px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:12px; color:#444;">
-            <span style="font-weight:600;">Sub Total:</span>
-            <span>$${fmt.format(subtotal)} COP</span>
+      <div style="display:flex; justify-content:flex-end;">
+        <div style="width: 280px; background:#F8FAFC; padding:20px; border-radius:12px; border:1px solid #E2E8F0;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px; color:#64748B; font-weight:500;">
+            <span>Subtotal:</span>
+            <span>$${fmt.format(subtotal)}</span>
           </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:12px; color:#444;">
-            <span style="font-weight:600;">Tax (19% IVA):</span>
-            <span>$${fmt.format(tax)} COP</span>
+          <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px; color:#64748B; font-weight:500;">
+            <span>IVA (19%):</span>
+            <span>$${fmt.format(tax)}</span>
           </div>
-          <div style="display:flex; justify-content:space-between; border-top:2px solid #222; border-bottom:2px solid #222; padding:10px 0; font-size:14px; font-weight:700; color:#111;">
-            <span>Total:</span>
-            <span>$${fmt.format(amount)} COP</span>
+          <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px; color:#16A34A; font-weight:600;">
+            <span>Envío:</span>
+            <span>GRATIS</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-top:2px dashed #CBD5E1; margin-top:15px; padding-top:15px; font-size:18px; font-weight:800; color:#111;">
+            <span>TOTAL:</span>
+            <span style="color:#1D4ED8;">$${fmt.format(amount)} COP</span>
           </div>
         </div>
       </div>
 
       <!-- FOOTER -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-        <div>
-          <div style="font-size:24px; font-weight:800; color:#1D4ED8; margin-bottom:15px;">MIKITECH</div>
-          <div style="font-size:11px; font-weight:600; color:#666; margin-bottom:3px;">Payment Info:</div>
-          <div style="font-size:11px; color:#666; margin-bottom:3px;">Account no: 0048 5928 2901</div>
-          <div style="font-size:11px; color:#666;">Bank name: MIKITECH Finance</div>
+      <div style="margin-top: 50px; text-align:center; border-top:1px solid #EEE; padding-top:20px;">
+        <div style="font-size:11px; color:#94A3B8; font-weight:500;">
+          Gracias por tu compra en MIKITECH. Garantía de 1 año en componentes.<br>
+          Esta es una representación electrónica de tu compra.
         </div>
-        <div style="background:#F8FAFC; padding:15px; border-radius:8px; display:flex; gap:20px;">
-          <div style="font-size:10px; color:#666; display:flex; align-items:center; gap:5px;"><span style="background:#222; color:white; width:16px; height:16px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:8px;">🔗</span> mikitech.com</div>
-          <div style="font-size:10px; color:#666; display:flex; align-items:center; gap:5px;"><span style="background:#222; color:white; width:16px; height:16px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:8px;">📞</span> +57 300 000 0000</div>
-        </div>
+        <div style="margin-top:10px; font-size:12px; font-weight:700; color:#1D4ED8;">mikitech.com | Hardware de Alto Rendimiento</div>
       </div>
     </div>
   `;
   content.innerHTML = html;
   preview.scrollIntoView({ behavior: 'smooth' });
+  showInvoiceToast('[OK] Factura PDF generada — usa el botón Imprimir para guardarla');
 }
 
 function printReport() {
@@ -511,7 +537,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
-</script>
 </script>
 </body>
 </html>

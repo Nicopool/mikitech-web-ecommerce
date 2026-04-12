@@ -147,7 +147,13 @@
                       <strong>Pedido #{{ pedido.id|stringformat:"s"|slice:":8" }}</strong>
                       <span style="color:var(--ds-primary); font-weight:700;">{{ pedido.monto_total|currency_cop }}</span>
                     </div>
-                    <div style="font-size:1.1rem; color:#64748B;">{{ pedido.creado_el|date:"d M Y" }} - {{ pedido.estado }}</div>
+                    <div style="font-size:1.1rem; color:#64748B; display:flex; justify-content:space-between; align-items:center;">
+                      <span>{{ pedido.creado_el|date:"d M Y" }} - 
+                      <span class="badge {% if pedido.estado == 'delivered' %}bg-success{% elif pedido.estado == 'shipped' %}bg-info{% elif pedido.estado == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %}" style="font-size:0.9rem;">
+                        {% if pedido.estado == 'delivered' %}Entregado{% elif pedido.estado == 'shipped' %}Enviado{% elif pedido.estado == 'pending' or pedido.estado == 'processing' %}Pendiente{% else %}Cancelado{% endif %}
+                      </span></span>
+                      <a href="/admin-panel/logistica/factura/{{ pedido.id }}/" target="_blank" style="text-decoration:none; color:var(--ds-primary); font-weight:700; border:1px solid var(--ds-primary); padding:2px 6px; border-radius:4px; font-size:0.9rem;">📄 Factura</a>
+                    </div>
                     <div style="font-size:1rem; margin-top:4px;">
                       {% for detalle in pedido.detalles.all %}
                         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">⚙️ {{ detalle.cantidad }}x {{ detalle.producto.nombre }}</div>

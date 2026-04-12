@@ -30,8 +30,11 @@
 {% block content %}
 <div class="auth-wrapper">
   <div class="auth-box">
-    <h1 class="auth-brand">INICIAR SESIÓN</h1>
-    <p class="auth-subtitle">ACCEDE A TU ENTORNO DE COMPRA MIKITECH.</p>
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <img src="{% static 'img/logo.png' %}" alt="MIKITECH" style="height: 8rem; margin-bottom: 2rem; filter: drop-shadow(0 0 10px rgba(29, 78, 216, 0.2));">
+        <h1 class="auth-brand">INICIAR SESIÓN</h1>
+        <p class="auth-subtitle">ACCEDE A TU ENTORNO DE COMPRA MIKITECH.</p>
+    </div>
     
     {% if error %}
     <div class="alert-wix error">⚠️ {{ error }}</div>

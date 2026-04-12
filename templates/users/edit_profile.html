@@ -231,29 +231,6 @@
             </select>
           </div>
 
-          <div class="form-section-title">Seguridad de la Cuenta</div>
-          <div class="form-group">
-            <label for="new_password">Nueva Contraseña</label>
-            <input type="password" id="password" name="nueva_clave" class="form-control" placeholder="Dejar en blanco para no cambiar">
-            <span class="hint">Mínimo 8 caracteres, incluyendo mayúsculas, números y símbolos.</span>
-          </div>
-
-          <div class="password-feedback" id="password-meter" style="text-align:left; margin-bottom: 25px; display:none;">
-            <div style="height:4px; background:#EEE; border-radius:2px; margin-bottom:8px; overflow:hidden;">
-              <div id="meter-bar" style="width:0; height:100%; transition:all 0.3s;"></div>
-            </div>
-            <ul id="password-check-list" style="list-style:none; padding:0; margin:0; font-size:11px; color:#666;">
-              <li data-check="length">○ Mínimo 8 caracteres</li>
-              <li data-check="upper">○ Una letra mayúscula</li>
-              <li data-check="number">○ Un número</li>
-              <li data-check="special">○ Un carácter especial (@$!%*?&)</li>
-            </ul>
-          </div>
-
-          <div class="form-group">
-            <label for="confirm_password">Confirmar Nueva Contraseña</label>
-            <input type="password" id="password2" name="confirmar_nueva_clave" class="form-control" placeholder="••••••••">
-          </div>
 
           <div class="form-actions">
             <button type="submit" class="btn-save" id="btn-save">✅ Guardar Cambios</button>
@@ -287,67 +264,12 @@ document.getElementById('profile-form').addEventListener('submit', function(e) {
     return;
   }
 
-  // Validar contraseña solo si se escribió algo
-  const pass = document.getElementById('password');
-  const pass2 = document.getElementById('password2');
-  if (pass.value) {
-    const val = pass.value;
-    const isSecure = val.length >= 8 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[@$!%*?&]/.test(val);
-    
-    if (!isSecure) {
-      e.preventDefault();
-      showToast('⚠️ La nueva contraseña no es segura', true);
-      return;
-    }
-
-    if (pass.value !== pass2.value) {
-      e.preventDefault();
-      showToast('⚠️ Las contraseñas no coinciden', true);
-      return;
-    }
-  }
 
   var btn = document.getElementById('btn-save');
   btn.textContent = 'Guardando...';
   btn.style.opacity = '0.7';
 });
 
-// Password Meter Logic
-const pass = document.getElementById('password');
-const meter = document.getElementById('password-meter');
-const bar = document.getElementById('meter-bar');
-const list = document.getElementById('password-check-list');
-
-pass.addEventListener('focus', () => meter.style.display = 'block');
-pass.addEventListener('input', function() {
-  const val = this.value;
-  if(!val) { meter.style.display = 'none'; return; }
-  meter.style.display = 'block';
-  
-  let score = 0;
-  const checks = {
-    length: val.length >= 8,
-    upper: /[A-Z]/.test(val),
-    number: /[0-9]/.test(val),
-    special: /[@$!%*?&]/.test(val)
-  };
-
-  Object.keys(checks).forEach(c => {
-    const li = list.querySelector(`[data-check="${c}"]`);
-    if(checks[c]) {
-      li.style.color = '#10B981';
-      li.innerHTML = '● ' + li.textContent.substring(2);
-      score++;
-    } else {
-      li.style.color = '#666';
-      li.innerHTML = '○ ' + li.textContent.substring(2);
-    }
-  });
-
-  const colors = ['#EF4444', '#F59E0B', '#3B82F6', '#10B981'];
-  bar.style.width = (score / 4 * 100) + '%';
-  bar.style.background = colors[score-1] || '#EEE';
-});
 
 document.getElementById('avatar-file').addEventListener('change', function() {
   var file = this.files[0];

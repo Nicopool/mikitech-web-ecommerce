@@ -12,6 +12,7 @@ urlpatterns = [
     
     # Carrito (vista de revisión pública, sin login)
     path('carrito/', views.ver_carrito, name='cart'),
+    path('api/cart-status/', views.cart_status_api, name='cart_status_api'),
     path('carrito/agregar/<str:id_producto>/', views.agregar_al_carrito, name='add_to_cart'),
     path('carrito/eliminar/<str:id_producto>/', views.eliminar_del_carrito, name='remove_from_cart'),
     path('carrito/actualizar/<str:id_producto>/', views.actualizar_carrito, name='update_cart'),

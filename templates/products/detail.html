@@ -5,246 +5,247 @@
 {% block extra_head %}
 <style>
   :root {
-    font-size: 10px;
+    --accent: #2563EB;
     --navy: #0F172A;
-    --blue: #3B82F6;
     --slate: #64748B;
-    --emerald: #10B981;
     --border: #E2E8F0;
-    --bg-soft: #F8FAFC;
+    --bg-premium: #F8FAFC;
   }
   
-  .section { padding: 6rem 0; }
-  .container { max-width: 120rem; margin: 0 auto; padding: 0 3rem; }
-  
-  .product-detail { display: grid; grid-template-columns: 1.2fr 1fr; gap: 6rem; margin-bottom: 8rem; }
-  @media (max-width: 80rem) { .product-detail { grid-template-columns: 1fr; } }
-  
-  /* GALLERY */
-  .p-gallery { position: sticky; top: 12rem; align-self: start; }
-  .p-main-img { background: #FFFFFF; border: 1px solid var(--border); border-radius: 1.6rem; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  .p-main-img img { width: 100%; height: 100%; object-fit: contain; padding: 4rem; }
-  
-  .p-thumbs { display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
-  .p-thumb { width: 8rem; height: 8rem; border-radius: 0.8rem; border: 2px solid transparent; overflow: hidden; cursor: pointer; transition: all 0.2s; background: white; }
-  .p-thumb.active { border-color: var(--blue); }
-  .p-thumb img { width: 100%; height: 100%; object-fit: cover; }
-  
-  /* INFO */
-  .p-brand { font-size: 1.2rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; }
-  .p-title { font-family: 'Oswald', sans-serif; font-size: 3.6rem; font-weight: 700; color: var(--navy); line-height: 1.1; margin-bottom: 2rem; text-transform: uppercase; }
-  
-  .p-stats { display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem; font-size: 1.4rem; color: var(--slate); }
-  .p-stars { display: flex; color: #F59E0B; }
-  
-  .p-desc { font-size: 1.6rem; line-height: 1.8; color: #475569; margin-bottom: 4rem; }
-  
-  .p-price-card { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 1.2rem; padding: 3rem; margin-bottom: 4rem; display: flex; justify-content: space-between; align-items: center; }
-  .p-price { font-family: 'Oswald', sans-serif; font-size: 3.2rem; font-weight: 700; color: var(--navy); }
-  .stock-tag { font-size: 1.2rem; font-weight: 700; padding: 0.6rem 1.4rem; border-radius: 0.4rem; text-transform: uppercase; }
-  .stock-tag.in { background: #DCFCE7; color: #166534; }
-  .stock-tag.low { background: #FEF3C7; color: #92400E; }
-  .stock-tag.out { background: #FEE2E2; color: #991B1B; }
-  
-  .p-actions { display: flex; gap: 1.5rem; margin-bottom: 5rem; }
-  .btn-p { height: 5.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; border-radius: 0.6rem; font-family: 'Jost', sans-serif; font-size: 1.4rem; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s; border: none; flex: 1; text-decoration: none; }
-  .btn-cart { background: var(--navy); color: white; }
-  .btn-cart:hover { background: var(--blue); }
-  .btn-fav { width: 5.5rem; flex: 0 0 5.5rem; background: transparent; border: 1px solid var(--border); color: var(--navy); }
-  .btn-fav:hover { border-color: #EF4444; color: #EF4444; }
-  .btn-fav.active { background: #FEE2E2; border-color: #EF4444; color: #EF4444; }
+  .detail-section { padding: 8rem 0; background: #FFFFFF; }
+  .detail-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 8rem; align-items: start; }
+  @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; gap: 4rem; } }
 
-  /* SPECS */
-  .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-  .spec-row { display: flex; justify-content: space-between; padding: 1.5rem 2rem; background: white; border: 1px solid var(--border); border-radius: 0.8rem; }
-  .spec-k { font-size: 1.2rem; color: var(--slate); font-weight: 500; }
-  .spec-v { font-size: 1.2rem; font-weight: 700; color: var(--navy); }
+  /* GALLERY SIDE */
+  .gallery-container { position: sticky; top: 12rem; }
+  .main-image-box { 
+    background: #FFF; 
+    border: 1px solid var(--border); 
+    border-radius: 2.4rem; 
+    aspect-ratio: 1/1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+    transition: all 0.5s ease;
+  }
+  .main-image-box img { width: 85%; height: 85%; object-fit: contain; transition: transform 0.5s ease; }
+  .main-image-box:hover img { transform: scale(1.05); }
+
+  .thumb-strip { display: flex; gap: 1.5rem; margin-top: 2rem; overflow-x: auto; padding-bottom: 1rem; }
+  .thumb-strip::-webkit-scrollbar { height: 4px; }
+  .thumb-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .thumb-item { 
+    flex: 0 0 9rem; 
+    height: 9rem; 
+    border-radius: 1.2rem; 
+    border: 2px solid transparent; 
+    cursor: pointer; 
+    background: #FFF; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .thumb-item.active { border-color: var(--accent); border-width: 2px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
+  .thumb-item img { width: 70%; height: 70%; object-fit: contain; }
+
+  /* INFO SIDE */
+  .p-header { margin-bottom: 3rem; }
+  .p-tag { font-size: 1.2rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.2rem; margin-bottom: 1rem; display: block; }
+  .p-name { font-family: 'Oswald', sans-serif; font-size: 4.8rem; line-height: 1.1; color: var(--navy); text-transform: uppercase; margin-bottom: 1.5rem; }
+  
+  .p-rating { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; color: var(--slate); font-size: 1.4rem; }
+  .stars-row { display: flex; color: #F59E0B; }
+  
+  .p-price-block { margin: 4rem 0; }
+  .price-main { font-family: 'Oswald', sans-serif; font-size: 4rem; font-weight: 700; color: var(--navy); }
+  .price-label { font-size: 1.2rem; color: var(--slate); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+
+  .stock-status { display: inline-flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1.6rem; border-radius: 10rem; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2rem; }
+  .stock-in { background: #DCFCE7; color: #15803D; }
+  .stock-low { background: #FEF3C7; color: #B45309; }
+  .stock-out { background: #FEE2E2; color: #B91C1C; }
+
+  .actions-row { display: flex; gap: 2rem; margin-top: 4rem; }
+  .btn-premium { height: 6.4rem; border-radius: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 1.2rem; font-family: 'Jost', sans-serif; font-size: 1.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: none; cursor: pointer; }
+  
+  .btn-add-cart { flex: 1; background: var(--navy); color: #FFF; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2); }
+  .btn-add-cart:hover { background: #1E293B; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(15, 23, 42, 0.3); }
+  .btn-add-cart:active { transform: translateY(-1px); }
+  
+  .btn-favourite { width: 6.4rem; background: #FFF; border: 1px solid var(--border); color: var(--navy); }
+  .btn-favourite:hover { border-color: #F87171; color: #F87171; background: #FEF2F2; }
+  .btn-favourite.active { background: #FEE2E2; border-color: #EF4444; color: #EF4444; }
+
+  /* SPECS TAB */
+  .specs-container { margin-top: 6rem; border-top: 1px solid var(--border); padding-top: 6rem; }
+  .specs-title { font-family: 'Oswald', sans-serif; font-size: 2.8rem; text-transform: uppercase; margin-bottom: 3rem; }
+  .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  @media (max-width: 600px) { .specs-grid { grid-template-columns: 1fr; } }
+  .spec-card { background: var(--bg-premium); padding: 2rem; border-radius: 1.2rem; border: 1px solid rgba(0,0,0,0.02); }
+  .spec-label { font-size: 1.1rem; color: var(--slate); text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 0.5rem; }
+  .spec-value { font-size: 1.5rem; font-weight: 600; color: var(--navy); }
 
   /* REVIEWS */
-  .rev-card { background: white; border: 1px solid var(--border); border-radius: 1.2rem; padding: 3rem; margin-bottom: 2rem; }
-  .rev-header { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
-  .rev-user { display: flex; align-items: center; gap: 1.5rem; }
-  .rev-avatar { width: 4.5rem; height: 4.5rem; border-radius: 50%; background: #F1F5F9; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.6rem; color: var(--blue); }
-  .rev-name { font-size: 1.5rem; font-weight: 700; color: var(--navy); text-decoration: none; }
-  .rev-content { font-size: 1.5rem; line-height: 1.7; color: #475569; }
+  .reviews-section { margin-top: 8rem; padding-top: 8rem; border-top: 1px solid var(--border); }
+  .review-bubble { background: #FFF; border: 1px solid var(--border); border-radius: 2rem; padding: 3rem; margin-bottom: 3rem; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+  .rev-user-box { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+  .rev-photo { width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover; background: var(--bg-premium); border: 2px solid #FFF; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  .rev-name-link { font-size: 1.6rem; font-weight: 700; color: var(--navy); text-decoration: none; }
+  .rev-body { font-size: 1.5rem; line-height: 1.8; color: #475569; }
 
-  /* FORM */
-  .rev-form { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 1.6rem; padding: 4rem; margin-top: 5rem; }
-  .form-control { width: 100%; padding: 1.5rem; border: 1px solid var(--border); border-radius: 0.8rem; font-family: 'Jost', sans-serif; font-size: 1.4rem; margin-top: 0.8rem; }
-  
-  .material-symbols-outlined { font-size: 2rem; vertical-align: middle; }
+  .write-review-btn { background: var(--bg-premium); color: var(--navy); border: 1px solid var(--border); width: auto; padding: 0 4rem; margin-top: 2rem; }
+
+  .material-symbols-outlined { font-size: 2.2rem; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="section">
+<div class="detail-section">
   <div class="container">
-    <div class="product-detail">
-
-      <!-- GALLERY -->
-      <div class="p-gallery">
-        <div class="p-main-img" id="gallery-main">
-          {% if producto.url_imagen_principal %}
-            <img src="{{ producto.url_imagen_principal }}" alt="{{ producto.nombre }}" id="main-img">
-          {% else %}
-            <span class="material-symbols-outlined" style="font-size: 12rem; color: #CBD5E1;">inventory_2</span>
-          {% endif %}
-        </div>
-        {% if producto.imagenes.all %}
-        <div class="p-thumbs">
-          {% for img in producto.imagenes.all %}
-          <div class="p-thumb {% if forloop.first %}active{% endif %}" onclick="switchMainImg(this, '{{ img.url_imagen }}')">
-            <img src="{{ img.url_imagen }}" alt="{{ producto.nombre }}">
-          </div>
-          {% endfor %}
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- PRODUCT INFO -->
-      <div class="p-info">
-        <div class="p-brand">{{ producto.marca|default:"MIKITECH" }} — {{ producto.categoria.nombre }}</div>
-        <h1 class="p-title">{{ producto.nombre }}</h1>
-
-        <div class="p-stats">
-          <div class="p-stars">
-            {% for i in "12345" %}
-              <span class="material-symbols-outlined" style="font-size:1.8rem; {% if forloop.counter <= producto.calificacion_promedio %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
-            {% endfor %}
-          </div>
-          <span>({{ producto.conteo_reseñas }} Reseñas)</span>
-          <span>|</span>
-          <span style="display:flex; align-items:center; gap:0.5rem;"><span class="material-symbols-outlined">thumb_up</span> {{ producto.conteo_votos }}</span>
-        </div>
-
-        <p class="p-desc">{{ producto.descripcion }}</p>
-
-        <div class="p-price-card">
-          <div>
-            <div style="font-size:1.2rem; color:var(--slate); margin-bottom:0.5rem; text-transform:uppercase; font-weight:700;">Precio Premium</div>
-            <div class="p-price">{{ producto.precio|currency_cop }}</div>
-          </div>
-          <div>
-            {% if producto.existencias == 0 %}
-              <div class="stock-tag out">Agotado</div>
-            {% elif producto.existencias <= 5 %}
-              <div class="stock-tag low">Últimas {{ producto.existencias }} unidades</div>
+    <div class="detail-grid">
+      
+      <!-- LEFT: GALLERY -->
+      <div class="gallery-side">
+        <div class="gallery-container">
+          <div class="main-image-box" id="gallery-main">
+            {% if producto.url_imagen_principal %}
+              <img src="{{ producto.url_imagen_principal }}" alt="{{ producto.nombre }}" id="main-product-img">
             {% else %}
-              <div class="stock-tag in">En Existencia</div>
+              <span class="material-symbols-outlined" style="font-size: 15rem; color: #CBD5E1;">inventory_2</span>
             {% endif %}
           </div>
+          
+          {% if producto.imagenes.all %}
+          <div class="thumb-strip">
+            <div class="thumb-item active" onclick="updatePreview(this, '{{ producto.url_imagen_principal }}')">
+              <img src="{{ producto.url_imagen_principal }}">
+            </div>
+            {% for extra in producto.imagenes.all %}
+            <div class="thumb-item" onclick="updatePreview(this, '{{ extra.url_imagen }}')">
+              <img src="{{ extra.url_imagen }}">
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- RIGHT: PRODUCT INFO -->
+      <div class="info-side">
+        <div class="p-header">
+          <span class="p-tag">{{ producto.categoria.nombre|default:"High Performance" }} — Premium Tech</span>
+          <h1 class="p-name">{{ producto.nombre }}</h1>
+          
+          <div class="p-rating">
+            <div class="stars-row">
+              {% for i in "12345" %}
+                <span class="material-symbols-outlined" style="font-size:1.8rem; {% if forloop.counter <= producto.calificacion_promedio %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
+              {% endfor %}
+            </div>
+            <span>({{ producto.conteo_reseñas }} Reseñas confirmadas)</span>
+            <span style="display:flex; align-items:center; gap:0.5rem; margin-left:1rem; color:var(--accent); font-weight:700;">
+              <span class="material-symbols-outlined">verified</span> Certificado
+            </span>
+          </div>
         </div>
 
-        <div class="p-actions">
-          <a href="{% url 'core:add_to_cart' producto.id %}" class="btn-p btn-cart">
-            <span class="material-symbols-outlined">shopping_cart</span> Añadir al Carrito
-          </a>
-          <button class="btn-p btn-fav {% if es_favorito %}active{% endif %}" id="fav-btn" data-product-id="{{ producto.id }}">
+        {% if producto.existencias == 0 %}
+          <div class="stock-status stock-out">Agotado Temporalmente</div>
+        {% elif producto.existencias <= 5 %}
+          <div class="stock-status stock-low">¡Últimas {{ producto.existencias }} unidades!</div>
+        {% else %}
+          <div class="stock-status stock-in">Disponible para envío inmediato</div>
+        {% endif %}
+
+        <div style="font-size: 1.6rem; color: #475569; line-height: 1.8; margin-bottom: 4rem;">
+          {{ producto.descripcion }}
+        </div>
+
+        <div class="p-price-block">
+          <div class="price-label">Precio Exclusivo MIKITECH</div>
+          <div class="price-main">{{ producto.precio|currency_cop }}</div>
+          <div style="font-size:1.1rem; color:var(--slate); margin-top:0.5rem;">IVA del 19% incluido • Garantía oficial de 1 año</div>
+        </div>
+
+        <div class="actions-row">
+          <button class="btn-premium btn-add-cart" onclick="addToCartAjax('{{ producto.id }}')">
+            <span class="material-symbols-outlined">shopping_cart</span>
+            Añadir al Carrito
+          </button>
+          
+          <button class="btn-premium btn-favourite {% if es_favorito %}active{% endif %}" id="fav-trigger" data-id="{{ producto.id }}">
             <span class="material-symbols-outlined" style="{% if es_favorito %}font-variation-settings: 'FILL' 1;{% endif %}">favorite</span>
           </button>
         </div>
 
-        <!-- SPECS -->
         {% if producto.especificaciones %}
-        <div style="margin-top: 4rem;">
-          <h2 style="font-family:'Oswald', sans-serif; font-size:2rem; text-transform:uppercase; margin-bottom:2rem;">Especificaciones Técnicas</h2>
-          <div class="spec-grid">
+        <div class="specs-container">
+          <h2 class="specs-title">Especificaciones Técnicas</h2>
+          <div class="specs-grid">
             {% for key, val in producto.especificaciones.items %}
-            <div class="spec-row">
-              <span class="spec-k">{{ key|title }}</span>
-              <span class="spec-v">{{ val }}</span>
+            <div class="spec-card">
+              <span class="spec-label">{{ key|title }}</span>
+              <span class="spec-value">{{ val }}</span>
             </div>
             {% endfor %}
           </div>
         </div>
         {% endif %}
 
-        <div style="margin-top: 3rem; font-size: 1.2rem; color: var(--slate); border-top: 1px dashed var(--border); padding-top: 2rem;">
-          SKU: #{{ producto.codigo_sku|default:"N/A" }} | Modelo: {{ producto.modelo|default:"2026-X" }}
+        <div style="margin-top: 6rem; padding: 2rem; border-radius: 1.2rem; background: var(--bg-premium); font-size: 1.3rem; color: var(--slate);">
+          <div style="display:flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>SKU: <strong style="color:var(--navy);">#{{ producto.codigo_sku|default:"MIKI-2026-X" }}</strong></span>
+            <span>Marca: <strong style="color:var(--navy);">{{ producto.marca|default:"MIKITECH" }}</strong></span>
+          </div>
+          <div>Envío asegurado a todo el país. Entrega estimada en 2-4 días hábiles.</div>
         </div>
       </div>
+
     </div>
 
-    <!-- REVIEWS SECTION -->
-    <div class="reviews-section" id="resenas">
-      <h2 style="font-family:'Oswald', sans-serif; font-size:2.8rem; text-transform:uppercase; margin-bottom:3rem;">
-        Reseñas de la Comunidad <span style="color:var(--slate); font-weight:400;">({{ producto.conteo_reseñas }})</span>
-      </h2>
+    <!-- REVIEWS -->
+    <div class="reviews-section">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:4rem;">
+        <div>
+          <h2 class="specs-title" style="margin-bottom:1rem;">Reseñas de la comunidad</h2>
+          <p style="font-size:1.4rem; color:var(--slate);">Opiniones de entusiastas del rendimiento como tú.</p>
+        </div>
+        <a href="#new-review-form" class="btn-premium write-review-btn">Escribir Reseña</a>
+      </div>
 
       {% for reseña in reseñas %}
-      <div class="rev-card">
-        <div class="rev-header">
-          <div class="rev-user">
-            <div class="rev-avatar">
-              {% if reseña.usuario.url_avatar %}
-                <img src="{{ reseña.usuario.url_avatar }}" alt="{{ reseña.usuario.nombre_mostrado }}" style="width:100%; height:100%; object-fit:cover;">
-              {% else %}
-                {{ reseña.usuario.nombre_mostrado|first|upper }}
-              {% endif %}
+      <div class="review-bubble">
+        <div class="rev-user-box">
+          {% if reseña.usuario.url_avatar %}
+            <img src="{{ reseña.usuario.url_avatar }}" class="rev-photo">
+          {% else %}
+            <div class="rev-photo" style="display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--accent); background:#EFF6FF;">{{ reseña.usuario.nombre_mostrado|first|upper }}</div>
+          {% endif %}
+          <div style="flex:1;">
+            <a href="{% url 'core:public_profile' reseña.usuario.nombre_usuario %}" class="rev-name-link">{{ reseña.usuario.nombre_mostrado }}</a>
+            <div style="display:flex; align-items:center; gap:1rem; margin-top:0.3rem;">
+              <div class="stars-row">
+                {% for i in "12345" %}
+                  <span class="material-symbols-outlined" style="font-size:1.4rem; color:#F59E0B; {% if forloop.counter <= reseña.calificacion %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
+                {% endfor %}
+              </div>
+              <span style="font-size:1.1rem; color:var(--slate);">{{ reseña.creado_el|date:"d M, Y" }}</span>
             </div>
-            <div>
-              <a href="{% url 'core:public_profile' reseña.usuario.nombre_usuario %}" class="rev-name">{{ reseña.usuario.nombre_mostrado }}</a>
-              <div style="font-size:1.1rem; color:var(--slate); margin-top:0.3rem;">{{ reseña.creado_el|date:"d M, Y" }}</div>
-            </div>
-          </div>
-          <div class="p-stars">
-            {% for i in "12345" %}
-              <span class="material-symbols-outlined" style="font-size:1.6rem; {% if forloop.counter <= reseña.calificacion %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
-            {% endfor %}
           </div>
         </div>
-        <p class="rev-content">{{ reseña.comentario }}</p>
-
-        {% if request.session.usuario_id %}
-        <details style="margin-top: 1.5rem;">
-          <summary style="cursor:pointer; font-size:1.2rem; color:var(--blue); font-weight:700;">Responder</summary>
-          <form method="POST" action="{% url 'interactions:add_reply' reseña.id %}" style="margin-top: 1rem;">
-            {% csrf_token %}
-            <textarea name="content" class="form-control" placeholder="Escribe tu respuesta..." rows="2" required></textarea>
-            <button type="submit" class="btn-p btn-cart" style="height:3.5rem; margin-top:1rem; width:auto; padding:0 2rem;">Enviar</button>
-          </form>
-        </details>
-        {% endif %}
+        <p class="rev-body">{{ reseña.comentario }}</p>
+      </div>
+      {% empty %}
+      <div style="background:var(--bg-premium); padding:6rem; border-radius:3rem; text-align:center;">
+        <span class="material-symbols-outlined" style="font-size:4rem; color:var(--slate); margin-bottom:2rem;">reviews</span>
+        <p style="font-size:1.6rem; color:var(--slate);">Aún no hay reseñas. ¡Sé el primero en compartir tu experiencia!</p>
       </div>
       {% endfor %}
-
-      <!-- FORM -->
-      {% if request.session.usuario_id %}
-      <div class="rev-form">
-        <h3 style="font-family:'Oswald', sans-serif; font-size:2.2rem; margin-bottom:2.5rem; text-transform:uppercase;">Escribir una reseña</h3>
-        <form method="POST" action="{% url 'interactions:add_review' producto.id %}">
-          {% csrf_token %}
-          <div style="margin-bottom: 2rem;">
-            <label style="font-size:1.2rem; font-weight:700; text-transform:uppercase; color:var(--slate);">Calificación</label>
-            <select name="rating" class="form-control">
-              <option value="5">Excelente (5 Estrellas)</option>
-              <option value="4">Muy Bueno (4 Estrellas)</option>
-              <option value="3">Bueno (3 Estrellas)</option>
-              <option value="2">Regular (2 Estrellas)</option>
-              <option value="1">Malo (1 Estrella)</option>
-            </select>
-          </div>
-          <div style="margin-bottom: 2.5rem;">
-            <label style="font-size:1.2rem; font-weight:700; text-transform:uppercase; color:var(--slate);">Comentario</label>
-            <textarea name="comment" class="form-control" rows="4" placeholder="¿Qué te pareció este producto?" required></textarea>
-          </div>
-          <button type="submit" class="btn-p btn-cart" style="width:25rem;">Publicar Reseña</button>
-        </form>
-      </div>
-      {% endif %}
     </div>
-
-    <!-- RELATED -->
-    {% if productos_relacionados %}
-    <div style="margin-top: 10rem;">
-      <h2 style="font-family:'Oswald', sans-serif; font-size:2.8rem; text-transform:uppercase; margin-bottom:4rem;">Productos Relacionados</h2>
-      <div class="wix-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr)); gap:3rem;">
-        {% for rp in productos_relacionados %}
-          {% include 'products/_product_card.html' with product=rp %}
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
 
   </div>
 </div>
@@ -252,15 +253,16 @@
 
 {% block extra_js %}
 <script>
-  function switchMainImg(thumb, url) {
-    document.getElementById('main-img').src = url;
-    document.querySelectorAll('.p-thumb').forEach(t => t.classList.remove('active'));
+  function updatePreview(thumb, url) {
+    document.getElementById('main-product-img').src = url;
+    document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
     thumb.classList.add('active');
   }
 
-  const favBtn = document.getElementById('fav-btn');
-  if (favBtn) {
-    favBtn.addEventListener('click', function() {
+  const triggerFav = document.getElementById('fav-trigger');
+  if (triggerFav) {
+    triggerFav.addEventListener('click', function() {
+      const pId = this.dataset.id;
       fetch('{% url "interactions:toggle_favorite" producto.id %}', {
         method: 'POST',
         headers: { 'X-CSRFToken': '{{ csrf_token }}' }
@@ -268,11 +270,11 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          const icon = this.querySelector('.material-symbols-outlined');
           this.classList.toggle('active', data.is_favorite);
+          const icon = this.querySelector('.material-symbols-outlined');
           icon.style.fontVariationSettings = data.is_favorite ? "'FILL' 1" : "'FILL' 0";
         } else {
-          window.toast.aviso('Inicia sesión para esta acción');
+          window.toast.aviso('Inicia sesión para guardar favoritos');
         }
       });
     });

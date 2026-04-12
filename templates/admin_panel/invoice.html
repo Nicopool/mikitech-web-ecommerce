@@ -1,0 +1,169 @@
+{% load miki_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo_pagina }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1D4ED8;
+            --secondary: #0F172A;
+            --bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-soft: #64748B;
+            --border: #E2E8F0;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Jost', sans-serif; background: #EEE; display: flex; justify-content: center; padding: 40px 0; }
+        
+        .invoice-box {
+            width: 850px;
+            background: var(--bg);
+            padding: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            color: var(--text-main);
+            position: relative;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .invoice-box { box-shadow: none; width: 100%; border-radius: 0; padding: 30px; }
+            .no-print { display: none; }
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 50px; border-bottom: 3px solid var(--secondary); padding-bottom: 20px; }
+        .logo-area { font-family: 'Oswald', sans-serif; font-size: 2.8rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px; }
+        .logo-icon { color: var(--primary); font-size: 3.5rem; }
+        
+        .invoice-meta { text-align: right; }
+        .invoice-meta h1 { font-family: 'Oswald', sans-serif; font-size: 2.5rem; margin-bottom: 8px; color: var(--primary); }
+        .invoice-meta p { font-size: 1.4rem; color: var(--text-soft); font-weight: 500; }
+
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 50px; }
+        .detail-col h3 { font-size: 1.2rem; text-transform: uppercase; color: var(--text-soft); letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        .detail-col p { font-size: 1.5rem; line-height: 1.6; font-weight: 500; }
+        .detail-col strong { color: var(--secondary); font-weight: 700; }
+
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+        .items-table th { background: #F8FAFC; color: var(--text-soft); font-size: 1.1rem; text-transform: uppercase; font-weight: 700; text-align: left; padding: 15px 20px; border-bottom: 2px solid var(--border); }
+        .items-table td { padding: 18px 20px; border-bottom: 1px solid var(--border); font-size: 1.4rem; }
+        .items-table .td-product { font-weight: 600; color: var(--secondary); }
+        .items-table .td-qty { text-align: center; font-weight: 700; }
+        .items-table .td-price { text-align: right; font-family: monospace; font-size: 1.5rem; }
+        
+        .totals-area { display: flex; justify-content: flex-end; }
+        .totals-box { width: 300px; }
+        .total-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 1.4rem; }
+        .total-row.grand-total { border-top: 2px solid var(--secondary); margin-top: 10px; padding-top: 15px; font-size: 2rem; font-weight: 800; color: var(--primary); font-family: 'Oswald', sans-serif; }
+
+        .footer { margin-top: 60px; padding-top: 30px; border-top: 1px solid var(--border); text-align: center; color: var(--text-soft); font-size: 1.2rem; line-height: 1.6; }
+        
+        .btn-print {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-print:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <button class="btn-print no-print" onclick="window.print()">
+        <span>🖨️</span> Imprimir Factura
+    </button>
+
+    <div class="invoice-box">
+        <div class="header">
+            <div class="logo-area">
+                <span class="logo-icon">⚡</span> MIKITECH
+            </div>
+            <div class="invoice-meta">
+                <h1>FACTURA DE VENTA</h1>
+                <p>Nº: #{{ pedido.id|stringformat:"s"|upper|truncatechars:12 }}</p>
+                <p>Fecha: {{ pedido.creado_el|date:"d/m/Y" }}</p>
+                <p>Hora: {{ pedido.creado_el|date:"H:i" }}</p>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <div class="detail-col">
+                <h3>EMISOR</h3>
+                <p><strong>MIKITECH S.A.S</strong></p>
+                <p>NIT: 901.234.567-8</p>
+                <p>Carrera 15 # 78-45, Edificio Tech</p>
+                <p>Bogotá D.C., Colombia</p>
+                <p>Tel: +57 (601) 456-7890</p>
+            </div>
+            <div class="detail-col">
+                <h3>CLIENTE</h3>
+                <p><strong>{{ perfil.nombre_mostrado }}</strong></p>
+                <p>Email: {{ perfil.email|default:"No especificado" }}</p>
+                <p>Dirección: {{ pedido.direccion_envio|default:"Retiro en tienda" }}</p>
+                <p>Ciudad: {{ pedido.ciudad|default:"Bogotá" }}</p>
+                <p>Pago: {{ pedido.notas|truncatechars:30|default:"Referencia Bancaria" }}</p>
+            </div>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Descripción del Producto</th>
+                    <th class="td-qty">Cant.</th>
+                    <th class="td-price">Vr. Unitario</th>
+                    <th class="td-price">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in detalles %}
+                <tr>
+                    <td class="td-product">{{ item.producto.nombre }}</td>
+                    <td class="td-qty">{{ item.cantidad }}</td>
+                    <td class="td-price">{{ item.precio_unitario|currency_cop }}</td>
+                    <td class="td-price">{% widthratio item.precio_unitario 1 item.cantidad as item_total %}{{ item_total|currency_cop }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="totals-area">
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>{{ subtotal|currency_cop }}</span>
+                </div>
+                <div class="total-row">
+                    <span>IVA (19%):</span>
+                    <span>{{ iva_monto|currency_cop }}</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>TOTAL:</span>
+                    <span>{{ pedido.monto_total|currency_cop }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Notas Legales:</strong> Esta es una representación gráfica de una factura de venta. Favor realizar sus pagos antes de la fecha de vencimiento.</p>
+            <p>Garantía de 1 año en componentes de hardware por defectos de fábrica.</p>
+            <p style="margin-top: 15px; font-weight: 700;">¡Gracias por confiar en MIKITECH para tu hardware de alto rendimiento!</p>
+        </div>
+    </div>
+
+</body>
+</html>

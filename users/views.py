@@ -93,7 +93,7 @@ def vista_registro(petición):
         # Si el error es específicamente por el envío de correo de confirmación de Supabase,
         # intentamos registrar al usuario directamente en la base de datos (fallback de emergencia).
         if error and "confirmation email" in error.lower():
-            print("⚠️ Supabase SMTP falló. Iniciando registro directo vía SQL...")
+            print("[!] Supabase SMTP falló. Iniciando registro directo vía SQL...")
             datos, error = registrar_usuario_sql(correo, clave, nombre_completo, nombre_usuario)
 
         if error:
@@ -199,25 +199,13 @@ def editar_perfil(petición):
                 from django.core.files.storage import default_storage
                 default_storage.save(nombre_archivo, archivo_avatar)
                 perfil.url_avatar = f'/media/{nombre_archivo}'
-
-        # Actualizar Contraseña si se solicita
-        nueva_clave = petición.POST.get('nueva_clave')
-        if nueva_clave:
-            import re
-            patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$"
-            if not re.match(patron, nueva_clave):
-                contexto_error = {'perfil': perfil, 'error': 'La nueva contraseña no es segura (8+ caracteres, Mayúscula, Número y Símbolo).'}
-                return render(petición, 'users/edit_profile.html', contexto_error)
-            
-            from .supabase_auth import actualizar_contraseña
-            token = petición.session.get('access_token')
-            _, error_pass = actualizar_contraseña(token, nueva_clave)
-            if error_pass:
-                contexto_error = {'perfil': perfil, 'error': f'Error al cambiar contraseña: {error_pass}'}
-                return render(petición, 'users/edit_profile.html', contexto_error)
+                petición.session['avatar_url'] = perfil.url_avatar
+                petición.session.modified = True
 
         perfil.save()
-        messages.success(petición, "Perfil y seguridad actualizados correctamente.")
+        petición.session['avatar_url'] = perfil.url_avatar or ''
+        petición.session.modified = True
+        messages.success(petición, "Perfil actualizado correctamente.")
         return redirect('users:profile')
 
     return render(petición, 'users/edit_profile.html', {
@@ -260,8 +248,8 @@ def mis_pedidos(petición):
         print("Error obteniendo pedidos:", e)
         pedidos = []
 
-    pedidos_entregados = sum(1 for p in pedidos if 'Entregado' in p[1])
-    pedidos_en_transito = sum(1 for p in pedidos if 'Entregado' not in p[1] and 'Cancelado' not in p[1])
+    pedidos_entregados = sum(1 for p in pedidos if p[1] == 'delivered')
+    pedidos_en_transito = sum(1 for p in pedidos if p[1] in ['pending', 'processing', 'shipped'])
 
     return render(petición, 'users/orders.html', {
         'perfil': perfil,
@@ -352,10 +340,11 @@ def mi_historial(petición):
     except Perfil.DoesNotExist:
         return redirect('users:login')
 
-    from interactions.models import Favorito, Voto, Reseña
+    from interactions.models import Favorito, Voto, Reseña, Pedido
     reseñas = Reseña.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
     votos = Voto.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
     favoritos = Favorito.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
+    pedidos = Pedido.objects.filter(usuario=perfil).order_by('-creado_el')
 
     return render(petición, 'users/history.html', {
         'perfil': perfil,
@@ -363,9 +352,11 @@ def mi_historial(petición):
         'resenas': reseñas,
         'votos': votos,
         'favoritos': favoritos,
+        'pedidos': pedidos,
         'conteo_resenas': reseñas.count(),
         'conteo_votos': votos.count(),
         'conteo_favoritos': favoritos.count(),
+        'conteo_pedidos': pedidos.count(),
     })
 
 
@@ -379,16 +370,15 @@ def mis_reportes(petición):
     except Perfil.DoesNotExist:
         return redirect('users:login')
 
-    from interactions.models import Voto, Reseña
+    from interactions.models import Voto, Reseña, Pedido
     from django.db import connection
 
     conteo_resenas = Reseña.objects.filter(usuario=perfil).count()
     conteo_votos = Voto.objects.filter(usuario=perfil).count()
     reseñas = Reseña.objects.filter(usuario=perfil).select_related('producto')
     
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT id, status, total_amount, created_at FROM public.orders WHERE user_id = %s ORDER BY created_at DESC", [str(perfil.id)])
-        pedidos = cursor.fetchall()
+    # Usar ORM con prefetch para tener los productos listos para la factura PDF
+    pedidos = Pedido.objects.filter(usuario=perfil).prefetch_related('detalles__producto').order_by('-creado_el')
 
     return render(petición, 'users/reports.html', {
         'perfil': perfil,
@@ -396,6 +386,15 @@ def mis_reportes(petición):
         'conteo_resenas': conteo_resenas,
         'conteo_votos': conteo_votos,
         'resenas': reseñas,
-        'pedidos': pedidos,
-        'conteo_pedidos': len(pedidos),
+        'orders': pedidos,
+        'conteo_pedidos': pedidos.count(),
     })
+
+
+def mark_notifications_read(request):
+    """Marcar todas las notificaciones del usuario como leídas."""
+    usuario_id = request.session.get('usuario_id')
+    if usuario_id:
+        from users.models import Notificacion
+        Notificacion.objects.filter(usuario_id=usuario_id, esta_leida=False).update(esta_leida=True)
+    return redirect(request.META.get('HTTP_REFERER', '/'))

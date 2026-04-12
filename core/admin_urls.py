@@ -27,7 +27,13 @@ urlpatterns = [
     
     # Moderación de interacciones
     path('resenas/', admin_views.moderacion_resenas, name='admin_reviews'),
+    path('resenas/notificar/<str:id_resena>/', admin_views.enviar_notificacion_resena, name='admin_review_notify'),
     path('resenas/eliminar/<str:id_resena>/', admin_views.eliminar_resena, name='admin_review_delete'),
+    
+    # Logística y Despachos
+    path('logistica/', admin_views.gestion_logistica, name='admin_logistics'),
+    path('logistica/actualizar/<str:id_pedido>/', admin_views.cambiar_estado_pedido, name='admin_order_update'),
+    path('logistica/factura/<str:id_pedido>/', admin_views.ver_factura_pedido, name='admin_order_invoice'),
     
     # Reportes
     path('reportes/', admin_views.reportes_dashboard, name='admin_reports'),

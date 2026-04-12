@@ -116,9 +116,32 @@ def perfil_publico(petición, nombre_usuario):
 
 
 def agregar_al_carrito(petición, id_producto):
-    """Añade un producto al carrito y redirige o responde JSON."""
+    """Añade un producto al carrito (acepta UUID o Slug) y redirige o responde JSON."""
     carrito = petición.session.get('cart', {})
-    id_str = str(id_producto)
+    
+    # Resolver id_producto (puede ser ID o Slug)
+    from products.models import Producto
+    import uuid
+    
+    producto_final = None
+    try:
+        # Intentar por UUID primero
+        val_uuid = uuid.UUID(id_producto)
+        producto_final = Producto.objects.get(id=val_uuid)
+    except (ValueError, Producto.DoesNotExist):
+        # Si falla, intentar por slug (enlace)
+        try:
+            producto_final = Producto.objects.get(enlace=id_producto)
+        except Producto.DoesNotExist:
+            pass
+
+    if not producto_final:
+        if petición.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'ok': False, 'error': 'Producto no encontrado'}, status=404)
+        messages.error(petición, "Producto no encontrado.")
+        return redirect('products:catalog')
+
+    id_str = str(producto_final.id)
     carrito[id_str] = carrito.get(id_str, 0) + 1
     petición.session['cart'] = carrito
     petición.session.modified = True
@@ -127,6 +150,8 @@ def agregar_al_carrito(petición, id_producto):
         from django.http import JsonResponse
         total_items = sum(carrito.values())
         return JsonResponse({'ok': True, 'total_items': total_items})
+    
+    messages.success(petición, f"Agregado: {producto_final.nombre}")
     return redirect('core:cart')
 
 
@@ -187,9 +212,18 @@ def _obtener_datos_carrito(petición):
     subtotal = Decimal('0')
     
     if carrito_sesion:
-        productos = Producto.objects.filter(id__in=carrito_sesion.keys())
+        # Filtrar solo claves que parezcan UUIDs válidos para evitar errores de base de datos
+        valid_ids = []
+        for k in carrito_sesion.keys():
+            try:
+                uuid.UUID(k)
+                valid_ids.append(k)
+            except ValueError:
+                continue
+
+        productos = Producto.objects.filter(id__in=valid_ids)
         for producto in productos:
-            cantidad = carrito_sesion[str(producto.id)]
+            cantidad = carrito_sesion.get(str(producto.id), 0)
             total_línea = producto.precio * cantidad
             artículos.append({
                 'producto': producto,
@@ -222,6 +256,34 @@ def ver_carrito(petición):
     return render(petición, 'core/cart.html', contexto)
 
 
+def cart_status_api(petición):
+    """Retorna el estado del carrito en formato JSON para el Mini-Carrito Drawer."""
+    from django.http import JsonResponse
+    from products.templatetags.product_filters import currency_cop
+    
+    datos = _obtener_datos_carrito(petición)
+    
+    articulos_json = []
+    for item in datos['articulos']:
+        articulos_json.append({
+            'producto': {
+                'id': str(item['producto'].id),
+                'nombre': item['producto'].nombre,
+                'url_imagen': item['producto'].url_imagen_principal,
+            },
+            'cantidad': item['cantidad'],
+            'total_linea': float(item['total_linea']),
+            'precio_formateado': currency_cop(item['producto'].precio),
+        })
+    
+    return JsonResponse({
+        'total_articulos': datos['total_articulos'],
+        'total_bruto': float(datos['total']),
+        'total_formateado': currency_cop(datos['total']),
+        'articulos': articulos_json
+    })
+
+
 def carrito(petición):
     """Finalización de compra (checkout) con formulario de pago."""
     if not petición.session.get('usuario_id'):
@@ -241,11 +303,14 @@ def carrito(petición):
         metodo = petición.POST.get('metodo_pago', 'tarjeta')
         estado = 'pending' if metodo == 'efectivo' else 'processing'
         
+        cedula_id = petición.POST.get('cedula', '')
+        
         pedido = Pedido.objects.create(
             usuario_id=usuario_id,
             estado=estado,
             monto_total=datos['total'],
             direccion_envio=direccion,
+            cedula=cedula_id,
             notas=f"Método de pago: {metodo.upper()}"
         )
         

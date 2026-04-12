@@ -47,9 +47,9 @@
   </div>
   <div class="g-col-3">
     <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #F59E0B;">
-      <div style="font-size:3rem; margin-bottom:1rem;">💬</div>
-      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Feedback</div>
-      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_resenas }}</div>
+      <div style="font-size:3rem; margin-bottom:1rem;">💰</div>
+      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Ticket Promedio</div>
+      <div style="font-size:2.4rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.ticket_promedio|currency_cop }}</div>
     </div>
   </div>
 </div>
@@ -165,10 +165,10 @@
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Febrero', 'Marzo'],
+        labels: {{ chart_labels|safe }},
         datasets: [{
           label: 'Ingresos Mensuales (COP Millones)',
-          data: [18.2, 25.4, 42.5, 30.1, 28.5, 35.8],
+          data: {{ chart_data|safe }},
           backgroundColor: gradient,
           borderRadius: 8,
           borderSkipped: false,

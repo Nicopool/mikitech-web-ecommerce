@@ -178,7 +178,10 @@
                 <div class="act-icon-wrap fav">📦</div>
                 <div style="flex:1; min-width:0;">
                   <div class="act-title">Compra de Componentes</div>
-                  <div class="act-sub">Pedido #{{ pedido.id|stringformat:"s"|upper|truncatechars:12 }} por {{ pedido.monto_total|currency_cop }} — Estado: {{ pedido.estado }}</div>
+                  <div class="act-sub">Pedido #{{ pedido.id|stringformat:"s"|upper|truncatechars:12 }} por {{ pedido.monto_total|currency_cop }} — 
+                  <span class="badge-status {% if pedido.estado == 'delivered' %}status-completed{% elif pedido.estado == 'shipped' %}status-shipped{% else %}status-pending{% endif %}" style="padding: 1px 6px; font-size: 1rem;">
+                    {% if pedido.estado == 'delivered' %}Entregado{% elif pedido.estado == 'shipped' %}En camino{% elif pedido.estado == 'pending' or pedido.estado == 'processing' %}Pendiente{% else %}{{ pedido.estado }}{% endif %}
+                  </span></div>
                 </div>
                 <div class="act-date">{{ pedido.creado_el|date:"d M Y" }}</div>
               </div>

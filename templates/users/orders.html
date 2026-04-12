@@ -160,7 +160,7 @@
                   <span class="badge-status status-completed">Entregado</span>
                   {% elif order.1 == 'shipped' %}
                   <span class="badge-status status-shipped">En camino</span>
-                  {% elif order.1 == 'pending' %}
+                  {% elif order.1 == 'pending' or order.1 == 'processing' %}
                   <span class="badge-status status-pending">Pendiente</span>
                   {% elif order.1 == 'cancelled' %}
                   <span class="badge-status status-cancelled">Cancelado</span>
@@ -275,7 +275,7 @@ function showDetail(id, status, total, date, address, notes) {
   var rows = [
     ['ID Pedido', '#' + id.substring(0, 12).toUpperCase()],
     ['Estado', status],
-    ['Total', '$ ' + parseFloat(total).toLocaleString('es-CO') + ' COP'],
+    ['Total', '$' + parseFloat(total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' COP'],
     ['Fecha', date],
     ['Dirección Envío', address || 'No especificada'],
     ['Notas', notes || 'Sin notas adicionales']

@@ -35,3 +35,20 @@ class Perfil(models.Model):
     @property
     def nombre_mostrado(self):
         return self.nombre_completo or self.nombre_usuario or 'Usuario'
+
+
+class Notificacion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    usuario = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name='notificaciones', db_column='user_id')
+    mensaje = models.TextField(db_column='message')
+    esta_leida = models.BooleanField(default=False, db_column='is_read')
+    creado_el = models.DateTimeField(auto_now_add=True, db_column='created_at')
+
+    class Meta:
+        db_table = 'notifications'
+        managed = False
+        verbose_name = 'Notificación'
+        verbose_name_plural = 'Notificaciones'
+
+    def __str__(self):
+        return f"Notificación para {self.usuario.nombre_usuario}: {self.mensaje[:20]}..."

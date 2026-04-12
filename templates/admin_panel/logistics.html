@@ -1,0 +1,161 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load miki_filters %}
+
+{% block admin_content %}
+<div class="g-header-flex">
+  <div>
+    <h2 class="g-section-title">Logística y Despachos</h2>
+    <p class="g-section-subtitle">Gestión de envíos y notificaciones de entrega en tiempo real.</p>
+  </div>
+</div>
+
+<!-- Tarjetas de Resumen -->
+<div class="g-stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 3rem;">
+  <div class="g-stat-card">
+    <div class="g-stat-icon" style="background: #FFF7ED; color: #EA580C;">pending</div>
+    <div class="g-stat-info">
+      <span class="g-stat-label">Pendientes</span>
+      <span class="g-stat-value">{{ stats.pendientes }}</span>
+    </div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon" style="background: #EFF6FF; color: #2563EB;">local_shipping</div>
+    <div class="g-stat-info">
+      <span class="g-stat-label">En Camino</span>
+      <span class="g-stat-value">{{ stats.en_camino }}</span>
+    </div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon" style="background: #F0FDF4; color: #16A34A;">check_circle</div>
+    <div class="g-stat-info">
+      <span class="g-stat-label">Entregados</span>
+      <span class="g-stat-value">{{ stats.entregados }}</span>
+    </div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon" style="background: #F8FAFC; color: #64748B;">filter_list</div>
+    <div class="g-stat-info">
+      <span class="g-stat-label">Filtro Activo</span>
+      <span class="g-stat-value" style="font-size: 1.4rem;">{{ stats.filtro_actual|capfirst }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Filtros Rápidos -->
+<div style="margin-bottom: 2rem; display: flex; gap: 1rem;">
+  <a href="?estado=all" class="g-btn {% if stats.filtro_actual == 'all' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">Todos</a>
+  <a href="?estado=Pendiente" class="g-btn {% if stats.filtro_actual == 'Pendiente' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">Pendientes</a>
+  <a href="?estado=Enviado" class="g-btn {% if stats.filtro_actual == 'Enviado' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">En Camino</a>
+  <a href="?estado=Entregado" class="g-btn {% if stats.filtro_actual == 'Entregado' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">Entregados</a>
+</div>
+
+<!-- Tabla de Pedidos -->
+<div class="g-card">
+  <table class="g-table">
+    <thead>
+      <tr>
+        <th>ID Pedido</th>
+        <th>Cliente</th>
+        <th>Fecha</th>
+        <th>Destino</th>
+        <th>Total</th>
+        <th>Estado Actual</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pedidos %}
+      <tr>
+        <td style="font-family: monospace; font-weight: 600; color: var(--ds-primary);">#{{ p.id|stringformat:"s"|slice:":8" }}</td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 3rem; height: 3rem; border-radius: 50%; background: #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; overflow: hidden;">
+              {% if p.usuario.url_avatar %}
+              <img src="{{ p.usuario.url_avatar }}" style="width: 100%; height: 100%; object-fit: cover;">
+              {% else %}
+              {{ p.usuario.nombre_mostrado|first|upper }}
+              {% endif %}
+            </div>
+            <div>
+              <div style="font-weight: 600;">{{ p.usuario.nombre_mostrado }}</div>
+              <div style="font-size: 1.1rem; color: #64748B;">@{{ p.usuario.nombre_usuario }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="font-size: 1.2rem;">{{ p.creado_el|date:"d M Y, h:i A" }}</td>
+        <td style="max-width: 200px; font-size: 1.2rem; white-space: normal;">{{ p.direccion_envio }}</td>
+        <td style="font-weight: 700;">{{ p.monto_total|currency_cop }}</td>
+        <td>
+          <span class="g-badge {% if p.estado == 'delivered' %}badge-success{% elif p.estado == 'shipped' %}badge-info{% elif p.estado == 'pending' or p.estado == 'processing' %}badge-pending{% else %}badge-error{% endif %}">
+            {% if p.estado == 'delivered' %}Entregado{% elif p.estado == 'shipped' %}Enviado{% elif p.estado == 'pending' or p.estado == 'processing' %}Pendiente{% else %}Cancelado{% endif %}
+          </span>
+        </td>
+        <td>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <a href="{% url 'admin_order_invoice' p.id %}" target="_blank" class="g-btn-sm" title="Ver Factura" style="background: var(--ds-primary-light); color: var(--ds-primary); border: 1px solid var(--ds-primary); text-decoration: none;">
+              <span class="material-symbols-outlined">description</span>
+            </a>
+
+            {% if p.estado == 'pending' or p.estado == 'processing' %}
+            <form action="{% url 'admin_order_update' p.id %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="nuevo_estado" value="Enviado">
+              <button type="submit" class="g-btn-sm" title="Marcar como Enviado" style="background: #EFF6FF; color: #2563EB; border: none; cursor: pointer;">
+                <span class="material-symbols-outlined">local_shipping</span>
+              </button>
+            </form>
+            {% endif %}
+
+            {% if p.estado == 'shipped' %}
+            <form action="{% url 'admin_order_update' p.id %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="nuevo_estado" value="Entregado">
+              <button type="submit" class="g-btn-sm" title="Confirmar Entrega" style="background: #F0FDF4; color: #16A34A; border: none; cursor: pointer;">
+                <span class="material-symbols-outlined">task_alt</span>
+              </button>
+            </form>
+            {% endif %}
+
+            {% if p.estado != 'delivered' and p.estado != 'cancelled' %}
+            <form action="{% url 'admin_order_update' p.id %}" method="post" onsubmit="return confirm('¿Seguro que deseas cancelar este pedido?')">
+              {% csrf_token %}
+              <input type="hidden" name="nuevo_estado" value="Cancelado">
+              <button type="submit" class="g-btn-sm" title="Cancelar Pedido" style="background: #FEE2E2; color: #DC2626; border: none; cursor: pointer;">
+                <span class="material-symbols-outlined">cancel</span>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 4rem; color: #64748B;">
+          <span class="material-symbols-outlined" style="font-size: 4rem; display: block; margin-bottom: 1rem;">inventory</span>
+          No se encontraron pedidos con estas características.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .badge-pending { background: #FFF7ED; color: #EA580C; }
+  .badge-info { background: #EFF6FF; color: #2563EB; }
+  .badge-success { background: #F0FDF4; color: #16A34A; }
+  .badge-error { background: #FEE2E2; color: #DC2626; }
+  
+  .g-btn-sm {
+    padding: 0.5rem;
+    border-radius: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .g-btn-sm:hover {
+    transform: scale(1.1);
+  }
+</style>
+{% endblock %}

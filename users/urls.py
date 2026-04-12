@@ -17,4 +17,5 @@ urlpatterns = [
     path('reportes/', views.mis_reportes, name='reports'),
     path('recuperar/', views.olvide_contraseña, name='forgot_password'),
     path('recuperar/verificar/', views.restablecer_contraseña, name='reset_password'),
+    path('notificaciones/leer/', views.mark_notifications_read, name='mark_notifications_read'),
 ]

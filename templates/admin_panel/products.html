@@ -30,7 +30,7 @@
   <div class="g-col-3">
     <div class="mpro-card">
       <div style="font-size:1.2rem; color:#64748B; margin-bottom: 0.5rem;">Valor Inventario</div>
-      <div style="font-size:2.2rem; font-weight:800; color:#2563EB;">Estimado</div>
+      <div style="font-size:2.2rem; font-weight:800; color:#2563EB;">{{ valor_total_inventario|currency_cop }}</div>
     </div>
   </div>
   <div class="g-col-3">
@@ -114,8 +114,13 @@
           </td>
 
           <td class="u-text-center">
-            <a href="{% url 'admin_product_edit' producto.id %}" class="g-action-btn">✏️</a>
-            <button class="g-action-btn g-action-disable" onclick="confirmarEliminacion('{{ producto.id }}', '{{ producto.nombre|escapejs }}')">🗑️</button>
+            <div style="display:flex; justify-content:center; gap:8px;">
+              {% if producto.url_imagen_principal %}
+              <a href="{{ producto.url_imagen_principal }}" target="_blank" download class="g-action-btn" title="Descargar Imagen" style="background:#DCFCE7; color:#16A34A;">💾</a>
+              {% endif %}
+              <a href="{% url 'admin_product_edit' producto.id %}" class="g-action-btn" title="Editar">✏️</a>
+              <button class="g-action-btn" onclick="confirmarEliminacion('{{ producto.id }}', '{{ producto.nombre|escapejs }}')" title="Eliminar">🗑️</button>
+            </div>
           </td>
         </tr>
         {% empty %}
@@ -189,7 +194,7 @@ function confirmarEliminacion(idProducto, nombreProducto) {
   cuerpo.appendChild(detalle);
   cuerpo.appendChild(alerta);
   
-  document.getElementById('formularioEliminar').action = '/panel-admin/productos/eliminar/' + idProducto + '/';
+  document.getElementById('formularioEliminar').action = '/admin-panel/productos/eliminar/' + idProducto + '/';
   modal.style.display = 'flex';
 }
 </script>

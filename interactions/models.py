@@ -79,6 +79,7 @@ class Pedido(models.Model):
     estado = models.CharField(max_length=50, default='Pendiente', db_column='status')
     monto_total = models.DecimalField(max_digits=10, decimal_places=2, db_column='total_amount')
     direccion_envio = models.TextField(db_column='shipping_address')
+    cedula = models.CharField(max_length=50, null=True, blank=True, db_column='document_id')
     notas = models.TextField(null=True, blank=True, db_column='notes')
     creado_el = models.DateTimeField(auto_now_add=True, db_column='created_at')
     actualizado_el = models.DateTimeField(auto_now=True, db_column='updated_at')

@@ -40,28 +40,27 @@ for i in range(1, 11):
 print(f"Usuarios creados. Esperando 3s para que los triggers creen los perfiles...")
 time.sleep(3)
 
-perfiles = list(Perfil.objects.filter(id__in=[u['id'] for u in usuarios_generados]))
+print("Intentando utilizar usuarios existentes en la base de datos...")
+perfiles = list(Perfil.objects.all())
+
 if not perfiles:
-    # Fallback si el trigger falló, forzamos la creación
-    print("El trigger no actuó. Creando perfiles manualmente...")
-    for u in usuarios_generados:
-        try:
-            Perfil.objects.create(id=u['id'], nombre_completo=f"User Test {u['id']}", nombre_usuario=u['username'])
-        except Exception:
-            pass
-    perfiles = list(Perfil.objects.filter(id__in=[u['id'] for u in usuarios_generados]))
+    print("ADVERTENCIA: No hay perfiles creados en Supabase MIKITECH y la API limitó los registros. Prueba nuevamente más tarde o con otro plan.")
+    import sys
+    sys.exit(1)
 
 # 3. Categorías
 cat_names = ["Procesadores", "Tarjetas Gráficas", "Placas Base", "Memoria RAM", "Almacenamiento", 
              "Fuentes de Poder", "Gabinetes", "Refrigeración", "Monitores", "Periféricos"]
 cat_objects = []
 for cname in cat_names:
-    cat = Categoria.objects.create(
+    cat, created = Categoria.objects.get_or_create(
         nombre=cname,
-        enlace=slugify(cname),
-        descripcion=f"Componentes para {cname.lower()}.",
-        icono='hardware',
-        url_imagen="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea"
+        defaults={
+            'enlace': slugify(cname),
+            'descripcion': f"Componentes para {cname.lower()}.",
+            'icono': 'hardware',
+            'url_imagen': "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea"
+        }
     )
     cat_objects.append(cat)
 
@@ -77,16 +76,18 @@ for cat in cat_objects:
         r = random.randint(100, 9999)
         name = f"{brand} {cat.nombre.split()[0]} Pro-{r}"
         
-        prod = Producto.objects.create(
-            categoria=cat,
+        prod, p_created = Producto.objects.get_or_create(
             nombre=name,
-            enlace=slugify(f"{name}-{uuid.uuid4().hex[:4]}"),
-            descripcion="Componente de alto rendimiento.",
-            precio=Decimal(random.uniform(50.0, 1500.0)).quantize(Decimal('0.01')),
-            existencias=random.randint(5, 50),
-            marca=brand,
-            esta_activo=True,
-            url_imagen_principal="https://images.unsplash.com/photo-1587202372634-32705e3bf49c"
+            defaults={
+                'categoria': cat,
+                'enlace': slugify(f"{name}-{uuid.uuid4().hex[:4]}"),
+                'descripcion': "Componente de alto rendimiento.",
+                'precio': Decimal(random.uniform(50.0, 1500.0)).quantize(Decimal('0.01')),
+                'existencias': random.randint(5, 50),
+                'marca': brand,
+                'esta_activo': True,
+                'url_imagen_principal': "https://images.unsplash.com/photo-1587202372634-32705e3bf49c"
+            }
         )
         prod_objects.append(prod)
 
@@ -95,12 +96,14 @@ while len(prod_objects) < 107:
     cat = random.choice(cat_objects)
     brand = random.choice(brands)
     name = f"{brand} Extra-{random.randint(1000, 9999)}"
-    prod = Producto.objects.create(
-        categoria=cat,
+    prod, p_created = Producto.objects.get_or_create(
         nombre=name,
-        enlace=slugify(f"{name}-{uuid.uuid4().hex[:4]}"),
-        precio=Decimal('99.99'),
-        esta_activo=True
+        defaults={
+            'categoria': cat,
+            'enlace': slugify(f"{name}-{uuid.uuid4().hex[:4]}"),
+            'precio': Decimal('99.99'),
+            'esta_activo': True
+        }
     )
     prod_objects.append(prod)
 

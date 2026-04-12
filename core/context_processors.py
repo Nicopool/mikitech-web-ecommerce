@@ -15,7 +15,21 @@ def global_context(request):
     carrito = request.session.get('cart', {})
     conteo_carrito = sum(carrito.values()) if carrito else 0
     
+    # Conteo de notificaciones (si hay sesión)
+    conteo_notificaciones = 0
+    notificaciones_previas = []
+    if request.session.get('usuario_id'):
+        from users.models import Notificacion
+        notificaciones_qs = Notificacion.objects.filter(
+            usuario_id=request.session.get('usuario_id'),
+            esta_leida=False
+        ).order_by('-creado_el')
+        conteo_notificaciones = notificaciones_qs.count()
+        notificaciones_previas = list(notificaciones_qs[:5]) # Últimas 5
+    
     return {
         'nav_categorias': nav_categorias,
         'conteo_carrito': conteo_carrito,
+        'conteo_notificaciones': conteo_notificaciones,
+        'ultimas_notificaciones': notificaciones_previas,
     }

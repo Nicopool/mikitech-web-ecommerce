@@ -6,8 +6,10 @@ from django.conf import settings
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from products.models import Producto, Categoria
-from users.models import Perfil
 from interactions.models import Reseña, Pedido
+from users.models import Perfil, Notificacion
+import os
+from django.core.files.storage import default_storage
 
 
 CODIGO_ADMIN = getattr(settings, 'ADMIN_GATEWAY_CODE', 'SENA-2026')
@@ -88,6 +90,8 @@ def login_administrador(petición):
             petición.session['token_acceso'] = datos.get('access_token')
             petición.session['rol_usuario'] = 'admin'
             petición.session['nombre_usuario'] = perfil.nombre_usuario
+            petición.session['avatar_url'] = perfil.url_avatar or ''
+            petición.session.modified = True
             return redirect('/admin-panel/')
         except Perfil.DoesNotExist:
             return render(petición, 'admin_panel/login.html', {
@@ -175,6 +179,10 @@ def cerrar_sesion_administrador(petición):
 @requerir_administrador
 def tablero_administrador(petición):
     """Estadísticas principales del panel."""
+    from django.db.models import Sum, F
+    valor_total_inv = Producto.objects.aggregate(total=Sum(F('precio') * F('existencias')))['total'] or 0
+    ingresos_estimados = Pedido.objects.filter(estado__in=['delivered', 'shipped']).aggregate(total=Sum('monto_total'))['total'] or 0
+    
     estadísticas = {
         'total_productos': Producto.objects.count(),
         'productos_activos': Producto.objects.filter(esta_activo=True).count(),
@@ -182,6 +190,8 @@ def tablero_administrador(petición):
         'total_usuarios': Perfil.objects.count(),
         'total_resenas': Reseña.objects.count(),
         'stock_bajo': Producto.objects.filter(existencias__lte=5, esta_activo=True).count(),
+        'valor_total_inventario': valor_total_inv,
+        'ingresos_estimados': ingresos_estimados,
     }
     productos_recientes = Producto.objects.order_by('-creado_el')[:5]
     reseñas_recientes = Reseña.objects.select_related('producto', 'usuario').order_by('-creado_el')[:5]
@@ -198,8 +208,13 @@ def tablero_administrador(petición):
 def gestion_productos(petición):
     """Lista de productos para gestión administrativa."""
     productos = Producto.objects.select_related('categoria').order_by('-creado_el')
+    
+    from django.db.models import Sum, F
+    valor_total_inv = productos.aggregate(total=Sum(F('precio') * F('existencias')))['total'] or 0
+    
     return render(petición, 'admin_panel/products.html', {
         'productos': productos,
+        'valor_total_inventario': valor_total_inv,
         'titulo_pagina': 'Gestión de Productos — MIKITECH',
     })
 
@@ -243,6 +258,18 @@ def crear_producto(petición):
                     es_destacado=es_destacado,
                     esta_activo=True,
                 )
+                
+                # Procesar Archivo Local después de crear para tener el ID si es necesario, 
+                # aunque aquí usamos UUID para el nombre del archivo.
+                if 'archivo_imagen' in petición.FILES:
+                    archivo = petición.FILES['archivo_imagen']
+                    nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
+                    ruta_guardada = default_storage.save(nombre_unico, archivo)
+                    # Re-obtener y actualizar el producto
+                    prod_reciente = Producto.objects.filter(enlace=enlace).first()
+                    if prod_reciente:
+                        prod_reciente.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
+                        prod_reciente.save()
                 messages.success(petición, f'Producto "{nombre}" creado con éxito.')
                 return redirect('/admin-panel/productos/')
             except Exception as e:
@@ -270,7 +297,15 @@ def editar_producto(petición, id_producto):
         producto.marca = petición.POST.get('marca', producto.marca)
         producto.descripcion = petición.POST.get('descripcion', producto.descripcion)
         producto.descripcion_corta = petición.POST.get('descripcion_corta', producto.descripcion_corta)
-        producto.url_imagen_principal = petición.POST.get('url_imagen_principal', producto.url_imagen_principal).strip()
+        
+        # Procesar Archivo Local si existe
+        if 'archivo_imagen' in petición.FILES:
+            archivo = petición.FILES['archivo_imagen']
+            nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
+            ruta_guardada = default_storage.save(nombre_unico, archivo)
+            producto.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
+        else:
+            producto.url_imagen_principal = petición.POST.get('url_imagen_principal', producto.url_imagen_principal).strip()
         producto.es_destacado = petición.POST.get('es_destacado') == 'on'
         producto.esta_activo = petición.POST.get('esta_activo') == 'on'
         id_cat = petición.POST.get('id_categoria')
@@ -319,6 +354,14 @@ def crear_categoria(petición):
         nombre = petición.POST.get('nombre', '').strip()
         descripcion = petición.POST.get('descripcion', '').strip()
         icono = petición.POST.get('icono', '').strip()
+        url_imagen = petición.POST.get('url_imagen', '').strip()
+        
+        # Procesar Archivo Local si existe
+        if 'archivo_imagen' in petición.FILES:
+            archivo = petición.FILES['archivo_imagen']
+            nombre_unico = f"categories/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
+            ruta_guardada = default_storage.save(nombre_unico, archivo)
+            url_imagen = f"{settings.MEDIA_URL}{ruta_guardada}"
         
         if not nombre:
             return render(petición, 'admin_panel/category_form.html', {
@@ -338,7 +381,8 @@ def crear_categoria(petición):
                 nombre=nombre, 
                 enlace=enlace, 
                 descripcion=descripcion, 
-                icono=icono
+                icono=icono,
+                url_imagen=url_imagen
             )
             messages.success(petición, f'Categoría "{nombre}" establecida.')
             return redirect('/admin-panel/categorias/')
@@ -359,6 +403,15 @@ def editar_categoria(petición, id_cat):
         categoría.nombre = petición.POST.get('nombre', categoría.nombre).strip()
         categoría.descripcion = petición.POST.get('descripcion', categoría.descripcion).strip()
         categoría.icono = petición.POST.get('icono', categoría.icono).strip()
+        
+        # Procesar Archivo Local si existe
+        if 'archivo_imagen' in petición.FILES:
+            archivo = petición.FILES['archivo_imagen']
+            nombre_unico = f"categories/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
+            ruta_guardada = default_storage.save(nombre_unico, archivo)
+            categoría.url_imagen = f"{settings.MEDIA_URL}{ruta_guardada}"
+        else:
+            categoría.url_imagen = petición.POST.get('url_imagen', categoría.url_imagen).strip()
         categoría.save()
         messages.success(petición, f'Categoría "{categoría.nombre}" actualizada.')
         return redirect('/admin-panel/categorias/')
@@ -421,10 +474,36 @@ def eliminar_resena(petición, id_resena):
 
 
 @requerir_administrador
+@require_POST
+def enviar_notificacion_resena(petición, id_resena):
+    """Enviar un aviso de moderación al usuario de la reseña."""
+    reseña = get_object_or_404(Reseña, id=id_resena)
+    mensaje = petición.POST.get('mensaje', '').strip()
+    
+    if not mensaje:
+        messages.error(petición, 'Debes escribir un mensaje para la notificación.')
+        return redirect('/admin-panel/resenas/')
+    
+    try:
+        Notificacion.objects.create(
+            id=uuid.uuid4(),
+            usuario=reseña.usuario,
+            mensaje=f"Aviso de Moderación MIKITECH: {mensaje} (Ref: {reseña.producto.nombre})",
+        )
+        messages.success(petición, f'Notificación enviada a {reseña.usuario.nombre_usuario}.')
+    except Exception as e:
+        messages.error(petición, f'Error al enviar notificación: {str(e)}')
+        
+    return redirect('/admin-panel/resenas/')
+
+
+@requerir_administrador
 def reportes_dashboard(petición):
-    """Métricas globales y reportes exportables con filtros de tiempo."""
+    """Métricas globales y reportes exportables con filtros de tiempo dinámicos."""
     import datetime
     from django.utils import timezone
+    from django.db.models import Sum, Count, Avg, F
+    from django.db.models.functions import TruncMonth
     
     dias = petición.GET.get('dias', 'all')
     filtro_fecha = {}
@@ -433,21 +512,142 @@ def reportes_dashboard(petición):
     if dias.isdigit():
         fecha_limite = timezone.now() - datetime.timedelta(days=int(dias))
         filtro_fecha = {'creado_el__gte': fecha_limite}
-        # Profiles from supabase might have created_at mapped to creado_el
         filtro_fecha_usuario = {'creado_el__gte': fecha_limite}
 
+    # Estadísticas base
     estadísticas = {
         'total_productos': Producto.objects.filter(**filtro_fecha).count(),
-        'total_categorias': Categoria.objects.count(), # Global always
+        'total_categorias': Categoria.objects.count(),
         'total_usuarios': Perfil.objects.filter(**filtro_fecha_usuario).count(),
         'total_resenas': Reseña.objects.filter(**filtro_fecha).count(),
         'filtro_actual': dias,
     }
     
+    # 1. Ticket Promedio (AOV)
+    # Usar términos en inglés para coincidir con el CHECK constraint de la DB
+    pedidos_exitosos = Pedido.objects.filter(estado__in=['delivered', 'shipped', 'Entregado', 'Enviado'])
+    avg_order = pedidos_exitosos.aggregate(promedio=Avg('monto_total'))['promedio'] or 0
+    estadísticas['ticket_promedio'] = avg_order
+
+    # 2. Datos para el Gráfico (Últimos 6 meses)
+    # Buscamos ingresos del histórico real agrupados por mes
+    seis_meses_atras = timezone.now() - datetime.timedelta(days=180)
+    ventas_mensuales = pedidos_exitosos.filter(creado_el__gte=seis_meses_atras) \
+        .annotate(mes=TruncMonth('creado_el')) \
+        .values('mes') \
+        .annotate(total=Sum('monto_total')) \
+        .order_by('mes')
+
+    meses_nombres = {
+        1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+        7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+    }
+
+    chart_labels = []
+    chart_data = []
+    
+    for v in ventas_mensuales:
+        chart_labels.append(meses_nombres[v['mes'].month])
+        # Convertimos a millones o lo dejamos en valor normal (ajustado para visualización)
+        # Dividimos por 1M para que el gráfico no tenga etiquetas gigantes
+        chart_data.append(float(v['total']) / 1_000_000)
+
+    # Si no hay datos, ponemos datos vacíos para evitar error en JS
+    if not chart_labels:
+        chart_labels = ['Sin Datos']
+        chart_data = [0]
+
     pedidos = Pedido.objects.filter(**filtro_fecha).select_related('usuario').order_by('-creado_el')
     
     return render(petición, 'admin_panel/reports.html', {
         'estadisticas': estadísticas,
         'pedidos': pedidos,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
         'titulo_pagina': 'Reportes y Estadísticas — MIKITECH',
+    })
+
+
+@requerir_administrador
+def gestion_logistica(petición):
+    """Módulo de despacho y entrega de pedidos."""
+    estado_filtro = petición.GET.get('estado', 'all')
+    
+    if estado_filtro != 'all':
+        pedidos = Pedido.objects.filter(estado=estado_filtro).select_related('usuario').order_by('-creado_el')
+    else:
+        pedidos = Pedido.objects.all().select_related('usuario').order_by('-creado_el')
+
+    # Estadísticas rápidas para la vista (Usando términos en inglés de la DB)
+    stats = {
+        'pendientes': Pedido.objects.filter(estado__in=['pending', 'processing']).count(),
+        'en_camino': Pedido.objects.filter(estado='shipped').count(),
+        'entregados': Pedido.objects.filter(estado='delivered').count(),
+        'filtro_actual': estado_filtro,
+    }
+
+    return render(petición, 'admin_panel/logistics.html', {
+        'pedidos': pedidos,
+        'stats': stats,
+        'titulo_pagina': 'Logística y Despacho — MIKITECH',
+    })
+
+
+@requerir_administrador
+@require_POST
+def cambiar_estado_pedido(petición, id_pedido):
+    """Actualiza el estado de un pedido y notifica al cliente si es necesario."""
+    pedido = get_object_or_404(Pedido, id=id_pedido)
+    if petición.method == 'POST':
+        nuevo_estado_es = petición.POST.get('nuevo_estado')
+        
+        # Mapeo de español (UI) a inglés (DB) para cumplir con el CHECK constraint
+        mapping = {
+            'Pendiente': 'pending',
+            'Enviado': 'shipped',
+            'Entregado': 'delivered',
+            'Cancelado': 'cancelled'
+        }
+        
+        status_to_save = mapping.get(nuevo_estado_es)
+        
+        if status_to_save:
+            estado_anterior = pedido.estado
+            pedido.estado = status_to_save
+            pedido.save()
+            
+            # Notificar al cliente si pasó a 'Entregado'
+            if status_to_save == 'delivered' and estado_anterior != 'delivered':
+                from interactions.models import Notificacion
+                Notificacion.objects.create(
+                    id=uuid.uuid4(),
+                    usuario=pedido.usuario,
+                    mensaje=f"[Pedido Entregado] Tu pedido #{str(pedido.id)[:8]} ha sido entregado exitosamente. Gracias por confiar en MIKITECH!",
+                )
+                messages.success(petición, f"Pedido #{str(pedido.id)[:8]} marcado como ENTREGADO. Cliente notificado.")
+            else:
+                messages.success(petición, f"Estado del pedido #{str(pedido.id)[:8]} actualizado a {nuevo_estado_es}.")
+            
+    return redirect('admin_logistics')
+
+
+@requerir_administrador
+def ver_factura_pedido(petición, id_pedido):
+    """Vista detallada de factura para impresión administrativa."""
+    pedido = get_object_or_404(Pedido.objects.prefetch_related('detalles__producto'), id=id_pedido)
+    perfil = pedido.usuario
+    
+    # Cálculos de impuestos para la factura legal
+    import decimal
+    iva_porcentaje = decimal.Decimal('0.19')
+    subtotal = pedido.monto_total / (decimal.Decimal('1') + iva_porcentaje)
+    iva_monto = pedido.monto_total - subtotal
+
+    return render(petición, 'admin_panel/invoice.html', {
+        'pedido': pedido,
+        'detalles': pedido.detalles.all(),
+        'perfil': perfil,
+        'subtotal': subtotal,
+        'iva_monto': iva_monto,
+        'titulo_pagina': f'Factura #{str(pedido.id)[:8].upper()} — MIKITECH',
     })

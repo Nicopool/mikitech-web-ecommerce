@@ -300,15 +300,7 @@ document.querySelectorAll('[data-precio]').forEach(function(el) {
 });
 
 function formatearCOP(num) {
-  var n = Math.round(num);
-  var str = n.toString();
-  var partes = [];
-  while (str.length > 3) {
-    partes.unshift(str.slice(-3));
-    str = str.slice(0, -3);
-  }
-  partes.unshift(str);
-  return '$ ' + partes.join('.') + ' COP';
+  return '$' + parseFloat(num).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' COP';
 }
 
 function recalcularTotales() {

@@ -327,7 +327,7 @@
                     <div style="color:var(--ds-text-soft); font-size:1.1rem;">Componente</div>
                   </div>
                 </div>
-                <div class="fav-price" style="color:var(--ds-text);">${{ favor.producto.precio }}</div>
+                <div class="fav-price" style="color:var(--ds-text);">{{ favor.producto.precio|currency_cop }}</div>
               </a>
               {% endfor %}
             {% else %}

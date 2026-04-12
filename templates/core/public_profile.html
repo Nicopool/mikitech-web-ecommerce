@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load miki_filters %}
+
+{% block extra_head %}
+<style>
+  :root { font-size: 10px; --ds-primary: #1D4ED8; --ds-surface: #FFFFFF; --ds-bg: #F8FAFC; --ds-border: #E2E8F0; }
+  .profile-hero { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); padding: 10rem 0 6rem; color: white; border-bottom: 5px solid var(--ds-primary); }
+  .container { max-width: 120rem; margin: 0 auto; padding: 0 3rem; }
+  
+  .profile-header { display: flex; align-items: flex-end; gap: 4rem; margin-top: -8rem; }
+  .profile-avatar { width: 18rem; height: 18rem; border-radius: 2rem; border: 6px solid var(--ds-surface); background: var(--ds-bg); object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-size: 8rem; font-weight: 800; color: var(--ds-primary); }
+  
+  .profile-info { padding-bottom: 2rem; }
+  .profile-name { font-family: 'Oswald', sans-serif; font-size: 4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--ds-surface); }
+  .profile-handle { font-size: 1.8rem; color: #94A3B8; font-weight: 500; }
+  
+  .profile-stats { display: flex; gap: 3rem; margin-top: 3rem; }
+  .stat-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding: 1.5rem 2.5rem; border-radius: 1.2rem; border: 1px solid rgba(255,255,255,0.1); min-width: 14rem; }
+  .stat-val { display: block; font-size: 2.4rem; font-weight: 800; color: var(--ds-primary); }
+  .stat-lbl { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: #94A3B8; }
+
+  .profile-content { display: grid; grid-template-columns: 35rem 1fr; gap: 5rem; padding: 6rem 0; }
+  @media (max-width: 90rem) { .profile-content { grid-template-columns: 1fr; } }
+
+  .sidebar-section { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: 2rem; padding: 3rem; margin-bottom: 3rem; }
+  .section-title { font-family: 'Oswald', sans-serif; font-size: 2rem; text-transform: uppercase; margin-bottom: 2rem; color: #0F172A; display: flex; align-items: center; gap: 1rem; }
+  
+  .bio-text { font-size: 1.5rem; line-height: 1.7; color: #475569; }
+  
+  .activity-card { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: 1.6rem; padding: 2.5rem; margin-bottom: 2rem; transition: transform 0.2s; }
+  .activity-card:hover { transform: translateY(-3px); }
+  .activity-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+  .activity-title { font-weight: 700; font-size: 1.6rem; color: #0F172A; text-decoration: none; }
+  .activity-date { font-size: 1.2rem; color: #94A3B8; }
+  .activity-body { font-size: 1.4rem; color: #475569; line-height: 1.6; }
+
+  .badge-tech { background: #EEF2FF; color: #4338CA; padding: 0.4rem 1rem; border-radius: 2rem; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-hero">
+  <div class="container">
+    <div class="profile-header">
+      {% if perfil.url_avatar %}
+        <img src="{{ perfil.url_avatar }}" alt="{{ perfil.nombre_mostrado }}" class="profile-avatar">
+      {% else %}
+        <div class="profile-avatar">{{ perfil.nombre_mostrado|first|upper }}</div>
+      {% endif %}
+      
+      <div class="profile-info">
+        <h1 class="profile-name">{{ perfil.nombre_mostrado }}</h1>
+        <div class="profile-handle">@{{ perfil.nombre_usuario }}</div>
+        
+        <div class="profile-stats">
+          <div class="stat-card">
+            <span class="stat-val">{{ reseñas.count }}</span>
+            <span class="stat-lbl">Reseñas</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val">{{ favoritos.count }}</span>
+            <span class="stat-lbl">Favoritos</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val">User</span>
+            <span class="stat-lbl">Rango</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="profile-content">
+    <aside>
+      <div class="sidebar-section">
+        <h2 class="section-title"><span class="material-symbols-outlined">person</span> Biografía</h2>
+        <p class="bio-text">
+          {% if perfil.biografia %}
+            {{ perfil.biografia }}
+          {% else %}
+            Este usuario aún no ha escrito su biografía en MIKITECH.
+          {% endif %}
+        </p>
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--ds-border);">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:1.3rem;">
+             <span class="material-symbols-outlined" style="color:var(--ds-primary)">location_on</span> {{ perfil.ciudad|default:"Ubicación desconocida" }}, {{ perfil.pais|default:"Colombia" }}
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:1.3rem;">
+             <span class="material-symbols-outlined" style="color:var(--ds-primary)">calendar_month</span> Miembro desde {{ perfil.id.timestamp|default:"2026" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h2 class="section-title"><span class="material-symbols-outlined">favorite</span> Favoritos</h2>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+          {% for fav in favoritos %}
+          <a href="{% url 'products:detail' fav.producto.enlace %}" title="{{ fav.producto.nombre }}">
+            <img src="{{ fav.producto.url_imagen_principal }}" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:0.8rem; border:1px solid var(--ds-border);">
+          </a>
+          {% empty %}
+            <p style="grid-column: span 3; font-size:1.2rem; color:#94A3B8; text-align:center;">Sin favoritos aún.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <section>
+        <h2 class="section-title" style="font-size: 2.4rem;"><span class="material-symbols-outlined">reviews</span> Actividad Reciente</h2>
+        
+        {% for r in reseñas %}
+        <div class="activity-card">
+          <div class="activity-header">
+            <a href="{% url 'products:detail' r.producto.enlace %}" class="activity-title">{{ r.producto.nombre }}</a>
+            <span class="activity-date">{{ r.creado_el|date:"d M, Y" }}</span>
+          </div>
+          <div style="color: #F59E0B; margin-bottom: 1rem;">
+            {% for i in "12345" %}
+              <span class="material-symbols-outlined" style="font-size:1.4rem; {% if forloop.counter <= r.calificacion %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
+            {% endfor %}
+          </div>
+          <p class="activity-body">{{ r.comentario }}</p>
+        </div>
+        {% empty %}
+        <div style="text-align:center; padding: 10rem 0; background: var(--ds-surface); border: 2px dashed var(--ds-border); border-radius: 2rem;">
+          <span class="material-symbols-outlined" style="font-size:6rem; color:var(--ds-border); margin-bottom:2rem;">history</span>
+          <p style="font-size:1.6rem; color:#94A3B8;">Este usuario no tiene actividad pública todavía.</p>
+        </div>
+        {% endfor %}
+      </section>
+    </main>
+  </div>
+</div>
+{% endblock %}
