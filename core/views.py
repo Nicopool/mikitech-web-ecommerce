@@ -224,7 +224,8 @@ def _obtener_datos_carrito(petición):
         productos = Producto.objects.filter(id__in=valid_ids)
         for producto in productos:
             cantidad = carrito_sesion.get(str(producto.id), 0)
-            total_línea = producto.precio * cantidad
+            precio_final = producto.precio_con_descuento
+            total_línea = precio_final * cantidad
             artículos.append({
                 'producto': producto,
                 'cantidad': cantidad,
@@ -325,7 +326,7 @@ def carrito(petición):
                 pedido=pedido,
                 producto=item['producto'],
                 cantidad=item['cantidad'],
-                precio_unitario=item['producto'].precio
+                precio_unitario=item['producto'].precio_con_descuento
             )
             
             # (Opcional) Reducir existencias

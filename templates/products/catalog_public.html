@@ -55,6 +55,117 @@
     letter-spacing: -1px;
   }
 
+  /* CAROUSEL TIENDA */
+  .miki-carousel {
+    position: relative;
+    width: 100%;
+    height: 40vh;
+    min-height: 30rem;
+    overflow: hidden;
+    margin-bottom: 4rem;
+  }
+  
+  .carousel-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  
+  .carousel-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 1;
+  }
+  
+  .carousel-item.active {
+    opacity: 1;
+    z-index: 2;
+  }
+  
+  .carousel-img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+  
+  .carousel-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.5) 100%);
+    z-index: 0;
+  }
+  
+  .carousel-content {
+    position: relative;
+    z-index: 3;
+    color: white;
+    padding: 0 2rem;
+    max-width: 80rem;
+  }
+  .carousel-content p {
+    font-family: 'Jost', sans-serif;
+    font-size: 1.6rem;
+    color: #CBD5E1;
+    max-width: 60rem;
+    margin: 0 auto;
+  }
+  
+  .carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    backdrop-filter: blur(5px);
+  }
+  .carousel-control:hover { background: rgba(255, 255, 255, 0.3); border-color: rgba(255, 255, 255, 0.5); }
+  .carousel-control.prev { left: 3rem; }
+  .carousel-control.next { right: 3rem; }
+  .carousel-control span { font-size: 3rem; }
+  
+  .carousel-dots {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1.2rem;
+    z-index: 10;
+  }
+  .dot {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .dot.active { background: #FFFFFF; width: 3rem; border-radius: 1rem; }
+
   /* CATEGORY LINKS */
   .cat-nav {
     display: flex;
@@ -135,12 +246,52 @@
 
 {% block content %}
 
-  <!-- STORE HERO -->
-  <section class="store-hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <span class="hero-subtitle">Mickytech Pro</span>
-      <h1 class="hero-title">Catálogo Completo</h1>
+  <!-- STORE CAROUSEL -->
+  <section class="miki-carousel">
+    <div class="carousel-inner">
+      <!-- Slide 1 -->
+      <div class="carousel-item active">
+        <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 1">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <span class="hero-subtitle">Mickytech Pro</span>
+          <h1 class="hero-title">Catálogo Completo</h1>
+          <p>La mayor selección de componentes de alto rendimiento para gaming y workstation.</p>
+        </div>
+      </div>
+      
+      <!-- Slide 2 -->
+      <div class="carousel-item">
+        <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 2">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <span class="hero-subtitle">Rendimiento Extremo</span>
+          <h1 class="hero-title">Poder sin Límites</h1>
+          <p>GPUs, Procesadores y RAM de última generación listos para tu próximo proyecto.</p>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="carousel-item">
+        <img src="https://images.unsplash.com/photo-1555617766-c94804975da3?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 3">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <span class="hero-subtitle">Garantía Total</span>
+          <h1 class="hero-title">Calidad Certificada</h1>
+          <p>Componentes originales con garantía directa y soporte técnico especializado.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <button class="carousel-control prev" onclick="mikiPrev()"><span class="material-symbols-outlined">chevron_left</span></button>
+    <button class="carousel-control next" onclick="mikiNext()"><span class="material-symbols-outlined">chevron_right</span></button>
+
+    <!-- Indicators -->
+    <div class="carousel-dots">
+      <div class="dot active" onclick="mikiSlide(0)"></div>
+      <div class="dot" onclick="mikiSlide(1)"></div>
+      <div class="dot" onclick="mikiSlide(2)"></div>
     </div>
   </section>
 
@@ -178,5 +329,40 @@
     {% endif %}
   </nav>
   {% endif %}
+{% endblock %}
 
+{% block extra_js %}
+<script>
+  let slideIndex = 0;
+  const slides = document.querySelectorAll('.carousel-item');
+  const dots = document.querySelectorAll('.dot');
+  let autoTimer;
+
+  function mikiSlide(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    
+    slideIndex = (n + slides.length) % slides.length;
+    slides[slideIndex].classList.add('active');
+    dots[slideIndex].classList.add('active');
+    
+    resetTimer();
+  }
+
+  function mikiNext() { mikiSlide(slideIndex + 1); }
+  function mikiPrev() { mikiSlide(slideIndex - 1); }
+
+  function resetTimer() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(mikiNext, 6000);
+  }
+
+  // Init
+  resetTimer();
+
+  // Pause on hover
+  const carousel = document.querySelector('.miki-carousel');
+  carousel.addEventListener('mouseenter', () => clearInterval(autoTimer));
+  carousel.addEventListener('mouseleave', resetTimer);
+</script>
 {% endblock %}

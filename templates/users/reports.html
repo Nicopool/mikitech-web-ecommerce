@@ -103,7 +103,7 @@
     <a href="/cuenta/reportes/" class="sb-link active"><span class="sb-icon"><span class="material-symbols-outlined">bar_chart</span></span> Reportes</a>
     <a href="/cuenta/perfil/editar/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">settings</span></span> Editar Perfil</a>
   </nav>
-  <div class="sb-logout"><a href="/cuenta/logout/" onclick="confirmarSalida(event, this.href)"><span><span class="material-symbols-outlined">logout</span></span> Cerrar Sesión</a></div>
+  <div class="sb-logout"><a href="{% url 'users:logout' %}" onclick="confirmarSalida(event, this.href)"><span><span class="material-symbols-outlined">logout</span></span> Cerrar Sesión</a></div>
 </aside>
 
 <main class="main-area">

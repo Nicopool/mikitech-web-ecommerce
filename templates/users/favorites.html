@@ -107,7 +107,7 @@
   </nav>
 
   <div class="sb-footer">
-    <a href="{% url 'users:logout' %}" class="btn-logout"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</a>
+    <a href="{% url 'users:logout' %}" class="btn-logout" onclick="confirmarSalida(event, this.href)"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</a>
   </div>
 </aside>
 
@@ -166,8 +166,27 @@
       color: '#0F172A'
     }).then((result) => {
       if (result.isConfirmed) {
-        // En una implementación real usaríamos fetch/ajax. Por ahora recargamos para simplificar.
         window.location.reload();
+      }
+    })
+  }
+
+  function confirmarSalida(e, url) {
+    e.preventDefault();
+    Swal.fire({
+      title: '¿Deseas cerrar sesión?',
+      text: "Tendrás que volver a ingresar tus credenciales la próxima vez.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#1D4ED8',
+      cancelButtonColor: '#64748B',
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar',
+      background: '#FFFFFF',
+      color: '#0F172A'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
       }
     })
   }

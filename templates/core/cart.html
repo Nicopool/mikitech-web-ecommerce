@@ -219,7 +219,7 @@
     </thead>
     <tbody id="cart-body">
       {% for item in articulos %}
-      <tr id="row-{{ item.producto.id }}" data-id="{{ item.producto.id }}" data-precio="{{ item.producto.precio }}">
+      <tr id="row-{{ item.producto.id }}" data-id="{{ item.producto.id }}" data-precio="{{ item.producto.precio_con_descuento|stringformat:".2f" }}">
         <td>
           <div class="cart-product">
             <a href="{% url 'products:detail' item.producto.enlace %}" class="cart-thumb">
@@ -231,7 +231,7 @@
             </a>
             <div>
               <a href="{% url 'products:detail' item.producto.enlace %}" class="cart-name">{{ item.producto.nombre }}</a>
-              <div class="cart-brand">{{ item.producto.marca|default:"" }} · {{ item.producto.precio|currency_cop }}</div>
+              <div class="cart-brand">{{ item.producto.marca|default:"" }} · {{ item.producto.precio_con_descuento|currency_cop }}</div>
             </div>
           </div>
         </td>

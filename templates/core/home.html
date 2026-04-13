@@ -3,90 +3,15 @@
 
 {% block extra_head %}
 <style>
-  /* 2. HERO SECTION */
-  .hero-tech {
-    position: relative;
-    width: 100%;
-    height: 45vh;
-    min-height: 35rem;
-    background-image: url('https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&q=80&w=2000');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  /* PRODUCT GRID (NATIVO HIGH-END) */
+  .wix-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); 
+    gap: 3.5rem; 
+    max-width: 130rem; 
+    margin: 4rem auto 8rem auto; 
+    padding: 0 4rem; 
   }
-  
-  .hero-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 100%);
-    z-index: 1;
-  }
-  
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    color: white;
-    padding: 0 2rem;
-    max-width: 90rem;
-  }
-  
-  .hero-title {
-    font-family: 'Oswald', sans-serif;
-    font-size: clamp(2.8rem, 4.5vw, 5rem);
-    font-weight: 700;
-    line-height: 1.1;
-    text-transform: uppercase;
-    margin-bottom: 2rem;
-    letter-spacing: -1px;
-  }
-  
-  .hero-subtitle {
-    font-family: 'Jost', sans-serif;
-    font-size: clamp(1.4rem, 2vw, 1.8rem);
-    font-weight: 400;
-    margin-bottom: 3.5rem;
-    color: #E2E8F0;
-  }
-  
-  .btn-hero-primary {
-    display: inline-block;
-    padding: 1.5rem 3.5rem;
-    background: #000000;
-    color: #FFFFFF;
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1rem;
-    border-radius: 0.4rem;
-    text-decoration: none;
-    transition: all 0.3s;
-    border: 0.2rem solid #000000;
-  }
-  .btn-hero-primary:hover { background: transparent; color: #000000; }
-
-  /* 3. TRUST BAR */
-  .trust-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4rem;
-    background: #F8FAFC;
-    padding: 2.5rem 2rem;
-    border-bottom: 1px solid #E2E8F0;
-    flex-wrap: wrap;
-  }
-  .trust-item { display: flex; align-items: center; gap: 1.5rem; }
-  .trust-icon { font-size: 3rem; color: #0F172A; }
-  .trust-text h4 { font-family: 'Oswald', sans-serif; font-size: 1.4rem; margin: 0; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; }
-  .trust-text p { font-family: 'Jost', sans-serif; font-size: 1.3rem; color: #64748B; margin: 0; }
-
-  /* 4. PRODUCT GRID (HOVER REVEAL NATIVO HIGH-END) */
-  .wix-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: 3.5rem; max-width: 130rem; margin: 0 auto 6rem auto; padding: 0 4rem; }
   
   .wix-product {
     background: #ffffff;
@@ -153,126 +78,23 @@
   .btn-view { background: #FFFFFF; color: #64748B; border: 1px solid #E2E8F0; }
   .btn-view:hover { border-color: #CBD5E1; color: #0F172A; background: #F8FAFC; }
 
-  /* 5. SOCIAL PROOF */
-  .social-proof { padding: 6rem 2rem; background: #FFFFFF; text-align: center; }
-  .social-proof h2 { font-family: 'Oswald', sans-serif; font-size: 2.8rem; color: #0F172A; text-transform: uppercase; margin-bottom: 3.5rem; }
-  .sp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(28rem, 1fr)); gap: 2.5rem; max-width: 110rem; margin: 0 auto; }
-  .sp-card { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 2.5rem; border-radius: 0.8rem; text-align: left; }
-  .sp-stars { color: #F59E0B; margin-bottom: 1.5rem; display:flex; gap:0.4rem; font-size:1.6rem; }
-  .sp-text { font-family: 'Jost', sans-serif; font-size: 1.4rem; color: #475569; margin-bottom: 1.5rem; font-style: italic; line-height:1.6; }
-  .sp-author { font-weight: 700; color: #0F172A; font-size: 1.3rem; text-transform:uppercase; letter-spacing:1px; }
-  .sp-role { font-size:1.2rem; color:#94A3B8; }
-
-  /* 6. NEWSLETTER / LEAD MAGNET */
-  .newsletter { background: #0F172A; padding: 6rem 2rem; color: #fff; text-align: center; }
-  .nl-box { max-width: 55rem; margin: 0 auto; }
-  .nl-box h3 { font-family: 'Oswald', sans-serif; font-size: 3rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing:1px; }
-  .nl-box p { font-family: 'Jost', sans-serif; font-size: 1.5rem; color: #94A3B8; margin-bottom: 2.5rem; }
-  .nl-form { display: flex; gap: 1rem; }
-  .nl-input { flex: 1; padding: 1.4rem 2rem; border: none; border-radius: 0.4rem; font-family: 'Jost', sans-serif; font-size: 1.4rem; outline:none; }
-  .nl-btn { background: #000000; color: #fff; border: none; padding: 1.4rem 2.5rem; border-radius: 0.4rem; font-weight: 700; letter-spacing:1px; font-family: 'Jost', sans-serif; text-transform: uppercase; cursor: pointer; transition: background 0.3s; }
-  .nl-btn:hover { background: #333333; }
-
   @media (max-width: 76.8rem) {
-    .trust-bar { flex-direction: column; gap: 3rem; align-items: flex-start; }
-    .nl-form { flex-direction: column; }
-    .wix-product .p-actions { height: 4rem; opacity: 1; margin-top: 1.5rem; } /* En móviles siempre visibles */
+    .wix-product .p-actions { height: 4rem; opacity: 1; margin-top: 1.5rem; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-  <!-- 2. HERO SECTION -->
-  <section class="hero-tech">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <h1 class="hero-title">Nueva Colección 2026</h1>
-      <p class="hero-subtitle">Equipos de computación de alto rendimiento. Diseñados para profesionales, ingenieros y entusiastas que no aceptan límites.</p>
-      <a href="{% url 'products:list' %}" class="btn-hero-primary">Explorar Catálogo</a>
-    </div>
-  </section>
-
-  <!-- 3. TRUST BAR -->
-  <div class="trust-bar">
-    <div class="trust-item">
-      <span class="material-symbols-outlined trust-icon">local_shipping</span>
-      <div class="trust-text">
-        <h4>Envío Gratuito</h4>
-        <p>A toda Colombia en pedidos mayores a $500k</p>
-      </div>
-    </div>
-    <div class="trust-item">
-      <span class="material-symbols-outlined trust-icon">verified_user</span>
-      <div class="trust-text">
-        <h4>Pago 100% Seguro</h4>
-        <p>Pasarela cifrada y autenticada</p>
-      </div>
-    </div>
-    <div class="trust-item">
-      <span class="material-symbols-outlined trust-icon">assignment_return</span>
-      <div class="trust-text">
-        <h4>Devoluciones</h4>
-        <p>30 días calendario de garantía</p>
-      </div>
-    </div>
+  <!-- CABECERA DE TIENDA -->
+  <div style="text-align:center; padding: 6rem 2rem 4rem;">
+    <span style="display:block; font-size:1.3rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.2rem; margin-bottom:1rem;">Nuestra Tienda</span>
+    <h1 style="font-family:'Oswald', sans-serif; font-size:3.6rem; text-transform:uppercase; color:#0F172A; margin:0;">Hardware de Alto Rendimiento</h1>
   </div>
 
-  <!-- 4. FEATURED PRODUCTS (GRILLA) -->
-  <div style="text-align:center; padding: 8rem 2rem 4rem;">
-    <span style="display:block; font-size:1.3rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.2rem; margin-bottom:1rem;">Selección Premium</span>
-    <h2 style="font-family:'Oswald', sans-serif; font-size:3.6rem; text-transform:uppercase; color:#0F172A; margin:0;">Lo Más Vendido</h2>
-  </div>
-
+  <!-- GRILLA DE PRODUCTOS (TIENDA EN HOME) -->
   <div class="wix-grid">
     {% for producto in productos_destacados %}
       {% include 'products/_product_card.html' with product=producto %}
     {% endfor %}
   </div>
-
-  <!-- 5. SOCIAL PROOF (TESTIMONIOS) -->
-  <section class="social-proof">
-    <h2>Nuestros Clientes</h2>
-    <div class="sp-grid">
-      <!-- Tarjeta 1 -->
-      <div class="sp-card">
-        <div class="sp-stars">
-          <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span>
-        </div>
-        <p class="sp-text">"La GPU llegó perfectamente embalada. El rendimiento de mi máquina para modelado 3D incrementó un 200%. Excelente servicio al cliente."</p>
-        <div class="sp-author">Carlos Mendoza</div>
-        <div class="sp-role">Arquitecto de Software</div>
-      </div>
-      <!-- Tarjeta 2 -->
-      <div class="sp-card">
-        <div class="sp-stars">
-          <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span>
-        </div>
-        <p class="sp-text">"Armé toda mi setup gamer con los componentes de esta tienda. Todo tiene garantía original y el envío a Medellín tomó solo 2 días."</p>
-        <div class="sp-author">Andrea Valderrama</div>
-        <div class="sp-role">Entusiasta Gaming</div>
-      </div>
-      <!-- Tarjeta 3 -->
-      <div class="sp-card">
-        <div class="sp-stars">
-          <span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star</span><span class="material-symbols-outlined">star_half</span>
-        </div>
-        <p class="sp-text">"La interfaz es súper limpia y segura. Fue fácil conseguir una tarjeta madre que ya estaba agotada en otros sitios grandes de tecnología."</p>
-        <div class="sp-author">Felipe Ortiz</div>
-        <div class="sp-role">Desarrollador Web</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 6. NEWSLETTER / LEAD MAGNET -->
-  <section class="newsletter">
-    <div class="nl-box">
-      <h3>Acceso Exclusivo</h3>
-      <p>Únete a nuestra lista VIP y recibe un 10% de descuento en tu primer componente además de avisos cuando llegue hardware de edición limitada y escaso en el mercado.</p>
-      <form class="nl-form" action="#" onsubmit="event.preventDefault(); Swal.fire('¡Suscrito!', 'Revisa tu bandeja de entrada en unos minutos.', 'success');">
-        <input type="email" class="nl-input" placeholder="Tu mejor dirección de correo" required>
-        <button type="submit" class="nl-btn">Obtener Descuento</button>
-      </form>
-    </div>
-  </section>
-
 {% endblock %}

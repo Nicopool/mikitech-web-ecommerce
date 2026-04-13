@@ -85,8 +85,11 @@ class Producto(models.Model):
     @property
     def precio_con_descuento(self):
         """Retorna el precio final tras aplicar el descuento activo."""
+        from decimal import Decimal
         if self.descuento_activo:
-            return round(float(self.precio) * (1 - self.descuento_porcentaje / 100))
+            # Calcular multiplicador de descuento: e.g. 0.90 para 10%
+            multiplicador = Decimal(1) - (Decimal(self.descuento_porcentaje) / Decimal(100))
+            return (self.precio * multiplicador).quantize(Decimal('1.'))
         return self.precio
 
     def en_existencia(self):
