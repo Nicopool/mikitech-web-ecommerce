@@ -92,7 +92,8 @@ class Producto(models.Model):
             return (self.precio * multiplicador).quantize(Decimal('1.'))
         return self.precio
 
-    def en_existencia(self):
+    @property
+    def en_stock(self):
         return self.existencias > 0
 
 

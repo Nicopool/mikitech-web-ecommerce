@@ -49,16 +49,52 @@
         <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="prod-short-desc">Descripción corta</label>
         <input type="text" id="prod-short-desc" name="descripcion_corta" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem;" value="{{ producto.descripcion_corta|default:'' }}" placeholder="Máx. 500 caracteres" maxlength="500">
       </div>
+      <!-- IMAGEN PRINCIPAL -->
       <div class="form-group" style="grid-column: span 2;">
-        <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="prod-image-file">Cargar desde PC (Recomendado)</label>
-        <input type="file" id="prod-image-file" name="archivo_imagen" accept="image/*" style="width:100%; padding:10px; border:1px dashed var(--ds-border); border-radius:8px; font-size:1.3rem; background:#f8fafc;" onchange="previewProductFile(this)">
-      </div>
-      <div class="form-group" style="grid-column: span 2;">
-        <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="prod-image">O usar URL externa</label>
-        <input type="url" id="prod-image" name="url_imagen_principal" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem;" value="{{ producto.url_imagen_principal|default:'' }}" placeholder="https://ejemplo.com/imagen.jpg" oninput="if(!document.getElementById('prod-image-file').value) document.getElementById('img-preview').src = this.value || ''">
-        <div style="margin-top:10px; width:200px; height:200px; border:1px solid var(--ds-border); border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#f8fafc;">
-          <img id="img-preview" src="{{ producto.url_imagen_principal|default:'' }}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.style.display='none'" onload="this.style.display='block'">
+        <label style="display:block; font-size:1.3rem; font-weight:700; color:var(--ds-text); margin-bottom:12px;">
+          <span class="material-symbols-outlined" style="vertical-align:middle; margin-right:5px; color:var(--ds-primary);">image</span> Imagen Principal
+        </label>
+        <div style="display:flex; gap:20px; align-items:flex-start;">
+          <div style="flex:1;">
+            <input type="file" id="prod-image-file" name="archivo_imagen" accept="image/*" style="display:none;" onchange="previewProductFile(this)">
+            <label for="prod-image-file" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:150px; border:2px dashed var(--ds-border); border-radius:16px; cursor:pointer; background:var(--ds-bg); transition:all 0.3s ease;" onmouseover="this.style.borderColor=var(--ds-primary); this.style.background='white';" onmouseout="this.style.borderColor='var(--ds-border)'; this.style.background='var(--ds-bg)';" id="drop-zone-main">
+              <span class="material-symbols-outlined" style="font-size:3.2rem; color:var(--ds-primary); margin-bottom:10px;">cloud_upload</span>
+              <span style="font-size:1.3rem; font-weight:600; color:var(--ds-text);">Seleccionar Foto Principal</span>
+              <span style="font-size:1.1rem; color:#94A3B8; margin-top:5px;">Archivos JPG, PNG o WEBP</span>
+            </label>
+          </div>
+          <div style="width:150px; height:150px; border:1px solid var(--ds-border); border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:white; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+            <img id="img-preview" src="{{ producto.url_imagen_principal|default:'' }}" style="max-width:90%; max-height:90%; object-fit:contain; {% if not producto.url_imagen_principal %}display:none;{% endif %}">
+            {% if not producto.url_imagen_principal %}
+            <span id="preview-placeholder" class="material-symbols-outlined" style="font-size:4rem; color:#E2E8F0;">image_not_supported</span>
+            {% endif %}
+          </div>
         </div>
+      </div>
+
+      <!-- GALERÍA DE IMÁGENES -->
+      <div class="form-group" style="grid-column: span 2; margin-top: 10px;">
+        <label style="display:block; font-size:1.3rem; font-weight:700; color:var(--ds-text); margin-bottom:12px;">
+          <span class="material-symbols-outlined" style="vertical-align:middle; margin-right:5px; color:var(--ds-primary);">photo_library</span> Galería de Imágenes (Múltiples)
+        </label>
+        <input type="file" id="prod-gallery-files" name="archivos_galeria" accept="image/*" multiple style="display:none;" onchange="previewGalleryFiles(this)">
+        <label for="prod-gallery-files" style="display:flex; align-items:center; gap:15px; padding:15px 25px; border:1px solid var(--ds-border); border-radius:12px; cursor:pointer; background:white; transition:all 0.3s ease; font-weight:600; font-size:1.3rem;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';" onmouseout="this.style.boxShadow='none';">
+          <span class="material-symbols-outlined" style="color:var(--ds-primary);">add_a_photo</span> Añadir fotos a la galería
+        </label>
+        
+        <div id="gallery-preview-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:15px; margin-top:20px;">
+          {% for extra in producto.imagenes.all %}
+          <div class="gallery-item-wrapper" style="position:relative; aspect-ratio:1/1; border:1px solid var(--ds-border); border-radius:10px; overflow:hidden; background:white;">
+            <img src="{{ extra.url_imagen }}" style="width:100%; height:100%; object-fit:contain;">
+            <div style="position:absolute; top:5px; right:5px; display:flex; gap:4px;">
+                <button type="button" onclick="marcarParaEliminar('{{ extra.id }}', this)" style="width:24px; height:24px; border-radius:6px; background:#EF4444; color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="Eliminar">
+                    <span class="material-symbols-outlined" style="font-size:1.6rem;">close</span>
+                </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div id="delete-queue" style="display:none;"></div>
       </div>
       
       <script>
@@ -66,11 +102,47 @@
         if (input.files && input.files[0]) {
           var reader = new FileReader();
           reader.onload = function(e) {
-            document.getElementById('img-preview').src = e.target.result;
-            document.getElementById('img-preview').style.display = 'block';
+            const preview = document.getElementById('img-preview');
+            const placeholder = document.getElementById('preview-placeholder');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            if(placeholder) placeholder.style.display = 'none';
           };
           reader.readAsDataURL(input.files[0]);
         }
+      }
+
+      function previewGalleryFiles(input) {
+        const container = document.getElementById('gallery-preview-container');
+        if (input.files) {
+          Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const div = document.createElement('div');
+              div.className = 'gallery-item-wrapper new-item';
+              div.style.cssText = 'position:relative; aspect-ratio:1/1; border:1px solid var(--ds-primary); border-radius:10px; overflow:hidden; background:white; animation: fadeIn 0.3s ease;';
+              div.innerHTML = `
+                <img src="${e.target.result}" style="width:100%; height:100%; object-fit:contain; opacity:0.7;">
+                <div style="position:absolute; bottom:0; left:0; right:0; background:var(--ds-primary); color:white; font-size:9px; text-align:center; padding:2px; font-weight:700;">NUEVO</div>
+              `;
+              container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      }
+
+      function marcarParaEliminar(id, btn) {
+        const queue = document.getElementById('delete-queue');
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'eliminar_imagenes';
+        input.value = id;
+        queue.appendChild(input);
+        btn.closest('.gallery-item-wrapper').style.opacity = '0.3';
+        btn.closest('.gallery-item-wrapper').style.filter = 'grayscale(1)';
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.6rem;">restore</span>';
+        btn.onclick = function() { location.reload(); }; // Simplificado para Demo
       }
       </script>
     </div>

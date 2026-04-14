@@ -3,9 +3,27 @@
 {% block page_title %}Reportes y Análisis — MIKITECH{% endblock %}
 
 {% block admin_content %}
-<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 40px;">
+<!-- CABECERA PROFESIONAL (PRINT-READY) -->
+<div class="report-header" style="display:none; margin-bottom:40px; border-bottom:3px solid var(--ds-primary); padding-bottom:20px;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div style="display:flex; align-items:center; gap:15px;">
+      <img src="{% static 'img/logo.png' %}" alt="Logo MIKITECH" style="height:60px;">
+      <div>
+        <h1 style="font-size:2.8rem; font-weight:800; color:var(--ds-secondary); margin:0;">MIKITECH — B.I. REPORT</h1>
+        <p style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:600; margin:0;">Software de Gestión Técnica v2026.04</p>
+      </div>
+    </div>
+    <div style="text-align:right; font-size:1.1rem; line-height:1.4;">
+      <p style="margin:0;"><strong>FECHA GENERACIÓN:</strong> {{ now|date:"d/m/Y H:i" }}</p>
+      <p style="margin:0;"><strong>OPERADOR:</strong> {{ request.session.nombre_usuario|default:"Administrador" }}</p>
+      <p style="margin:0;"><strong>PERIODO:</strong> {{ estadisticas.filtro_actual|upper }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 40px;" id="no-print">
   <div>
-    <h2 style="font-size:2.4rem; font-weight:800; margin:0;">📊 Inteligencia de Negocio</h2>
+    <h2 style="font-size:2.4rem; font-weight:800; margin:0;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 10px; color:var(--ds-primary);">analytics</span> Inteligencia de Negocio</h2>
     <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Métricas clave de rendimiento y herramientas de extracción de datos.</p>
   </div>
   <div style="display:flex; gap: 15px;">
@@ -18,36 +36,38 @@
         <option value="90" {% if estadisticas.filtro_actual == '90' %}selected{% endif %}>Último Trimestre (90D)</option>
       </select>
     </form>
-    <button class="g-btn-primary" onclick="window.print()">📥 GENERAR PDF</button>
+    <button class="g-btn-primary" onclick="window.print()" style="display:flex; align-items:center; gap:8px;">
+        <span class="material-symbols-outlined">print</span> GENERAR PDF PROFESIONAL
+    </button>
   </div>
 </div>
 
 <!-- PANEL DE MÉTRICAS GLOBALES -->
 <div class="g-row u-mb-4" style="margin-bottom: 40px;">
   <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #2563EB;">
-      <div style="font-size:3rem; margin-bottom:1rem;">📦</div>
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #2563EB;">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#2563EB; margin-bottom:10px;">inventory_2</span>
       <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Hardware Total</div>
       <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_productos }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #7C3AED;">
-      <div style="font-size:3rem; margin-bottom:1rem;">👥</div>
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #7C3AED;">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#7C3AED; margin-bottom:10px;">groups</span>
       <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Audiencia</div>
       <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_usuarios }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #10B981;">
-      <div style="font-size:3rem; margin-bottom:1rem;">📂</div>
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #10B981;">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#10B981; margin-bottom:10px;">folder_special</span>
       <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Líneas Base</div>
       <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_categorias }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 40px 20px; border-top: 4px solid #F59E0B;">
-      <div style="font-size:3rem; margin-bottom:1rem;">💰</div>
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #F59E0B;">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#F59E0B; margin-bottom:10px;">payments</span>
       <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Ticket Promedio</div>
       <div style="font-size:2.4rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.ticket_promedio|currency_cop }}</div>
     </div>
@@ -55,19 +75,90 @@
 </div>
 
 <!-- GRÁFICO DE RENDIMIENTO -->
-<div class="mpro-card u-mb-4" style="margin-bottom: 40px; padding: 30px;">
+<div class="mpro-card u-mb-4" style="margin-bottom: 40px; padding: 30px; border-radius:16px;">
   <div style="border-bottom:1px solid #E2E8F0; padding-bottom:1.5rem; margin-bottom:2rem; display: flex; justify-content: space-between; align-items: center;">
-    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);">📈 Rendimiento Comercial (Últimos 6 Meses)</h3>
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);"><span class="material-symbols-outlined" style="vertical-align: middle;">bar_chart</span> Curva de Ingresos (COP Millones)</h3>
+    <span style="font-size:13px; color:var(--ds-text-soft); font-weight:600;">HISTORIAL DE LOS ÚLTIMOS 6 MESES</span>
   </div>
   <div style="position: relative; height: 350px; width: 100%;">
     <canvas id="ventasChart"></canvas>
   </div>
 </div>
 
+<!-- TABLA DE REPORTES DETALLADA (CRUD COMPLETO) -->
+<div class="mpro-card" style="padding:0; overflow:hidden; margin-bottom: 40px; border-radius:16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--ds-border);">
+  <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); background: var(--ds-bg); display: flex; justify-content: space-between; align-items: center;">
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text); margin:0;"><span class="material-symbols-outlined" style="vertical-align: middle;">receipt_long</span> Registro Completo de Transacciones</h3>
+    <div style="display:flex; gap:10px;">
+        <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; font-weight:700; padding:8px 15px; border-radius:8px; font-size:1.2rem;">{{ pedidos|length }} OPERACIONES ENCONTRADAS</span>
+    </div>
+  </div>
+  
+  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none; overflow-x:auto;">
+    <table class="g-table" style="width:100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background:var(--ds-bg-alt);">
+          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">REF. PEDIDO</th>
+          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">FECHA/HORA</th>
+          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">CLIENTE & DOCUMENTO</th>
+          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">HARDWARE ADQUIRIDO</th>
+          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">MONTO TOTAL</th>
+          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px; text-align:center;">ESTADO</th>
+          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px; text-align:center;">ACCIÓN</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pedido in pedidos %}
+        <tr style="border-bottom:1px solid #F1F5F9; transition: background 0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
+          <td style="padding:20px; font-family:'Inter', monospace; font-weight:700; color:var(--ds-secondary);">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</td>
+          <td style="padding:20px; font-size:1.3rem; color:#475569;">
+            <div style="font-weight:700;">{{ pedido.creado_el|date:"d M Y" }}</div>
+            <div style="font-size:1.1rem; opacity:0.7;">{{ pedido.creado_el|date:"h:i A" }}</div>
+          </td>
+          <td style="padding:20px; font-size:1.3rem;">
+            <div style="font-weight:800; color:var(--ds-primary);">{{ pedido.usuario.nombre_mostrado }}</div>
+            <div style="font-size:1.1rem; color:#64748B; margin-top:4px;">ID: {{ pedido.cedula|default:"N/A" }} | Tel: {{ pedido.telefono|default:"N/A" }}</div>
+          </td>
+          <td style="padding:20px; font-size:1.2rem; max-width: 250px;">
+            <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                {% for item in pedido.detalles.all %}
+                   <span style="background:#F1F5F9; color:#475569; padding:2px 8px; border-radius:4px; font-size:1.1rem; white-space:nowrap; border:1px solid #E2E8F0;">
+                     {{ item.cantidad }}x {{ item.producto.nombre|truncatechars:15 }}
+                   </span>
+                {% endfor %}
+            </div>
+          </td>
+          <td style="padding:20px; font-size:1.5rem; font-weight:800; color:#0F172A;">
+            {{ pedido.monto_total|currency_cop }}
+            <div style="font-size:1rem; color:#10B981; font-weight:600;">IVA INC. (19%)</div>
+          </td>
+          <td style="padding:20px; text-align:center;">
+            {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' %}
+              <span class="mpro-badge" style="background:#FEF3C7; color:#D97706; padding:6px 12px; font-weight:700; border-radius:20px;">PENDIENTE</span>
+            {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+              <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; padding:6px 12px; font-weight:700; border-radius:20px;">EN CAMINO</span>
+            {% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
+              <span class="mpro-badge" style="background:#D1FAE5; color:#059669; padding:6px 12px; font-weight:700; border-radius:20px;">ENTREGADO</span>
+            {% else %}
+              <span class="mpro-badge" style="background:#F3F4F6; color:#4B5563; padding:6px 12px; font-weight:700; border-radius:20px;">{{ pedido.estado|upper }}</span>
+            {% endif %}
+          </td>
+          <td style="padding:20px; text-align:center;">
+             <a href="{% url 'admin_order_invoice' pedido.id %}" target="_blank" class="g-btn-primary" style="padding:8px 15px; font-size:1.1rem; background:transparent; border:2px solid var(--ds-primary); color:var(--ds-primary); box-shadow:none; font-weight:700;">VER FACTURA</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="padding:60px; text-align:center; color:#64748B; font-size:1.5rem;">No hay registros de transacciones para este periodo.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <!-- HERRAMIENTAS DE EXPORTACIÓN -->
-<div class="mpro-card" style="margin-bottom: 40px;">
+<div class="mpro-card" style="margin-bottom: 40px; border-radius:16px;" id="no-print">
   <div style="border-bottom:1px solid #E2E8F0; padding-bottom:1.5rem; margin-bottom:3rem;">
-    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);">📂 Exportación Estratégica</h3>
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);">📂 Exportación de Activos</h3>
   </div>
   <div class="g-row">
     <div class="g-col-4">
@@ -94,61 +185,16 @@
   </div>
 </div>
 
-<!-- TABLA DE REPORTES DETALLADA -->
-<div class="mpro-card" style="padding:0; overflow:hidden; margin-bottom: 40px;">
-  <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center;">
-    <span style="font-weight: 700; color: var(--ds-text);">📋 Registro Extendido de Transacciones (Pedidos)</span>
-    <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8;">{{ pedidos|length }} Registros</span>
-  </div>
-  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none;">
-    <table class="g-table">
-      <thead>
-        <tr>
-          <th>ID REFERENCIA</th>
-          <th>FECHA</th>
-          <th>CLIENTE</th>
-          <th>MONTO TOTAL</th>
-          <th>ESTADO OPERATIVO</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for pedido in pedidos %}
-        <tr>
-          <td style="font-family:monospace; color:#64748B;">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</td>
-          <td style="color:#64748B; font-weight:500;">{{ pedido.creado_el|date:"d M Y, h:i A" }}</td>
-          <td style="font-weight:600; color:var(--ds-primary);">@{{ pedido.usuario.nombre_usuario }}</td>
-          <td style="font-weight:700;">{{ pedido.monto_total|currency_cop }}</td>
-          <td>
-            {% if pedido.estado == 'Pendiente' %}
-              <span class="mpro-badge" style="background:#FEF3C7; color:#D97706;">Pendiente</span>
-            {% elif pedido.estado == 'Enviado' %}
-              <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8;">Enviado</span>
-            {% elif pedido.estado == 'Entregado' %}
-              <span class="mpro-badge" style="background:#D1FAE5; color:#059669;">Entregado</span>
-            {% else %}
-              <span class="mpro-badge" style="background:#F3F4F6; color:#4B5563;">{{ pedido.estado }}</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="u-text-center" style="padding:50px; color:#64748B; font-size:1.4rem;">
-            No hay transacciones registradas para este periodo.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
 <style>
   @media print {
-    .g-sidebar, .g-topbar, .g-btn-primary { display: none !important; }
-    .g-main-wrapper { margin-left: 0 !important; width: 100% !important; }
-    .mpro-card { border: 1px solid #E2E8F0 !important; box-shadow: none !important; padding: 20px !important; }
-    body { background: white !important; }
-    h2, h3 { color: black !important; }
+    #no-print, .g-sidebar, .g-topbar, .g-btn-primary, .sb-logo, .sb-nav { display: none !important; }
+    .report-header { display: block !important; }
+    .g-main-wrapper { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
+    .mpro-card { border: 1px solid #E2E8F0 !important; box-shadow: none !important; padding: 10px !important; margin-bottom: 20px !important; page-break-inside: avoid; }
+    body { background: white !important; font-size: 10pt; }
+    h2, h3 { color: black !important; margin-top: 5px !important; }
+    .g-table th { background: #F1F5F9 !important; color: black !important; -webkit-print-color-adjust: exact; }
+    .mpro-badge { border: 1px solid #CBD5E1 !important; color: black !important; }
   }
 </style>
 

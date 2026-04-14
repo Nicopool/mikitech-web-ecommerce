@@ -93,8 +93,8 @@
       {{ perfil.nombre_usuario|first|upper }}
     </div>
     {% endif %}
-    <div class="sb-name">{{ perfil.nombre_completo|default:perfil.nombre_usuario }}</div>
-    <div class="sb-role">{{ perfil.rol }}</div>
+    <div class="sb-user-name">{{ perfil.nombre_mostrado }}</div>
+    <div class="sb-user-role">Usuario</div>
   </div>
 
   <nav class="sb-nav">

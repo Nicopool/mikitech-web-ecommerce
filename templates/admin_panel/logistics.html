@@ -1,169 +1,252 @@
 {% extends 'admin_panel/base_admin.html' %}
 {% load miki_filters %}
 
+{% block page_title %}Logística Pro — MIKITECH{% endblock %}
+
 {% block admin_content %}
-<div class="g-header-flex">
+<!-- ENCABEZADO DE SECCIÓN -->
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
   <div>
-    <h2 class="g-section-title">Logística y Despachos</h2>
-    <p class="g-section-subtitle">Gestión de envíos y notificaciones de entrega en tiempo real.</p>
+    <h2 style="font-size:2.2rem; font-weight:800; margin:0;">🛰️ Centro de Comando Logístico</h2>
+    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Gestión de despachos y asignación de flota motorizada.</p>
   </div>
 </div>
 
-<!-- Tarjetas de Resumen -->
-<div class="g-stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 3rem;">
-  <div class="g-stat-card">
-    <div class="g-stat-icon" style="background: #FFF7ED; color: #EA580C;">pending</div>
-    <div class="g-stat-info">
-      <span class="g-stat-label">Pendientes</span>
-      <span class="g-stat-value">{{ stats.pendientes }}</span>
+<!-- TARJETAS DE MÉTRICAS (SIMETRÍA MPRO) -->
+<div class="g-row u-mb-4">
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+        <span class="material-symbols-outlined" style="color:#F59E0B; font-size:2.4rem;">pending_actions</span>
+        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Por Despachar</div>
+      </div>
+      <div style="font-size:3.2rem; font-weight:800; color:#F59E0B;">{{ stats.pendientes }}</div>
     </div>
   </div>
-  <div class="g-stat-card">
-    <div class="g-stat-icon" style="background: #EFF6FF; color: #2563EB;">local_shipping</div>
-    <div class="g-stat-info">
-      <span class="g-stat-label">En Camino</span>
-      <span class="g-stat-value">{{ stats.en_camino }}</span>
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+        <span class="material-symbols-outlined" style="color:#3B82F6; font-size:2.4rem;">local_shipping</span>
+        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">En Tránsito</div>
+      </div>
+      <div style="font-size:3.2rem; font-weight:800; color:#3B82F6;">{{ stats.en_camino }}</div>
     </div>
   </div>
-  <div class="g-stat-card">
-    <div class="g-stat-icon" style="background: #F0FDF4; color: #16A34A;">check_circle</div>
-    <div class="g-stat-info">
-      <span class="g-stat-label">Entregados</span>
-      <span class="g-stat-value">{{ stats.entregados }}</span>
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+        <span class="material-symbols-outlined" style="color:#10B981; font-size:2.4rem;">check_circle</span>
+        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Entregados</div>
+      </div>
+      <div style="font-size:3.2rem; font-weight:800; color:#10B981;">{{ stats.entregados }}</div>
     </div>
   </div>
-  <div class="g-stat-card">
-    <div class="g-stat-icon" style="background: #F8FAFC; color: #64748B;">filter_list</div>
-    <div class="g-stat-info">
-      <span class="g-stat-label">Filtro Activo</span>
-      <span class="g-stat-value" style="font-size: 1.4rem;">{{ stats.filtro_actual|capfirst }}</span>
+  <div class="g-col-3">
+    <div class="mpro-card">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+        <span class="material-symbols-outlined" style="color:#EF4444; font-size:2.4rem;">no_accounts</span>
+        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Sin Piloto</div>
+      </div>
+      <div style="font-size:3.2rem; font-weight:800; color:#EF4444;">{{ stats.sin_repartidor }}</div>
     </div>
   </div>
 </div>
 
-<!-- Filtros Rápidos -->
-<div style="margin-bottom: 2rem; display: flex; gap: 1rem;">
-  <a href="?estado=all" class="g-btn {% if stats.filtro_actual == 'all' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">Todos</a>
-  <a href="?estado=Pendiente" class="g-btn {% if stats.filtro_actual == 'Pendiente' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">Pendientes</a>
-  <a href="?estado=Enviado" class="g-btn {% if stats.filtro_actual == 'Enviado' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">En Camino</a>
-  <a href="?estado=Entregado" class="g-btn {% if stats.filtro_actual == 'Entregado' %}g-btn-primary{% else %}g-btn-outline{% endif %}" style="padding: 0.6rem 1.5rem; font-size: 1.2rem; border-radius: 2rem; text-decoration: none;">Entregados</a>
+<!-- FILTROS Y BÚSQUEDA -->
+<div class="mpro-card" style="padding: 2rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+  <div style="display: flex; gap: 1rem;">
+    <a href="?estado=all" class="g-btn-primary" style="padding: 8px 18px; font-size: 1.2rem; border-radius: 20px; text-decoration: none; transition: 0.3s; {% if stats.filtro_actual != 'all' %}background:#F1F5F9; color:#64748B; box-shadow:none;{% endif %}">Todos</a>
+    <a href="?estado=Pendiente" class="g-btn-primary" style="padding: 8px 18px; font-size: 1.2rem; border-radius: 20px; text-decoration: none; transition: 0.3s; {% if stats.filtro_actual != 'Pendiente' %}background:#F1F5F9; color:#64748B; box-shadow:none;{% endif %}">Pendientes</a>
+    <a href="?estado=Enviado" class="g-btn-primary" style="padding: 8px 18px; font-size: 1.2rem; border-radius: 20px; text-decoration: none; transition: 0.3s; {% if stats.filtro_actual != 'Enviado' %}background:#F1F5F9; color:#64748B; box-shadow:none;{% endif %}">En Camino</a>
+    <a href="?estado=Entregado" class="g-btn-primary" style="padding: 8px 18px; font-size: 1.2rem; border-radius: 20px; text-decoration: none; transition: 0.3s; {% if stats.filtro_actual != 'Entregado' %}background:#F1F5F9; color:#64748B; box-shadow:none;{% endif %}">Entregados</a>
+  </div>
+  
+  <div class="g-search-wrapper" style="width: 350px; position:relative;">
+    <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94A3B8; display:flex; align-items:center;"><span class="material-symbols-outlined" style="font-size:1.8rem;">search</span></span>
+    <input type="text" id="orderSearch" class="g-search" placeholder="Buscar por # Pedido o Cliente..." style="width: 100%; padding-left: 40px; height:40px; border-radius:8px; border:1px solid #E2E8F0; outline:none; font-size:1.3rem;">
+  </div>
 </div>
 
-<!-- Tabla de Pedidos -->
-<div class="g-card">
-  <table class="g-table">
-    <thead>
-      <tr>
-        <th>ID Pedido</th>
-        <th>Cliente</th>
-        <th>Fecha</th>
-        <th>Destino</th>
-        <th>Total</th>
-        <th>Repartidor</th>
-        <th>Estado Actual</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for p in pedidos %}
-      <tr>
-        <td style="font-family: monospace; font-weight: 600; color: var(--ds-primary);">#{{ p.id|stringformat:"s"|slice:":8" }}</td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 3rem; height: 3rem; border-radius: 50%; background: #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; overflow: hidden;">
-              {% if p.usuario.url_avatar %}
-              <img src="{{ p.usuario.url_avatar }}" style="width: 100%; height: 100%; object-fit: cover;">
-              {% else %}
-              {{ p.usuario.nombre_mostrado|first|upper }}
-              {% endif %}
+<!-- TABLA DE DESPACHOS -->
+<div class="mpro-card" style="padding:0;">
+  <div class="g-table-container">
+    <table class="g-table" id="logisticsTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente / Destino</th>
+          <th>Monto</th>
+          <th>Repartidor</th>
+          <th>Estado</th>
+          <th style="text-align:center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pedidos %}
+        <tr data-search="{{ p.id|stringformat:'s'|lower }} {{ p.usuario.nombre_mostrado|lower }} {{ p.direccion_envio|lower }}">
+          <td style="font-family:monospace; font-weight:700; color:var(--ds-primary);">#{{ p.id|stringformat:"s"|slice:":8"|upper }}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:3.6rem; height:3.6rem; border-radius:10px; background:#F1F5F9; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.4rem; overflow:hidden;">
+                {% if p.usuario.url_avatar %}
+                  <img src="{{ p.usuario.url_avatar }}" style="width:100%; height:100%; object-fit:cover;">
+                {% else %}
+                  {{ p.usuario.nombre_mostrado|first|upper }}
+                {% endif %}
+              </div>
+              <div style="max-width:200px;">
+                <div style="font-weight:700; font-size:1.3rem;">{{ p.usuario.nombre_mostrado }}</div>
+                <div style="font-size:1.1rem; color:#64748B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{{ p.direccion_envio }}">{{ p.direccion_envio }}</div>
+              </div>
             </div>
-            <div>
-              <div style="font-weight: 600;">{{ p.usuario.nombre_mostrado }}</div>
-              <div style="font-size: 1.1rem; color: #64748B;">@{{ p.usuario.nombre_usuario }}</div>
+          </td>
+          <td style="font-weight:800; color:var(--ds-text);">{{ p.monto_total|currency_cop }}</td>
+          <td>
+            {% if p.repartidor %}
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="material-symbols-outlined" style="font-size:1.6rem; color:#2563EB;">motorcycle</span>
+                <span style="font-weight:700; color:#1E293B; font-size:1.2rem;">{{ p.repartidor.nombre_usuario }}</span>
+              </div>
+            {% else %}
+              <button onclick="openAssignModal('{{ p.id }}', '{{ p.usuario.nombre_mostrado|escapejs }}')" class="g-btn-primary" style="padding:6px 12px; font-size:1.1rem; background:#FEE2E2; color:#DC2626; box-shadow:none; border:none; cursor:pointer; border-radius:8px;">ASIGNAR PILOTO</button>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.estado == 'delivered' %}
+              <span class="mpro-badge" style="background:#DCFCE7; color:#16A34A; padding:6px 12px; border-radius:20px; font-weight:700; font-size:1rem;">ENTREGADO</span>
+            {% elif p.estado == 'shipped' %}
+              <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; padding:6px 12px; border-radius:20px; font-weight:700; font-size:1rem;">EN CAMINO</span>
+            {% elif p.estado == 'processing' or p.estado == 'pending' %}
+              <span class="mpro-badge" style="background:#FFF7ED; color:#EA580C; padding:6px 12px; border-radius:20px; font-weight:700; font-size:1rem;">PROCESANDO</span>
+            {% else %}
+              <span class="mpro-badge" style="background:#F1F5F9; color:#64748B; padding:6px 12px; border-radius:20px; font-weight:700; font-size:1rem;">{{ p.estado|upper }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center;">
+            <div style="display:flex; justify-content:center; gap:8px;">
+               <a href="{% url 'admin_order_invoice' p.id %}" target="_blank" class="g-action-btn" title="Ver Factura" style="background:#F1F5F9; border-radius:8px; display:flex; align-items:center; justify-content:center; width:32px; height:32px; text-decoration:none;">📎</a>
+               
+               {% if p.estado == 'pending' or p.estado == 'processing' %}
+                 <button onclick="updateStatus('{{ p.id }}', 'Enviado')" class="g-action-btn" style="background:#DBEAFE; color:#1D4ED8; border-radius:8px; border:none; cursor:pointer; width:32px; height:32px;" title="Marcar como Enviado">🚀</button>
+               {% endif %}
+
+               {% if p.estado == 'shipped' %}
+                 <button onclick="updateStatus('{{ p.id }}', 'Entregado')" class="g-action-btn" style="background:#DCFCE7; color:#16A34A; border-radius:8px; border:none; cursor:pointer; width:32px; height:32px;" title="Confirmar Entrega">✅</button>
+               {% endif %}
+
+               {% if p.estado != 'delivered' and p.estado != 'cancelled' %}
+                 <button onclick="updateStatus('{{ p.id }}', 'Cancelado')" class="g-action-btn" style="background:#FEE2E2; color:#DC2626; border-radius:8px; border:none; cursor:pointer; width:32px; height:32px;" title="Anular Pedido">✖️</button>
+               {% endif %}
             </div>
-          </div>
-        </td>
-        <td style="font-size: 1.2rem;">{{ p.creado_el|date:"d M Y, h:i A" }}</td>
-        <td style="max-width: 200px; font-size: 1.2rem; white-space: normal;">{{ p.direccion_envio }}</td>
-        <td style="font-weight: 700;">{{ p.monto_total|currency_cop }}</td>
-        <td>
-          {% if p.repartidor %}
-          <span style="background:#DBEAFE; color:#1D4ED8; padding:0.4rem 1rem; border-radius:20px; font-size:1rem; font-weight:700;">{{ p.repartidor.nombre_usuario }}</span>
-          {% else %}
-          <span style="color:#94A3B8; font-size:1.1rem; font-style:italic;">Sin asignar</span>
-          {% endif %}
-        </td>
-        <td>
-          <span class="g-badge {% if p.estado == 'delivered' %}badge-success{% elif p.estado == 'shipped' %}badge-info{% elif p.estado == 'pending' or p.estado == 'processing' %}badge-pending{% else %}badge-error{% endif %}">
-            {% if p.estado == 'delivered' %}Entregado{% elif p.estado == 'shipped' %}Enviado{% elif p.estado == 'pending' or p.estado == 'processing' %}Pendiente{% else %}Cancelado{% endif %}
-          </span>
-        </td>
-        <td>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <a href="{% url 'admin_order_invoice' p.id %}" target="_blank" class="g-btn-sm" title="Ver Factura" style="background: var(--ds-primary-light); color: var(--ds-primary); border: 1px solid var(--ds-primary); text-decoration: none;">
-              <span class="material-symbols-outlined">description</span>
-            </a>
-
-            {% if p.estado == 'pending' or p.estado == 'processing' %}
-            <form action="{% url 'admin_order_update' p.id %}" method="post">
-              {% csrf_token %}
-              <input type="hidden" name="nuevo_estado" value="Enviado">
-              <button type="submit" class="g-btn-sm" title="Marcar como Enviado" style="background: #EFF6FF; color: #2563EB; border: none; cursor: pointer;">
-                <span class="material-symbols-outlined">local_shipping</span>
-              </button>
-            </form>
-            {% endif %}
-
-            {% if p.estado == 'shipped' %}
-            <form action="{% url 'admin_order_update' p.id %}" method="post">
-              {% csrf_token %}
-              <input type="hidden" name="nuevo_estado" value="Entregado">
-              <button type="submit" class="g-btn-sm" title="Confirmar Entrega" style="background: #F0FDF4; color: #16A34A; border: none; cursor: pointer;">
-                <span class="material-symbols-outlined">task_alt</span>
-              </button>
-            </form>
-            {% endif %}
-
-            {% if p.estado != 'delivered' and p.estado != 'cancelled' %}
-            <form action="{% url 'admin_order_update' p.id %}" method="post" onsubmit="return confirm('¿Seguro que deseas cancelar este pedido?')">
-              {% csrf_token %}
-              <input type="hidden" name="nuevo_estado" value="Cancelado">
-              <button type="submit" class="g-btn-sm" title="Cancelar Pedido" style="background: #FEE2E2; color: #DC2626; border: none; cursor: pointer;">
-                <span class="material-symbols-outlined">cancel</span>
-              </button>
-            </form>
-            {% endif %}
-          </div>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 4rem; color: #64748B;">
-          <span class="material-symbols-outlined" style="font-size: 4rem; display: block; margin-bottom: 1rem;">inventory</span>
-          No se encontraron pedidos con estas características.
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="padding:80px; text-align:center;">
+             <span class="material-symbols-outlined" style="font-size:5rem; color:#CBD5E1; display:block; margin-bottom:15px;">rocket_launch</span>
+             <p style="font-size:1.5rem; color:#94A3B8; font-weight:600;">No hay misiones logísticas activas con este filtro.</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<!-- MODAL DE ASIGNACIÓN -->
+<div id="assignModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:999; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div class="mpro-card" style="width:100%; max-width:450px; padding:30px; animation: slideUp 0.3s ease;">
+    <h3 id="modalTitle" style="font-size:1.8rem; font-weight:800; margin-bottom:10px;">Asignar Repartidor</h3>
+    <p style="color:#64748B; font-size:1.2rem; margin-bottom:20px;">Selecciona el piloto disponible para el pedido <span id="orderIdLabel" style="font-family:monospace; font-weight:700; color:var(--ds-primary);"></span></p>
+    
+    <form id="assignForm" method="post" action="">
+      {% csrf_token %}
+      <div style="margin-bottom:25px;">
+        <label style="display:block; font-size:1.1rem; font-weight:700; margin-bottom:8px; color:#475569;">PILOTOS DISPONIBLES</label>
+        <select name="id_repartidor" required style="width:100%; padding:12px; border-radius:8px; border:1px solid #E2E8F0; outline:none; font-size:1.3rem; background:#F8FAFC;">
+          <option value="">-- Elige un Repartidor --</option>
+          {% for r in repartidores %}
+            <option value="{{ r.id }}">{{ r.nombre_usuario }} ({{ r.nombre_completo|default:"" }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" onclick="closeAssignModal()" class="g-btn-primary" style="background:#F1F5F9; color:#475569; box-shadow:none; border:none; cursor:pointer; border-radius:8px; height:40px;">Cancelar</button>
+        <button type="submit" class="g-btn-primary" style="height:40px; border:none; cursor:pointer; border-radius:8px;">Confirmar Asignación</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // SEARCH REALTIME
+  document.getElementById('orderSearch').addEventListener('keyup', function() {
+    let q = this.value.toLowerCase();
+    document.querySelectorAll('#logisticsTable tbody tr').forEach(tr => {
+      let text = tr.getAttribute('data-search') || "";
+      tr.style.display = text.includes(q) ? "" : "none";
+    });
+  });
+
+  // ASIGNACIÓN
+  function openAssignModal(orderId, clientName) {
+    document.getElementById('orderIdLabel').textContent = '#' + orderId.substring(0,8).toUpperCase();
+    document.getElementById('assignModal').style.display = 'flex';
+    document.getElementById('assignForm').action = "/admin-panel/logistica/asignar/" + orderId + "/";
+  }
+
+  function closeAssignModal() {
+    document.getElementById('assignModal').style.display = 'none';
+  }
+
+  // STATUS UPDATES CON SWEETALERT2
+  function updateStatus(orderId, nextStatus) {
+    let config = {
+      title: '¿Confirmar actualización?',
+      text: `¿Deseas cambiar el estado a: ${nextStatus}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'No, esperar',
+      confirmButtonColor: '#1D4ED8'
+    };
+
+    if(nextStatus === 'Cancelado') {
+      config.icon = 'warning';
+      config.confirmButtonColor = '#DC2626';
+    }
+
+    Swal.fire(config).then((result) => {
+      if (result.isConfirmed) {
+        // Enviar vía formulario POST dinámico
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "/admin-panel/logistica/actualizar/" + orderId + "/";
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'nuevo_estado';
+        statusInput.value = nextStatus;
+        
+        form.appendChild(csrfInput);
+        form.appendChild(statusInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  }
+</script>
 
 <style>
-  .badge-pending { background: #FFF7ED; color: #EA580C; }
-  .badge-info { background: #EFF6FF; color: #2563EB; }
-  .badge-success { background: #F0FDF4; color: #16A34A; }
-  .badge-error { background: #FEE2E2; color: #DC2626; }
-  
-  .g-btn-sm {
-    padding: 0.5rem;
-    border-radius: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-  }
-  .g-btn-sm:hover {
-    transform: scale(1.1);
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity:0; }
+    to { transform: translateY(0); opacity:1; }
   }
 </style>
 {% endblock %}

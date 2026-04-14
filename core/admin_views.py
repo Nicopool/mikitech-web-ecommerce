@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from products.models import Producto, Categoria
+from products.models import Producto, Categoria, ImagenProducto
 from interactions.models import Reseña, Pedido
 from users.models import Perfil, Notificacion
 import os
@@ -257,7 +257,7 @@ def crear_producto(petición):
 
             try:
                 cat = Categoria.objects.get(id=id_categoria)
-                Producto.objects.create(
+                nuevo_prod = Producto.objects.create(
                     id=uuid.uuid4(),
                     categoria=cat,
                     nombre=nombre,
@@ -267,24 +267,31 @@ def crear_producto(petición):
                     marca=marca,
                     descripcion=descripcion,
                     descripcion_corta=descripcion_corta,
-                    url_imagen_principal=petición.POST.get('url_imagen_principal', '').strip(),
                     es_destacado=es_destacado,
                     descuento_porcentaje=descuento_porcentaje,
                     descuento_expira_el=descuento_expira_el,
                     esta_activo=True,
                 )
                 
-                # Procesar Archivo Local después de crear para tener el ID si es necesario, 
-                # aunque aquí usamos UUID para el nombre del archivo.
+                # Imagen Principal
                 if 'archivo_imagen' in petición.FILES:
                     archivo = petición.FILES['archivo_imagen']
                     nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
                     ruta_guardada = default_storage.save(nombre_unico, archivo)
-                    # Re-obtener y actualizar el producto
-                    prod_reciente = Producto.objects.filter(enlace=enlace).first()
-                    if prod_reciente:
-                        prod_reciente.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
-                        prod_reciente.save()
+                    nuevo_prod.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
+                    nuevo_prod.save()
+
+                # Galería de Imágenes
+                if 'archivos_galeria' in petición.FILES:
+                    for f in petición.FILES.getlist('archivos_galeria'):
+                        nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
+                        ruta_extra = default_storage.save(nombre_extra, f)
+                        ImagenProducto.objects.create(
+                            producto=nuevo_prod,
+                            url_imagen=f"{settings.MEDIA_URL}{ruta_extra}"
+                        )
+                
+                messages.success(petición, f'Producto "{nombre}" creado con éxito.')
                 messages.success(petición, f'Producto "{nombre}" creado con éxito.')
                 return redirect('/admin-panel/productos/')
             except Exception as e:
@@ -313,15 +320,30 @@ def editar_producto(petición, id_producto):
         producto.descripcion = petición.POST.get('descripcion', producto.descripcion)
         producto.descripcion_corta = petición.POST.get('descripcion_corta', producto.descripcion_corta)
         
-        # Procesar Archivo Local si existe
+        # Imagen Principal Local
         if 'archivo_imagen' in petición.FILES:
             archivo = petición.FILES['archivo_imagen']
             nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
             ruta_guardada = default_storage.save(nombre_unico, archivo)
             producto.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
-        else:
-            producto.url_imagen_principal = petición.POST.get('url_imagen_principal', producto.url_imagen_principal).strip()
+            
+        # Galería: Nuevas Imágenes
+        if 'archivos_galeria' in petición.FILES:
+            for f in petición.FILES.getlist('archivos_galeria'):
+                nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
+                ruta_extra = default_storage.save(nombre_extra, f)
+                ImagenProducto.objects.create(
+                    producto=producto,
+                    url_imagen=f"{settings.MEDIA_URL}{ruta_extra}"
+                )
+
+        # Galería: Eliminaciones
+        ids_eliminar = petición.POST.getlist('eliminar_imagenes')
+        if ids_eliminar:
+            ImagenProducto.objects.filter(id__in=ids_eliminar, producto=producto).delete()
+
         producto.es_destacado = petición.POST.get('es_destacado') == 'on'
+        # Al editar producto, el estado activo viene explícito
         producto.esta_activo = petición.POST.get('esta_activo') == 'on'
         # Descuento
         producto.descuento_porcentaje = int(petición.POST.get('descuento_porcentaje', '0') or '0')
@@ -584,7 +606,7 @@ def reportes_dashboard(petición):
         chart_labels = ['Sin Datos']
         chart_data = [0]
 
-    pedidos = Pedido.objects.filter(**filtro_fecha).select_related('usuario').order_by('-creado_el')
+    pedidos = Pedido.objects.filter(**filtro_fecha).select_related('usuario').prefetch_related('detalles__producto').order_by('-creado_el')
     
     return render(petición, 'admin_panel/reports.html', {
         'estadisticas': estadísticas,
@@ -598,26 +620,62 @@ def reportes_dashboard(petición):
 @requerir_administrador
 def gestion_logistica(petición):
     """Módulo de despacho y entrega de pedidos."""
-    estado_filtro = petición.GET.get('estado', 'all')
+    estado_filtro_es = petición.GET.get('estado', 'all')
     
-    if estado_filtro != 'all':
-        pedidos = Pedido.objects.filter(estado=estado_filtro).select_related('usuario').order_by('-creado_el')
+    # Mapeo invertido para la consulta en DB
+    mapping_inverso = {
+        'Pendiente': 'pending',
+        'Enviado': 'shipped',
+        'Entregado': 'delivered',
+        'Cancelado': 'cancelled'
+    }
+    
+    db_status = mapping_inverso.get(estado_filtro_es, estado_filtro_es)
+
+    if db_status != 'all':
+        pedidos = Pedido.objects.filter(estado=db_status).select_related('usuario', 'repartidor').order_by('-creado_el')
     else:
-        pedidos = Pedido.objects.all().select_related('usuario').order_by('-creado_el')
+        pedidos = Pedido.objects.all().select_related('usuario', 'repartidor').order_by('-creado_el')
 
     # Estadísticas rápidas para la vista (Usando términos en inglés de la DB)
     stats = {
         'pendientes': Pedido.objects.filter(estado__in=['pending', 'processing']).count(),
         'en_camino': Pedido.objects.filter(estado='shipped').count(),
         'entregados': Pedido.objects.filter(estado='delivered').count(),
-        'filtro_actual': estado_filtro,
+        'sin_repartidor': Pedido.objects.filter(repartidor__isnull=True, estado__in=['pending', 'processing', 'shipped']).count(),
+        'filtro_actual': estado_filtro_es,
     }
+
+    # Cargar repartidores para el modal de asignación
+    repartidores = Perfil.objects.filter(rol='repartidor', esta_activo=True).order_by('nombre_usuario')
 
     return render(petición, 'admin_panel/logistics.html', {
         'pedidos': pedidos,
         'stats': stats,
+        'repartidores': repartidores,
         'titulo_pagina': 'Logística y Despacho — MIKITECH',
     })
+
+
+@requerir_administrador
+@require_POST
+def asignar_repartidor_admin(petición, id_pedido):
+    """Asignación manual de un piloto a un pedido."""
+    pedido = get_object_or_404(Pedido, id=id_pedido)
+    id_repartidor = petición.POST.get('id_repartidor')
+    
+    if id_repartidor:
+        repartidor = get_object_or_404(Perfil, id=id_repartidor, rol='repartidor')
+        pedido.repartidor = repartidor
+        # Si estaba pendiente, lo pasamos a processing al asignar
+        if pedido.estado == 'pending':
+            pedido.estado = 'processing'
+        pedido.save()
+        messages.success(petición, f'Pedido #{str(pedido.id)[:8]} asignado a {repartidor.nombre_usuario}.')
+    else:
+        messages.warning(petición, 'No se seleccionó ningún repartidor.')
+        
+    return redirect('admin_logistics')
 
 
 @requerir_administrador

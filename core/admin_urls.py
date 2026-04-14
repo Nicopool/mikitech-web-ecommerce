@@ -32,6 +32,7 @@ urlpatterns = [
     
     # Logística y Despachos
     path('logistica/', admin_views.gestion_logistica, name='admin_logistics'),
+    path('logistica/asignar/<str:id_pedido>/', admin_views.asignar_repartidor_admin, name='admin_assign_driver'),
     path('logistica/actualizar/<str:id_pedido>/', admin_views.cambiar_estado_pedido, name='admin_order_update'),
     path('logistica/factura/<str:id_pedido>/', admin_views.ver_factura_pedido, name='admin_order_invoice'),
     

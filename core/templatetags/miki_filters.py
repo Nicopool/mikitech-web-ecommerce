@@ -46,3 +46,10 @@ def precio_con_descuento(value, porcentaje):
         return int(round(resultado))
     except (ValueError, TypeError):
         return value
+@register.filter(name='modulo')
+def modulo(num, val):
+    """Retorna el residuo de una división."""
+    try:
+        return int(num) % int(val)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return 0
