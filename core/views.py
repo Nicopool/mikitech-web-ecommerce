@@ -333,6 +333,14 @@ def carrito(petición):
             if item['producto'].existencias >= item['cantidad']:
                 item['producto'].existencias -= item['cantidad']
                 item['producto'].save()
+
+        # Notificar al cliente sobre la orden recibida
+        from users.models import Notificacion
+        Notificacion.objects.create(
+            id=uuid.uuid4(),
+            usuario_id=usuario_id,
+            mensaje=f"[Orden Recibida] ¡Hola! Hemos recibido tu pedido #{str(pedido.id)[:8]}. Pronto comenzaremos con el alistamiento técnico.",
+        )
         
         petición.session['cart'] = {}
         petición.session.modified = True

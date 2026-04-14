@@ -249,9 +249,7 @@ def mis_pedidos(petición):
         from users.models import Perfil
         perfil = Perfil.objects.get(id=petición.session['usuario_id'])
         from interactions.models import Pedido
-        pedidos = Pedido.objects.filter(usuario=perfil).order_by('-creado_el').values_list(
-            'id', 'estado', 'monto_total', 'creado_el', 'actualizado_el', 'direccion_envio', 'notas'
-        )
+        pedidos = Pedido.objects.filter(usuario=perfil).select_related('repartidor').order_by('-creado_el')
     except Exception as e:
         print("Error obteniendo pedidos:", e)
         pedidos = []

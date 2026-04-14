@@ -565,46 +565,56 @@ def reportes_dashboard(petición):
 
     # Estadísticas base
     estadísticas = {
-        'total_productos': Producto.objects.filter(**filtro_fecha).count(),
-        'total_categorias': Categoria.objects.count(),
-        'total_usuarios': Perfil.objects.filter(**filtro_fecha_usuario).count(),
+        'inventario_total': Producto.objects.count(), 
+        'nuevos_productos': Producto.objects.filter(**filtro_fecha).count(), 
+        'total_usuarios': Perfil.objects.count(),
         'total_resenas': Reseña.objects.filter(**filtro_fecha).count(),
+        'pedidos_total': Pedido.objects.filter(**filtro_fecha).count(),
         'filtro_actual': dias,
     }
     
-    # 1. Ticket Promedio (AOV)
-    # Usar términos en inglés para coincidir con el CHECK constraint de la DB
+    # 1. Ticket Promedio (AOV) e Ingresos Totales
     pedidos_exitosos = Pedido.objects.filter(estado__in=['delivered', 'shipped', 'Entregado', 'Enviado'])
-    avg_order = pedidos_exitosos.aggregate(promedio=Avg('monto_total'))['promedio'] or 0
+    pedidos_periodo = pedidos_exitosos.filter(**filtro_fecha)
+    
+    avg_order = pedidos_periodo.aggregate(promedio=Avg('monto_total'))['promedio'] or 0
+    total_ingresos = pedidos_periodo.aggregate(total=Sum('monto_total'))['total'] or 0
+    
     estadísticas['ticket_promedio'] = avg_order
+    estadísticas['ingresos_periodo'] = total_ingresos
 
-    # 2. Datos para el Gráfico (Últimos 6 meses)
-    # Buscamos ingresos del histórico real agrupados por mes
-    seis_meses_atras = timezone.now() - datetime.timedelta(days=180)
-    ventas_mensuales = pedidos_exitosos.filter(creado_el__gte=seis_meses_atras) \
-        .annotate(mes=TruncMonth('creado_el')) \
-        .values('mes') \
-        .annotate(total=Sum('monto_total')) \
-        .order_by('mes')
-
-    meses_nombres = {
-        1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
-        7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
-    }
-
+    # 2. Datos para el Gráfico (Últimos 6 meses sin GAPS)
     chart_labels = []
     chart_data = []
     
-    for v in ventas_mensuales:
-        chart_labels.append(meses_nombres[v['mes'].month])
-        # Convertimos a millones o lo dejamos en valor normal (ajustado para visualización)
-        # Dividimos por 1M para que el gráfico no tenga etiquetas gigantes
-        chart_data.append(float(v['total']) / 1_000_000)
+    meses_nombres = {
+        1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr', 5: 'May', 6: 'Jun',
+        7: 'Jul', 8: 'Ago', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic'
+    }
 
-    # Si no hay datos, ponemos datos vacíos para evitar error en JS
-    if not chart_labels:
-        chart_labels = ['Sin Datos']
-        chart_data = [0]
+    hoy = timezone.now()
+    datos_por_mes = {}
+    
+    # Obtener datos de la DB
+    seis_meses_atras = hoy - datetime.timedelta(days=180)
+    ventas_db = pedidos_exitosos.filter(creado_el__gte=seis_meses_atras) \
+        .annotate(mes_idx=TruncMonth('creado_el')) \
+        .values('mes_idx') \
+        .annotate(total=Sum('monto_total'))
+    
+    for v in ventas_db:
+        periodo_key = v['mes_idx'].strftime("%Y-%m")
+        datos_por_mes[periodo_key] = float(v['total']) / 1_000_000
+
+    # Llenar la serie (6 meses atrás hasta hoy)
+    for i in range(5, -1, -1):
+        # Usamos aproximación de 30 días para retroceder meses de forma segura
+        fecha_eval = hoy - datetime.timedelta(days=i*30)
+        # Ajustamos al primer día del mes para la clave de búsqueda
+        primer_dia_mes = fecha_eval.replace(day=1)
+        key = primer_dia_mes.strftime("%Y-%m")
+        chart_labels.append(meses_nombres[primer_dia_mes.month])
+        chart_data.append(datos_por_mes.get(key, 0))
 
     pedidos = Pedido.objects.filter(**filtro_fecha).select_related('usuario').prefetch_related('detalles__producto').order_by('-creado_el')
     
@@ -667,11 +677,17 @@ def asignar_repartidor_admin(petición, id_pedido):
     if id_repartidor:
         repartidor = get_object_or_404(Perfil, id=id_repartidor, rol='repartidor')
         pedido.repartidor = repartidor
-        # Si estaba pendiente, lo pasamos a processing al asignar
-        if pedido.estado == 'pending':
-            pedido.estado = 'processing'
         pedido.save()
-        messages.success(petición, f'Pedido #{str(pedido.id)[:8]} asignado a {repartidor.nombre_usuario}.')
+        
+        # Notificar al cliente sobre la asignación del repartidor
+        from users.models import Notificacion
+        Notificacion.objects.create(
+            id=uuid.uuid4(),
+            usuario=pedido.usuario,
+            mensaje=f"[Repartidor Asignado] ¡Hola! Tu pedido #{str(pedido.id)[:8]} ya tiene un piloto asignado: {repartidor.nombre_usuario}. Estamos preparando tu despacho.",
+        )
+        
+        messages.success(petición, f'Pedido #{str(pedido.id)[:8]} asignado a {repartidor.nombre_usuario}. Cliente notificado.')
     else:
         messages.warning(petición, 'No se seleccionó ningún repartidor.')
         
@@ -701,15 +717,24 @@ def cambiar_estado_pedido(petición, id_pedido):
             pedido.estado = status_to_save
             pedido.save()
             
-            # Notificar al cliente si pasó a 'Entregado'
-            if status_to_save == 'delivered' and estado_anterior != 'delivered':
-                from interactions.models import Notificacion
+            # Notificaciones Automáticas según el estado
+            from users.models import Notificacion
+            notif_msg = None
+            
+            if status_to_save == 'shipped' and estado_anterior != 'shipped':
+                notif_msg = f"[En Camino] 🚚 ¡Grandes noticias! Tu pedido #{str(pedido.id)[:8]} ya ha sido despachado y está en manos de nuestro repartidor. ¡Llegará pronto!"
+            elif status_to_save == 'delivered' and estado_anterior != 'delivered':
+                notif_msg = f"[Entregado] ✅ Tu pedido #{str(pedido.id)[:8]} ha sido entregado exitosamente. ¡Gracias por confiar en MIKITECH!"
+            elif status_to_save == 'cancelled' and estado_anterior != 'cancelled':
+                notif_msg = f"[Cancelado] ❌ Tu pedido #{str(pedido.id)[:8]} ha sido cancelado. Si tienes dudas, contáctanos a soporte."
+                
+            if notif_msg:
                 Notificacion.objects.create(
                     id=uuid.uuid4(),
                     usuario=pedido.usuario,
-                    mensaje=f"[Pedido Entregado] Tu pedido #{str(pedido.id)[:8]} ha sido entregado exitosamente. Gracias por confiar en MIKITECH!",
+                    mensaje=notif_msg,
                 )
-                messages.success(petición, f"Pedido #{str(pedido.id)[:8]} marcado como ENTREGADO. Cliente notificado.")
+                messages.success(petición, f"Pedido #{str(pedido.id)[:8]} actualizado a {nuevo_estado_es.upper()}. Cliente notificado.")
             else:
                 messages.success(petición, f"Estado del pedido #{str(pedido.id)[:8]} actualizado a {nuevo_estado_es}.")
             

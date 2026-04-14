@@ -1,4 +1,5 @@
 {% extends "admin_panel/base_admin.html" %}
+{% load static %}
 {% load miki_filters %}
 {% block page_title %}Reportes y Análisis — MIKITECH{% endblock %}
 
@@ -45,31 +46,35 @@
 <!-- PANEL DE MÉTRICAS GLOBALES -->
 <div class="g-row u-mb-4" style="margin-bottom: 40px;">
   <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #2563EB;">
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #2563EB; background: linear-gradient(145deg, #ffffff, #f1f5f9);">
       <span class="material-symbols-outlined" style="font-size:3.5rem; color:#2563EB; margin-bottom:10px;">inventory_2</span>
       <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Hardware Total</div>
-      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_productos }}</div>
+      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.inventario_total }}</div>
+      <div style="font-size:1.1rem; color:#10B981; font-weight:600;">+{{ estadisticas.nuevos_productos }} NUEVOS</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #7C3AED;">
-      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#7C3AED; margin-bottom:10px;">groups</span>
-      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Audiencia</div>
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #7C3AED; background: linear-gradient(145deg, #ffffff, #f5f3ff);">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#7C3AED; margin-bottom:10px;">payments</span>
+      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Ingresos (Periodo)</div>
+      <div style="font-size:2.8rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.ingresos_periodo|currency_cop }}</div>
+      <div style="font-size:1.1rem; color:#6366f1; font-weight:600;">{{ estadisticas.pedidos_total }} OPERACIONES</div>
+    </div>
+  </div>
+  <div class="g-col-3">
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #10B981; background: linear-gradient(145deg, #ffffff, #f0fdf4);">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#10B981; margin-bottom:10px;">groups</span>
+      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Audiencia Total</div>
       <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_usuarios }}</div>
+      <div style="font-size:1.1rem; color:#10B981; font-weight:600;">CLIENTES ACTIVOS</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #10B981;">
-      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#10B981; margin-bottom:10px;">folder_special</span>
-      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Líneas Base</div>
-      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_categorias }}</div>
-    </div>
-  </div>
-  <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #F59E0B;">
-      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#F59E0B; margin-bottom:10px;">payments</span>
+    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #F59E0B; background: linear-gradient(145deg, #ffffff, #fffbeb);">
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#F59E0B; margin-bottom:10px;">monitoring</span>
       <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Ticket Promedio</div>
       <div style="font-size:2.4rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.ticket_promedio|currency_cop }}</div>
+      <div style="font-size:1.1rem; color:#d97706; font-weight:600;">VALOR POR PEDIDO</div>
     </div>
   </div>
 </div>
@@ -89,8 +94,12 @@
 <div class="mpro-card" style="padding:0; overflow:hidden; margin-bottom: 40px; border-radius:16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--ds-border);">
   <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); background: var(--ds-bg); display: flex; justify-content: space-between; align-items: center;">
     <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text); margin:0;"><span class="material-symbols-outlined" style="vertical-align: middle;">receipt_long</span> Registro Completo de Transacciones</h3>
-    <div style="display:flex; gap:10px;">
-        <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; font-weight:700; padding:8px 15px; border-radius:8px; font-size:1.2rem;">{{ pedidos|length }} OPERACIONES ENCONTRADAS</span>
+    <div style="display:flex; gap:15px; align-items:center;">
+        <div style="position:relative;">
+          <span class="material-symbols-outlined" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ds-text-soft);">search</span>
+          <input type="text" id="transactionSearch" placeholder="Buscar pedido, cliente..." style="padding:8px 12px 0 35px; border-radius:8px; border:1px solid var(--ds-border); font-size:1.3rem; outline:none; width:250px;">
+        </div>
+        <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; font-weight:700; padding:8px 15px; border-radius:8px; font-size:1.2rem;">{{ pedidos|length }} OPERACIONES</span>
     </div>
   </div>
   
@@ -133,14 +142,14 @@
             <div style="font-size:1rem; color:#10B981; font-weight:600;">IVA INC. (19%)</div>
           </td>
           <td style="padding:20px; text-align:center;">
-            {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' %}
-              <span class="mpro-badge" style="background:#FEF3C7; color:#D97706; padding:6px 12px; font-weight:700; border-radius:20px;">PENDIENTE</span>
+            {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}
+              <span class="mpro-badge" style="background:#FEF3C7; color:#D97706; padding:6px 12px; font-weight:700; border-radius:20px; box-shadow: 0 0 10px rgba(217, 119, 6, 0.2);">PENDIENTE</span>
             {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
-              <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; padding:6px 12px; font-weight:700; border-radius:20px;">EN CAMINO</span>
+              <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; padding:6px 12px; font-weight:700; border-radius:20px; box-shadow: 0 0 10px rgba(29, 78, 216, 0.2);">EN CAMINO</span>
             {% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
-              <span class="mpro-badge" style="background:#D1FAE5; color:#059669; padding:6px 12px; font-weight:700; border-radius:20px;">ENTREGADO</span>
+              <span class="mpro-badge" style="background:#D1FAE5; color:#059669; padding:6px 12px; font-weight:700; border-radius:20px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);">ENTREGADO</span>
             {% else %}
-              <span class="mpro-badge" style="background:#F3F4F6; color:#4B5563; padding:6px 12px; font-weight:700; border-radius:20px;">{{ pedido.estado|upper }}</span>
+              <span class="mpro-badge" style="background:#FEE2E2; color:#DC2626; padding:6px 12px; font-weight:700; border-radius:20px;">{{ pedido.estado|upper }}</span>
             {% endif %}
           </td>
           <td style="padding:20px; text-align:center;">
@@ -194,31 +203,50 @@
     body { background: white !important; font-size: 10pt; }
     h2, h3 { color: black !important; margin-top: 5px !important; }
     .g-table th { background: #F1F5F9 !important; color: black !important; -webkit-print-color-adjust: exact; }
-    .mpro-badge { border: 1px solid #CBD5E1 !important; color: black !important; }
+    .mpro-badge { border: 1px solid #CBD5E1 !important; color: black !important; -webkit-print-color-adjust: exact; }
   }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
+    // 1. Lógica del Buscador
+    const searchInput = document.getElementById('transactionSearch');
+    const tableBody = document.querySelector('.g-table tbody');
+    const rows = tableBody.querySelectorAll('tr');
+
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+      rows.forEach(row => {
+        if (row.classList.contains('empty-row')) return;
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    });
+
+    // 2. Gráfico Premium (Area Chart)
     const ctx = document.getElementById('ventasChart').getContext('2d');
-    
-    // Gradiente para las barras
     let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, '#3B82F6');   
-    gradient.addColorStop(1, '#1D4ED8');   
+    gradient.addColorStop(0, 'rgba(29, 78, 216, 0.4)');   
+    gradient.addColorStop(1, 'rgba(29, 78, 216, 0.0)');   
 
     new Chart(ctx, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels: {{ chart_labels|safe }},
         datasets: [{
-          label: 'Ingresos Mensuales (COP Millones)',
+          label: 'Ingresos Mensuales',
           data: {{ chart_data|safe }},
+          borderColor: '#1D4ED8',
+          borderWidth: 4,
           backgroundColor: gradient,
-          borderRadius: 8,
-          borderSkipped: false,
-          barPercentage: 0.55
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#1D4ED8',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8
         }]
       },
       options: {
@@ -228,24 +256,24 @@
           legend: { display: false },
           tooltip: {
             backgroundColor: '#0F172A',
-            titleFont: { family: 'Inter', size: 13 },
-            bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
-            padding: 12,
-            cornerRadius: 8,
+            titleFont: { family: 'Inter', size: 14, weight: 'bold' },
+            bodyFont: { family: 'Inter', size: 14 },
+            padding: 15,
+            cornerRadius: 10,
             displayColors: false,
             callbacks: {
-              label: function(context) { return '$ ' + context.raw + ' Millones'; }
+              label: function(context) { return '$ ' + context.raw + ' COP Millones'; }
             }
           }
         },
         scales: {
           y: {
             beginAtZero: true,
-            grid: { color: '#F1F5F9', borderDash: [5, 5], drawBorder: false },
+            grid: { color: '#F1F5F9', drawBorder: false },
             ticks: { font: { family: 'Inter', size: 12 }, color: '#64748B', callback: function(val) { return '$' + val + 'M'; } }
           },
           x: {
-            grid: { display: false, drawBorder: false },
+            grid: { display: false },
             ticks: { font: { family: 'Inter', size: 12, weight: '600' }, color: '#475569' }
           }
         }
