@@ -265,13 +265,83 @@ body.g-admin-layout {
 .g-content { padding: 40px; flex: 1; overflow-y: auto; }
 .g-page-title { font-size: 24px; font-weight: 700; margin-bottom: 30px; color: var(--ds-text); display:flex; justify-content:space-between; align-items:center; }
 
+/* ── FORM CARDS ── */
 .mpro-card { 
-  background: var(--ds-surface); border-radius: 16px; border: 1px solid var(--ds-border); 
-  padding: 30px; box-shadow: var(--ds-shadow); 
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  height: 100%; display: flex; flex-direction: column; justify-content: center;
+  display: block;
+  width: 100%;
+  background: var(--ds-surface);
+  border-radius: 16px;
+  border: 1px solid var(--ds-border); 
+  padding: 3rem;
+  box-shadow: var(--ds-shadow);
+  box-sizing: border-box;
 }
-.mpro-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+
+/* ── SECTION TITLES ── */
+.mpro-section-title {
+  font-family: 'Oswald', 'Inter', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ds-text);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--ds-primary-light);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mpro-section-title span {
+  color: var(--ds-primary);
+  font-size: 2rem;
+}
+
+/* ── LABELS ── */
+.mpro-label {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ds-text);
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.2px;
+}
+
+/* ── INPUTS / SELECTS / TEXTAREAS ── */
+.mpro-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 1.2rem 1.6rem;
+  border-radius: 1rem;
+  border: 1.5px solid var(--ds-border);
+  background: #FFFFFF;
+  font-size: 1.4rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--ds-text);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mpro-input:focus {
+  border-color: var(--ds-primary);
+  box-shadow: 0 0 0 4px var(--ds-primary-light);
+}
+
+.mpro-input::placeholder {
+  color: #94A3B8;
+  font-weight: 400;
+}
+
+textarea.mpro-input {
+  resize: vertical;
+  line-height: 1.8;
+}
+/* sin hover-transform en el card de formularios para no romper layout */
 .g-controls-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; align-items: center; justify-content: space-between; }
 .g-btn-primary { background: var(--ds-primary); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px; cursor: pointer; border: none; box-shadow: 0 4px 10px rgba(29, 78, 216, 0.2); transition: opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; }
 .g-btn-primary:hover { opacity: 0.9; }

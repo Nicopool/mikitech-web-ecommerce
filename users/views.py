@@ -254,8 +254,8 @@ def mis_pedidos(petición):
         print("Error obteniendo pedidos:", e)
         pedidos = []
 
-    pedidos_entregados = sum(1 for p in pedidos if p[1] == 'delivered')
-    pedidos_en_transito = sum(1 for p in pedidos if p[1] in ['pending', 'processing', 'shipped'])
+    pedidos_entregados = sum(1 for p in pedidos if p.estado == 'delivered')
+    pedidos_en_transito = sum(1 for p in pedidos if p.estado in ['pending', 'processing', 'shipped'])
 
     return render(petición, 'users/orders.html', {
         'perfil': perfil,

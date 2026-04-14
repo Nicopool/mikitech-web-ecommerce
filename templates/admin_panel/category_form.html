@@ -2,65 +2,141 @@
 {% block nav_categories %}active{% endblock %}
 
 {% block admin_content %}
+
+<!-- ===== ENCABEZADO ===== -->
 <div class="u-flex u-justify-between u-align-center u-mb-4">
   <div>
-    <h2 style="font-size:2.2rem; font-weight:800;">{% if categoria %}✏️ Editar Categoría{% else %}➕ Nueva Categoría{% endif %}</h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Organiza tus productos mediante categorías claras.</p>
+    <h2 style="font-size:2.4rem; font-weight:800; font-family:'Oswald',sans-serif; color:var(--ds-text);">
+      {% if categoria %}✏️ Editar Categoría{% else %}➕ Nueva Categoría{% endif %}
+    </h2>
+    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
+      Organiza tus productos mediante categorías claras y descriptivas.
+    </p>
   </div>
-  <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:#E2E8F0; color:var(--ds-text); box-shadow:none;">← Volver</a>
+  <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:#E2E8F0; color:var(--ds-text); box-shadow:none;">
+    ← Volver al listado
+  </a>
 </div>
 
 {% if error %}
-<div class="g-alert g-alert-error" style="margin-bottom: 25px;">
+<div class="g-alert g-alert-error" style="margin-bottom: 2.5rem;">
   <span>{{ error }}</span>
 </div>
 {% endif %}
 
-<div class="mpro-card" style="max-width:600px;">
-  <form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div style="margin-bottom: 20px;">
-      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-name">Nombre *</label>
-      <input type="text" id="cat-name" name="nombre" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem;" required value="{{ categoria.nombre|default:'' }}" placeholder="Ej: Procesadores">
-    </div>
-    <div style="margin-bottom: 20px;">
-      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-icon">Emoji / Icono (Material Symbol)</label>
-      <input type="text" id="cat-icon" name="icono" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem;" value="{{ categoria.icono|default:'' }}" placeholder="Ej: 🔷 o hardware">
-    </div>
-    <div style="margin-bottom: 20px;">
-      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-image-file">Cargar desde PC (Recomendado)</label>
-      <input type="file" id="cat-image-file" name="archivo_imagen" accept="image/*" style="width:100%; padding:10px; border:1px dashed var(--ds-border); border-radius:8px; font-size:1.3rem; background:#f8fafc;" onchange="previewFile(this)">
-    </div>
-    <div style="margin-bottom: 20px;">
-      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-image">O usar URL externa</label>
-      <input type="url" id="cat-image" name="url_imagen" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem;" value="{{ categoria.url_imagen|default:'' }}" placeholder="https://ejemplo.com/foto.jpg" oninput="if(!document.getElementById('cat-image-file').value) document.getElementById('cat-preview').src = this.value || ''">
-      <div style="margin-top:10px; width:150px; height:150px; border:1px solid var(--ds-border); border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#f8fafc;">
-        <img id="cat-preview" src="{{ categoria.url_imagen|default:'' }}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.style.display='none'" onload="this.style.display='block'">
+<!-- ===== FORMULARIO ===== -->
+<div style="max-width: 680px;">
+  <div class="mpro-card">
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- Nombre -->
+      <div style="margin-bottom: 2.5rem;">
+        <label class="mpro-label" for="cat-name">Nombre de la Categoría *</label>
+        <input
+          type="text"
+          id="cat-name"
+          name="nombre"
+          class="mpro-input"
+          required
+          value="{{ categoria.nombre|default:'' }}"
+          placeholder="Ej: Procesadores, Tarjetas de Video, RAM..."
+        >
       </div>
-    </div>
-    
-    <script>
-    function previewFile(input) {
-      if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('cat-preview').src = e.target.result;
-          document.getElementById('cat-preview').style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-    </script>
-    <div style="margin-bottom: 25px;">
-      <label style="display:block; font-size:1.3rem; font-weight:600; color:var(--ds-text); margin-bottom:8px;" for="cat-desc">Descripción</label>
-      <textarea id="cat-desc" name="descripcion" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--ds-border); outline:none; font-size:1.4rem; resize:vertical;" rows="3">{{ categoria.descripcion|default:'' }}</textarea>
-    </div>
-    <div style="display:flex; gap:15px; border-top: 1px solid var(--ds-border); padding-top: 25px;">
-      <button type="submit" class="g-btn-primary" style="padding: 14px 40px; font-size: 1.4rem;">
-        {% if categoria %}💾 Guardar cambios{% else %}➕ Crear categoría{% endif %}
-      </button>
-      <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:transparent; border:1px solid var(--ds-border); color:var(--ds-text); box-shadow:none;">Cancelar</a>
-    </div>
-  </form>
+
+      <!-- Icono -->
+      <div style="margin-bottom: 2.5rem;">
+        <label class="mpro-label" for="cat-icon">Emoji o Nombre de Icono (Material Symbols)</label>
+        <input
+          type="text"
+          id="cat-icon"
+          name="icono"
+          class="mpro-input"
+          value="{{ categoria.icono|default:'' }}"
+          placeholder="Ej: 🔷  ó  hardware"
+        >
+        <p style="font-size:1.15rem; color:#94A3B8; margin-top:0.6rem;">
+          Puedes usar un emoji directamente o un nombre de Material Symbol como <code>memory</code>, <code>storage</code>, etc.
+        </p>
+      </div>
+
+      <!-- Imagen -->
+      <div style="margin-bottom: 2.5rem;">
+        <label class="mpro-label">Imagen de la Categoría</label>
+        <div style="background:#F8FAFC; border:1px solid var(--ds-border); border-radius:1.6rem; padding:2rem;">
+
+          <!-- Upload desde PC -->
+          <input type="file" id="cat-image-file" name="archivo_imagen" accept="image/*" style="display:none;" onchange="previewFile(this)">
+          <label for="cat-image-file" style="display:flex; align-items:center; gap:1rem; padding:1.2rem 2rem; border:1.5px solid var(--ds-primary); border-radius:1rem; cursor:pointer; background:white; color:var(--ds-primary); font-weight:700; font-size:1.3rem; width:fit-content; transition:all 0.25s ease; margin-bottom:1.5rem;" onmouseover="this.style.background='var(--ds-primary)'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='var(--ds-primary)';">
+            <span class="material-symbols-outlined">cloud_upload</span> Subir desde mi PC
+          </label>
+
+          <!-- URL externa -->
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display:block; font-size:1.2rem; font-weight:600; color:var(--ds-text-soft); margin-bottom:0.8rem;">O pegar URL externa</label>
+            <input
+              type="url"
+              id="cat-image"
+              name="url_imagen"
+              class="mpro-input"
+              style="font-size:1.3rem;"
+              value="{{ categoria.url_imagen|default:'' }}"
+              placeholder="https://ejemplo.com/foto.jpg"
+              oninput="if(!document.getElementById('cat-image-file').value){ document.getElementById('cat-preview').src = this.value || ''; }"
+            >
+          </div>
+
+          <!-- Preview -->
+          <div style="display:flex; align-items:center; gap:1.5rem;">
+            <span style="font-size:1.2rem; font-weight:600; color:var(--ds-text-soft);">Vista previa:</span>
+            <div style="width:12rem; height:12rem; border:1px solid var(--ds-border); border-radius:1.2rem; overflow:hidden; display:flex; align-items:center; justify-content:center; background:white; box-shadow:0 4px 12px rgba(0,0,0,0.05); flex-shrink:0;">
+              <img id="cat-preview" src="{{ categoria.url_imagen|default:'' }}" style="max-width:90%; max-height:90%; object-fit:contain; {% if not categoria.url_imagen %}display:none;{% endif %}" onerror="this.style.display='none'" onload="this.style.display='block'">
+              <span class="material-symbols-outlined" id="cat-preview-placeholder" style="font-size:4rem; color:#CBD5E1; {% if categoria.url_imagen %}display:none;{% endif %}">image</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div style="margin-bottom: 3rem;">
+        <label class="mpro-label" for="cat-desc">Descripción</label>
+        <textarea
+          id="cat-desc"
+          name="descripcion"
+          class="mpro-input"
+          style="min-height:12rem; resize:vertical; line-height:1.8;"
+          placeholder="Descripción breve de los productos que incluye esta categoría..."
+        >{{ categoria.descripcion|default:'' }}</textarea>
+      </div>
+
+      <!-- Acciones -->
+      <div style="display:flex; gap:1.5rem; border-top:2px solid var(--ds-border); padding-top:2.5rem;">
+        <button type="submit" class="g-btn-primary" style="padding:1.4rem 4rem; font-size:1.4rem; gap:0.8rem; display:inline-flex; align-items:center;">
+          <span class="material-symbols-outlined">{% if categoria %}save{% else %}add_circle{% endif %}</span>
+          {% if categoria %}GUARDAR CAMBIOS{% else %}CREAR CATEGORÍA{% endif %}
+        </button>
+        <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:transparent; border:1px solid var(--ds-border); color:var(--ds-text-soft); box-shadow:none; padding:1.4rem 2.5rem;">
+          CANCELAR
+        </a>
+      </div>
+    </form>
+  </div>
 </div>
+
+<script>
+function previewFile(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      const preview = document.getElementById('cat-preview');
+      const placeholder = document.getElementById('cat-preview-placeholder');
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+
 {% endblock %}
