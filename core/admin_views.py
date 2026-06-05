@@ -761,3 +761,136 @@ def ver_factura_pedido(petición, id_pedido):
         'iva_monto': iva_monto,
         'titulo_pagina': f'Factura #{str(pedido.id)[:8].upper()} — MIKITECH',
     })
+
+
+@requerir_administrador
+def descargar_plantilla_excel(petición):
+    import openpyxl
+    from django.http import HttpResponse
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Plantilla Productos"
+    columnas = ["NOMBRE", "CATEGORIA", "PRECIO", "STOCK", "MARCA", "DESCRIPCION", "URL_IMAGEN"]
+    ws.append(columnas)
+    ws.append(["Audífonos Bluetooth Pro", "Electrónica", 150000, 50, "Sony", "Audífonos con cancelación de ruido", "https://ejemplo.com/imagen.jpg"])
+    
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_productos_mikitech.xlsx"'
+    wb.save(response)
+    return response
+
+
+@requerir_administrador
+def carga_masiva_productos(petición):
+    import openpyxl
+    campos_referencia = [
+        {'nombre': 'NOMBRE', 'requerido': True, 'descripcion': 'Nombre del producto.'},
+        {'nombre': 'CATEGORIA', 'requerido': True, 'descripcion': 'Nombre de la categoría (se crea si no existe).'},
+        {'nombre': 'PRECIO', 'requerido': True, 'descripcion': 'Precio de venta al público sin puntos ni comas.'},
+        {'nombre': 'STOCK', 'requerido': True, 'descripcion': 'Cantidad disponible en bodega.'},
+        {'nombre': 'MARCA', 'requerido': False, 'descripcion': 'Marca del fabricante.'},
+        {'nombre': 'DESCRIPCION', 'requerido': False, 'descripcion': 'Detalle completo del producto.'},
+        {'nombre': 'URL_IMAGEN', 'requerido': False, 'descripcion': 'Enlace directo a la imagen principal.'},
+    ]
+
+    reporte = None
+    
+    if petición.method == 'POST':
+        archivo = petición.FILES.get('archivo_excel')
+        omitir_errores = petición.POST.get('omitir_errores') == 'on'
+        omitir_duplicados = petición.POST.get('omitir_duplicados') == 'on'
+        
+        if not archivo or not archivo.name.endswith('.xlsx'):
+            messages.error(petición, 'Por favor sube un archivo Excel válido (.xlsx).')
+        else:
+            try:
+                wb = openpyxl.load_workbook(archivo)
+                ws = wb.active
+                
+                creados = 0
+                errores = 0
+                omitidos = 0
+                detalles = []
+                
+                from django.utils.text import slugify
+                
+                # Asumir primera fila como header
+                headers = [str(cell.value).strip().upper() if cell.value else "" for cell in ws[1]]
+                col_map = {name: i for i, name in enumerate(headers)}
+                
+                req_cols = ["NOMBRE", "CATEGORIA", "PRECIO", "STOCK"]
+                if not all(c in col_map for c in req_cols):
+                    raise Exception(f"El archivo debe contener las columnas: {', '.join(req_cols)}")
+                    
+                for fila_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                    if not any(row):  # saltar fila vacía
+                        continue
+                        
+                    nombre = row[col_map.get("NOMBRE")] if "NOMBRE" in col_map else None
+                    cat_nombre = row[col_map.get("CATEGORIA")] if "CATEGORIA" in col_map else None
+                    precio = row[col_map.get("PRECIO")] if "PRECIO" in col_map else None
+                    stock = row[col_map.get("STOCK")] if "STOCK" in col_map else None
+                    marca = row[col_map.get("MARCA")] if "MARCA" in col_map else ""
+                    desc = row[col_map.get("DESCRIPCION")] if "DESCRIPCION" in col_map else ""
+                    url_img = row[col_map.get("URL_IMAGEN")] if "URL_IMAGEN" in col_map else ""
+                    
+                    if not nombre or not cat_nombre or precio is None or stock is None:
+                        errores += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "error", "mensaje": "Faltan datos obligatorios"})
+                        if not omitir_errores: break
+                        continue
+                        
+                    if omitir_duplicados and Producto.objects.filter(nombre=nombre).exists():
+                        omitidos += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "omitido", "mensaje": "Producto duplicado"})
+                        continue
+                        
+                    try:
+                        cat_slug = slugify(cat_nombre)
+                        categoria, _ = Categoria.objects.get_or_create(
+                            enlace=cat_slug, 
+                            defaults={"nombre": cat_nombre, "id": uuid.uuid4()}
+                        )
+                        
+                        prod_slug = slugify(nombre)
+                        base_enlace = prod_slug
+                        contador = 1
+                        while Producto.objects.filter(enlace=prod_slug).exists():
+                            prod_slug = f"{base_enlace}-{contador}"
+                            contador += 1
+                            
+                        Producto.objects.create(
+                            id=uuid.uuid4(),
+                            categoria=categoria,
+                            nombre=nombre,
+                            enlace=prod_slug,
+                            precio=float(precio),
+                            existencias=int(stock),
+                            marca=marca or "",
+                            descripcion=desc or "",
+                            url_imagen_principal=url_img or "",
+                            esta_activo=True
+                        )
+                        creados += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "ok", "mensaje": "Producto creado con éxito"})
+                    except Exception as e:
+                        errores += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "error", "mensaje": str(e)[:50]})
+                        if not omitir_errores: break
+                
+                reporte = {
+                    "creados": creados,
+                    "errores": errores,
+                    "omitidos": omitidos,
+                    "detalles": detalles
+                }
+                messages.success(petición, 'Proceso de importación finalizado.')
+            except Exception as e:
+                messages.error(petición, f'Error al procesar el archivo: {str(e)}')
+            
+    return render(petición, 'admin_panel/bulk_upload.html', {
+        'campos_referencia': campos_referencia,
+        'reporte': reporte,
+        'titulo_pagina': 'Carga Masiva — MIKITECH'
+    })

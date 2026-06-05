@@ -14,38 +14,58 @@ def vista_ingreso(petición):
         return redirect('users:profile')
 
     if petición.method == 'POST':
-        correo = petición.POST.get('correo', '').strip()
-        clave = petición.POST.get('clave', '')
+        correo    = petición.POST.get('correo', '').strip()
+        clave     = petición.POST.get('clave', '')
+        recordar  = petición.POST.get('recordarme')  # CP-MK-015: Recordarme
 
+        # CP-MK-011: Campos vacíos bloqueados desde backend
         if not correo or not clave:
             return render(petición, 'users/login.html', {
                 'error': 'Por favor completa todos los campos.',
                 'next': petición.POST.get('next', '')
             })
 
-        datos, error = iniciar_sesion_usuario(correo, clave)
-
-        if error:
+        # Validación estricta de formato de email (prevención SQLi básico)
+        import re
+        if not re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', correo):
             return render(petición, 'users/login.html', {
-                'error': 'Correo o contraseña incorrectos.',
+                'error': 'Formato de correo inválido.',
                 'correo': correo,
                 'next': petición.POST.get('next', '')
             })
 
+        datos, error = iniciar_sesion_usuario(correo, clave)
+
+        # CP-MK-012 / 013: Siempre mensaje genérico (nunca revelar si el correo existe)
+        if error:
+            return render(petición, 'users/login.html', {
+                'error': 'Credenciales incorrectas. Intenta de nuevo.',
+                'correo': correo,
+                'next': petición.POST.get('next', '')
+            })
+
+        # CP-MK-015: Persistencia de sesión según checkbox "Recordarme"
+        # Si marcó "Recordarme" → sesión persiste 30 días (2 592 000 s)
+        # Si no → sesión expira al cerrar el navegador (set_expiry(0))
+        if recordar:
+            petición.session.set_expiry(2592000)  # 30 días
+        else:
+            petición.session.set_expiry(0)         # Solo navegador abierto
+
         # Guardar sesión
         id_usuario = datos.get('user', {}).get('id')
-        petición.session['usuario_id'] = id_usuario
-        petición.session['token_acceso'] = datos.get('access_token')
+        petición.session['usuario_id']    = id_usuario
+        petición.session['token_acceso']  = datos.get('access_token')
 
         # Obtener o crear perfil
         try:
             perfil = Perfil.objects.get(id=id_usuario)
-            petición.session['rol_usuario'] = perfil.rol
+            petición.session['rol_usuario']    = perfil.rol
             petición.session['nombre_usuario'] = perfil.nombre_usuario
-            petición.session['avatar_url'] = perfil.url_avatar or ''
+            petición.session['avatar_url']     = perfil.url_avatar or ''
         except Perfil.DoesNotExist:
             petición.session['rol_usuario'] = 'client'
-            petición.session['avatar_url'] = ''
+            petición.session['avatar_url']  = ''
 
         proxima_url = petición.GET.get('next', '/cuenta/perfil/')
         messages.success(petición, '¡Bienvenido de nuevo!')
@@ -63,11 +83,13 @@ def vista_registro(petición):
         return redirect('users:profile')
 
     if petición.method == 'POST':
-        nombre_completo = petición.POST.get('nombre_completo', '').strip()
-        nombre_usuario = petición.POST.get('nombre_usuario', '').strip()
+        import html
+        nombre_completo = html.escape(petición.POST.get('nombre_completo', '').strip())
+        nombre_usuario = html.escape(petición.POST.get('nombre_usuario', '').strip())
         correo = petición.POST.get('correo', '').strip()
         clave = petición.POST.get('clave', '')
         clave2 = petición.POST.get('clave2', '')
+        terminos = petición.POST.get('terminos')
 
         contexto = {
             'nombre_completo': nombre_completo,
@@ -76,15 +98,23 @@ def vista_registro(petición):
             'titulo_pagina': 'Crear Cuenta — MIKITECH',
         }
 
+        if not terminos:
+            contexto['error'] = 'Debes aceptar los Términos y Condiciones.'
+            return render(petición, 'users/register.html', contexto)
+
         if not all([nombre_completo, nombre_usuario, correo, clave]):
             contexto['error'] = 'Por favor completa todos los campos del formulario.'
+            return render(petición, 'users/register.html', contexto)
+
+        import re
+        if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", correo):
+            contexto['error'] = 'Formato de correo inválido.'
             return render(petición, 'users/register.html', contexto)
 
         if clave != clave2:
             contexto['error'] = 'Las contraseñas no coinciden.'
             return render(petición, 'users/register.html', contexto)
 
-        import re
         patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$"
         if not re.match(patron, clave):
             contexto['error'] = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial (@$!%*?&).'
@@ -191,11 +221,12 @@ def editar_perfil(petición):
         return redirect('users:login')
 
     if petición.method == 'POST':
-        perfil.nombre_completo = petición.POST.get('nombre_completo', perfil.nombre_completo)
-        perfil.biografia = petición.POST.get('biografia', perfil.biografia)
-        perfil.telefono = petición.POST.get('telefono', perfil.telefono)
-        perfil.ciudad = petición.POST.get('ciudad', perfil.ciudad)
-        perfil.pais = petición.POST.get('pais', perfil.pais)
+        import html
+        perfil.nombre_completo = html.escape(petición.POST.get('nombre_completo', perfil.nombre_completo))
+        perfil.biografia = html.escape(petición.POST.get('biografia', perfil.biografia))
+        perfil.telefono = html.escape(petición.POST.get('telefono', perfil.telefono))
+        perfil.ciudad = html.escape(petición.POST.get('ciudad', perfil.ciudad))
+        perfil.pais = html.escape(petición.POST.get('pais', perfil.pais))
 
         # Avatar
         if 'avatar' in petición.FILES:

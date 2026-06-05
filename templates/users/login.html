@@ -5,73 +5,190 @@
 
 {% block extra_head %}
 <style>
-  .auth-wrapper { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; padding: 60px 20px; background: #FFFFFF; }
-  .auth-box { width: 100%; max-width: 480px; text-align: center; padding: 30px; }
-  .auth-brand { font-family: 'Oswald', sans-serif; font-size: 44px; font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; }
-  .auth-subtitle { font-family: 'Jost', sans-serif; font-size: 15px; color: #666; margin-bottom: 40px; text-transform: uppercase; }
-  
-  .wix-input-group { margin-bottom: 30px; text-align: left; }
-  .wix-label { display: block; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-  .wix-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #111; background: transparent; font-family: 'Jost', sans-serif; font-size: 16px; outline: none; transition: border-width 0.3s; }
-  .wix-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; } 
-  
-  .wix-btn-solid { width: 100%; background: #111; color: white; border: none; padding: 18px; font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; margin-top: 10px; text-transform:uppercase;}
-  .wix-btn-solid:hover { background: #444; }
-  
-  .wix-links { margin-top: 30px; display: flex; justify-content: space-between; font-family: 'Jost', sans-serif; font-size: 14px; }
-  .wix-links a { color: #111; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; }
-  .wix-links a:hover { border-bottom: 1px solid #111; }
-  
-  .alert-wix { padding: 15px; margin-bottom: 25px; border: 1px solid; font-family: 'Jost', sans-serif; font-size: 14px; text-align:left;}
-  .alert-wix.error { border-color: #EF4444; color: #EF4444; }
-  .alert-wix.success { border-color: #10B981; color: #10B981; }
+  .auth-page { min-height: calc(100vh - 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; background: #F9FAFB; }
+  .auth-logo { text-align: center; margin-bottom: 24px; }
+  .auth-logo img { height: 40px; filter: brightness(0); }
+
+  .auth-card { background: #FFFFFF; width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,.05), 0 8px 10px -6px rgba(0,0,0,.01); padding: 40px; }
+
+  .auth-title    { font-family:'Inter',sans-serif; font-size:28px; font-weight:800; text-transform:uppercase; margin-bottom:8px; text-align:center; color:#111827; }
+  .auth-subtitle { font-family:'Inter',sans-serif; font-size:14px; color:#6B7280; text-align:center; margin-bottom:32px; }
+
+  .input-group   { margin-bottom:20px; }
+  .input-label   { display:block; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:#374151; margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+  .input-wrapper { position:relative; display:flex; align-items:center; }
+  .input-icon    { position:absolute; left:16px; color:#9CA3AF; width:18px; height:18px; pointer-events:none; }
+  .input-field   { width:100%; padding:14px 44px 14px 44px; font-family:'Inter',sans-serif; font-size:15px; border:1px solid #D1D5DB; border-radius:8px; background:#fff; color:#111827; transition:all .2s; }
+  .input-field:focus { outline:none; border-color:#7C3AED; box-shadow:0 0 0 3px rgba(124,58,237,.1); }
+  .input-field::placeholder { color:#9CA3AF; }
+
+  .toggle-pass { position:absolute; right:14px; background:none; border:none; cursor:pointer; color:#9CA3AF; display:flex; align-items:center; padding:0; transition:color .2s; }
+  .toggle-pass:hover { color:#7C3AED; }
+
+  .remember-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; font-family:'Inter',sans-serif; font-size:13px; }
+  .remember-row label { display:flex; align-items:center; gap:8px; color:#4B5563; cursor:pointer; }
+  .remember-row input[type="checkbox"] { width:15px; height:15px; accent-color:#7C3AED; }
+  .forgot-link { color:#7C3AED; text-decoration:none; font-weight:600; }
+  .forgot-link:hover { text-decoration:underline; }
+
+  .btn-primary { width:100%; background:#7C3AED; color:#fff; border:none; border-radius:8px; padding:16px; font-family:'Inter',sans-serif; font-size:16px; font-weight:700; cursor:pointer; transition:background .2s; display:flex; justify-content:center; align-items:center; gap:8px; }
+  .btn-primary:hover { background:#6D28D9; }
+  .btn-primary:disabled { background:#A78BFA; cursor:not-allowed; }
+
+  .auth-footer { margin-top:28px; text-align:center; font-family:'Inter',sans-serif; font-size:14px; color:#6B7280; }
+  .auth-footer a { color:#7C3AED; text-decoration:none; font-weight:600; }
+  .auth-footer a:hover { text-decoration:underline; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-wrapper">
-  <div class="auth-box">
-    <div style="text-align: center; margin-bottom: 3rem;">
-        <img src="{% static 'img/logo.png' %}" alt="MIKITECH" style="height: 8rem; margin-bottom: 2rem; filter: drop-shadow(0 0 10px rgba(29, 78, 216, 0.2));">
-        <h1 class="auth-brand">INICIAR SESIÓN</h1>
-        <p class="auth-subtitle">ACCEDE A TU ENTORNO DE COMPRA MIKITECH.</p>
-    </div>
-    
+<div class="auth-page">
+  <div class="auth-logo">
+    <img src="{% static 'img/logo.png' %}" alt="MIKITECH">
+  </div>
+
+  <div class="auth-card">
+    <h1 class="auth-title">INICIA SESIÓN</h1>
+    <p class="auth-subtitle">Ingresa tus datos para acceder a tu cuenta</p>
+
+    {# ── Mensajes del servidor ── #}
     {% if error %}
-    <div class="alert-wix error">⚠️ {{ error }}</div>
+    <script>
+      document.addEventListener("DOMContentLoaded",function(){if(window.toast)window.toast.error("{{ error|escapejs }}");});
+    </script>
     {% endif %}
     {% if messages %}
-      {% for message in messages %}
-      <div class="alert-wix success">✅ {{ message }}</div>
-      {% endfor %}
+    <script>
+      document.addEventListener("DOMContentLoaded",function(){
+        {% for message in messages %}if(window.toast)window.toast.exito("{{ message|escapejs }}");{% endfor %}
+      });
+    </script>
     {% endif %}
     {% if success %}
-    <div class="alert-wix success">✅ {{ success }}</div>
+    <script>
+      document.addEventListener("DOMContentLoaded",function(){if(window.toast)window.toast.exito("{{ success|escapejs }}");});
+    </script>
     {% endif %}
-    
-    <form method="POST" action="{% url 'users:login' %}">
+
+    <form id="loginForm" method="POST" action="{% url 'users:login' %}" novalidate>
       {% csrf_token %}
-      {% if next %}
-      <input type="hidden" name="next" value="{{ next }}">
-      {% endif %}
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CORREO ELECTRÓNICO</label>
-        <input type="email" name="correo" class="wix-input" required placeholder="tu@email.com" autocomplete="off" autofocus>
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      {# ── Correo ── #}
+      <div class="input-group">
+        <label class="input-label" for="id_correo">CORREO ELECTRÓNICO</label>
+        <div class="input-wrapper">
+          <i data-lucide="mail" class="input-icon"></i>
+          <input type="email" name="correo" id="id_correo" class="input-field"
+                 required placeholder="tu@email.com"
+                 pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
+                 autocomplete="email" autofocus>
+        </div>
       </div>
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CONTRASEÑA</label>
-        <input type="password" name="clave" class="wix-input" required placeholder="••••••••" autocomplete="new-password">
+
+      {# ── Contraseña + Ojito ── #}
+      <div class="input-group">
+        <label class="input-label" for="id_clave">CONTRASEÑA</label>
+        <div class="input-wrapper">
+          <i data-lucide="lock" class="input-icon"></i>
+          <input type="password" name="clave" id="id_clave" class="input-field"
+                 required placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="toggle-pass" id="toggleClave"
+                  aria-label="Mostrar/ocultar contraseña" onclick="togglePassword('id_clave','toggleClave','iconClave')">
+            <i data-lucide="eye" id="iconClave" style="width:18px;height:18px;"></i>
+          </button>
+        </div>
       </div>
-      
-      <button type="submit" class="wix-btn-solid" onclick="this.textContent='INICIANDO SESIÓN...'">ENTRAR</button>
+
+      {# ── Recordarme + Olvidé contraseña ── #}
+      <div class="remember-row">
+        <label>
+          <input type="checkbox" name="recordarme" id="recordarme">
+          Recordarme
+        </label>
+        <a class="forgot-link" href="{% url 'users:forgot_password' %}">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button type="button" id="btn-submit" class="btn-primary" onclick="handleLoginSubmit(this)">
+        <i data-lucide="log-in" style="width:20px;height:20px;"></i> ENTRAR
+      </button>
     </form>
-    
-    <div class="wix-links">
-      <a href="{% url 'users:forgot_password' %}">¿Olvidaste tu contraseña?</a>
-      <a href="{% url 'users:register' %}">Crear una cuenta nueva</a>
+
+    <div class="auth-footer">
+      ¿Aún no tienes cuenta? <a href="{% url 'users:register' %}">Regístrate aquí →</a>
     </div>
   </div>
 </div>
+
+<script>
+/* ── Helper de alertas (usa Swal directo + window.toast como fallback) ── */
+function showAlert(type, message) {
+  const iconMap = { warning: 'warning', error: 'error', success: 'success', info: 'info' };
+  if (window.Swal) {
+    Swal.fire({
+      icon: iconMap[type] || 'info',
+      title: message,
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      background: '#111111',
+      color: '#ffffff'
+    });
+  } else if (window.toast) {
+    window.toast[type === 'warning' ? 'aviso' : type === 'error' ? 'error' : 'exito'](message);
+  } else {
+    alert(message);
+  }
+}
+
+/* ── Toggle ojito ── */
+function togglePassword(inputId, btnId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.setAttribute('data-lucide', 'eye-off');
+  } else {
+    input.type = 'password';
+    icon.setAttribute('data-lucide', 'eye');
+  }
+  lucide.createIcons();
+}
+
+/* ── Validación y submit ── */
+function handleLoginSubmit(btn) {
+  if (!navigator.onLine) {
+    showAlert('warning', 'Sin conexión a internet. Revisa tu red.');
+    return;
+  }
+
+  const correo  = document.getElementById('id_correo').value.trim();
+  const clave   = document.getElementById('id_clave').value.trim();
+  const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  if (!correo && !clave) {
+    showAlert('warning', 'Por favor, ingresa tu correo y contraseña.');
+    return;
+  }
+  if (!correo) {
+    showAlert('warning', 'El campo de correo es obligatorio.');
+    return;
+  }
+  if (!clave) {
+    showAlert('warning', 'El campo de contraseña es obligatorio.');
+    return;
+  }
+  if (!emailRe.test(correo)) {
+    showAlert('error', 'Formato de correo electrónico no válido (ej. usuario@dominio.com).');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:20px;height:20px;"></i> INICIANDO SESIÓN...';
+  lucide.createIcons();
+  document.getElementById('loginForm').submit();
+}
+</script>
 {% endblock %}

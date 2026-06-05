@@ -1,0 +1,467 @@
+{% extends "admin_panel/base_admin.html" %}
+{% block page_title %}Carga Masiva de Productos — MIKITECH{% endblock %}
+{% block nav_products %}active{% endblock %}
+
+{% block admin_content %}
+<style>
+  /* ─── Zona de Drop ─────────────────────────────────────────────────────── */
+  .bulk-drop-zone {
+    border: 2.5px dashed var(--ds-border);
+    border-radius: 2rem;
+    padding: 5rem 3rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .bulk-drop-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(29, 78, 216, 0.04), rgba(99, 102, 241, 0.04));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .bulk-drop-zone.drag-over {
+    border-color: var(--ds-primary);
+    background: linear-gradient(135deg, #EFF6FF, #F0F9FF);
+    transform: scale(1.01);
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1);
+  }
+  .bulk-drop-zone.drag-over::before { opacity: 1; }
+  .bulk-drop-zone.archivo-seleccionado {
+    border-color: #10B981;
+    background: linear-gradient(135deg, #F0FDF4, #ECFDF5);
+  }
+
+  /* ─── Icono animado ─────────────────────────────────────────────────────── */
+  .upload-icon-wrapper {
+    width: 8rem;
+    height: 8rem;
+    background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    box-shadow: 0 12px 30px rgba(29, 78, 216, 0.3);
+    animation: float-icon 3s ease-in-out infinite;
+  }
+  @keyframes float-icon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .upload-icon-wrapper.success-icon {
+    background: linear-gradient(135deg, #10B981, #34D399);
+    box-shadow: 0 12px 30px rgba(16, 185, 129, 0.3);
+    animation: none;
+  }
+  .upload-icon-wrapper.loading-icon {
+    background: linear-gradient(135deg, #F59E0B, #FBBF24);
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.3);
+    animation: spin-pulse 1s linear infinite;
+  }
+  @keyframes spin-pulse {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.05); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  /* ─── Tarjetas de reporte ────────────────────────────────────────────────── */
+  .reporte-card {
+    border-radius: 1.6rem;
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .reporte-card-creados {
+    background: linear-gradient(135deg, #DCFCE7, #BBF7D0);
+    border: 1px solid #86EFAC;
+  }
+  .reporte-card-errores {
+    background: linear-gradient(135deg, #FEE2E2, #FECACA);
+    border: 1px solid #FCA5A5;
+  }
+  .reporte-card-omitidos {
+    background: linear-gradient(135deg, #FEF9C3, #FEF08A);
+    border: 1px solid #FDE047;
+  }
+  .reporte-numero {
+    font-family: 'Oswald', sans-serif;
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* ─── Tabla de resultados ──────────────────────────────────────────────── */
+  .resultado-row-ok { background: #F0FDF4; }
+  .resultado-row-error { background: #FEF2F2; }
+  .resultado-row-omitido { background: #FEFCE8; }
+
+  /* ─── Plantilla banner ─────────────────────────────────────────────────── */
+  .plantilla-banner {
+    background: linear-gradient(135deg, #0F172A, #1E293B);
+    border-radius: 2rem;
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+  }
+  .plantilla-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -5%;
+    width: 30rem;
+    height: 30rem;
+    background: radial-gradient(circle, rgba(29, 78, 216, 0.25), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ─── Barra de progreso ────────────────────────────────────────────────── */
+  .progress-bar-wrapper {
+    background: #E2E8F0;
+    border-radius: 99px;
+    height: 0.8rem;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1D4ED8, #3B82F6);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+</style>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ENCABEZADO
+═══════════════════════════════════════════════════════════════ -->
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="flex-wrap:wrap; gap:1.5rem;">
+  <div>
+    <h2 style="font-size:2.4rem; font-weight:800; font-family:'Oswald',sans-serif;">
+      Carga Masiva de Productos
+    </h2>
+    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
+      Importa múltiples productos desde un archivo Excel (.xlsx) en un solo paso.
+    </p>
+  </div>
+  <a href="/admin-panel/productos/" class="g-btn-primary"
+     style="background:#E2E8F0; color:var(--ds-text); box-shadow:none;">
+    ← Volver al listado
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     MENSAJES DJANGO
+═══════════════════════════════════════════════════════════════ -->
+{% if messages %}
+  {% for msg in messages %}
+  <div class="g-alert {% if msg.tags == 'error' %}g-alert-error{% else %}g-alert-success{% endif %}" style="margin-bottom:2rem;">
+    <span>{{ msg }}</span>
+  </div>
+  {% endfor %}
+{% endif %}
+
+<!-- ══════════════════════════════════════════════════════════════
+     BANNER DESCARGA PLANTILLA
+═══════════════════════════════════════════════════════════════ -->
+<div class="plantilla-banner u-mb-4">
+  <div style="position:relative; z-index:1;">
+    <div style="font-size:1.2rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.8rem;">
+      Paso 1
+    </div>
+    <h3 style="font-family:'Oswald',sans-serif; font-size:2rem; font-weight:800; color:white; margin:0 0 0.8rem;">
+      Descarga la plantilla oficial
+    </h3>
+    <p style="font-size:1.3rem; color:#94A3B8; margin:0; max-width:45rem;">
+      Usa nuestro archivo Excel con formato correcto, ejemplos de datos y hoja de instrucciones incluida.
+    </p>
+  </div>
+  <a href="/admin-panel/productos/plantilla-excel/"
+     class="g-btn-primary"
+     style="background:linear-gradient(135deg,#1D4ED8,#3B82F6); font-size:1.4rem; padding:1.4rem 3rem; white-space:nowrap; position:relative; z-index:1; flex-shrink:0;"
+     id="btn-descargar-plantilla">
+    <span class="material-symbols-outlined" style="vertical-align:middle; margin-right:0.6rem;">download</span>
+    Descargar Plantilla .XLSX
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FORMULARIO PRINCIPAL
+═══════════════════════════════════════════════════════════════ -->
+<div class="mpro-card u-mb-4" style="max-width:860px;">
+  <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:3rem;">
+    <div style="width:5rem; height:5rem; background:linear-gradient(135deg,#1D4ED8,#3B82F6); border-radius:1.4rem;
+                display:flex; align-items:center; justify-content:center; flex-shrink:0;
+                box-shadow:0 8px 20px rgba(29,78,216,0.3);">
+      <span class="material-symbols-outlined" style="color:white; font-size:2.8rem;">upload_file</span>
+    </div>
+    <div>
+      <h3 style="font-size:1.9rem; font-weight:800; margin:0;">Paso 2 — Sube tu archivo</h3>
+      <p style="font-size:1.3rem; color:#64748B; margin:0.3rem 0 0;">Arrastra el Excel sobre la zona o haz clic para seleccionarlo.</p>
+    </div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" id="form-carga-masiva">
+    {% csrf_token %}
+
+    <!-- Zona de Drop -->
+    <div id="drop-zone" class="bulk-drop-zone u-mb-3"
+         onclick="document.getElementById('archivo-xlsx').click()">
+      <div class="upload-icon-wrapper" id="upload-icon">
+        <span class="material-symbols-outlined" style="color:white; font-size:3.6rem;" id="upload-icon-symbol">cloud_upload</span>
+      </div>
+      <h3 id="drop-titulo" style="font-size:1.8rem; font-weight:800; color:var(--ds-text); margin:0 0 0.8rem;">
+        Arrastra tu archivo Excel aquí
+      </h3>
+      <p id="drop-subtitulo" style="font-size:1.3rem; color:#64748B; margin:0 0 1.5rem;">
+        O haz clic para seleccionarlo · Solo archivos <strong>.xlsx</strong>
+      </p>
+      <div id="archivo-nombre-display" style="display:none; background:white; border:1px solid #BBF7D0;
+           border-radius:1rem; padding:1rem 2rem; font-size:1.4rem; font-weight:700; color:#15803D;
+           display:inline-flex; align-items:center; gap:0.8rem;">
+        <span class="material-symbols-outlined" style="font-size:2rem; color:#16A34A;">description</span>
+        <span id="nombre-archivo-texto">—</span>
+      </div>
+      <input type="file" id="archivo-xlsx" name="archivo_excel" accept=".xlsx" style="display:none;" required>
+    </div>
+
+    <!-- Opciones de importación -->
+    <div style="background:#F8FAFC; border:1px solid var(--ds-border); border-radius:1.6rem;
+                padding:2rem 2.5rem; margin-bottom:3rem;">
+      <h4 style="font-size:1.5rem; font-weight:800; margin:0 0 1.5rem; color:var(--ds-text);">
+        <span class="material-symbols-outlined" style="vertical-align:middle; font-size:1.8rem;">tune</span>
+        Opciones de importación
+      </h4>
+      <div style="display:flex; flex-wrap:wrap; gap:2rem;">
+        <label style="display:flex; align-items:center; gap:1rem; cursor:pointer; font-size:1.3rem; font-weight:600; color:var(--ds-text);">
+          <input type="checkbox" name="omitir_errores" id="omitir-errores" checked
+                 style="width:1.8rem; height:1.8rem; accent-color:var(--ds-primary);">
+          Continuar si hay filas con error (importar las válidas)
+        </label>
+        <label style="display:flex; align-items:center; gap:1rem; cursor:pointer; font-size:1.3rem; font-weight:600; color:var(--ds-text);">
+          <input type="checkbox" name="omitir_duplicados" id="omitir-duplicados" checked
+                 style="width:1.8rem; height:1.8rem; accent-color:var(--ds-primary);">
+          Omitir automáticamente productos con nombre duplicado
+        </label>
+      </div>
+    </div>
+
+    <!-- Botón de envío -->
+    <button type="submit" id="btn-importar" class="g-btn-primary"
+            style="padding:1.5rem 5rem; font-size:1.6rem; display:inline-flex; align-items:center; gap:1rem; width:100%; justify-content:center;">
+      <span class="material-symbols-outlined" id="btn-import-icon">upload</span>
+      <span id="btn-import-text">INICIAR IMPORTACIÓN</span>
+    </button>
+  </form>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     REPORTE DE RESULTADOS (aparece tras la importación)
+═══════════════════════════════════════════════════════════════ -->
+{% if reporte %}
+<div id="seccion-reporte" class="u-mb-4">
+  <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:3rem;">
+    <div style="width:5rem; height:5rem; background:linear-gradient(135deg,#10B981,#34D399); border-radius:1.4rem;
+                display:flex; align-items:center; justify-content:center; flex-shrink:0;
+                box-shadow:0 8px 20px rgba(16,185,129,0.3);">
+      <span class="material-symbols-outlined" style="color:white; font-size:2.8rem;">task_alt</span>
+    </div>
+    <div>
+      <h3 style="font-size:2rem; font-weight:800; margin:0; font-family:'Oswald',sans-serif;">Reporte de Importación</h3>
+      <p style="font-size:1.3rem; color:#64748B; margin:0.3rem 0 0;">Procesamiento completado — revisa los detalles a continuación.</p>
+    </div>
+  </div>
+
+  <!-- Tarjetas resumen -->
+  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:2rem; margin-bottom:3rem;">
+    <div class="reporte-card reporte-card-creados">
+      <div>
+        <div class="reporte-numero" style="color:#16A34A;">{{ reporte.creados }}</div>
+        <div style="font-size:1.3rem; font-weight:700; color:#15803D; margin-top:0.4rem;">Productos Creados</div>
+      </div>
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#16A34A; opacity:0.5; margin-left:auto;">check_circle</span>
+    </div>
+    <div class="reporte-card reporte-card-errores">
+      <div>
+        <div class="reporte-numero" style="color:#DC2626;">{{ reporte.errores }}</div>
+        <div style="font-size:1.3rem; font-weight:700; color:#B91C1C; margin-top:0.4rem;">Filas con Error</div>
+      </div>
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#DC2626; opacity:0.5; margin-left:auto;">cancel</span>
+    </div>
+    <div class="reporte-card reporte-card-omitidos">
+      <div>
+        <div class="reporte-numero" style="color:#D97706;">{{ reporte.omitidos }}</div>
+        <div style="font-size:1.3rem; font-weight:700; color:#B45309; margin-top:0.4rem;">Filas Omitidas</div>
+      </div>
+      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#D97706; opacity:0.5; margin-left:auto;">remove_circle</span>
+    </div>
+  </div>
+
+  <!-- Tabla detallada de resultados -->
+  {% if reporte.detalles %}
+  <div class="mpro-card" style="padding:0; overflow:hidden;">
+    <div style="padding:2rem 2.5rem; border-bottom:1px solid var(--ds-border); display:flex; align-items:center; justify-content:space-between;">
+      <h4 style="margin:0; font-size:1.6rem; font-weight:800;">Detalle fila por fila</h4>
+      <span style="font-size:1.2rem; color:#64748B; background:#F1F5F9; padding:0.4rem 1.2rem; border-radius:5rem; font-weight:600;">
+        {{ reporte.detalles|length }} filas procesadas
+      </span>
+    </div>
+    <div class="g-table-container">
+      <table class="g-table" style="font-size:1.25rem;">
+        <thead>
+          <tr>
+            <th style="width:5rem;">FILA</th>
+            <th>NOMBRE DEL PRODUCTO</th>
+            <th>CATEGORÍA</th>
+            <th style="width:10rem;">ESTADO</th>
+            <th>MENSAJE</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in reporte.detalles %}
+          <tr class="resultado-row-{{ d.estado }}">
+            <td style="font-weight:800; text-align:center;">{{ d.fila }}</td>
+            <td style="font-weight:600;">{{ d.nombre|default:"—" }}</td>
+            <td style="color:#64748B;">{{ d.categoria|default:"—" }}</td>
+            <td style="text-align:center;">
+              {% if d.estado == "ok" %}
+              <span class="mpro-badge" style="background:#DCFCE7; color:#16A34A; border:1px solid #BBF7D0;">Creado</span>
+              {% elif d.estado == "error" %}
+              <span class="mpro-badge" style="background:#FEE2E2; color:#DC2626; border:1px solid #FECACA;">Error</span>
+              {% else %}
+              <span class="mpro-badge" style="background:#FEF9C3; color:#D97706; border:1px solid #FDE047;">Omitido</span>
+              {% endif %}
+            </td>
+            <td style="color:{% if d.estado == 'ok' %}#16A34A{% elif d.estado == 'error' %}#DC2626{% else %}#D97706{% endif %}; font-weight:600; font-size:1.2rem;">
+              {{ d.mensaje }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div style="margin-top:2.5rem; display:flex; gap:1.5rem; flex-wrap:wrap;">
+    <a href="/admin-panel/productos/" class="g-btn-primary" style="display:inline-flex; align-items:center; gap:0.8rem;">
+      <span class="material-symbols-outlined">inventory_2</span>
+      Ver todos los Productos
+    </a>
+    <a href="/admin-panel/productos/carga-masiva/" class="g-btn-primary"
+       style="background:transparent; border:1.5px solid var(--ds-border); color:var(--ds-text-soft); box-shadow:none; display:inline-flex; align-items:center; gap:0.8rem;">
+      <span class="material-symbols-outlined">upload</span>
+      Nueva Importación
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════════════════════
+     GUÍA RÁPIDA DE CAMPOS
+═══════════════════════════════════════════════════════════════ -->
+<div class="mpro-card">
+  <h4 style="font-size:1.7rem; font-weight:800; margin:0 0 2rem; display:flex; align-items:center; gap:1rem;">
+    <span class="material-symbols-outlined" style="color:var(--ds-primary);">help_outline</span>
+    Referencia de columnas del archivo
+  </h4>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(28rem, 1fr)); gap:1.5rem;">
+    {% for campo in campos_referencia %}
+    <div style="background:{% if campo.requerido %}#EFF6FF{% else %}#F8FAFC{% endif %}; border:1px solid {% if campo.requerido %}#BFDBFE{% else %}var(--ds-border){% endif %}; border-radius:1.2rem; padding:1.5rem 2rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.8rem;">
+        <code style="background:{% if campo.requerido %}var(--ds-primary){% else %}#64748B{% endif %}; color:white; padding:0.3rem 0.8rem; border-radius:0.6rem; font-size:1.1rem; font-weight:700;">{{ campo.nombre }}</code>
+        <span style="font-size:1rem; font-weight:700; color:{% if campo.requerido %}#1D4ED8{% else %}#6B7280{% endif %}; background:{% if campo.requerido %}#DBEAFE{% else %}#F1F5F9{% endif %}; padding:0.2rem 0.8rem; border-radius:4rem;">
+          {% if campo.requerido %}REQUERIDO{% else %}OPCIONAL{% endif %}
+        </span>
+      </div>
+      <p style="font-size:1.25rem; color:#475569; margin:0; line-height:1.5;">{{ campo.descripcion }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+// ─── Drag & Drop ────────────────────────────────────────────────────────────
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('archivo-xlsx');
+
+['dragenter', 'dragover'].forEach(event => {
+  dropZone.addEventListener(event, function(e) {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+});
+
+['dragleave', 'drop'].forEach(event => {
+  dropZone.addEventListener(event, function(e) {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (event === 'drop' && e.dataTransfer.files.length) {
+      const dt = new DataTransfer();
+      dt.items.add(e.dataTransfer.files[0]);
+      fileInput.files = dt.files;
+      actualizarUIConArchivo(e.dataTransfer.files[0]);
+    }
+  });
+});
+
+fileInput.addEventListener('change', function() {
+  if (this.files.length) actualizarUIConArchivo(this.files[0]);
+});
+
+function actualizarUIConArchivo(file) {
+  const nombreDisplay = document.getElementById('archivo-nombre-display');
+  const nombreTexto = document.getElementById('nombre-archivo-texto');
+  const icon = document.getElementById('upload-icon');
+  const iconSymbol = document.getElementById('upload-icon-symbol');
+  const titulo = document.getElementById('drop-titulo');
+  const subtitulo = document.getElementById('drop-subtitulo');
+
+  icon.classList.remove('loading-icon');
+  icon.classList.add('success-icon');
+  iconSymbol.textContent = 'check_circle';
+  titulo.textContent = 'Archivo listo para importar';
+  subtitulo.textContent = 'Revisa las opciones y haz clic en "Iniciar Importación"';
+  nombreTexto.textContent = file.name;
+  nombreDisplay.style.display = 'inline-flex';
+  dropZone.classList.add('archivo-seleccionado');
+}
+
+// ─── Submit con feedback visual ─────────────────────────────────────────────
+document.getElementById('form-carga-masiva').addEventListener('submit', function(e) {
+  const btnText = document.getElementById('btn-import-text');
+  const btnIcon = document.getElementById('btn-import-icon');
+  const btn = document.getElementById('btn-importar');
+  const icon = document.getElementById('upload-icon');
+  const iconSymbol = document.getElementById('upload-icon-symbol');
+
+  icon.classList.remove('success-icon');
+  icon.classList.add('loading-icon');
+  iconSymbol.textContent = 'sync';
+  btnText.textContent = 'PROCESANDO ARCHIVO...';
+  btnIcon.textContent = 'hourglass_top';
+  btn.disabled = true;
+  btn.style.opacity = '0.8';
+});
+
+// ─── Auto-scroll al reporte si existe ───────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const reporte = document.getElementById('seccion-reporte');
+  if (reporte) {
+    setTimeout(function() {
+      reporte.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  }
+});
+</script>
+
+{% endblock %}

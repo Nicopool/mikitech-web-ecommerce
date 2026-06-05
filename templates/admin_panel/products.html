@@ -17,9 +17,15 @@
     <h2 style="font-size:2.2rem; font-weight:800;">📦 Gestión de Inventario</h2>
     <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">{{ productos|length }} producto{% if productos|length != 1 %}s{% endif %} registrados</p>
   </div>
-  <a href="{% url 'admin_product_create' %}" class="g-btn-primary">
-    + Nuevo Producto
-  </a>
+  <div style="display:flex; gap:1rem;">
+    <a href="{% url 'admin_product_bulk_upload' %}" class="g-btn-primary" style="background:transparent; border:1.5px solid var(--ds-border); color:var(--ds-text-soft); box-shadow:none; display:inline-flex; align-items:center; gap:0.8rem;">
+      <span class="material-symbols-outlined">upload</span>
+      Carga Masiva
+    </a>
+    <a href="{% url 'admin_product_create' %}" class="g-btn-primary">
+      + Nuevo Producto
+    </a>
+  </div>
 </div>
 
 <!-- MINI ESTADÍSTICAS -->

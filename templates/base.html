@@ -5,25 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{{ titulo_pagina|default:"MIKITECH | El Mejor Hardware de Alto Rendimiento" }}{% endblock %}</title>
   {% load static %}
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     html { font-size: 10px; }
-    body { font-family: 'Jost', sans-serif; background-color: #FFFFFF; color: #111111; overflow-x: hidden; font-size: 1.6rem; }
+    body { font-family: 'Inter', sans-serif; background-color: #FFFFFF; color: #111111; overflow-x: hidden; font-size: 1.6rem; }
     a { text-decoration: none; color: inherit; }
     
     /* NAVBAR */
     .nav-wix { display: flex; justify-content: space-between; align-items: center; padding: 0 4rem; height: 7rem; background-color: #FFFFFF; border-bottom: 1px solid #EEEEEE; position: sticky; top: 0; z-index: 100; transition: all 0.3s ease; }
     
-    .nav-logo { font-family: 'Oswald', sans-serif; font-size: 2.4rem; font-weight: 700; color: #0F172A; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-logo { font-family: 'Inter', sans-serif; font-size: 2.4rem; font-weight: 800; color: #0F172A; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
     
     .nav-right { display: flex; align-items: center; gap: 3rem; font-size: 1.4rem; font-weight: 500; }
     
-    .nav-action { display: flex; align-items: center; gap: 0.8rem; cursor: pointer; transition: opacity 0.2s; }
-    .nav-action:hover { opacity: 0.7; }
-    .nav-action svg { width: 1.8rem; height: 1.8rem; fill: #111; }
+    .nav-action { display: flex; align-items: center; gap: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .nav-action:hover { opacity: 0.7; transform: translateY(-1px); }
+    .nav-action svg { width: 2.2rem; height: 2.2rem; stroke: #111; stroke-width: 2; fill: none; }
     .nav-avatar { width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; border: 0.2rem solid #1D4ED8; flex-shrink: 0; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2); }
-    .nav-avatar-placeholder { width: 4.5rem; height: 4.5rem; border-radius: 50%; background: #111; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Jost', sans-serif; font-size: 1.6rem; font-weight: 700; flex-shrink: 0; }
+    .nav-avatar-placeholder { width: 4.5rem; height: 4.5rem; border-radius: 50%; background: #111; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 700; flex-shrink: 0; }
     
     /* CART DRAWER (MINI-CARRITO) */
     .cart-drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.6); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(4px); }
@@ -33,19 +37,21 @@
     body.cart-open .cart-drawer { right: 0; }
     
     .cd-header { padding: 3rem; border-bottom: 1px solid #EEE; display: flex; justify-content: space-between; align-items: center; }
-    .cd-header h3 { font-family: 'Oswald', sans-serif; font-size: 2.2rem; text-transform: uppercase; letter-spacing: 1px; }
+    .cd-header h3 { font-family: 'Inter', sans-serif; font-size: 2.2rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
     .cd-close { cursor: pointer; color: #111; font-size: 3rem; }
+    .cd-close svg { width: 2.8rem; height: 2.8rem; stroke-width: 2; }
     
     .cd-items { flex: 1; overflow-y: auto; padding: 2rem 3rem; }
-    .cd-item { display: flex; gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid #FAF9F6; align-items: center; }
+    .cd-item { display: flex; gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid #FAF9F6; align-items: center; transition: background 0.2s; }
+    .cd-item:hover { background: #FAFAFA; border-radius: 8px; }
     .cd-item-img { width: 7rem; height: 7rem; background: #F8FAFC; border-radius: 0.8rem; object-fit: contain; }
     .cd-item-info { flex: 1; }
     .cd-item-name { font-size: 1.4rem; font-weight: 600; color: #111; margin-bottom: 0.4rem; display: block; }
     .cd-item-price { font-size: 1.3rem; color: #64748B; font-weight: 500; }
     
     .cd-footer { padding: 3rem; border-top: 1px solid #EEE; background: #F8FAFC; }
-    .cd-total { display: flex; justify-content: space-between; margin-bottom: 2.5rem; font-family: 'Oswald', sans-serif; font-size: 1.8rem; font-weight: 700; text-transform: uppercase; }
-    .cd-btn { display: block; width: 100%; padding: 1.8rem; background: #111; color: white; text-align: center; text-transform: uppercase; font-family: 'Oswald', sans-serif; font-size: 1.5rem; letter-spacing: 1.5px; border-radius: 0.4rem; transition: all 0.3s; }
+    .cd-total { display: flex; justify-content: space-between; margin-bottom: 2.5rem; font-family: 'Inter', sans-serif; font-size: 1.8rem; font-weight: 700; text-transform: uppercase; }
+    .cd-btn { display: block; width: 100%; padding: 1.8rem; background: #111; color: white; text-align: center; text-transform: uppercase; font-family: 'Inter', sans-serif; font-size: 1.5rem; letter-spacing: 1.5px; border-radius: 0.4rem; transition: all 0.3s; font-weight: 600; }
     .cd-btn:hover { background: #333; transform: translateY(-2px); }
     
     /* HAMBURGER */
@@ -60,10 +66,10 @@
     body.drawer-open .drawer { right: 0; }
     
     .drawer-close { position: absolute; top: 3rem; right: 3rem; cursor: pointer; padding: 1rem; display: flex; align-items: center; justify-content: center; }
-    .drawer-close svg { width: 3rem; height: 3rem; fill: white; }
+    .drawer-close svg { width: 3rem; height: 3rem; stroke: white; fill: none; }
     
     .drawer-nav { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 3rem; }
-    .drawer-nav a { font-family: 'Jost', sans-serif; font-size: 2.6rem; font-weight: 400; color: white; transition: color 0.2s; }
+    .drawer-nav a { font-family: 'Inter', sans-serif; font-size: 2.6rem; font-weight: 600; color: white; transition: color 0.2s; }
     .drawer-nav a:hover { color: #AAA; }
     
     .drawer-social { display: flex; justify-content: center; gap: 2rem; padding-bottom: 5rem; }
@@ -75,16 +81,16 @@
     /* FOOTER PREMIUM */
     .miki-footer { background: #0F172A; color: #94A3B8; padding: 8rem 4rem 4rem; border-top: 1px solid #1E293B; }
     .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(25rem, 1fr)); gap: 4rem; max-width: 130rem; margin: 0 auto; }
-    .footer-col h4 { font-family: 'Oswald', sans-serif; font-size: 1.6rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2.5rem; }
+    .footer-col h4 { font-family: 'Inter', sans-serif; font-size: 1.6rem; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2.5rem; font-weight: 700; }
     .footer-col p { font-size: 1.4rem; line-height: 1.8; margin-bottom: 2.5rem; }
     .footer-links { list-style: none; padding: 0; margin: 0; }
     .footer-links li { margin-bottom: 1.2rem; }
     .footer-links a { font-size: 1.4rem; transition: color 0.3s; color: #94A3B8; }
-    .footer-links a:hover { color: #FFFFFF; }
+    .footer-links a:hover { color: #FFFFFF; text-decoration: underline; }
     .footer-bottom { border-top: 1px solid #1E293B; margin-top: 6rem; padding-top: 3rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem; font-size: 1.2rem; }
     .footer-social { display: flex; gap: 2rem; }
-    .footer-social span { font-size: 2.2rem; color: #FFFFFF; cursor: pointer; transition: opacity 0.3s; }
-    .footer-social span:hover { opacity: 0.7; }
+    .footer-social i { font-size: 2.2rem; color: #FFFFFF; cursor: pointer; transition: opacity 0.3s; stroke: #FFF; width: 2.4rem; height: 2.4rem; }
+    .footer-social i:hover { opacity: 0.7; transform: scale(1.1); }
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -96,19 +102,19 @@
   <nav class="nav-wix">
     <a href="{% url 'core:home' %}" class="nav-logo" style="display: flex; align-items: center; gap: 1.5rem;">
       <img src="{% static 'img/logo.png' %}" alt="MIKITECH" style="height: 5rem; width: auto; filter: drop-shadow(0 0 8px rgba(29, 78, 216, 0.1)); transition: all 0.3s ease;" class="miki-logo-img">
-      <span style="font-family: 'Oswald', sans-serif; font-size: 2.8rem; font-weight: 700; color: #0F172A; letter-spacing: 2px;">MIKITECH</span>
+      <span style="font-family: 'Inter', sans-serif; font-size: 2.8rem; font-weight: 800; color: #0F172A; letter-spacing: 2px;">MIKITECH</span>
     </a>
     
     <div class="nav-right">
       <a href="javascript:void(0)" class="nav-action" onclick="toggleCartDrawer()">
-        <span class="material-symbols-outlined" style="font-size: 2.4rem; color: #111;">shopping_cart</span>
+        <i data-lucide="shopping-cart"></i>
         <strong id="cart-counter" style="background:#111; color:white; border-radius:50%; min-width:1.8rem; height:1.8rem; padding: 0 0.5rem; display:inline-flex; align-items:center; justify-content:center; font-size:1rem; position:relative; top:-0.8rem; left:-0.8rem;">{{ conteo_carrito }}</strong>
       </a>
 
       <!-- Notificaciones -->
       {% if request.session.usuario_id %}
       <div class="nav-action nav-notif" style="position:relative; cursor:pointer;" onclick="toggleNotifDropdown()">
-        <span class="material-symbols-outlined" style="font-size:2.2rem; color:#111;">notifications</span>
+        <i data-lucide="bell"></i>
         {% if conteo_notificaciones > 0 %}
           <span style="position:absolute; top:-5px; right:-5px; background:#DC2626; color:white; border-radius:50%; min-width:1.6rem; height:1.6rem; font-size:1rem; display:flex; align-items:center; justify-content:center; font-weight:700;">{{ conteo_notificaciones }}</span>
         {% endif %}
@@ -148,13 +154,13 @@
       </a>
       {% if request.session.rol_usuario == 'repartidor' %}
       <a href="{% url 'core:repartidor' %}" class="nav-action" style="color:#0284C7;">
-        <span class="material-symbols-outlined" style="font-size:2.4rem;">local_shipping</span>
+        <i data-lucide="truck" style="stroke: #0284C7;"></i>
         <span>Rutas</span>
       </a>
       {% endif %}
       {% else %}
       <a href="{% url 'users:login' %}" class="nav-action">
-        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <i data-lucide="user"></i>
         <span>Ingresar</span>
       </a>
       {% endif %}
@@ -173,7 +179,7 @@
   
   <div class="drawer">
     <div class="drawer-close" onclick="document.body.classList.remove('drawer-open')">
-      <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      <i data-lucide="x"></i>
     </div>
     
     <nav class="drawer-nav">
@@ -195,12 +201,12 @@
   <div class="cart-drawer">
     <div class="cd-header">
       <h3>Tu Carrito</h3>
-      <span class="material-symbols-outlined cd-close" onclick="toggleCartDrawer()">close</span>
+      <div class="cd-close" onclick="toggleCartDrawer()"><i data-lucide="x"></i></div>
     </div>
     <div class="cd-items" id="cart-drawer-items">
       <!-- AJAX Se encarga de llenar esto -->
       <div style="text-align:center; padding-top:10rem; color:#94A3B8;">
-        <span class="material-symbols-outlined" style="font-size:5rem; margin-bottom:1rem;">shopping_basket</span>
+        <i data-lucide="shopping-bag" style="width: 5rem; height: 5rem; margin-bottom: 1rem; stroke-width: 1.5;"></i>
         <p>Tu bolsa está vacía.</p>
       </div>
     </div>
@@ -224,13 +230,13 @@
       <div class="footer-col">
         <a href="{% url 'core:home' %}" style="display:flex; align-items:center; gap:1.2rem; margin-bottom:2.5rem;">
           <img src="{% static 'img/logo.png' %}" alt="MIKITECH" style="height: 4.5rem; filter: brightness(0) invert(1);">
-          <span style="font-family:'Oswald', sans-serif; font-size:2.4rem; color:#FFF; font-weight:700; letter-spacing:2px;">MIKITECH</span>
+          <span style="font-family:'Inter', sans-serif; font-size:2.4rem; color:#FFF; font-weight:800; letter-spacing:2px;">MIKITECH</span>
         </a>
         <p>Expertos en hardware de alta gama. Ofrecemos lo último en tecnología de computación, optimizando el rendimiento para gamers y profesionales exigentes.</p>
         <div class="footer-social">
-          <span class="material-symbols-outlined">public</span>
-          <span class="material-symbols-outlined">alternate_email</span>
-          <span class="material-symbols-outlined">share</span>
+          <i data-lucide="globe"></i>
+          <i data-lucide="at-sign"></i>
+          <i data-lucide="share-2"></i>
         </div>
       </div>
       
@@ -271,9 +277,7 @@
 
     <div class="footer-bottom">
       <div style="color: #64748B;">&copy; 2026 MIKITECH WEB. Todos los derechos reservados. Bogotá, Colombia.</div>
-      <div style="font-family:'Oswald', sans-serif; font-weight:600; font-size: 1.3rem; letter-spacing:1px; color:#FFF; display:flex; align-items:center; gap:0.5rem;">
-        DISEÑADO POR <span style="color:#2563EB;">ANTIGRAVITY</span>
-      </div>
+
     </div>
   </footer>
   <!-- SWEETALERT2 GLOBAL LOGIC -->
@@ -380,8 +384,8 @@
                     price.textContent = item.cantidad + ' x ' + item.precio_formateado;
 
                     const deleteBtn = document.createElement('button');
-                    deleteBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">delete</span>';
-                    deleteBtn.style.cssText = 'background:none; border:none; color:#EF4444; cursor:pointer; margin-left: auto;';
+                    deleteBtn.innerHTML = '<i data-lucide="trash-2"></i>';
+                    deleteBtn.style.cssText = 'background:none; border:none; color:#EF4444; cursor:pointer; margin-left: auto; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; stroke: #EF4444;';
                     deleteBtn.onclick = () => removeFromCartAjax(item.producto.id);
 
                     const rightPanel = document.createElement('div');
@@ -403,10 +407,9 @@
                 const emptyDiv = document.createElement('div');
                 emptyDiv.style.cssText = 'text-align:center; padding-top:10rem; color:#94A3B8;';
 
-                const icon = document.createElement('span');
-                icon.className = 'material-symbols-outlined';
-                icon.style.cssText = 'font-size:5rem; display:block; margin-bottom:1rem;';
-                icon.textContent = 'shopping_basket';
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', 'shopping-bag');
+                icon.style.cssText = 'width: 5rem; height: 5rem; display:block; margin: 0 auto 1rem; stroke-width: 1.5;';
 
                 const msg = document.createElement('p');
                 msg.textContent = 'Tu bolsa está vacía.';
@@ -418,6 +421,7 @@
                 if (footer) footer.style.display = 'none';
                 if (counter) counter.textContent = '0';
             }
+            lucide.createIcons();
         } catch (e) { console.error('Error al cargar carrito drawer:', e); }
     }
 
@@ -513,6 +517,10 @@
   </script>
 
   {% block extra_js %}{% endblock %}
-
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      lucide.createIcons();
+    });
+  </script>
 </body>
 </html>

@@ -15,6 +15,8 @@ urlpatterns = [
     path('productos/crear/', admin_views.crear_producto, name='admin_product_create'),
     path('productos/editar/<str:id_producto>/', admin_views.editar_producto, name='admin_product_edit'),
     path('productos/eliminar/<str:id_producto>/', admin_views.eliminar_producto, name='admin_product_delete'),
+    path('productos/carga-masiva/', admin_views.carga_masiva_productos, name='admin_product_bulk_upload'),
+    path('productos/plantilla-excel/', admin_views.descargar_plantilla_excel, name='admin_excel_template'),
     
     # Gestión de categorías
     path('categorias/', admin_views.gestion_categorias, name='admin_categories'),
