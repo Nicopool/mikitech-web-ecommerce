@@ -12,12 +12,21 @@
     --bg-premium: #F8FAFC;
   }
   
-  .detail-section { padding: 8rem 0; background: #FFFFFF; }
-  .detail-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 8rem; align-items: start; }
-  @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; gap: 4rem; } }
+  /* Mobile-First layout: base para pantallas pequeñas */
+  .detail-section { padding: 2rem 1.5rem; background: #FFFFFF; }
+  .detail-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: start; }
+  
+  @media (min-width: 900px) { 
+    .detail-section { padding: 4rem 2rem; }
+    .detail-grid { grid-template-columns: 1.1fr 0.9fr; gap: 6rem; } 
+  }
 
   /* GALLERY SIDE */
-  .gallery-container { position: sticky; top: 12rem; }
+  .gallery-container { position: static; }
+  @media (min-width: 900px) {
+    .gallery-container { position: sticky; top: 12rem; }
+  }
+  
   .main-image-box { 
     background: #FFF; 
     border: 1px solid var(--border); 
@@ -30,76 +39,67 @@
     box-shadow: 0 10px 40px rgba(0,0,0,0.03);
     transition: all 0.5s ease;
   }
-  .main-image-box img { width: 85%; height: 85%; object-fit: contain; transition: transform 0.5s ease; }
+  /* Cambio clave: object-fit cover para adaptar imagen */
+  .main-image-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
   .main-image-box:hover img { transform: scale(1.05); }
 
-  .thumb-strip { display: flex; gap: 1.5rem; margin-top: 2rem; overflow-x: auto; padding-bottom: 1rem; }
+  .thumb-strip { display: flex; gap: 1.5rem; margin-top: 2rem; overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; }
   .thumb-strip::-webkit-scrollbar { height: 4px; }
   .thumb-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   .thumb-item { 
     flex: 0 0 9rem; 
     height: 9rem; 
     border-radius: 1.2rem; 
-    border: 2px solid transparent; 
+    border: 1px solid var(--border); 
     cursor: pointer; 
     background: #FFF; 
     display: flex; 
     align-items: center; 
     justify-content: center;
-    border: 1px solid var(--border);
     overflow: hidden;
   }
   .thumb-item.active { border-color: var(--accent); border-width: 2px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
-  .thumb-item img { width: 70%; height: 70%; object-fit: contain; }
+  /* object-fit cover para miniaturas */
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
 
   /* INFO SIDE */
   .p-header { margin-bottom: 3rem; }
-  .p-tag { font-size: 1.2rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.2rem; margin-bottom: 1rem; display: block; }
-  .p-name { font-family: 'Oswald', sans-serif; font-size: 4.8rem; line-height: 1.1; color: var(--navy); text-transform: uppercase; margin-bottom: 1.5rem; }
+  .p-tag { font-size: 1.1rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem; display: block; }
+  .p-name { font-family: 'Inter', sans-serif; font-size: 3.2rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; color: var(--navy); margin-bottom: 1.5rem; }
   
-  .p-rating { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; color: var(--slate); font-size: 1.4rem; }
-  .stars-row { display: flex; color: #F59E0B; }
+  .p-rating { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; color: var(--slate); font-size: 1.3rem; }
   
-  .p-price-block { margin: 4rem 0; }
-  .price-main { font-family: 'Oswald', sans-serif; font-size: 4rem; font-weight: 700; color: var(--navy); }
-  .price-label { font-size: 1.2rem; color: var(--slate); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  .p-price-block { margin: 3rem 0; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+  .price-main { font-family: 'Inter', sans-serif; font-size: 2.8rem; font-weight: 500; color: var(--navy); letter-spacing: -0.5px; }
+  .price-label { font-size: 1.1rem; color: var(--slate); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 0.5rem; }
 
-  .stock-status { display: inline-flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1.6rem; border-radius: 10rem; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 2rem; }
-  .stock-in { background: #DCFCE7; color: #15803D; }
+  .stock-status { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.2rem; border-radius: 6px; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 2rem; }
+  .stock-in { background: #F8FAFC; color: #334155; border: 1px solid #E2E8F0; }
   .stock-low { background: #FEF3C7; color: #B45309; }
   .stock-out { background: #FEE2E2; color: #B91C1C; }
 
-  .actions-row { display: flex; gap: 2rem; margin-top: 4rem; }
-  .btn-premium { height: 6.4rem; border-radius: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 1.2rem; font-family: 'Jost', sans-serif; font-size: 1.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: none; cursor: pointer; }
+  /* Fila de acciones adaptativa */
+  .actions-row { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 3rem; }
+  .btn-premium { height: 4.8rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 1rem; font-family: 'Inter', sans-serif; font-size: 1.3rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s ease; border: none; cursor: pointer; width: 100%; }
   
-  .btn-add-cart { flex: 1; background: var(--navy); color: #FFF; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2); }
-  .btn-add-cart:hover { background: #1E293B; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(15, 23, 42, 0.3); }
-  .btn-add-cart:active { transform: translateY(-1px); }
+  @media (min-width: 640px) {
+    .actions-row { flex-direction: row; gap: 2rem; }
+    .btn-premium { width: auto; }
+  }
   
-  .btn-favourite { width: 6.4rem; background: #FFF; border: 1px solid var(--border); color: var(--navy); }
-  .btn-favourite:hover { border-color: #F87171; color: #F87171; background: #FEF2F2; }
-  .btn-favourite.active { background: #FEE2E2; border-color: #EF4444; color: #EF4444; }
+  .btn-add-cart { flex: 1; background: var(--navy); color: #FFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); }
+  .btn-add-cart:hover { background: #1E293B; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15); }
+  .btn-add-cart:active { transform: translateY(0); }
 
   /* SPECS TAB */
   .specs-container { margin-top: 6rem; border-top: 1px solid var(--border); padding-top: 6rem; }
-  .specs-title { font-family: 'Oswald', sans-serif; font-size: 2.8rem; text-transform: uppercase; margin-bottom: 3rem; }
-  .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
-  @media (max-width: 600px) { .specs-grid { grid-template-columns: 1fr; } }
+  .specs-title { font-family: 'Inter', sans-serif; font-size: 2.8rem; text-transform: uppercase; margin-bottom: 3rem; }
+  .specs-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+  @media (min-width: 600px) { .specs-grid { grid-template-columns: repeat(2, 1fr); } }
   .spec-card { background: var(--bg-premium); padding: 2rem; border-radius: 1.2rem; border: 1px solid rgba(0,0,0,0.02); }
   .spec-label { font-size: 1.1rem; color: var(--slate); text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 0.5rem; }
   .spec-value { font-size: 1.5rem; font-weight: 600; color: var(--navy); }
 
-  /* REVIEWS */
-  .reviews-section { margin-top: 8rem; padding-top: 8rem; border-top: 1px solid var(--border); }
-  .review-bubble { background: #FFF; border: 1px solid var(--border); border-radius: 2rem; padding: 3rem; margin-bottom: 3rem; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
-  .rev-user-box { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
-  .rev-photo { width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover; background: var(--bg-premium); border: 2px solid #FFF; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-  .rev-name-link { font-size: 1.6rem; font-weight: 700; color: var(--navy); text-decoration: none; }
-  .rev-body { font-size: 1.5rem; line-height: 1.8; color: #475569; }
-
-  .write-review-btn { background: var(--bg-premium); color: var(--navy); border: 1px solid var(--border); width: auto; padding: 0 4rem; margin-top: 2rem; }
-
-  .material-symbols-outlined { font-size: 2.2rem; }
 </style>
 {% endblock %}
 
@@ -115,7 +115,7 @@
             {% if producto.url_imagen_principal %}
               <img src="{{ producto.url_imagen_principal }}" alt="{{ producto.nombre }}" id="main-product-img">
             {% else %}
-              <span class="material-symbols-outlined" style="font-size: 15rem; color: #CBD5E1;">inventory_2</span>
+              <i data-lucide="package" style="width: 15rem; height: 15rem; color: #CBD5E1;"></i>
             {% endif %}
           </div>
           
@@ -141,14 +141,8 @@
           <h1 class="p-name">{{ producto.nombre }}</h1>
           
           <div class="p-rating">
-            <div class="stars-row">
-              {% for i in "12345" %}
-                <span class="material-symbols-outlined" style="font-size:1.8rem; {% if forloop.counter <= producto.calificacion_promedio %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
-              {% endfor %}
-            </div>
-            <span>({{ producto.conteo_reseñas }} Reseñas confirmadas)</span>
-            <span style="display:flex; align-items:center; gap:0.5rem; margin-left:1rem; color:var(--accent); font-weight:700;">
-              <span class="material-symbols-outlined">verified</span> Certificado
+            <span style="display:flex; align-items:center; gap:0.5rem; color:var(--accent); font-weight:700; font-size:1.3rem;">
+              <i data-lucide="badge-check" style="width: 2rem; height: 2rem;"></i> Producto Certificado MIKITECH
             </span>
           </div>
         </div>
@@ -167,31 +161,24 @@
 
         <div class="p-price-block">
           {% if producto.descuento_activo %}
-          <div style="font-size:1.2rem; color:var(--slate); text-transform:uppercase; font-weight:700; letter-spacing:1px; margin-bottom:0.5rem;">Precio Exclusivo MIKITECH</div>
-          <div style="font-size:1.6rem; color:#94A3B8; text-decoration:line-through; margin-bottom:0.5rem;">{{ producto.precio|currency_cop }}</div>
-          <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:0.5rem;">
-            <span style="font-family:'Oswald',sans-serif; font-size:4.8rem; font-weight:900; color:#EF4444; line-height:1;">{{ producto.precio_con_descuento|currency_cop }}</span>
-            <div>
-              <span style="background:#EF4444; color:white; font-weight:900; font-size:2rem; padding:0.6rem 1.2rem; border-radius:0.8rem; display:inline-block;">-{{ producto.descuento_porcentaje }}%</span>
-              <div style="font-size:1.4rem; color:#EF4444; font-weight:700; margin-top:0.4rem;">Precio de Hoy</div>
-            </div>
+          <div class="price-label">Precio Exclusivo MIKITECH</div>
+          <div style="font-size:1.4rem; color:#94A3B8; text-decoration:line-through; margin-bottom:0.5rem;">{{ producto.precio|currency_cop }}</div>
+          <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:1rem;">
+            <span style="font-family: 'Inter', sans-serif; font-size:2.8rem; font-weight:600; color:var(--navy); letter-spacing:-0.5px; line-height:1;">{{ producto.precio_con_descuento|currency_cop }}</span>
+            <span style="background:#F1F5F9; color:#334155; font-weight:600; font-size:1.2rem; padding:0.4rem 0.8rem; border-radius:4px; border:1px solid #E2E8F0; letter-spacing:1px;">-{{ producto.descuento_porcentaje }}% OFF</span>
           </div>
-          <div style="font-size:1.1rem; color:var(--slate); margin-top:0.5rem;">IVA del 19% incluido • Garantía oficial de 1 año</div>
+          <div style="font-size:1.1rem; color:var(--slate); line-height:1.6;">IVA del 19% incluido<br>Garantía oficial de 1 año cubierta por el fabricante</div>
           {% else %}
           <div class="price-label">Precio Exclusivo MIKITECH</div>
           <div class="price-main">{{ producto.precio|currency_cop }}</div>
-          <div style="font-size:1.1rem; color:var(--slate); margin-top:0.5rem;">IVA del 19% incluido • Garantía oficial de 1 año</div>
+          <div style="font-size:1.1rem; color:var(--slate); line-height:1.6; margin-top:1rem;">IVA del 19% incluido<br>Garantía oficial de 1 año cubierta por el fabricante</div>
           {% endif %}
         </div>
 
         <div class="actions-row">
           <button class="btn-premium btn-add-cart" onclick="addToCartAjax('{{ producto.id }}')">
-            <span class="material-symbols-outlined">shopping_cart</span>
+            <i data-lucide="shopping-cart"></i>
             Añadir al Carrito
-          </button>
-          
-          <button class="btn-premium btn-favourite {% if es_favorito %}active{% endif %}" id="fav-trigger" data-id="{{ producto.id }}">
-            <span class="material-symbols-outlined" style="{% if es_favorito %}font-variation-settings: 'FILL' 1;{% endif %}">favorite</span>
           </button>
         </div>
 
@@ -209,56 +196,21 @@
         </div>
         {% endif %}
 
-        <div style="margin-top: 6rem; padding: 2rem; border-radius: 1.2rem; background: var(--bg-premium); font-size: 1.3rem; color: var(--slate);">
-          <div style="display:flex; justify-content: space-between; margin-bottom: 1rem;">
-            <span>SKU: <strong style="color:var(--navy);">#{{ producto.codigo_sku|default:"MIKI-2026-X" }}</strong></span>
-            <span>Marca: <strong style="color:var(--navy);">{{ producto.marca|default:"MIKITECH" }}</strong></span>
+        <div style="margin-top: 4rem; padding: 2rem; border-radius: 8px; border: 1px solid #F1F5F9; background: #FAFAFA; font-size: 1.2rem; color: var(--slate); line-height: 1.7;">
+          <div style="display:flex; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #F1F5F9;">
+            <span>SKU: <span style="color:var(--navy); font-family: monospace; font-size: 1.1rem;">#{{ producto.codigo_sku|default:"MIKI-2026-X" }}</span></span>
+            <span>Marca: <span style="color:var(--navy); font-weight: 500;">{{ producto.marca|default:"MIKITECH" }}</span></span>
           </div>
-          <div>Envío asegurado a todo el país. Entrega estimada en 2-4 días hábiles.</div>
+          <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <i data-lucide="truck" style="width: 1.6rem; height: 1.6rem; color: var(--slate); flex-shrink:0; margin-top:0.2rem;"></i>
+            <span>Envío asegurado a todo el país vía logística certificada. <br>Entrega estimada en <strong>2-4 días hábiles</strong>.</span>
+          </div>
         </div>
       </div>
 
     </div>
 
-    <!-- REVIEWS -->
-    <div class="reviews-section">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:4rem;">
-        <div>
-          <h2 class="specs-title" style="margin-bottom:1rem;">Reseñas de la comunidad</h2>
-          <p style="font-size:1.4rem; color:var(--slate);">Opiniones de entusiastas del rendimiento como tú.</p>
-        </div>
-        <a href="#new-review-form" class="btn-premium write-review-btn">Escribir Reseña</a>
-      </div>
 
-      {% for reseña in reseñas %}
-      <div class="review-bubble">
-        <div class="rev-user-box">
-          {% if reseña.usuario.url_avatar %}
-            <img src="{{ reseña.usuario.url_avatar }}" class="rev-photo">
-          {% else %}
-            <div class="rev-photo" style="display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--accent); background:#EFF6FF;">{{ reseña.usuario.nombre_mostrado|first|upper }}</div>
-          {% endif %}
-          <div style="flex:1;">
-            <a href="{% url 'core:public_profile' reseña.usuario.nombre_usuario %}" class="rev-name-link">{{ reseña.usuario.nombre_mostrado }}</a>
-            <div style="display:flex; align-items:center; gap:1rem; margin-top:0.3rem;">
-              <div class="stars-row">
-                {% for i in "12345" %}
-                  <span class="material-symbols-outlined" style="font-size:1.4rem; color:#F59E0B; {% if forloop.counter <= reseña.calificacion %}font-variation-settings: 'FILL' 1;{% endif %}">star</span>
-                {% endfor %}
-              </div>
-              <span style="font-size:1.1rem; color:var(--slate);">{{ reseña.creado_el|date:"d M, Y" }}</span>
-            </div>
-          </div>
-        </div>
-        <p class="rev-body">{{ reseña.comentario }}</p>
-      </div>
-      {% empty %}
-      <div style="background:var(--bg-premium); padding:6rem; border-radius:3rem; text-align:center;">
-        <span class="material-symbols-outlined" style="font-size:4rem; color:var(--slate); margin-bottom:2rem;">reviews</span>
-        <p style="font-size:1.6rem; color:var(--slate);">Aún no hay reseñas. ¡Sé el primero en compartir tu experiencia!</p>
-      </div>
-      {% endfor %}
-    </div>
 
   </div>
 </div>
@@ -270,27 +222,6 @@
     document.getElementById('main-product-img').src = url;
     document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
     thumb.classList.add('active');
-  }
-
-  const triggerFav = document.getElementById('fav-trigger');
-  if (triggerFav) {
-    triggerFav.addEventListener('click', function() {
-      const pId = this.dataset.id;
-      fetch('{% url "interactions:toggle_favorite" producto.id %}', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          this.classList.toggle('active', data.is_favorite);
-          const icon = this.querySelector('.material-symbols-outlined');
-          icon.style.fontVariationSettings = data.is_favorite ? "'FILL' 1" : "'FILL' 0";
-        } else {
-          window.toast.aviso('Inicia sesión para guardar favoritos');
-        }
-      });
-    });
   }
 </script>
 {% endblock %}

@@ -6,7 +6,7 @@
 <!-- ===== ENCABEZADO ===== -->
 <div class="u-flex u-justify-between u-align-center u-mb-4">
   <div>
-    <h2 style="font-size:2.4rem; font-weight:800; font-family:'Oswald',sans-serif; color:var(--ds-text);">
+    <h2 style="font-size:2.4rem; font-weight:800; font-family: 'Inter', sans-serif; color:var(--ds-text);">
       {% if producto %}✏️ Editar Producto{% else %}➕ Nuevo Producto{% endif %}
     </h2>
     <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
@@ -71,7 +71,7 @@
             <span style="position:absolute; left:1.5rem; top:50%; transform:translateY(-50%); font-size:1.5rem; font-weight:700; color:var(--ds-text-soft);">$</span>
             <input type="number" id="prod-price" name="precio" class="mpro-input" required min="0" step="1"
               value="{{ producto.precio|default:'0'|floatformat:0 }}"
-              style="padding-left:3.5rem; font-family:'Oswald',sans-serif; font-size:2rem; font-weight:700;">
+              style="padding-left:3.5rem; font-family: 'Inter', sans-serif; font-size:2rem; font-weight:700;">
           </div>
         </div>
         <div>
@@ -159,7 +159,7 @@
           <span class="material-symbols-outlined" style="color:#0284C7; font-size:2.8rem;">sell</span>
         </div>
         <div>
-          <h3 style="font-family:'Oswald',sans-serif; font-size:1.8rem; font-weight:800; color:#0369A1; margin:0;">Oferta Especial</h3>
+          <h3 style="font-family: 'Inter', sans-serif; font-size:1.8rem; font-weight:800; color:#0369A1; margin:0;">Oferta Especial</h3>
           <p style="font-size:1.3rem; color:#0E7490; margin:0.2rem 0 0;">El descuento se mostrará en el catálogo y la ficha del producto.</p>
         </div>
       </div>
@@ -170,7 +170,7 @@
             <input type="number" id="desc-porcentaje" name="descuento_porcentaje" min="0" max="90" step="1"
               value="{{ producto.descuento_porcentaje|default:'0' }}"
               class="mpro-input"
-              style="border-color:#BAE6FD; font-family:'Oswald',sans-serif; font-size:2.4rem; font-weight:800; color:#0369A1; text-align:center; padding-right:3rem;"
+              style="border-color:#BAE6FD; font-family: 'Inter', sans-serif; font-size:2.4rem; font-weight:800; color:#0369A1; text-align:center; padding-right:3rem;"
               oninput="actualizarPrevistaDescuento()">
             <span style="position:absolute; right:1.5rem; top:50%; transform:translateY(-50%); font-size:1.6rem; font-weight:800; color:#0369A1;">%</span>
           </div>
@@ -183,7 +183,7 @@
         </div>
         <div id="preview-descuento" style="background:white; border-radius:1.6rem; padding:1.5rem; border:1px solid #BAE6FD; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:8rem; box-shadow:0 8px 20px rgba(0,0,0,0.04);">
           <div id="prev-original" style="font-size:1.2rem; color:#94A3B8; text-decoration:line-through; font-weight:600;">$0</div>
-          <div id="prev-final" style="font-family:'Oswald',sans-serif; font-size:2.4rem; font-weight:900; color:#16A34A;">$0</div>
+          <div id="prev-final" style="font-family: 'Inter', sans-serif; font-size:2.4rem; font-weight:900; color:#16A34A;">$0</div>
           <div id="prev-desc-badge" style="background:#DCFCE7; color:#16A34A; padding:0.2rem 0.8rem; border-radius:0.6rem; font-size:1rem; font-weight:800; margin-top:0.4rem;">AHORRA 0%</div>
         </div>
       </div>
@@ -236,7 +236,7 @@ function formatColombianPrice(n) {
 }
 
 function previewProductFile(input) {
-  if (input.files && input.files[0]) {
+  if (input.files & input.files[0]) {
     var reader = new FileReader();
     reader.onload = function(e) {
       const preview = document.getElementById('img-preview');
@@ -291,7 +291,7 @@ function actualizarPrevistaDescuento() {
   const pct = parseInt(document.getElementById('desc-porcentaje').value) || 0;
   const precio = parseFloat(document.getElementById('prod-price').value) || 0;
   const preview = document.getElementById('preview-descuento');
-  if (pct > 0 && precio > 0) {
+  if (pct > 0 & precio > 0) {
     const finalPrice = Math.round(precio * (1 - pct / 100));
     preview.style.display = 'flex';
     document.getElementById('prev-original').textContent = formatColombianPrice(precio);

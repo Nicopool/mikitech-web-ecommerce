@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ titulo_pagina }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #1D4ED8;
@@ -16,7 +18,7 @@
             --border: #E2E8F0;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: 'Jost', sans-serif; background: #EEE; display: flex; justify-content: center; padding: 40px 0; }
+        body { font-family: 'Inter', sans-serif; background: #EEE; display: flex; justify-content: center; padding: 40px 0; }
         
         .invoice-box {
             width: 850px;
@@ -35,11 +37,11 @@
         }
 
         .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 50px; border-bottom: 3px solid var(--secondary); padding-bottom: 20px; }
-        .logo-area { font-family: 'Oswald', sans-serif; font-size: 2.8rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px; }
+        .logo-area { font-family: 'Inter', sans-serif; font-size: 2.8rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px; }
         .logo-icon { color: var(--primary); font-size: 3.5rem; }
         
         .invoice-meta { text-align: right; }
-        .invoice-meta h1 { font-family: 'Oswald', sans-serif; font-size: 2.5rem; margin-bottom: 8px; color: var(--primary); }
+        .invoice-meta h1 { font-family: 'Inter', sans-serif; font-size: 2.5rem; margin-bottom: 8px; color: var(--primary); }
         .invoice-meta p { font-size: 1.4rem; color: var(--text-soft); font-weight: 500; }
 
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 50px; }
@@ -57,7 +59,7 @@
         .totals-area { display: flex; justify-content: flex-end; }
         .totals-box { width: 300px; }
         .total-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 1.4rem; }
-        .total-row.grand-total { border-top: 2px solid var(--secondary); margin-top: 10px; padding-top: 15px; font-size: 2rem; font-weight: 800; color: var(--primary); font-family: 'Oswald', sans-serif; }
+        .total-row.grand-total { border-top: 2px solid var(--secondary); margin-top: 10px; padding-top: 15px; font-size: 2rem; font-weight: 800; color: var(--primary); font-family: 'Inter', sans-serif; }
 
         .footer { margin-top: 60px; padding-top: 30px; border-top: 1px solid var(--border); text-align: center; color: var(--text-soft); font-size: 1.2rem; line-height: 1.6; }
         

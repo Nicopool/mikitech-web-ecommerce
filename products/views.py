@@ -88,30 +88,23 @@ def detalle_producto(petición, enlace):
         esta_activo=True
     ).exclude(id=producto.id)[:4]
 
-    # Verificar si el usuario ya votó o marcó como favorito
+    # Verificar si el usuario ya votó
     usuario_id = petición.session.get('usuario_id')
     ha_votado = False
-    es_favorito = False
     
     if usuario_id:
-        from interactions.models import Voto, Favorito
+        from interactions.models import Voto
         from users.models import Perfil
         try:
             perfil = Perfil.objects.get(id=usuario_id)
             ha_votado = Voto.objects.filter(usuario=perfil, producto=producto).exists()
-            es_favorito = Favorito.objects.filter(usuario=perfil, producto=producto).exists()
         except Perfil.DoesNotExist:
             pass
-
-    from interactions.models import Reseña
-    reseñas = Reseña.objects.filter(producto=producto).select_related('usuario').order_by('-creado_el')
 
     contexto = {
         'producto': producto,
         'productos_relacionados': productos_relacionados,
-        'reseñas': reseñas,
         'ha_votado': ha_votado,
-        'es_favorito': es_favorito,
         'titulo_pagina': f'{producto.nombre} | MIKITECH',
     }
 

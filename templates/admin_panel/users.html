@@ -227,7 +227,7 @@ function filtrarUsuarios() {
     var coincideBusqueda = texto.includes(q);
     var coincideRol = !rol || textoRol.includes(rol);
     
-    row.style.display = (coincideBusqueda && coincideRol) ? '' : 'none';
+    row.style.display = (coincideBusqueda & coincideRol) ? '' : 'none';
   });
 }
 

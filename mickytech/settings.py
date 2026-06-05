@@ -68,11 +68,14 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', 'db.abhnnxuqmbjkqiakebmv.supabase.co'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+        'HOST': os.environ.get('DB_HOST', 'aws-0-us-west-2.pooler.supabase.com'),
+        'PORT': os.environ.get('DB_PORT', '6543'),  # PgBouncer port
         'OPTIONS': {
             'sslmode': 'require',
         },
+        # Reutiliza la conexión durante 60s en vez de abrir/cerrar por request
+        'CONN_MAX_AGE': 60,
+        'CONN_HEALTH_CHECKS': True,
     }
 }
 
@@ -128,6 +131,17 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'server.log',
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{',
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -137,6 +151,12 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        # Loguear queries que tarden más de 300ms
+        'django.db.backends': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
             'propagate': False,
         },
     },

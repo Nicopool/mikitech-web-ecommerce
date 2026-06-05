@@ -197,11 +197,14 @@ def mi_perfil(petición):
     from interactions.models import Favorito
     favoritos_recientes = Favorito.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')[:4]
 
+    pedidos_entregados = sum(1 for p in pedidos_qs if getattr(p, 'estado', '') in ['delivered', 'Entregado', 'Completado'])
+
     return render(petición, 'users/profile.html', {
         'perfil': perfil,
         'titulo_pagina': f'Mi Panel — {perfil.nombre_mostrado} | MIKITECH',
         'conteo_resenas': conteo_resenas,
         'conteo_pedidos': conteo_pedidos,
+        'pedidos_entregados': pedidos_entregados,
         'resenas_recientes': reseñas_recientes,
         'pedidos_recientes': pedidos_recientes,
         'favoritos_recientes': favoritos_recientes,
@@ -244,6 +247,12 @@ def editar_perfil(petición):
         perfil.save()
         petición.session['avatar_url'] = perfil.url_avatar or ''
         petición.session.modified = True
+        
+        # AJAX response for Fetch API
+        if petición.headers.get('x-requested-with') == 'XMLHttpRequest' or petición.content_type == 'application/json':
+            from django.http import JsonResponse
+            return JsonResponse({'success': True, 'message': 'Perfil actualizado correctamente'})
+            
         messages.success(petición, "Perfil actualizado correctamente.")
         return redirect('users:profile')
 

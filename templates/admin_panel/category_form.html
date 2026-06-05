@@ -6,7 +6,7 @@
 <!-- ===== ENCABEZADO ===== -->
 <div class="u-flex u-justify-between u-align-center u-mb-4">
   <div>
-    <h2 style="font-size:2.4rem; font-weight:800; font-family:'Oswald',sans-serif; color:var(--ds-text);">
+    <h2 style="font-size:2.4rem; font-weight:800; font-family: 'Inter', sans-serif; color:var(--ds-text);">
       {% if categoria %}✏️ Editar Categoría{% else %}➕ Nueva Categoría{% endif %}
     </h2>
     <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
@@ -125,7 +125,7 @@
 
 <script>
 function previewFile(input) {
-  if (input.files && input.files[0]) {
+  if (input.files & input.files[0]) {
     var reader = new FileReader();
     reader.onload = function(e) {
       const preview = document.getElementById('cat-preview');

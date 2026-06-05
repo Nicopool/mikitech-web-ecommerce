@@ -9,11 +9,11 @@
     max-width: 900px;
     margin: 0 auto;
     padding: 40px 20px 80px;
-    font-family: 'Jost', sans-serif;
+    font-family: 'Inter', sans-serif;
   }
 
   .cart-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 28px;
     font-weight: 700;
     text-transform: uppercase;
@@ -162,7 +162,7 @@
     background: #111;
     color: white;
     border: none;
-    font-family: 'Jost', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
@@ -178,7 +178,7 @@
     padding: 60px 20px;
   }
   .cart-empty-icon { font-size: 50px; margin-bottom: 20px; opacity: 0.3; }
-  .cart-empty h2 { font-family: 'Oswald', sans-serif; font-size: 22px; margin-bottom: 10px; }
+  .cart-empty h2 { font-family: 'Inter', sans-serif; font-size: 22px; margin-bottom: 10px; }
   .cart-empty p { color: #999; font-size: 14px; margin-bottom: 25px; }
   .btn-shop {
     display: inline-block;
@@ -389,7 +389,7 @@ function eliminarItem(idProducto) {
 
 function verificarVacio() {
   var tbody = document.getElementById('cart-body');
-  if (tbody && tbody.children.length === 0) {
+  if (tbody & tbody.children.length === 0) {
     location.reload();
   }
 }

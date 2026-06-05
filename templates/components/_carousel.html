@@ -1,0 +1,82 @@
+<!-- ═══ CARRUSEL REUTILIZABLE ═══ -->
+<style>
+  .miki-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 30rem;
+    overflow: hidden;
+  }
+  .miki-carousel .carousel-inner {
+    width: 100%; height: 100%; position: relative;
+  }
+  .miki-carousel .carousel-item {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0; transition: opacity 0.8s ease-in-out; z-index: 1;
+  }
+  .miki-carousel .carousel-item.active { opacity: 1; z-index: 2; }
+  .miki-carousel .carousel-img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .miki-carousel .carousel-dots {
+    position: absolute; bottom: 2rem; left: 50%;
+    transform: translateX(-50%); display: flex; gap: 1rem; z-index: 10;
+  }
+  .miki-carousel .dot {
+    width: 0.8rem; height: 0.8rem; border-radius: 50%;
+    background: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.3s;
+  }
+  .miki-carousel .dot.active { background: #FFFFFF; width: 3rem; border-radius: 1rem; }
+</style>
+
+<section class="miki-carousel" id="miki-carousel-{{ carousel_id|default:'main' }}">
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 1">
+    </div>
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 2">
+    </div>
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1555617766-c94804975da3?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 3">
+    </div>
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1542393545-10f5cde2c810?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 4">
+    </div>
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1550537687-c91072c4792d?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Hardware 5">
+    </div>
+  </div>
+  <div class="carousel-dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</section>
+
+<script>
+(function() {
+  const carouselEl = document.getElementById('miki-carousel-{{ carousel_id|default:"main" }}');
+  if (!carouselEl) return;
+  const slides = carouselEl.querySelectorAll('.carousel-item');
+  const dots = carouselEl.querySelectorAll('.dot');
+  let idx = 0, timer;
+
+  function goTo(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    idx = (n + slides.length) % slides.length;
+    slides[idx].classList.add('active');
+    dots[idx].classList.add('active');
+    resetTimer();
+  }
+  function resetTimer() { clearInterval(timer); timer = setInterval(() => goTo(idx + 1), 5000); }
+
+  dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+  carouselEl.addEventListener('mouseenter', () => clearInterval(timer));
+  carouselEl.addEventListener('mouseleave', resetTimer);
+  resetTimer();
+})();
+</script>

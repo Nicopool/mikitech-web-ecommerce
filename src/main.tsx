@@ -1,10 +1,13 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
+import Hero from './components/Hero.tsx';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+const heroContainer = document.getElementById('react-hero');
+if (heroContainer) {
+  createRoot(heroContainer).render(
+    <StrictMode>
+      <Hero />
+    </StrictMode>,
+  );
+}

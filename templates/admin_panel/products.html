@@ -203,7 +203,7 @@ function filtrarTabla() {
     var coincideBusqueda = texto.includes(query);
     var coincideEstado = !estadoFiltro || textoEstado.includes(estadoFiltro);
     
-    fila.style.display = (coincideBusqueda && coincideEstado) ? '' : 'none';
+    fila.style.display = (coincideBusqueda & coincideEstado) ? '' : 'none';
   });
 }
 

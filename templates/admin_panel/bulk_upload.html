@@ -90,7 +90,7 @@
     border: 1px solid #FDE047;
   }
   .reporte-numero {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 4rem;
     font-weight: 800;
     line-height: 1;
@@ -146,7 +146,7 @@
 ═══════════════════════════════════════════════════════════════ -->
 <div class="u-flex u-justify-between u-align-center u-mb-4" style="flex-wrap:wrap; gap:1.5rem;">
   <div>
-    <h2 style="font-size:2.4rem; font-weight:800; font-family:'Oswald',sans-serif;">
+    <h2 style="font-size:2.4rem; font-weight:800; font-family: 'Inter', sans-serif;">
       Carga Masiva de Productos
     </h2>
     <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
@@ -178,7 +178,7 @@
     <div style="font-size:1.2rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.8rem;">
       Paso 1
     </div>
-    <h3 style="font-family:'Oswald',sans-serif; font-size:2rem; font-weight:800; color:white; margin:0 0 0.8rem;">
+    <h3 style="font-family: 'Inter', sans-serif; font-size:2rem; font-weight:800; color:white; margin:0 0 0.8rem;">
       Descarga la plantilla oficial
     </h3>
     <p style="font-size:1.3rem; color:#94A3B8; margin:0; max-width:45rem;">
@@ -276,7 +276,7 @@
       <span class="material-symbols-outlined" style="color:white; font-size:2.8rem;">task_alt</span>
     </div>
     <div>
-      <h3 style="font-size:2rem; font-weight:800; margin:0; font-family:'Oswald',sans-serif;">Reporte de Importación</h3>
+      <h3 style="font-size:2rem; font-weight:800; margin:0; font-family: 'Inter', sans-serif;">Reporte de Importación</h3>
       <p style="font-size:1.3rem; color:#64748B; margin:0.3rem 0 0;">Procesamiento completado — revisa los detalles a continuación.</p>
     </div>
   </div>
@@ -405,7 +405,7 @@ const fileInput = document.getElementById('archivo-xlsx');
   dropZone.addEventListener(event, function(e) {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
-    if (event === 'drop' && e.dataTransfer.files.length) {
+    if (event === 'drop' & e.dataTransfer.files.length) {
       const dt = new DataTransfer();
       dt.items.add(e.dataTransfer.files[0]);
       fileInput.files = dt.files;

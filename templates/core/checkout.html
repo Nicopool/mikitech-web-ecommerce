@@ -6,7 +6,7 @@
   /* ESTILOS ESPECÍFICOS PARA CHECKOUT PREMIUM MINIMALISTA */
   .ck-container {
     max-width: 1200px; margin: 0 auto; padding: 60px 20px;
-    font-family: 'Jost', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: #111;
   }
   .ck-header {
@@ -14,7 +14,7 @@
     text-align: center;
   }
   .ck-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 38px;
     font-weight: 700;
     letter-spacing: 1px;
@@ -47,7 +47,7 @@
     margin-bottom: 30px;
   }
   .ck-section-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 25px;
@@ -72,7 +72,7 @@
   }
   .ck-input {
     width: 100%; padding: 12px 0; border: none; border-bottom: 1px solid #CCC;
-    background: transparent; font-family: 'Jost', sans-serif; font-size: 16px;
+    background: transparent; font-family: 'Inter', sans-serif; font-size: 16px;
     outline: none; transition: border-color 0.3s;
   }
   .ck-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; }
@@ -98,7 +98,7 @@
     top: 100px;
   }
   .ck-summary-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 22px; font-weight: 700; letter-spacing: 1px;
     margin-bottom: 30px; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 15px;
   }
@@ -114,22 +114,22 @@
   }
   .ck-item-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; color:#111;}
   .ck-item-desc { color: #666; font-size: 13px; }
-  .ck-item-price { font-weight: 700; font-size: 16px; font-family: 'Oswald', sans-serif; }
+  .ck-item-price { font-weight: 700; font-size: 16px; font-family: 'Inter', sans-serif; }
 
   .ck-totals { margin-bottom: 30px; font-size: 14px; color: #444; }
   .ck-totals-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
-  .ck-totals-val { font-weight: 600; font-family: 'Oswald', sans-serif; font-size: 16px;}
+  .ck-totals-val { font-weight: 600; font-family: 'Inter', sans-serif; font-size: 16px;}
   
   .ck-grand-total {
     display: flex; justify-content: space-between; align-items: center;
     border-top: 2px solid #111; padding-top: 20px; margin-bottom: 30px;
   }
   .ck-grand-label { font-weight: 700; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; }
-  .ck-grand-val { font-size: 28px; font-weight: 700; font-family: 'Oswald', sans-serif; color: #111;}
+  .ck-grand-val { font-size: 28px; font-weight: 700; font-family: 'Inter', sans-serif; color: #111;}
 
   .ck-btn {
     width: 100%; background: #111; color: white; border: none; padding: 20px;
-    font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px;
+    font-family: 'Inter', sans-serif; font-size: 16px; letter-spacing: 2px;
     cursor: pointer; transition: background 0.3s; text-transform: uppercase;
   }
   .ck-btn:hover { background: #444; }
@@ -308,7 +308,7 @@
 
           // Ocultar sugerencias si se hace clic fuera
           document.addEventListener('click', function(e) {
-            if (e.target !== input && e.target !== suggestionsBox) {
+            if (e.target !== input & e.target !== suggestionsBox) {
               suggestionsBox.style.display = 'none';
             }
           });
