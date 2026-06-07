@@ -12,58 +12,62 @@
   .mpro-badge-glow { box-shadow: 0 0 12px currentColor; opacity: 0.9; }
 </style>
 
-<div class="u-flex u-justify-between u-align-center u-mb-4">
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 30px;">
   <div>
-    <h2 style="font-size:2.2rem; font-weight:800;">📦 Gestión de Inventario</h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">{{ productos|length }} producto{% if productos|length != 1 %}s{% endif %} registrados</p>
+    <h2 style="font-size:2.2rem; font-weight:800; color:var(--ds-text); display:flex; align-items:center; gap:8px;">
+      <i data-lucide="package" style="width:2.4rem; height:2.4rem; color:var(--ds-primary);"></i> Gestión de Inventario
+    </h2>
+    <p style="font-size:1.3rem; color:var(--ds-text-soft); margin-top:0.4rem;">{{ productos|length }} producto{% if productos|length != 1 %}s{% endif %} registrados</p>
   </div>
   <div style="display:flex; gap:1rem;">
     <a href="{% url 'admin_product_bulk_upload' %}" class="g-btn-primary" style="background:transparent; border:1.5px solid var(--ds-border); color:var(--ds-text-soft); box-shadow:none; display:inline-flex; align-items:center; gap:0.8rem;">
-      <span class="material-symbols-outlined">upload</span>
+      <i data-lucide="upload-cloud" style="width:1.6rem; height:1.6rem;"></i>
       Carga Masiva
     </a>
-    <a href="{% url 'admin_product_create' %}" class="g-btn-primary">
-      + Nuevo Producto
+    <a href="{% url 'admin_product_create' %}" class="g-btn-primary" style="gap:8px;">
+      <i data-lucide="plus-circle" style="width:1.6rem; height:1.6rem;"></i> Nuevo Producto
     </a>
   </div>
 </div>
 
 <!-- MINI ESTADÍSTICAS -->
-<div class="g-row u-mb-4">
+<div class="g-row u-mb-4" style="margin-bottom: 30px;">
   <div class="g-col-3">
-    <div class="mpro-card">
+    <div class="mpro-card mpro-card-interactive">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:var(--ds-primary); font-size:2.4rem;">inventory_2</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Unidades</div>
+        <i data-lucide="package" style="color:var(--ds-primary); width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Unidades</div>
       </div>
       <div style="font-size:3.2rem; font-weight:800; color:var(--ds-text);">{{ productos|length }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card">
+    <div class="mpro-card mpro-card-interactive">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:#10B981; font-size:2.4rem;">payments</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Valor Total</div>
+        <i data-lucide="dollar-sign" style="color:#10B981; width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Valor Total</div>
       </div>
       <div style="font-size:2.4rem; font-weight:800; color:#10B981;">{{ valor_total_inventario|currency_cop }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card" style="border-left: 4px solid #EF4444;">
+    <div class="mpro-card mpro-card-interactive" style="border-left: 4px solid #EF4444;">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:#EF4444; font-size:2.4rem;">warning</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Alertas Stock</div>
+        <i data-lucide="alert-triangle" style="color:#EF4444; width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Alertas Stock</div>
       </div>
       <div style="font-size:3.2rem; font-weight:800; color:#EF4444;">{{ productos|length|modulo:3 }} <span style="font-size:1.4rem; font-weight:600; vertical-align:middle;">CRÍTICAS</span></div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card">
+    <div class="mpro-card mpro-card-interactive">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:var(--ds-primary); font-size:2.4rem;">description</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Acciones</div>
+        <i data-lucide="file-text" style="color:var(--ds-primary); width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Acciones</div>
       </div>
-      <a href="{% url 'admin_reports' %}" class="g-btn-primary u-w-full" style="padding:10px; font-size:1.1rem; box-shadow:none;">GENERAR INFORME B.I.</a>
+      <a href="{% url 'admin_reports' %}" class="g-btn-primary u-w-full" style="padding:10px; font-size:1.1rem; box-shadow:none; gap:6px;">
+        <i data-lucide="bar-chart-3" style="width:1.4rem; height:1.4rem;"></i> GENERAR INFORME B.I.
+      </a>
     </div>
   </div>
 </div>
@@ -71,10 +75,12 @@
 <!-- TABLA DE PRODUCTOS -->
 <div class="mpro-card" style="padding:0;">
   <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text); margin:0;"><span class="material-symbols-outlined" style="vertical-align: middle;">inventory_2</span> Catálogo de Hardware</h3>
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text); margin:0; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="list" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Catálogo de Hardware
+    </h3>
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
       <div class="g-search-wrapper" style="display:flex; align-items:center;">
-        <span style="position:absolute; left:12px; display:flex; align-items:center;"><span class="material-symbols-outlined" style="font-size:1.8rem;">search</span></span>
+        <span style="position:absolute; left:12px; display:flex; align-items:center;"><i data-lucide="search" style="width:1.6rem; height:1.6rem; color:var(--ds-text-soft);"></i></span>
         <input type="text" id="buscadorProductos" class="g-search" placeholder="Filtrar por nombre, marca..." style="width: 250px; padding-left:40px;">
       </div>
       <select id="filtroEstado" style="padding: 10px 15px; border-radius: 8px; border: 1px solid var(--ds-border); outline: none; font-size: 13px; background: var(--ds-bg); color: var(--ds-text);">
@@ -85,7 +91,7 @@
     </div>
   </div>
   
-  <div class="g-table-container">
+  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none;">
     <table class="g-table" id="tablaProductos">
       <thead>
         <tr>
@@ -107,12 +113,12 @@
               {% if producto.url_imagen_principal %}
               <img src="{{ producto.url_imagen_principal }}" alt="{{ producto.nombre }}">
               {% else %}
-              <span class="material-symbols-outlined" style="color:#CBD5E1; font-size:2.4rem;">inventory_2</span>
+              <i data-lucide="package" style="color:#CBD5E1; width:2.4rem; height:2.4rem;"></i>
               {% endif %}
             </div>
           </td>
           <td>
-            <div style="font-weight: 600; font-size: 1.4rem;">{{ producto.nombre|truncatechars:50 }}</div>
+            <div style="font-weight: 600; font-size: 1.4rem; color:var(--ds-text);">{{ producto.nombre|truncatechars:50 }}</div>
             <div style="font-size:1.1rem; color:#94A3B8;">ENLACE: {{ producto.enlace }}</div>
           </td>
           <td style="color:#64748B;">{{ producto.categoria.nombre|default:"Sin categoría" }}</td>
@@ -120,11 +126,11 @@
           <td style="font-weight: 700;">{{ producto.precio|currency_cop }}</td>
           <td>
             {% if producto.existencias <= 5 %}
-            <span class="mpro-badge mpro-badge-glow" style="background:#FEE2E2; color:#DC2626; border: 1px solid #FECACA;">
-                <span class="material-symbols-outlined" style="font-size:1.4rem; vertical-align:middle; margin-right:4px;">warning</span>{{ producto.existencias }}
+            <span class="mpro-badge mpro-badge-glow" style="background:#FEE2E2; color:#DC2626; border: 1px solid #FECACA; display:inline-flex; align-items:center; gap:4px; font-weight:700;">
+              <i data-lucide="alert-triangle" style="width:1.2rem; height:1.2rem;"></i> {{ producto.existencias }}
             </span>
             {% else %}
-            <span class="mpro-badge" style="background:#DCFCE7; color:#16A34A; border: 1px solid #BBF7D0;">{{ producto.existencias }}</span>
+            <span class="mpro-badge" style="background:#DCFCE7; color:#16A34A; border: 1px solid #BBF7D0; font-weight:700;">{{ producto.existencias }}</span>
             {% endif %}
           </td>
           <td>
@@ -134,8 +140,8 @@
             <span class="mpro-badge g-badge-inactive">Inactivo</span>
             {% endif %}
             {% if producto.es_destacado %}
-            <span class="mpro-badge mpro-badge-glow" style="background:#EDE9FE; color:#7C3AED; margin-left:0.4rem; border: 1px solid #DDD6FE;">
-                <span class="material-symbols-outlined" style="font-size:1.4rem; vertical-align:middle; margin-right:2px; font-variation-settings: 'FILL' 1;">star</span>Dest.
+            <span class="mpro-badge mpro-badge-glow" style="background:#EDE9FE; color:#7C3AED; margin-left:0.4rem; border: 1px solid #DDD6FE; display:inline-flex; align-items:center; gap:3px;">
+              <i data-lucide="star" style="width:1.2rem; height:1.2rem; fill:#7C3AED; stroke:none;"></i> Dest.
             </span>
             {% endif %}
           </td>
@@ -143,15 +149,15 @@
           <td class="u-text-center">
             <div style="display:flex; justify-content:center; gap:8px;">
               {% if producto.url_imagen_principal %}
-              <a href="{{ producto.url_imagen_principal }}" target="_blank" download class="g-action-btn" title="Descargar Imagen" style="background:#F0FDF4; color:#16A34A; border: 1px solid #DCFCE7;">
-                <span class="material-symbols-outlined" style="font-size:1.8rem;">download</span>
+              <a href="{{ producto.url_imagen_principal }}" target="_blank" download class="g-action-btn" title="Descargar Imagen" style="background:#F0FDF4; color:#16A34A; border: 1px solid #DCFCE7; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px;">
+                <i data-lucide="download" style="width:1.6rem; height:1.6rem;"></i>
               </a>
               {% endif %}
-              <a href="{% url 'admin_product_edit' producto.id %}" class="g-action-btn" title="Editar" style="background:#EFF6FF; color:#1D4ED8; border: 1px solid #DBEAFE;">
-                <span class="material-symbols-outlined" style="font-size:1.8rem;">edit</span>
+              <a href="{% url 'admin_product_edit' producto.id %}" class="g-action-btn" title="Editar" style="background:#EFF6FF; color:#1D4ED8; border: 1px solid #DBEAFE; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px;">
+                <i data-lucide="edit-3" style="width:1.6rem; height:1.6rem;"></i>
               </a>
-              <button class="g-action-btn" onclick="confirmarEliminacion('{{ producto.id }}', '{{ producto.nombre|escapejs }}')" title="Eliminar" style="background:#FEF2F2; color:#DC2626; border: 1px solid #FEE2E2;">
-                <span class="material-symbols-outlined" style="font-size:1.8rem;">delete</span>
+              <button class="g-action-btn" onclick="confirmarEliminacion('{{ producto.id }}', '{{ producto.nombre|escapejs }}')" title="Eliminar" style="background:#FEF2F2; color:#DC2626; border: 1px solid #FEE2E2; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px; cursor:pointer;">
+                <i data-lucide="trash-2" style="width:1.6rem; height:1.6rem;"></i>
               </button>
             </div>
           </td>
@@ -169,17 +175,17 @@
 </div>
 
 <!-- Modal de Eliminación -->
-<div id="modalEliminar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+<div id="modalEliminar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
   <div class="mpro-card" style="width:400px; max-width:90%; animation: slideUp 0.3s ease;">
-    <div style="background:#DC2626; color:white; padding:15px 25px; margin:-25px -25px 25px -25px; border-radius:16px 16px 0 0; font-weight:700;">
-      ⚠️ Confirmar Eliminación
+    <div style="background:#DC2626; color:white; padding:15px 25px; margin:-25px -25px 25px -25px; border-radius:16px 16px 0 0; font-weight:700; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="alert-triangle" style="width:2rem; height:2rem;"></i> Confirmar Eliminación
     </div>
     <div id="cuerpo-modal-eliminar" style="font-size:1.4rem; color:var(--ds-text); padding-top: 20px;"></div>
     <div style="margin-top:25px; display:flex; justify-content:flex-end; gap:10px;">
-      <button onclick="document.getElementById('modalEliminar').style.display='none'" class="g-btn-primary" style="background:#F1F5F9; color:var(--ds-text); box-shadow:none;">Cancelar</button>
+      <button onclick="document.getElementById('modalEliminar').style.display='none'" class="g-btn-primary" style="background:#F1F5F9; color:var(--ds-text); box-shadow:none; border:none; cursor:pointer;">Cancelar</button>
       <form id="formularioEliminar" method="post" style="display:inline;">
         {% csrf_token %}
-        <button type="submit" class="g-btn-primary" style="background:#DC2626;">Confirmar Borrado</button>
+        <button type="submit" class="g-btn-primary" style="background:#DC2626; border:none; cursor:pointer;">Confirmar Borrado</button>
       </form>
     </div>
   </div>
@@ -229,6 +235,10 @@ function confirmarEliminacion(idProducto, nombreProducto) {
   
   document.getElementById('formularioEliminar').action = '/admin-panel/productos/eliminar/' + idProducto + '/';
   modal.style.display = 'flex';
+  
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
 }
 </script>
 {% endblock %}

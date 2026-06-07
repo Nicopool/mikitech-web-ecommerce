@@ -43,33 +43,232 @@
       flex-shrink: 0; /* Clave para que no crezca gigante al hacer zoom */
     }
     
-    /* NAVBAR */
-    .nav-wix { display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; height: 8rem; background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid #1E293B; position: sticky; top: 0; z-index: 100; transition: all 0.3s ease; }
+    /* NAVBAR MODERN REDESIGN */
+    .nav-wix { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 0 4rem; 
+      height: 8.5rem; 
+      background-color: rgba(15, 23, 42, 0.75); 
+      backdrop-filter: blur(16px); 
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07); 
+      position: sticky; 
+      top: 0; 
+      z-index: 100; 
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+    }
     
-    .nav-logo { display: flex; align-items: center; height: 5rem; transition: opacity 0.2s; }
-    .nav-logo:hover { opacity: 0.85; }
-    .nav-logo img { height: 100%; width: auto; object-fit: contain; max-width: 20rem; }
+    .nav-logo { 
+      display: flex; 
+      align-items: center; 
+      height: 5.5rem; 
+      transition: transform 0.3s ease, filter 0.3s ease; 
+    }
+    .nav-logo:hover { 
+      transform: scale(1.03);
+      filter: brightness(1.1);
+    }
+    .nav-logo img { 
+      height: 100%; 
+      width: auto; 
+      object-fit: contain; 
+      max-width: 20rem; 
+    }
     
     /* Enlaces de menú en escritorio */
-    .nav-menu-desktop { display: none; }
-    .nav-link-desktop { font-family: 'Helvetica', Arial, sans-serif; font-size: 1.4rem; font-weight: 600; color: #F8FAFC; text-decoration: none; padding: 1rem 0; position: relative; transition: color 0.2s; }
-    .nav-link-desktop:hover { color: #38BDF8; }
+    .nav-menu-desktop { 
+      display: none; 
+      align-items: center;
+      gap: 3.5rem;
+    }
+    .nav-link-desktop { 
+      font-family: 'Helvetica', Arial, sans-serif; 
+      font-size: 1.45rem; 
+      font-weight: 600; 
+      color: #94A3B8; 
+      text-decoration: none; 
+      padding: 0.8rem 1.2rem; 
+      border-radius: 8px;
+      position: relative; 
+      transition: all 0.3s ease; 
+    }
+    .nav-link-desktop:hover { 
+      color: #38BDF8; 
+      background: rgba(56, 189, 248, 0.06);
+    }
+    .nav-link-desktop::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 1.2rem;
+      right: 1.2rem;
+      height: 2px;
+      background: linear-gradient(90deg, #38BDF8, #0284C7);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-link-desktop:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
     
-    .nav-right { display: flex; align-items: center; gap: 1.5rem; font-size: 1.4rem; font-weight: 500; }
+    .nav-right { 
+      display: flex; 
+      align-items: center; 
+      gap: 1.2rem; 
+      font-size: 1.4rem; 
+      font-weight: 500; 
+    }
     
-    .nav-action { display: flex; align-items: center; justify-content: center; gap: 0.8rem; cursor: pointer; transition: all 0.2s; min-height: 4.4rem; padding: 0.5rem; font-size: 1.8rem; }
-    .nav-action:hover { opacity: 0.7; transform: translateY(-1px); }
-    /* Iconos nav-action delegan tamaño al padre mediante em */
-    .nav-action svg, .nav-action .material-symbols-outlined { stroke: #FFF; fill: none; }
-
-    .nav-notif-btn { display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; min-height: 4.4rem; min-width: 4.4rem; padding: 0.5rem; border-radius: 50%; transition: all 0.2s; font-size: 1.8rem; }
-    .nav-notif-btn:hover { background-color: #F1F5F9; }
-    .nav-notif-btn svg { stroke: #111; fill: none; }
+    /* Buscador Rápido */
+    .nav-search-form {
+      display: none;
+      position: relative;
+      align-items: center;
+    }
+    @media (min-width: 768px) {
+      .nav-search-form {
+        display: flex;
+      }
+    }
+    .nav-search-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 0.8rem 1.6rem 0.8rem 3.6rem;
+      color: #FFF;
+      font-size: 1.3rem;
+      width: 180px;
+      transition: all 0.3s ease;
+    }
+    .nav-search-input:focus {
+      outline: none;
+      width: 250px;
+      border-color: #38BDF8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .nav-search-icon {
+      position: absolute;
+      left: 1.2rem;
+      color: #64748B;
+      pointer-events: none;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Botones de acción en navbar */
+    .nav-action-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    
+    .nav-action-btn { 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      width: 4.2rem;
+      height: 4.2rem;
+      border-radius: 12px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #E2E8F0; 
+      cursor: pointer; 
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+    }
+    .nav-action-btn:hover { 
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.08);
+      color: #38BDF8;
+      transform: translateY(-2px); 
+    }
+    .nav-action-btn svg {
+      width: 2rem;
+      height: 2rem;
+      stroke: currentColor;
+      fill: none;
+      transition: stroke 0.3s;
+    }
+    .nav-action-btn:hover svg {
+      stroke: #38BDF8;
+    }
+    
+    /* Notificaciones y avatares */
+    .nav-notif-btn { 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      width: 4.2rem;
+      height: 4.2rem;
+      border-radius: 12px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #E2E8F0; 
+      position: relative; 
+      cursor: pointer; 
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+    }
+    .nav-notif-btn:hover { 
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.08);
+      color: #38BDF8;
+      transform: translateY(-2px); 
+    }
+    .nav-notif-btn svg { 
+      width: 2rem;
+      height: 2rem;
+      stroke: currentColor; 
+      fill: none; 
+      transition: stroke 0.3s;
+    }
+    .nav-notif-btn:hover svg {
+      stroke: #38BDF8;
+    }
 
     .notif-item { padding: 1rem; border-bottom: 1px solid #F8FAFC; border-radius: 6px; margin-bottom: 0.5rem; transition: background-color 0.2s; }
     .notif-item:hover { background-color: #F1F5F9 !important; }
-    .nav-avatar { width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; border: 0.2rem solid #1D4ED8; flex-shrink: 0; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2); }
-    .nav-avatar-placeholder { width: 4.5rem; height: 4.5rem; border-radius: 50%; background: #111; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Helvetica', Arial, sans-serif; font-size: 1.6rem; font-weight: 700; flex-shrink: 0; }
+    .nav-avatar { 
+      width: 4.2rem; 
+      height: 4.2rem; 
+      border-radius: 12px; 
+      object-fit: cover; 
+      border: 1.5px solid rgba(255, 255, 255, 0.1); 
+      flex-shrink: 0; 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+      transition: all 0.3s ease;
+    }
+    .nav-avatar:hover {
+      border-color: #38BDF8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+    }
+    .nav-avatar-placeholder { 
+      width: 4.2rem; 
+      height: 4.2rem; 
+      border-radius: 12px; 
+      background: #1E293B; 
+      border: 1px solid #334155;
+      color: #38BDF8; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-family: 'Helvetica', Arial, sans-serif; 
+      font-size: 1.5rem; 
+      font-weight: 700; 
+      flex-shrink: 0; 
+      transition: all 0.3s ease;
+    }
+    .nav-avatar-placeholder:hover {
+      border-color: #38BDF8;
+      background: rgba(56, 189, 248, 0.1);
+      transform: translateY(-2px);
+    }
     
     /* CART DRAWER (MINI-CARRITO) */
     .cart-drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.6); z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(4px); }
@@ -182,70 +381,77 @@
     </div>
     
     <div class="nav-right">
-      <a href="javascript:void(0)" class="nav-action" onclick="toggleCartDrawer()">
-        <i data-lucide="shopping-cart"></i>
-        <strong id="cart-counter" style="background:#111; color:white; border-radius:50%; min-width:1.8rem; height:1.8rem; padding: 0 0.5rem; display:inline-flex; align-items:center; justify-content:center; font-size:1rem; position:relative; top:-0.8rem; left:-0.8rem;">{{ conteo_carrito }}</strong>
-      </a>
+      <!-- Buscador rápido integrado -->
+      <form class="nav-search-form" action="{% url 'core:search' %}" method="GET">
+        <i class="nav-search-icon" data-lucide="search"></i>
+        <input type="text" name="q" class="nav-search-input" placeholder="Buscar hardware..." value="{{ query|default:'' }}">
+      </form>
 
-      <!-- Notificaciones -->
-      {% if request.session.usuario_id %}
-      <div class="nav-notif-btn" style="position:relative; cursor:pointer;" onclick="toggleNotifDropdown(event)">
-        <i data-lucide="bell"></i>
-        {% if conteo_notificaciones > 0 %}
-          <span style="position:absolute; top:-5px; right:-5px; background:#DC2626; color:white; border-radius:50%; min-width:1.6rem; height:1.6rem; font-size:1rem; display:flex; align-items:center; justify-content:center; font-weight:700;">{{ conteo_notificaciones }}</span>
+      <div class="nav-action-wrapper">
+        <!-- Carrito -->
+        <a href="javascript:void(0)" class="nav-action-btn" onclick="toggleCartDrawer()" aria-label="Ver carrito" style="position: relative;">
+          <i data-lucide="shopping-cart"></i>
+          <strong id="cart-counter" style="position: absolute; top: 0px; right: 0px; background: #38BDF8; color: #0F172A; border-radius: 50%; min-width: 1.8rem; height: 1.8rem; padding: 0 0.4rem; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; border: 1.5px solid #0F172A;">{{ conteo_carrito }}</strong>
+        </a>
+
+        <!-- Notificaciones -->
+        {% if request.session.usuario_id %}
+        <div class="nav-notif-btn" onclick="toggleNotifDropdown(event)" aria-label="Notificaciones">
+          <i data-lucide="bell"></i>
+          {% if conteo_notificaciones > 0 %}
+            <span style="position: absolute; top: 0px; right: 0px; background: #DC2626; color: white; border-radius: 50%; min-width: 1.8rem; height: 1.8rem; font-size: 1rem; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 1.5px solid #0F172A;">{{ conteo_notificaciones }}</span>
+          {% endif %}
+          
+          <!-- Dropdown Notificaciones -->
+          <div id="notif-dropdown" style="display:none; position:absolute; top:5.5rem; right:0; width:30rem; background:#1E293B; border:1px solid #334155; box-shadow:0 10px 25px rgba(0,0,0,0.4); border-radius:12px; z-index:1000; padding:1.5rem; cursor:default;" onclick="event.stopPropagation()">
+            <h4 style="font-size:1.4rem; margin-bottom:1.5rem; border-bottom:1px solid #334155; padding-bottom:1rem; display:flex; justify-content:space-between; align-items:center; color:#FFF;">
+              Notificaciones
+              {% if conteo_notificaciones > 0 %}
+              <a href="{% url 'users:mark_notifications_read' %}" style="font-size:1.1rem; color:#38BDF8; font-weight:400;">Limpiar todo</a>
+              {% endif %}
+            </h4>
+            <div style="max-height:30rem; overflow-y:auto;">
+              {% for n in ultimas_notificaciones %}
+              <div class="notif-item" style="border-bottom:1px solid #334155; {% if not n.esta_leida %}background:rgba(56, 189, 248, 0.08);{% endif %}">
+                <p style="font-size:1.2rem; line-height:1.4; color:#E2E8F0; margin:0;">{{ n.mensaje }}</p>
+                <small style="font-size:1rem; color:#64748B; display:block; margin-top:0.4rem;">{{ n.creado_el|timesince }}</small>
+              </div>
+              {% empty %}
+              <p style="text-align:center; padding:2rem; color:#64748B; font-size:1.3rem;">No tienes nuevos avisos.</p>
+              {% endfor %}
+            </div>
+            <a href="{% url 'users:profile' %}" style="display:block; text-align:center; padding-top:1.5rem; font-size:1.2rem; color:#94A3B8; border-top:1px solid #334155; margin-top:1rem; text-decoration:none;">Ver todo en mi perfil</a>
+          </div>
+        </div>
         {% endif %}
         
-        <!-- Dropdown Notificaciones -->
-        <div id="notif-dropdown" style="display:none; position:absolute; top:4.5rem; right:0; width:28rem; background:white; border:1px solid #EEE; box-shadow:0 10px 25px rgba(0,0,0,0.1); border-radius:8px; z-index:1000; padding:1.5rem; cursor:default;" onclick="event.stopPropagation()">
-          <h4 style="font-size:1.4rem; margin-bottom:1.5rem; border-bottom:1px solid #F1F5F9; padding-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
-            Notificaciones
-            {% if conteo_notificaciones > 0 %}
-            <a href="{% url 'users:mark_notifications_read' %}" style="font-size:1.1rem; color:#2563EB; font-weight:400;">Limpiar todo</a>
+        <!-- Login / Cuenta / Repartidor -->
+        {% if request.session.usuario_id %}
+          {% if request.session.rol_usuario == 'repartidor' %}
+          <a href="{% url 'core:repartidor' %}" class="nav-action-btn" aria-label="Rutas repartidor" style="color:#38BDF8;">
+            <i data-lucide="truck"></i>
+          </a>
+          {% endif %}
+          
+          <a href="{% url 'users:profile' %}" aria-label="Mi cuenta" style="display: inline-flex; align-items: center; justify-content: center;">
+            {% if request.session.avatar_url %}
+              <img src="{{ request.session.avatar_url }}" class="nav-avatar" alt="Avatar">
+            {% else %}
+              <div class="nav-avatar-placeholder">{{ request.session.nombre_usuario|first|upper|default:"U" }}</div>
             {% endif %}
-          </h4>
-          <div style="max-height:30rem; overflow-y:auto;">
-            {% for n in ultimas_notificaciones %}
-            <div class="notif-item" style="{% if not n.esta_leida %}background:#F0F9FF;{% endif %}">
-              <p style="font-size:1.2rem; line-height:1.4; color:#1E293B; margin:0;">{{ n.mensaje }}</p>
-              <small style="font-size:1rem; color:#94A3B8; display:block; margin-top:0.4rem;">{{ n.creado_el|timesince }}</small>
-            </div>
-            {% empty %}
-            <p style="text-align:center; padding:2rem; color:#94A3B8; font-size:1.3rem;">No tienes nuevos avisos.</p>
-            {% endfor %}
-          </div>
-          <a href="{% url 'users:profile' %}" style="display:block; text-align:center; padding-top:1.5rem; font-size:1.2rem; color:#64748B; border-top:1px solid #F1F5F9; margin-top:1rem;">Ver todo en mi perfil</a>
-        </div>
-      </div>
-      {% endif %}
-      
-      <!-- Login / Cuenta -->
-      {% if request.session.usuario_id %}
-      <a href="{% url 'users:profile' %}" class="nav-action">
-        {% if request.session.avatar_url %}
-          <img src="{{ request.session.avatar_url }}" class="nav-avatar" alt="Avatar">
+          </a>
         {% else %}
-          <div class="nav-avatar-placeholder">{{ request.session.nombre_usuario|first|upper|default:"U" }}</div>
+          <a href="{% url 'users:login' %}" class="nav-action-btn" aria-label="Ingresar">
+            <i data-lucide="user"></i>
+          </a>
         {% endif %}
-        <span>Dashboard</span>
-      </a>
-      {% if request.session.rol_usuario == 'repartidor' %}
-      <a href="{% url 'core:repartidor' %}" class="nav-action" style="color:#0284C7;">
-        <i data-lucide="truck" style="stroke: #0284C7;"></i>
-        <span>Rutas</span>
-      </a>
-      {% endif %}
-      {% else %}
-      <a href="{% url 'users:login' %}" class="nav-action">
-        <i data-lucide="user"></i>
-        <span>Ingresar</span>
-      </a>
-      {% endif %}
-      
-      <!-- Menú Hamburguesa -->
-      <div class="hamburger" onclick="document.body.classList.add('drawer-open')">
-        <span></span>
-        <span></span>
-        <span></span>
+        
+        <!-- Menú Hamburguesa -->
+        <div class="hamburger" onclick="document.body.classList.add('drawer-open')">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
     </div>
   </nav>
@@ -358,18 +564,15 @@
   <!-- SWEETALERT2 GLOBAL LOGIC -->
   <script>
     const Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 4000,
+      toast: false,
+      position: 'center',
+      showConfirmButton: true,
+      confirmButtonColor: '#0284C7',
+      timer: 3000,
       timerProgressBar: true,
-      background: '#111111',
+      background: '#1E293B',
       color: '#ffffff',
-      iconColor: '#1D4ED8',
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-      }
+      iconColor: '#38BDF8'
     });
 
     // Mapeo manual para uso en JS frontal (window.toast)
@@ -461,19 +664,48 @@
                     name.className = 'cd-item-name';
                     name.textContent = item.producto.nombre;
 
+                    const qtyWrapper = document.createElement('div');
+                    qtyWrapper.style.cssText = 'display:inline-flex; align-items:center; gap:8px; border:1px solid #E2E8F0; border-radius:8px; padding:2px 4px; background:#F8FAFC; margin-top:8px;';
+                    
+                    const decBtn = document.createElement('button');
+                    decBtn.textContent = '-';
+                    decBtn.style.cssText = 'width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; background:none; border:none; font-size:1.4rem; font-weight:bold; cursor:pointer; color:#1E293B;';
+                    decBtn.onclick = () => updateQuantityAjax(item.producto.id, 'restar');
+                    
+                    const qtyVal = document.createElement('span');
+                    qtyVal.textContent = item.cantidad;
+                    qtyVal.style.cssText = 'font-size:1.3rem; font-weight:600; min-width:20px; text-align:center; color:#1E293B;';
+                    
+                    const incBtn = document.createElement('button');
+                    incBtn.textContent = '+';
+                    incBtn.style.cssText = 'width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; background:none; border:none; font-size:1.4rem; font-weight:bold; cursor:pointer; color:#1E293B;';
+                    
+                    if (item.cantidad >= item.producto.existencias) {
+                        incBtn.disabled = true;
+                        incBtn.style.opacity = '0.3';
+                        incBtn.style.cursor = 'not-allowed';
+                        incBtn.title = 'No hay más stock disponible';
+                    }
+                    incBtn.onclick = () => updateQuantityAjax(item.producto.id, 'sumar');
+                    
+                    qtyWrapper.appendChild(decBtn);
+                    qtyWrapper.appendChild(qtyVal);
+                    qtyWrapper.appendChild(incBtn);
+
                     const price = document.createElement('span');
                     price.className = 'cd-item-price';
-                    price.textContent = item.cantidad + ' x ' + item.precio_formateado;
+                    price.textContent = item.precio_formateado;
 
                     const deleteBtn = document.createElement('button');
                     deleteBtn.innerHTML = '<i data-lucide="trash-2"></i>';
-                    deleteBtn.style.cssText = 'background:none; border:none; color:#EF4444; cursor:pointer; margin-left: auto; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; stroke: #EF4444;';
+                    deleteBtn.style.cssText = 'background:none; border:none; color:#EF4444; cursor:pointer; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; stroke: #EF4444; margin-bottom:6px;';
                     deleteBtn.onclick = () => removeFromCartAjax(item.producto.id);
 
                     const rightPanel = document.createElement('div');
                     rightPanel.style.cssText = 'display:flex; flex-direction:column; justify-content:space-between; margin-left:auto; text-align:right; align-items:flex-end;';
                     rightPanel.appendChild(deleteBtn);
                     rightPanel.appendChild(price);
+                    rightPanel.appendChild(qtyWrapper);
 
                     info.appendChild(name);
                     div.appendChild(img);
@@ -505,6 +737,61 @@
             }
             lucide.createIcons();
         } catch (e) { console.error('Error al cargar carrito drawer:', e); }
+    }
+
+    async function updateQuantityAjax(productId, action) {
+        try {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            const formData = new FormData();
+            formData.append('accion', action);
+
+            const response = await fetch(`/carrito/actualizar/${productId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: formData
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (data.ok) {
+                if (window.toast) {
+                    if (action === 'sumar') {
+                        window.toast.exito("Cantidad aumentada");
+                    } else if (action === 'restar') {
+                        if (data.cantidad === 0) {
+                            window.toast.aviso("Producto removido");
+                        } else {
+                            window.toast.info("Cantidad disminuida");
+                        }
+                    }
+                }
+                // Actualizar contador del header inmediatamente
+                const counter = document.getElementById('cart-counter');
+                if (counter) counter.textContent = data.total_items;
+                
+                updateCartDrawer();
+            }
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async function addToCartAjax(productId) {

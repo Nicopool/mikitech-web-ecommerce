@@ -20,12 +20,15 @@ def global_context(request):
     notificaciones_previas = []
     if request.session.get('usuario_id'):
         from users.models import Notificacion
-        notificaciones_qs = Notificacion.objects.filter(
-            usuario_id=request.session.get('usuario_id'),
-            esta_leida=False
-        ).order_by('-creado_el')
-        conteo_notificaciones = notificaciones_qs.count()
-        notificaciones_previas = list(notificaciones_qs[:5]) # Últimas 5
+        # Traer todas las notificaciones no leídas en una sola consulta para evitar dos round-trips
+        todas_notif_no_leidas = list(
+            Notificacion.objects.filter(
+                usuario_id=request.session.get('usuario_id'),
+                esta_leida=False
+            ).order_by('-creado_el')
+        )
+        conteo_notificaciones = len(todas_notif_no_leidas)
+        notificaciones_previas = todas_notif_no_leidas[:5]  # Mostrar máximo 5
     
     return {
         'nav_categorias': nav_categorias,

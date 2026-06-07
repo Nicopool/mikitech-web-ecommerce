@@ -278,13 +278,13 @@
   {% if productos.paginator.num_pages > 1 %}
   <nav class="pag-nav">
     {% if productos.has_previous %}
-      <a href="?page={{ productos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}" class="pag-link">&laquo;</a>
+      <a href="?pagina={{ productos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if precio_min %}&precio_min={{ precio_min }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="pag-link">&laquo;</a>
     {% endif %}
     
     <span class="pag-current">{{ productos.number }} / {{ productos.paginator.num_pages }}</span>
     
     {% if productos.has_next %}
-      <a href="?page={{ productos.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}" class="pag-link">&raquo;</a>
+      <a href="?pagina={{ productos.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if precio_min %}&precio_min={{ precio_min }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="pag-link">&raquo;</a>
     {% endif %}
   </nav>
   {% endif %}

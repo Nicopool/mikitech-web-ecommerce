@@ -5,93 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{{ titulo_pagina|default:"Administración — MIKITECH" }}{% endblock %}</title>
   {% load static %}
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=3.0">
-  <style>
-    .material-symbols-outlined { font-size: inherit; vertical-align: bottom; }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=4.0">
+  <link rel="stylesheet" href="{% static 'css/admin_design_system.css' %}?v=1.0">
 </head>
 <body class="g-admin-layout">
+
 <aside class="g-sidebar">
-    <div style="display:flex; align-items:center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 16px; margin: 15px; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="width: 4.5rem; height: 4.5rem; border-radius: 12px; overflow: hidden; border: 2px solid var(--ds-accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); background: #1e293b; flex-shrink: 0;">
-            {% if request.session.avatar_url %}
-            <img src="{{ request.session.avatar_url }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-            {% else %}
-            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.8rem; color: var(--ds-accent);">
-                {{ request.session.nombre_usuario|first|upper|default:"A" }}
-            </div>
-            {% endif %}
-        </div>
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-family: 'Inter', sans-serif; font-size: 1.8rem; font-weight: 800; color: #FFFFFF; letter-spacing: 1px; line-height: 1;">MIKITECH</span>
-            <span style="font-size: 1rem; color: var(--ds-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">Admin Panel</span>
-        </div>
-    </div>
-  
+  <div class="g-sidebar-header">
+    <a href="/" style="display: block; height: 4.5rem;">
+      <img src="{% static 'img/logo.png' %}" alt="MIKITECH" style="height: 100%; width: auto; object-fit: contain; filter: brightness(0) invert(1);">
+    </a>
+    <span style="font-size: 1.1rem; color: rgba(255,255,255,0.45); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Admin Panel</span>
+  </div>
+
   <nav class="g-nav">
-    <a href="{% url 'admin_dashboard' %}" class="g-nav-item"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
-    <a href="{% url 'admin_products' %}" class="g-nav-item"><span class="material-symbols-outlined">inventory_2</span> Inventario</a>
-    <a href="{% url 'admin_logistics' %}" class="g-nav-item"><span class="material-symbols-outlined">local_shipping</span> Logística</a>
-    <a href="{% url 'admin_users' %}" class="g-nav-item"><span class="material-symbols-outlined">group</span> Clientes</a>
-    <a href="{% url 'admin_categories' %}" class="g-nav-item"><span class="material-symbols-outlined">folder</span> Categorías</a>
-    <a href="{% url 'admin_reviews' %}" class="g-nav-item"><span class="material-symbols-outlined">chat</span> Reseñas</a>
-    <a href="{% url 'admin_reports' %}" class="g-nav-item"><span class="material-symbols-outlined">bar_chart</span> Reportes</a>
+    <div style="padding: 1.5rem 2.5rem 0.5rem; font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; text-transform: uppercase;">Principal</div>
+    <a href="{% url 'admin_dashboard' %}" class="g-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+    <a href="{% url 'admin_products' %}" class="g-nav-item"><i data-lucide="package"></i> Inventario</a>
+    <a href="{% url 'admin_users' %}" class="g-nav-item"><i data-lucide="users"></i> Clientes</a>
+
+    <div style="padding: 1.5rem 2.5rem 0.5rem; font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; text-transform: uppercase;">Catálogo</div>
+    <a href="{% url 'admin_categories' %}" class="g-nav-item"><i data-lucide="folder-open"></i> Categorías</a>
+
+    <div style="padding: 1.5rem 2.5rem 0.5rem; font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; text-transform: uppercase;">Análisis</div>
+    <a href="{% url 'admin_reports' %}" class="g-nav-item"><i data-lucide="bar-chart-3"></i> Reportes</a>
   </nav>
 
   <div class="g-sidebar-footer">
     <div class="g-s-avatar" style="overflow: hidden;">
-        {% if request.session.avatar_url %}
+      {% if request.session.avatar_url %}
         <img src="{{ request.session.avatar_url }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
-        {% else %}
+      {% else %}
         {{ request.session.nombre_usuario|first|upper|default:"A" }}
-        {% endif %}
+      {% endif %}
     </div>
     <div class="g-s-info">
       <h4>{{ request.session.nombre_usuario|default:"Administrador" }}</h4>
-      <p>Gerente de Sistema</p>
+      <p style="display: flex; align-items: center; gap: 0.5rem;">
+        <span class="g-online-dot"></span> En línea
+      </p>
     </div>
   </div>
 </aside>
 
 <main class="g-main-wrapper">
-  
+
   <header class="g-topbar">
     <div class="g-top-title">
-      <h1>¡Hola, {{ request.session.nombre_usuario|default:"Admin" }}!</h1>
-      <p>Bienvenido al panel central de control técnico.</p>
+      <h1>{% block page_title %}Panel de Control{% endblock %}</h1>
+      <p id="g-current-date" style="font-size: 1.2rem; color: var(--ds-text-soft); margin-top: 2px;"></p>
     </div>
     <div class="g-top-actions">
-      <a href="{% url 'admin_logout' %}" style="border:1px solid #E2E8F0; padding:8px 15px; border-radius:20px; font-size:13px; font-weight:600; text-decoration:none; color:#DC2626; display:flex; align-items:center; gap:5px;"><span class="material-symbols-outlined" style="font-size:1.6rem;">logout</span> Cerrar Sesión</a>
+      <a href="/" target="_blank" class="g-btn-secondary" style="font-size: 12px; padding: 8px 14px; border-radius: 20px;">
+        <i data-lucide="external-link" style="width: 1.4rem; height: 1.4rem;"></i> Ver Tienda
+      </a>
+      <a href="{% url 'admin_logout' %}" class="g-btn-ghost">
+        <i data-lucide="log-out" style="width: 1.5rem; height: 1.5rem;"></i> Cerrar Sesión
+      </a>
     </div>
   </header>
 
   <div class="g-content">
-    {% if messages %}
-    <div class="g-messages">
-      {% for message in messages %}
-      <div class="g-alert g-alert-{{ message.tags }}">
-        <span>{{ message }}</span>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
     {% block admin_content %}{% endblock %}
   </div>
 
 </main>
 
+<!-- SweetAlert2 Toast Config (igual que User Dashboard) -->
+<script>
+  const AdminToast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 4000,
+    timerProgressBar: true,
+    background: '#1E293B',
+    color: '#F8FAFC',
+    iconColor: '#60A5FA',
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer);
+      toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+  });
+
+  window.adminToast = {
+    success: (m) => AdminToast.fire({ icon: 'success', title: m }),
+    error:   (m) => AdminToast.fire({ icon: 'error',   title: m }),
+    info:    (m) => AdminToast.fire({ icon: 'info',    title: m }),
+    warning: (m) => AdminToast.fire({ icon: 'warning', title: m }),
+  };
+</script>
+
+<!-- Mensajes Django → SweetAlert2 Toasts -->
+{% if messages %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+      var tag = "{{ message.tags }}";
+      var type = 'info';
+      if (tag.includes('success')) type = 'success';
+      else if (tag.includes('error'))   type = 'error';
+      else if (tag.includes('warning')) type = 'warning';
+      window.adminToast[type]("{{ message|escapejs }}");
+    {% endfor %}
+  });
+</script>
+{% endif %}
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    // Fecha actual en el topbar
+    const dateEl = document.getElementById('g-current-date');
+    if (dateEl) {
+      const now = new Date();
+      const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      dateEl.textContent = now.toLocaleDateString('es-CO', opts);
+    }
+
+    // Auto-marcar link activo en sidebar
     const currentPath = window.location.pathname;
     const links = document.querySelectorAll(".g-nav-item");
     links.forEach(link => {
       const href = link.getAttribute("href");
-      if(href === currentPath || (currentPath.includes(href) & href !== "/panel-admin/")) {
+      if (href === currentPath || (href !== "/panel-admin/" && currentPath.startsWith(href))) {
         link.classList.add("active");
       }
     });
+
+    // Inicializar Lucide Icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   });
 </script>
 

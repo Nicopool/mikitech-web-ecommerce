@@ -17,8 +17,8 @@
             <div class="filter-group__label">Categoría</div>
             <select name="categoria" class="form-select" onchange="document.getElementById('filter-form').submit()" id="filter-category">
               <option value="">Todas las categorías</option>
-              {% for cat in categories %}
-              <option value="{{ cat.slug }}" {% if cat.slug == category_slug %}selected{% endif %}>{{ cat.name }}</option>
+              {% for cat in categorias %}
+              <option value="{{ cat.enlace }}" {% if cat.enlace == enlace_categoria %}selected{% endif %}>{{ cat.nombre }}</option>
               {% endfor %}
             </select>
           </div>
@@ -27,8 +27,8 @@
           <div class="filter-group">
             <div class="filter-group__label">Rango de precio (COP)</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)">
-              <input type="number" name="precio_min" id="filter-price-min" class="form-input" placeholder="Mín." value="{{ min_price }}" min="0" step="1">
-              <input type="number" name="precio_max" id="filter-price-max" class="form-input" placeholder="Máx." value="{{ max_price }}" min="0" step="1">
+              <input type="number" name="precio_min" id="filter-price-min" class="form-input" placeholder="Mín." value="{{ precio_min }}" min="0" step="1">
+              <input type="number" name="precio_max" id="filter-price-max" class="form-input" placeholder="Máx." value="{{ precio_max }}" min="0" step="1">
             </div>
           </div>
 
@@ -37,8 +37,8 @@
             <div class="filter-group__label">Marca</div>
             <select name="marca" class="form-select" id="filter-brand">
               <option value="">Todas las marcas</option>
-              {% for b in brands %}
-              <option value="{{ b }}" {% if b == brand %}selected{% endif %}>{{ b }}</option>
+              {% for b in marcas %}
+              <option value="{{ b }}" {% if b == marca %}selected{% endif %}>{{ b }}</option>
               {% endfor %}
             </select>
           </div>
@@ -47,10 +47,10 @@
           <div class="filter-group">
             <div class="filter-group__label">Ordenar por</div>
             <select name="orden" class="form-select" id="filter-sort">
-              <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Más recientes</option>
-              <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Precio: menor a mayor</option>
-              <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Precio: mayor a menor</option>
-              <option value="name_asc" {% if sort == 'name_asc' %}selected{% endif %}>Nombre A–Z</option>
+              <option value="nuevo" {% if orden == 'nuevo' or orden == 'newest' %}selected{% endif %}>Más recientes</option>
+              <option value="precio_asc" {% if orden == 'precio_asc' %}selected{% endif %}>Precio: menor a mayor</option>
+              <option value="precio_desc" {% if orden == 'precio_desc' %}selected{% endif %}>Precio: mayor a menor</option>
+              <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre A–Z</option>
             </select>
           </div>
 
@@ -68,7 +68,7 @@
             {% if query %}
             <h1 class="section__title">Resultados para <span>"{{ query }}"</span></h1>
             {% elif current_category %}
-            <h1 class="section__title">{{ current_category.icon|default:"📦" }} <span>{{ current_category.name }}</span></h1>
+            <h1 class="section__title">{{ current_category.icono|default:"📦" }} <span>{{ current_category.nombre }}</span></h1>
             {% else %}
             <h1 class="section__title">Catálogo de <span>Productos</span></h1>
             {% endif %}
@@ -76,29 +76,29 @@
           </div>
         </div>
 
-        {% if products %}
+        {% if productos %}
         <div class="products-grid">
-          {% for product in products %}
+          {% for product in productos %}
           {% include 'products/_product_card.html' with product=product %}
           {% endfor %}
         </div>
 
         <!-- PAGINACIÓN -->
-        {% if total_pages > 1 %}
+        {% if total_paginas > 1 %}
         <nav class="pagination" aria-label="Paginación">
-          {% if page > 1 %}
-          <a href="?{% if query %}q={{ query }}&{% endif %}pagina={{ page|add:"-1" }}" class="pagination__btn" aria-label="Página anterior">←</a>
+          {% if pagina > 1 %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}{% if enlace_categoria %}categoria={{ enlace_categoria }}&{% endif %}{% if precio_min %}precio_min={{ precio_min }}&{% endif %}{% if precio_max %}precio_max={{ precio_max }}&{% endif %}{% if marca %}marca={{ marca }}&{% endif %}{% if orden %}orden={{ orden }}&{% endif %}pagina={{ pagina|add:"-1" }}" class="pagination__btn" aria-label="Página anterior">←</a>
           {% endif %}
-          {% for i in "x"|rjust:total_pages %}
-          <a href="?{% if query %}q={{ query }}&{% endif %}pagina={{ forloop.counter }}"
-             class="pagination__btn {% if forloop.counter == page %}active{% endif %}"
+          {% for i in "x"|rjust:total_paginas %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}{% if enlace_categoria %}categoria={{ enlace_categoria }}&{% endif %}{% if precio_min %}precio_min={{ precio_min }}&{% endif %}{% if precio_max %}precio_max={{ precio_max }}&{% endif %}{% if marca %}marca={{ marca }}&{% endif %}{% if orden %}orden={{ orden }}&{% endif %}pagina={{ forloop.counter }}"
+             class="pagination__btn {% if forloop.counter == pagina %}active{% endif %}"
              aria-label="Página {{ forloop.counter }}"
-             aria-current="{% if forloop.counter == page %}page{% endif %}">
+             aria-current="{% if forloop.counter == pagina %}page{% endif %}">
             {{ forloop.counter }}
           </a>
           {% endfor %}
-          {% if page < total_pages %}
-          <a href="?{% if query %}q={{ query }}&{% endif %}pagina={{ page|add:"1" }}" class="pagination__btn" aria-label="Página siguiente">→</a>
+          {% if pagina < total_paginas %}
+          <a href="?{% if query %}q={{ query }}&{% endif %}{% if enlace_categoria %}categoria={{ enlace_categoria }}&{% endif %}{% if precio_min %}precio_min={{ precio_min }}&{% endif %}{% if precio_max %}precio_max={{ precio_max }}&{% endif %}{% if marca %}marca={{ marca }}&{% endif %}{% if orden %}orden={{ orden }}&{% endif %}pagina={{ pagina|add:"1" }}" class="pagination__btn" aria-label="Página siguiente">→</a>
           {% endif %}
         </nav>
         {% endif %}

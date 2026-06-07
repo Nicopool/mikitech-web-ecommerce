@@ -32,7 +32,7 @@ def buscar(petición):
     marca = petición_get.get('marca', '')
     orden = petición_get.get('orden', '-creado_el')
 
-    productos = Producto.objects.filter(esta_activo=True)
+    productos = Producto.objects.filter(esta_activo=True).select_related('categoria')
 
     if consulta:
         productos = productos.filter(
@@ -72,14 +72,24 @@ def buscar(petición):
 
     # Paginación (12 por página)
     per_pagina = 12
-    pagina = int(petición_get.get('pagina', 1))
+    param_pagina = petición_get.get('pagina') or petición_get.get('page') or '1'
+    try:
+        pagina = int(param_pagina)
+        if pagina < 1:
+            pagina = 1
+    except ValueError:
+        pagina = 1
     total = productos.count()
     inicio_p = (pagina - 1) * per_pagina
     fin_p = inicio_p + per_pagina
     productos_lista = productos[inicio_p:fin_p]
     total_paginas = (total + per_pagina - 1) // per_pagina
 
-    categorías = Categoria.objects.all().order_by('nombre')
+    from django.core.cache import cache
+    categorías = cache.get('nav_categorias')
+    if categorías is None:
+        categorías = list(Categoria.objects.all().order_by('nombre'))
+        cache.set('nav_categorias', categorías, 300)
 
     # Marcas cacheadas 10 minutos (cambian raramente)
     from django.core.cache import cache
@@ -91,6 +101,13 @@ def buscar(petición):
             .distinct().order_by('marca')
         )
         cache.set('marcas_activas', marcas, 600)
+
+    current_category = None
+    if enlace_categoría:
+        try:
+            current_category = Categoria.objects.get(enlace=enlace_categoría)
+        except Categoria.DoesNotExist:
+            pass
 
     contexto = {
         'productos': productos_lista,
@@ -105,7 +122,18 @@ def buscar(petición):
         'total': total,
         'pagina': pagina,
         'total_paginas': total_paginas,
+        'current_category': current_category,
         'titulo_pagina': f'Búsqueda: {consulta}' if consulta else 'Catálogo de Productos',
+        # Duplicados de compatibilidad (inglés/español)
+        'products': productos_lista,
+        'categories': categorías,
+        'category_slug': enlace_categoría,
+        'min_price': precio_min,
+        'max_price': precio_max,
+        'brand': marca,
+        'sort': orden,
+        'page': pagina,
+        'total_pages': total_paginas,
     }
     return render(petición, 'core/search.html', contexto)
 
@@ -285,6 +313,7 @@ def cart_status_api(petición):
                 'url_imagen': prod.url_imagen_principal,
                 'descuento_activo': prod.descuento_activo,
                 'porcentaje': prod.descuento_porcentaje if prod.descuento_activo else 0,
+                'existencias': prod.existencias,
             },
             'cantidad': item['cantidad'],
             'total_linea': float(item['total_linea']),

@@ -3,66 +3,322 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page_title }}</title>
+  <title>{{ page_title|default:"Área Restringida | MIKITECH" }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Inter', sans-serif; background: #FFFFFF; color:#111; }
+    :root {
+      --ds-bg: #0A0F1E;
+      --ds-surface: rgba(30, 41, 59, 0.45);
+      --ds-border: rgba(255, 255, 255, 0.08);
+      --ds-text: #F8FAFC;
+      --ds-text-soft: #94A3B8;
+      --ds-primary: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+      --ds-primary-hover: linear-gradient(135deg, #0ea5e9 0%, #0284C7 100%);
+      --ds-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      --ds-radius: 20px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; }
-    .auth-box { width: 100%; max-width: 480px; text-align: center; padding: 30px; }
-    .auth-brand { font-family: 'Inter', sans-serif; font-size: 44px; font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; }
-    .auth-subtitle { font-family: 'Inter', sans-serif; font-size: 15px; color: #666; margin-bottom: 40px; text-transform: uppercase; }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--ds-bg);
+      color: var(--ds-text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-image: 
+        radial-gradient(circle at 90% 10%, rgba(56, 189, 248, 0.12) 0%, transparent 50%),
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: cover, 4rem 4rem, 4rem 4rem;
+      background-color: var(--ds-bg);
+      background-attachment: fixed;
+      background-repeat: no-repeat, repeat, repeat;
+    }
+
+    .auth-card {
+      background: var(--ds-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--ds-radius);
+      border: 1px solid var(--ds-border);
+      width: 100%;
+      max-width: 450px;
+      padding: 45px;
+      box-shadow: var(--ds-shadow);
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
     
-    .wix-input-group { margin-bottom: 30px; text-align: left; }
-    .wix-label { display: block; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-    .wix-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #111; background: transparent; font-family: 'Inter', sans-serif; font-size: 16px; outline: none; transition: border-width 0.3s; color:#111; }
-    .wix-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; } 
+    .auth-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 25px;
+      transition: transform 0.3s ease;
+    }
+    .auth-logo:hover {
+      transform: scale(1.05);
+    }
+    .auth-logo img {
+      height: 4.8rem;
+      object-fit: contain;
+    }
     
-    .wix-btn-solid { width: 100%; background: #111; color: white; border: none; padding: 18px; font-family: 'Inter', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; margin-top: 10px; text-transform:uppercase;}
-    .wix-btn-solid:hover { background: #444; }
+    .auth-title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
     
-    .wix-links { margin-top: 30px; font-family: 'Inter', sans-serif; font-size: 14px; text-align: center;}
-    .wix-links a { color: #111; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; font-weight:600;}
-    .wix-links a:hover { border-bottom: 1px solid #111; }
+    .auth-subtitle {
+      font-size: 1.4rem;
+      color: var(--ds-text-soft);
+      margin-bottom: 35px;
+      line-height: 1.5;
+    }
     
-    .alert-wix { padding: 15px; margin-bottom: 25px; border: 1px solid; font-family: 'Inter', sans-serif; font-size: 14px; text-align:left;}
-    .alert-wix.error { border-color: #EF4444; color: #EF4444; }
-    .alert-wix.info { border-color: #3B82F6; color: #3B82F6; }
+    .form-group {
+      margin-bottom: 22px;
+      text-align: left;
+    }
     
+    .form-label {
+      display: block;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #E2E8F0;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      color: #475569;
+      transition: color 0.3s;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 14px 16px 14px 46px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-size: 1.5rem;
+      font-family: inherit;
+      background: rgba(15, 23, 42, 0.6);
+      color: #FFF;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    
+    .form-input::placeholder {
+      color: #475569;
+    }
+
+    .form-input:focus {
+      border-color: #38BDF8;
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+      background: rgba(15, 23, 42, 0.8);
+    }
+    
+    .form-input:focus + .input-icon {
+      color: #38BDF8;
+    }
+
+    .btn-solid {
+      width: 100%;
+      background: var(--ds-primary);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+      box-shadow: 0 10px 20px rgba(2, 132, 199, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .btn-solid:hover {
+      background: var(--ds-primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(2, 132, 199, 0.4);
+    }
+
+    .btn-solid:active {
+      transform: translateY(1px);
+    }
+    
+    .auth-links {
+      margin-top: 30px;
+      font-size: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 24px;
+    }
+    
+    .auth-links a {
+      color: #38BDF8;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .auth-links a:hover {
+      text-decoration: underline;
+      color: #0ea5e9;
+    }
+    
+    .alert-wix {
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-bottom: 22px;
+      font-size: 1.35rem;
+      font-weight: 500;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-wix.error {
+      background: rgba(220, 38, 38, 0.15);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #F87171;
+    }
+    
+    .alert-wix.info {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: #38BDF8;
+    }
+
+    @media (max-width: 480px), (max-height: 700px) {
+      .auth-card {
+        padding: 24px 20px;
+        border-radius: 16px;
+        margin: 10px 0;
+      }
+      .auth-logo {
+        margin-bottom: 15px;
+      }
+      .auth-logo img {
+        height: 3.8rem;
+      }
+      .auth-title {
+        font-size: 2rem;
+      }
+      .auth-subtitle {
+        margin-bottom: 20px;
+        font-size: 1.25rem;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-input {
+        padding: 12px 14px 12px 42px;
+        font-size: 1.4rem;
+      }
+      .btn-solid {
+        padding: 12px;
+        font-size: 1.4rem;
+      }
+      .auth-links {
+        margin-top: 20px;
+        padding-top: 16px;
+      }
+    }
   </style>
 </head>
 <body>
 
-<div class="auth-wrapper">
-  <div class="auth-box">
-    <h1 class="auth-brand">ÁREA RESTRINGIDA</h1>
-    <p class="auth-subtitle">INGRESA EL CÓDIGO DE SEGURIDAD PARA ACCEDER.</p>
+<div class="auth-card">
+  <div class="auth-logo">
+    <img src="/static/img/logo.png" alt="MIKITECH">
+  </div>
+  <h1 class="auth-title">Área Restringida</h1>
+  <p class="auth-subtitle">Ingresa el código de acceso para continuar.</p>
+  
+  {% if error %}
+  <div class="alert-wix error">
+    <i data-lucide="alert-circle" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
+    <span>{{ error }}</span>
+  </div>
+  {% else %}
+  <div class="alert-wix info">
+    <i data-lucide="info" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
+    <span>Esta zona requiere verificación de seguridad institucional.</span>
+  </div>
+  {% endif %}
+  
+  <form method="POST" action="/admin-panel/pasarela/" id="gateway-form">
+    {% csrf_token %}
     
-    {% if error %}
-    <div class="alert-wix error">⚠️ {{ error }}</div>
-    {% else %}
-    <div class="alert-wix info">ℹ️ Esta área está protegida. Solo personal autorizado de MIKITECH puede continuar.</div>
-    {% endif %}
-    
-    <form method="POST" action="/admin-panel/pasarela/" id="gateway-form">
-      {% csrf_token %}
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CÓDIGO DE ACCESO</label>
-        <input type="password" name="codigo_secreto" class="wix-input" required placeholder="•••••••••" autofocus>
+    <div class="form-group">
+      <label class="form-label">Código de Acceso</label>
+      <div class="input-wrapper">
+        <i data-lucide="shield-check" class="input-icon" style="width:1.8rem; height:1.8rem;"></i>
+        <input type="password" name="codigo_secreto" class="form-input" required placeholder="•••••••••" autofocus>
       </div>
-      
-      <button type="submit" class="wix-btn-solid" onclick="this.textContent='VERIFICANDO...'">VERIFICAR ACCESO</button>
-    </form>
-    
-    <div class="wix-links">
-      <a href="/">← Volver a la tienda pública</a>
     </div>
+    
+    <button type="submit" class="btn-solid" id="submit-btn">
+      <i data-lucide="shield" style="width:1.8rem; height:1.8rem;"></i>
+      <span id="btn-text">Verificar Acceso</span>
+    </button>
+  </form>
+  
+  <div class="auth-links">
+    <a href="/" style="color: var(--ds-text-soft);">← Volver a la tienda pública</a>
   </div>
 </div>
 
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+    const form = document.getElementById('gateway-form');
+    form.addEventListener('submit', () => {
+      document.getElementById('btn-text').textContent = 'Verificando...';
+    });
+  });
+</script>
 </body>
 </html>

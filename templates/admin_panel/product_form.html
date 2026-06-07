@@ -2,230 +2,358 @@
 {% block nav_products %}active{% endblock %}
 
 {% block admin_content %}
+<!-- ===== ESTILOS EXTRA Y ANIMACIONES DE SOPORTE ===== -->
+<style>
+  /* Contenedor principal de dos columnas */
+  .mpro-layout-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 3rem;
+    align-items: start;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 1024px) {
+    .mpro-layout-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  /* Tarjeta Premium */
+  .mpro-premium-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 1.6rem;
+    padding: 2.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2.5rem;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .mpro-premium-card:hover {
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -8px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Inputs de formulario mejorados con iconos */
+  .mpro-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .mpro-input-wrapper .mpro-icon {
+    position: absolute;
+    left: 1.4rem;
+    color: #94A3B8;
+    pointer-events: none;
+    font-size: 2rem;
+    transition: color 0.25s ease;
+  }
+
+  .mpro-input-with-icon {
+    padding-left: 4.2rem !important;
+  }
+
+  .mpro-input:focus + .mpro-icon {
+    color: var(--ds-primary, #2563EB);
+  }
+
+  /* Caja drag-and-drop */
+  .mpro-dropzone {
+    border: 2px dashed #CBD5E1;
+    border-radius: 1.4rem;
+    background: #F8FAFC;
+    cursor: pointer;
+    min-height: 18rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    transition: all 0.25s ease;
+    text-align: center;
+  }
+
+  .mpro-dropzone:hover {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+  }
+
+  /* Tarjeta de previsualización de descuento premium */
+  .discount-calculator-card {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border: 1px solid #A7F3D0;
+    border-radius: 1.6rem;
+    padding: 2rem;
+    color: #065F46;
+  }
+
+  /* Badge para descuento */
+  .badge-glow-green {
+    background: #10B981;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  }
+</style>
 
 <!-- ===== ENCABEZADO ===== -->
-<div class="u-flex u-justify-between u-align-center u-mb-4">
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="max-width: 1200px; margin: 0 auto 3rem;">
   <div>
-    <h2 style="font-size:2.4rem; font-weight:800; font-family: 'Inter', sans-serif; color:var(--ds-text);">
+    <h2 style="font-size:2.8rem; font-weight:900; font-family: 'Inter', sans-serif; color:var(--ds-text); display: flex; align-items: center; gap: 1rem;">
       {% if producto %}✏️ Editar Producto{% else %}➕ Nuevo Producto{% endif %}
     </h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
-      Completa los campos para {% if producto %}actualizar{% else %}agregar{% endif %} un componente al catálogo.
+    <p style="font-size:1.4rem; color:#64748B; margin-top:0.4rem;">
+      Completa la ficha técnica para {% if producto %}actualizar{% else %}agregar{% endif %} un componente al catálogo de MIKITECH.
     </p>
   </div>
-  <a href="/admin-panel/productos/" class="g-btn-primary" style="background:#E2E8F0; color:var(--ds-text); box-shadow:none;">
+  <a href="/admin-panel/productos/" class="g-btn-secondary" style="font-weight: 700; box-shadow: none; border-radius: 1.2rem;">
     ← Volver al listado
   </a>
 </div>
 
 {% if error %}
-<div class="g-alert g-alert-error" style="margin-bottom: 2.5rem;">
+<div class="g-alert g-alert-error" style="max-width: 1200px; margin: 0 auto 2.5rem;">
   <span>{{ error }}</span>
 </div>
 {% endif %}
 
 <!-- ===== FORMULARIO ===== -->
-<div class="mpro-card" style="max-width:960px;">
-  <form method="POST" id="product-form" enctype="multipart/form-data">
-    {% csrf_token %}
+<form method="POST" id="product-form" enctype="multipart/form-data" class="mpro-layout-grid">
+  {% csrf_token %}
 
-    <!-- ── SECCIÓN 1: INFORMACIÓN GENERAL ── -->
-    <div style="margin-bottom:3.5rem;">
-      <h3 class="mpro-section-title">
+  <!-- COLUMNA IZQUIERDA (Información Principal) -->
+  <div>
+    <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
+    <div class="mpro-premium-card">
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem;">
         <span class="material-symbols-outlined">inventory_2</span> Información General
       </h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem;">
-        <div style="grid-column:span 2;">
+      
+      <div style="display:grid; grid-template-columns:1fr; gap:2.2rem;">
+        <div>
           <label class="mpro-label" for="prod-name">Nombre del Producto *</label>
-          <input type="text" id="prod-name" name="nombre" class="mpro-input" required
-            value="{{ producto.nombre|default:'' }}" placeholder="Ej: AMD Ryzen 9 7950X — 16 Núcleos">
+          <div class="mpro-input-wrapper">
+            <input type="text" id="prod-name" name="nombre" class="mpro-input mpro-input-with-icon" required
+              value="{{ producto.nombre|default:'' }}" placeholder="Ej: AMD Ryzen 9 7950X — 16 Núcleos">
+            <span class="material-symbols-outlined mpro-icon">drive_file_rename_outline</span>
+          </div>
         </div>
-        <div>
-          <label class="mpro-label" for="prod-category">Categoría *</label>
-          <select id="prod-category" name="id_categoria" class="mpro-input" required>
-            <option value="">Selecciona una categoría...</option>
-            {% for cat in categorias %}
-            <option value="{{ cat.id }}" {% if producto and producto.categoria_id == cat.id %}selected{% endif %}>
-              {{ cat.nombre }}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div>
-          <label class="mpro-label" for="prod-brand">Marca / Fabricante</label>
-          <input type="text" id="prod-brand" name="marca" class="mpro-input"
-            value="{{ producto.marca|default:'' }}" placeholder="Ej: AMD, ASUS, Corsair, Kingston...">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+          <div>
+            <label class="mpro-label" for="prod-category">Categoría *</label>
+            <div class="mpro-input-wrapper">
+              <select id="prod-category" name="id_categoria" class="mpro-input mpro-input-with-icon" required style="padding-right: 3rem;">
+                <option value="">Selecciona...</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}" {% if producto and producto.categoria_id == cat.id %}selected{% endif %}>
+                  {{ cat.nombre }}
+                </option>
+                {% endfor %}
+              </select>
+              <span class="material-symbols-outlined mpro-icon">category</span>
+            </div>
+          </div>
+          <div>
+            <label class="mpro-label" for="prod-brand">Marca / Fabricante</label>
+            <div class="mpro-input-wrapper">
+              <input type="text" id="prod-brand" name="marca" class="mpro-input mpro-input-with-icon"
+                value="{{ producto.marca|default:'' }}" placeholder="Ej: AMD, ASUS, Corsair...">
+              <span class="material-symbols-outlined mpro-icon">verified</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ── SECCIÓN 2: PRECIOS E INVENTARIO ── -->
-    <div style="margin-bottom:3.5rem;">
-      <h3 class="mpro-section-title">
+    <!-- SECCIÓN 2: PRECIOS E INVENTARIO -->
+    <div class="mpro-premium-card">
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem;">
         <span class="material-symbols-outlined">payments</span> Precio e Inventario
       </h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem;">
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:2.2rem; margin-bottom: 2rem;">
         <div>
           <label class="mpro-label" for="prod-price">Precio de Venta (COP) *</label>
-          <div style="position:relative;">
-            <span style="position:absolute; left:1.5rem; top:50%; transform:translateY(-50%); font-size:1.5rem; font-weight:700; color:var(--ds-text-soft);">$</span>
+          <div class="mpro-input-wrapper">
+            <span style="position:absolute; left:1.5rem; font-size:2rem; font-weight:800; color:#94A3B8;">$</span>
             <input type="number" id="prod-price" name="precio" class="mpro-input" required min="0" step="1"
               value="{{ producto.precio|default:'0'|floatformat:0 }}"
-              style="padding-left:3.5rem; font-family: 'Inter', sans-serif; font-size:2rem; font-weight:700;">
+              style="padding-left:3.5rem; font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:800; color:var(--ds-primary);">
           </div>
         </div>
         <div>
           <label class="mpro-label" for="prod-stock">Unidades en Stock *</label>
-          <input type="number" id="prod-stock" name="existencias" class="mpro-input" required min="0"
-            value="{{ producto.existencias|default:'0' }}" placeholder="Ej: 50">
+          <div class="mpro-input-wrapper">
+            <input type="number" id="prod-stock" name="existencias" class="mpro-input mpro-input-with-icon" required min="0"
+              value="{{ producto.existencias|default:'0' }}" placeholder="Ej: 50">
+            <span class="material-symbols-outlined mpro-icon">warehouse</span>
+          </div>
         </div>
-        <div style="grid-column:span 2;">
-          <label class="mpro-label" for="prod-short-desc">Descripción Corta (Catálogo / SEO)</label>
-          <input type="text" id="prod-short-desc" name="descripcion_corta" class="mpro-input"
+      </div>
+
+      <div>
+        <label class="mpro-label" for="prod-short-desc">Descripción Corta (SEO / Ficha Breve)</label>
+        <div class="mpro-input-wrapper">
+          <input type="text" id="prod-short-desc" name="descripcion_corta" class="mpro-input mpro-input-with-icon"
             value="{{ producto.descripcion_corta|default:'' }}"
             placeholder="Resumen técnico breve visible en las tarjetas del catálogo..." maxlength="500">
+          <span class="material-symbols-outlined mpro-icon">article</span>
         </div>
       </div>
     </div>
 
-    <!-- ── SECCIÓN 3: MULTIMEDIA ── -->
-    <div style="margin-bottom:3.5rem;">
-      <h3 class="mpro-section-title">
-        <span class="material-symbols-outlined">perm_media</span> Imágenes
+    <!-- SECCIÓN 3: OFERTA ESPECIAL -->
+    <div class="discount-calculator-card mpro-premium-card">
+      <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2.2rem;">
+        <div style="width:4.8rem; height:4.8rem; background:white; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(16,185,129,0.15); flex-shrink:0;">
+          <span class="material-symbols-outlined" style="color:#059669; font-size:2.8rem;">sell</span>
+        </div>
+        <div>
+          <h3 style="font-family: 'Inter', sans-serif; font-size:1.8rem; font-weight:800; color:#047857; margin:0;">Oferta Especial y Descuentos</h3>
+          <p style="font-size:1.3rem; color:#065F46; margin:0.2rem 0 0; opacity: 0.85;">Aplica descuentos dinámicos programados para este producto.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1.2fr 1.5fr 1.3fr; gap:2rem; align-items:end;">
+        <div>
+          <label style="display:block; font-size:1.3rem; font-weight:700; color:#047857; margin-bottom:0.8rem;">% Descuento</label>
+          <div style="position:relative; display: flex; align-items: center;">
+            <input type="number" id="desc-porcentaje" name="descuento_porcentaje" min="0" max="90" step="1"
+              value="{{ producto.descuento_porcentaje|default:'0' }}"
+              class="mpro-input"
+              style="border-color:#A7F3D0; font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:800; color:#047857; text-align:center; padding-right:3.5rem;"
+              oninput="actualizarPrevistaDescuento()">
+            <span style="position:absolute; right:1.5rem; font-size:1.6rem; font-weight:800; color:#047857;">%</span>
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:1.3rem; font-weight:700; color:#047857; margin-bottom:0.8rem;">Expira el (Opcional)</label>
+          <input type="datetime-local" name="descuento_expira_el" id="desc-expira" class="mpro-input"
+            style="border-color:#A7F3D0; color: #047857;"
+            value="{% if producto.descuento_expira_el %}{{ producto.descuento_expira_el|date:'Y-m-d' }}T{{ producto.descuento_expira_el|date:'H:i' }}{% endif %}">
+        </div>
+
+        <div id="preview-descuento" style="background:white; border-radius:1.4rem; padding:1.2rem; border:1px solid #A7F3D0; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:8rem; box-shadow:0 8px 20px rgba(0,0,0,0.03);">
+          <div id="prev-original" style="font-size:1.2rem; color:#94A3B8; text-decoration:line-through; font-weight:600;">$0</div>
+          <div id="prev-final" style="font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:900; color:#059669;">$0</div>
+          <div id="prev-desc-badge" class="badge-glow-green" style="margin-top:0.4rem;">AHORRA 0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 4: ESPECIFICACIONES TÉCNICAS -->
+    <div class="mpro-premium-card">
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem;">
+        <span class="material-symbols-outlined">description</span> Especificaciones Técnicas (Detalle)
+      </h3>
+      <textarea id="prod-desc" name="descripcion" class="mpro-input"
+        style="min-height:18rem; resize:vertical; line-height:1.9;"
+        placeholder="Escribe aquí la ficha técnica completa, compatibilidades, detalles de hardware, garantía, etc...">{{ producto.descripcion|default:'' }}</textarea>
+    </div>
+  </div>
+
+  <!-- COLUMNA DERECHA (Multimedia y Visibilidad) -->
+  <div>
+    <!-- SECCIÓN 5: IMAGEN PRINCIPAL -->
+    <div class="mpro-premium-card">
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2rem;">
+        <span class="material-symbols-outlined">perm_media</span> Foto Principal
       </h3>
 
-      <!-- Imagen principal -->
-      <label class="mpro-label">Foto Principal del Producto</label>
-      <div style="display:flex; gap:2rem; align-items:stretch; background:#F8FAFC; border:1px solid var(--ds-border); border-radius:1.6rem; padding:2rem; margin-bottom:2rem;">
+      <div style="display:flex; flex-direction:column; gap:2rem;">
         <input type="file" id="prod-image-file" name="archivo_imagen" accept="image/*" style="display:none;" onchange="previewProductFile(this)">
-        <label for="prod-image-file"
-          style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:16rem; border:2px dashed var(--ds-border); border-radius:1.2rem; cursor:pointer; background:white; transition:all 0.25s ease;"
-          onmouseover="this.style.borderColor='var(--ds-primary)'; this.style.background='var(--ds-primary-light)';"
-          onmouseout="this.style.borderColor='var(--ds-border)'; this.style.background='white';">
-          <span class="material-symbols-outlined" style="font-size:3.6rem; color:var(--ds-primary); margin-bottom:0.8rem;">cloud_upload</span>
-          <span style="font-size:1.4rem; font-weight:700; color:var(--ds-text);">Haz click o arrastra la imagen aquí</span>
-          <span style="font-size:1.2rem; color:#94A3B8; margin-top:0.4rem;">JPG, PNG o WEBP — Recomendado 800×800px</span>
+        <label for="prod-image-file" class="mpro-dropzone">
+          <span class="material-symbols-outlined" style="font-size:4rem; color:#3B82F6; margin-bottom:0.8rem;">cloud_upload</span>
+          <span style="font-size:1.4rem; font-weight:700; color:var(--ds-text);">Subir Foto Principal</span>
+          <span style="font-size:1.2rem; color:#94A3B8; margin-top:0.4rem;">Recomendado: 800×800px (WEBP/PNG)</span>
         </label>
-        <div style="width:16rem; height:16rem; border:1px solid var(--ds-border); border-radius:1.2rem; overflow:hidden; display:flex; align-items:center; justify-content:center; background:white; flex-shrink:0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+
+        <!-- Preview de Imagen Principal -->
+        <div style="border:1px solid #E2E8F0; border-radius:1.4rem; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#F8FAFC; aspect-ratio: 1.2 / 1; width: 100%; box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);">
           <img id="img-preview" src="{{ producto.url_imagen_principal|default:'' }}"
             style="max-width:90%; max-height:90%; object-fit:contain; {% if not producto.url_imagen_principal %}display:none;{% endif %}">
           <div id="preview-placeholder" style="display:flex; flex-direction:column; align-items:center; color:#CBD5E1; {% if producto.url_imagen_principal %}display:none;{% endif %}">
             <span class="material-symbols-outlined" style="font-size:5rem;">image</span>
-            <span style="font-size:1rem; font-weight:700; margin-top:0.5rem; letter-spacing:1px;">PREVIEW</span>
+            <span style="font-size:1.1rem; font-weight:700; margin-top:0.5rem; letter-spacing:1px;">SIN IMAGEN</span>
           </div>
         </div>
-      </div>
-
-      <!-- Galería -->
-      <label class="mpro-label">Galería de Imágenes Adicionales</label>
-      <div style="background:white; border:1px solid var(--ds-border); border-radius:1.6rem; padding:2rem;">
-        <input type="file" id="prod-gallery-files" name="archivos_galeria" accept="image/*" multiple style="display:none;" onchange="previewGalleryFiles(this)">
-        <label for="prod-gallery-files"
-          style="display:inline-flex; align-items:center; gap:0.8rem; padding:1rem 2rem; border:1.5px solid var(--ds-primary); border-radius:1rem; cursor:pointer; color:var(--ds-primary); font-weight:700; font-size:1.3rem; transition:all 0.25s ease; margin-bottom:1.5rem;"
-          onmouseover="this.style.background='var(--ds-primary)'; this.style.color='white';"
-          onmouseout="this.style.background='transparent'; this.style.color='var(--ds-primary)';">
-          <span class="material-symbols-outlined">add_photo_alternate</span> Añadir fotos a la galería
-        </label>
-
-        <div id="gallery-preview-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(10rem, 1fr)); gap:1.5rem;">
-          {% for extra in producto.imagenes.all %}
-          <div class="gallery-item-wrapper" style="position:relative; aspect-ratio:1/1; border:1px solid var(--ds-border); border-radius:1.2rem; overflow:hidden; background:#F8FAFC;">
-            <img src="{{ extra.url_imagen }}" style="width:100%; height:100%; object-fit:contain;">
-            <button type="button" onclick="marcarParaEliminar('{{ extra.id }}', this)"
-              style="position:absolute; top:0.5rem; right:0.5rem; width:2.4rem; height:2.4rem; border-radius:0.6rem; background:rgba(239,68,68,0.9); color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="Eliminar">
-              <span class="material-symbols-outlined" style="font-size:1.6rem;">close</span>
-            </button>
-          </div>
-          {% endfor %}
-        </div>
-        <div id="delete-queue" style="display:none;"></div>
       </div>
     </div>
 
-    <!-- ── SECCIÓN 4: DESCRIPCIÓN TÉCNICA ── -->
-    <div style="margin-bottom:3.5rem;">
-      <h3 class="mpro-section-title">
-        <span class="material-symbols-outlined">description</span> Especificaciones Técnicas
+    <!-- SECCIÓN 6: GALERÍA ADICIONAL -->
+    <div class="mpro-premium-card">
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2rem;">
+        <span class="material-symbols-outlined">add_to_photos</span> Galería Extra
       </h3>
-      <textarea id="prod-desc" name="descripcion" class="mpro-input"
-        style="min-height:18rem; resize:vertical; line-height:1.9;"
-        placeholder="Escribe aquí la ficha técnica completa, compatibilidades, garantía, etc...">{{ producto.descripcion|default:'' }}</textarea>
+
+      <input type="file" id="prod-gallery-files" name="archivos_galeria" accept="image/*" multiple style="display:none;" onchange="previewGalleryFiles(this)">
+      <label for="prod-gallery-files"
+        style="display:flex; align-items:center; justify-content:center; gap:0.8rem; padding:1.2rem; border:1.5px solid #3B82F6; border-radius:1.2rem; cursor:pointer; color:#3B82F6; font-weight:700; font-size:1.3rem; transition:all 0.25s ease; margin-bottom:2rem; background: transparent;"
+        onmouseover="this.style.background='#3B82F6'; this.style.color='white';"
+        onmouseout="this.style.background='transparent'; this.style.color='#3B82F6';">
+        <span class="material-symbols-outlined">add_photo_alternate</span> Añadir a la Galería
+      </label>
+
+      <!-- Grid de Galería -->
+      <div id="gallery-preview-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(8rem, 1fr)); gap:1.2rem;">
+        {% for extra in producto.imagenes.all %}
+        <div class="gallery-item-wrapper" data-image-id="{{ extra.id }}" style="position:relative; aspect-ratio:1/1; border:1px solid #E2E8F0; border-radius:1.2rem; overflow:hidden; background:#F8FAFC; transition: all 0.3s ease;">
+          <img src="{{ extra.url_imagen }}" style="width:100%; height:100%; object-fit:contain;">
+          <button type="button" onclick="toggleEliminarGaleria('{{ extra.id }}', this)"
+            style="position:absolute; top:0.5rem; right:0.5rem; width:2.4rem; height:2.4rem; border-radius:0.6rem; background:rgba(239,68,68,0.9); color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="Eliminar">
+            <span class="material-symbols-outlined" style="font-size:1.6rem;">close</span>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      <div id="delete-queue" style="display:none;"></div>
     </div>
 
-    <!-- ── SECCIÓN 5: DESCUENTO ── -->
-    <div style="margin-bottom:3.5rem; padding:2.5rem; border-radius:2rem; background:linear-gradient(135deg,#F0F9FF,#E0F2FE); border:1px solid #BAE6FD;">
-      <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2.5rem;">
-        <div style="width:4.5rem; height:4.5rem; background:white; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(14,165,233,0.2); flex-shrink:0;">
-          <span class="material-symbols-outlined" style="color:#0284C7; font-size:2.8rem;">sell</span>
-        </div>
-        <div>
-          <h3 style="font-family: 'Inter', sans-serif; font-size:1.8rem; font-weight:800; color:#0369A1; margin:0;">Oferta Especial</h3>
-          <p style="font-size:1.3rem; color:#0E7490; margin:0.2rem 0 0;">El descuento se mostrará en el catálogo y la ficha del producto.</p>
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:2rem; align-items:end;">
-        <div>
-          <label style="display:block; font-size:1.3rem; font-weight:700; color:#0369A1; margin-bottom:0.8rem;">% de Descuento</label>
-          <div style="position:relative;">
-            <input type="number" id="desc-porcentaje" name="descuento_porcentaje" min="0" max="90" step="1"
-              value="{{ producto.descuento_porcentaje|default:'0' }}"
-              class="mpro-input"
-              style="border-color:#BAE6FD; font-family: 'Inter', sans-serif; font-size:2.4rem; font-weight:800; color:#0369A1; text-align:center; padding-right:3rem;"
-              oninput="actualizarPrevistaDescuento()">
-            <span style="position:absolute; right:1.5rem; top:50%; transform:translateY(-50%); font-size:1.6rem; font-weight:800; color:#0369A1;">%</span>
-          </div>
-        </div>
-        <div>
-          <label style="display:block; font-size:1.3rem; font-weight:700; color:#0369A1; margin-bottom:0.8rem;">Válido hasta (opcional)</label>
-          <input type="datetime-local" name="descuento_expira_el" id="desc-expira" class="mpro-input"
-            style="border-color:#BAE6FD;"
-            value="{% if producto.descuento_expira_el %}{{ producto.descuento_expira_el|date:'Y-m-d' }}T{{ producto.descuento_expira_el|date:'H:i' }}{% endif %}">
-        </div>
-        <div id="preview-descuento" style="background:white; border-radius:1.6rem; padding:1.5rem; border:1px solid #BAE6FD; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:8rem; box-shadow:0 8px 20px rgba(0,0,0,0.04);">
-          <div id="prev-original" style="font-size:1.2rem; color:#94A3B8; text-decoration:line-through; font-weight:600;">$0</div>
-          <div id="prev-final" style="font-family: 'Inter', sans-serif; font-size:2.4rem; font-weight:900; color:#16A34A;">$0</div>
-          <div id="prev-desc-badge" style="background:#DCFCE7; color:#16A34A; padding:0.2rem 0.8rem; border-radius:0.6rem; font-size:1rem; font-weight:800; margin-top:0.4rem;">AHORRA 0%</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── SECCIÓN 6: ESTADO Y VISIBILIDAD ── -->
-    <div style="margin-bottom:3rem; background:#F8FAFC; border:1px solid var(--ds-border); border-radius:1.6rem; padding:2rem 2.5rem;">
-      <h3 class="mpro-section-title" style="margin-bottom:1.5rem;">
-        <span class="material-symbols-outlined">toggle_on</span> Visibilidad en Tienda
+    <!-- SECCIÓN 7: VISIBILIDAD Y ESTADO -->
+    <div class="mpro-premium-card" style="background: #F8FAFC;">
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #E2E8F0; padding-bottom: 1.5rem; margin-bottom: 2rem;">
+        <span class="material-symbols-outlined">visibility</span> Publicación
       </h3>
-      <div style="display:flex; flex-wrap:wrap; gap:3rem;">
+
+      <div style="display:flex; flex-direction:column; gap:1.8rem;">
         <label style="display:flex; align-items:center; gap:1.2rem; cursor:pointer; font-size:1.4rem; font-weight:600; color:var(--ds-text);">
           <input type="checkbox" name="es_destacado" id="prod-featured"
             {% if producto and producto.es_destacado %}checked{% endif %}
-            style="width:2rem; height:2rem; accent-color:var(--ds-primary);">
-          ⭐ Destacado en el Hero / Inicio
+            style="width:2rem; height:2rem; accent-color:#3B82F6;">
+          <span>⭐ Destacado en Inicio</span>
         </label>
+        
         {% if producto %}
         <label style="display:flex; align-items:center; gap:1.2rem; cursor:pointer; font-size:1.4rem; font-weight:600; color:var(--ds-text);">
           <input type="checkbox" name="esta_activo" id="prod-active"
             {% if producto.esta_activo %}checked{% endif %}
-            style="width:2rem; height:2rem; accent-color:var(--ds-primary);">
-          ✅ Activo (Visible en catálogo)
+            style="width:2rem; height:2rem; accent-color:#3B82F6;">
+          <span>✅ Activo en Catálogo</span>
         </label>
         {% endif %}
       </div>
     </div>
 
-    <!-- ── ACCIONES ── -->
-    <div style="display:flex; gap:1.5rem; border-top:2px solid var(--ds-border); padding-top:2.5rem;">
-      <button type="submit" class="g-btn-primary" style="padding:1.5rem 5rem; font-size:1.5rem; display:inline-flex; align-items:center; gap:0.8rem;">
-        <span class="material-symbols-outlined">{% if producto %}save{% else %}add_circle{% endif %}</span>
-        {% if producto %}GUARDAR CAMBIOS{% else %}CREAR PRODUCTO{% endif %}
+    <!-- ACCIONES -->
+    <div style="display:flex; flex-direction:column; gap:1.2rem; margin-top:2.5rem;">
+      <button type="submit" class="g-btn-primary" style="padding:1.6rem; font-size:1.5rem; font-weight:800; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; gap:0.8rem; box-shadow:0 8px 25px rgba(37,99,235,0.25);">
+        <span class="material-symbols-outlined">save</span>
+        {% if producto %}GUARDAR PRODUCTO{% else %}CREAR NUEVO PRODUCTO{% endif %}
       </button>
-      <a href="/admin-panel/productos/" class="g-btn-primary" style="background:transparent; border:1.5px solid var(--ds-border); color:var(--ds-text-soft); box-shadow:none; padding:1.5rem 3rem;">
+      <a href="/admin-panel/productos/" class="g-btn-secondary" style="padding:1.5rem; font-size:1.4rem; font-weight:700; border-radius:1.2rem; text-align:center;">
         CANCELAR
       </a>
     </div>
-
-  </form>
-</div>
-
+  </div>
+</form>
 {% endblock %}
 
 {% block extra_js %}
@@ -236,7 +364,7 @@ function formatColombianPrice(n) {
 }
 
 function previewProductFile(input) {
-  if (input.files & input.files[0]) {
+  if (input.files && input.files[0]) {
     var reader = new FileReader();
     reader.onload = function(e) {
       const preview = document.getElementById('img-preview');
@@ -257,12 +385,12 @@ function previewGalleryFiles(input) {
       reader.onload = function(e) {
         const div = document.createElement('div');
         div.className = 'gallery-item-wrapper';
-        div.style.cssText = 'position:relative; aspect-ratio:1/1; border:1.5px solid var(--ds-primary); border-radius:1.2rem; overflow:hidden; background:white;';
+        div.style.cssText = 'position:relative; aspect-ratio:1/1; border:2px dashed #3B82F6; border-radius:1.2rem; overflow:hidden; background:white;';
         const img = document.createElement('img');
         img.src = e.target.result;
         img.style.cssText = 'width:100%; height:100%; object-fit:contain;';
         const badge = document.createElement('div');
-        badge.style.cssText = 'position:absolute; bottom:0; left:0; right:0; background:var(--ds-primary); color:white; font-size:0.9rem; text-align:center; padding:0.2rem; font-weight:800;';
+        badge.style.cssText = 'position:absolute; bottom:0; left:0; right:0; background:#3B82F6; color:white; font-size:0.9rem; text-align:center; padding:0.2rem; font-weight:800;';
         badge.textContent = 'NUEVO';
         div.appendChild(img);
         div.appendChild(badge);
@@ -273,25 +401,39 @@ function previewGalleryFiles(input) {
   }
 }
 
-function marcarParaEliminar(id, btn) {
+function toggleEliminarGaleria(id, btn) {
   const queue = document.getElementById('delete-queue');
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'eliminar_imagenes';
-  input.value = id;
-  queue.appendChild(input);
+  const inputExistente = queue.querySelector(`input[value="${id}"]`);
   const wrapper = btn.closest('.gallery-item-wrapper');
-  wrapper.style.opacity = '0.3';
-  wrapper.style.filter = 'grayscale(1)';
-  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.6rem;">restore</span>';
-  btn.onclick = function() { location.reload(); };
+
+  if (inputExistente) {
+    // Si ya estaba en cola para borrar, restaurarla
+    inputExistente.remove();
+    wrapper.style.opacity = '1';
+    wrapper.style.filter = 'none';
+    btn.style.background = 'rgba(239,68,68,0.9)';
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.6rem;">close</span>';
+    btn.title = "Eliminar";
+  } else {
+    // Si no estaba, agregarla a la cola y cambiar interfaz
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'eliminar_imagenes';
+    input.value = id;
+    queue.appendChild(input);
+    wrapper.style.opacity = '0.3';
+    wrapper.style.filter = 'grayscale(1)';
+    btn.style.background = '#475569';
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.6rem;">settings_backup_restore</span>';
+    btn.title = "Restaurar";
+  }
 }
 
 function actualizarPrevistaDescuento() {
   const pct = parseInt(document.getElementById('desc-porcentaje').value) || 0;
   const precio = parseFloat(document.getElementById('prod-price').value) || 0;
   const preview = document.getElementById('preview-descuento');
-  if (pct > 0 & precio > 0) {
+  if (pct > 0 && precio > 0) {
     const finalPrice = Math.round(precio * (1 - pct / 100));
     preview.style.display = 'flex';
     document.getElementById('prev-original').textContent = formatColombianPrice(precio);

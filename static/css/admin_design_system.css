@@ -1,0 +1,300 @@
+/* =============================================
+   MIKITECH Admin Design System — Extended v1.0
+   Complemento de main.css para el Admin Panel
+   Micro-animaciones, estados y componentes extra
+   ============================================= */
+
+/* ─── SIDEBAR IMPROVEMENTS ─── */
+.g-sidebar {
+  width: var(--sidebar-w, 27rem);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sección label del nav */
+.g-nav-section {
+  padding: 1.5rem 2.5rem 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* Nav item mejorado con icono y transición fluida */
+.g-nav-item {
+  border-radius: 0;
+  margin: 0 0.8rem;
+  border-radius: 0.8rem;
+  padding: 1.1rem 1.6rem !important;
+  gap: 1rem !important;
+}
+.g-nav-item i {
+  width: 2rem !important;
+  height: 2rem !important;
+  flex-shrink: 0;
+}
+.g-nav-item.active::before {
+  left: 0 !important;
+  border-radius: 0 0.4rem 0.4rem 0 !important;
+}
+
+/* ─── TOPBAR IMPROVEMENTS ─── */
+.g-topbar {
+  height: var(--topbar-h, 6.5rem);
+  box-shadow: 0 1px 0 var(--ds-border), 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.g-top-title h1 {
+  font-size: 1.6rem !important;
+  letter-spacing: -0.01em;
+}
+
+/* ─── MODAL BASE ─── */
+.g-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+.g-modal-backdrop.open { display: flex; }
+
+.g-modal {
+  background: var(--ds-surface);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 90vw;
+}
+
+.g-modal-header {
+  padding: 1.8rem 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.g-modal-header-danger {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white;
+}
+
+.g-modal-header-primary {
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  color: white;
+}
+
+.g-modal-close {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.g-modal-close:hover { background: rgba(255,255,255,0.25); }
+
+.g-modal-body { padding: 2.4rem; }
+.g-modal-footer {
+  padding: 1.6rem 2.4rem;
+  border-top: 1px solid var(--ds-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* ─── FORM ENHANCEMENTS ─── */
+
+/* Input con icono prepend */
+.g-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.g-input-group .g-input-icon {
+  position: absolute;
+  left: 1.4rem;
+  color: var(--ds-text-soft);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.g-input-group .mpro-input {
+  padding-left: 4rem;
+}
+
+/* Estado de error en inputs */
+.mpro-input.is-invalid {
+  border-color: var(--ds-danger);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+}
+.mpro-input.is-valid {
+  border-color: var(--ds-success);
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.08);
+}
+
+/* Helper text bajo inputs */
+.g-field-helper {
+  font-size: 1.15rem;
+  color: var(--ds-text-muted);
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.g-field-helper.error { color: var(--ds-danger); }
+.g-field-helper.success { color: var(--ds-success); }
+
+/* ─── EMPTY STATE ─── */
+.g-empty-state {
+  text-align: center;
+  padding: 6rem 3rem;
+  color: var(--ds-text-muted);
+}
+.g-empty-state i {
+  width: 4.8rem;
+  height: 4.8rem;
+  margin: 0 auto 1.6rem;
+  display: block;
+  opacity: 0.4;
+}
+.g-empty-state h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ds-text-soft);
+  margin-bottom: 0.8rem;
+}
+.g-empty-state p {
+  font-size: 1.4rem;
+  margin-bottom: 2.4rem;
+}
+
+/* ─── LOADING SKELETON ─── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.g-skeleton {
+  background: linear-gradient(90deg, #F0F2F5 25%, #E8EAED 50%, #F0F2F5 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 0.6rem;
+}
+
+/* ─── PAGE HEADER COMPONENT ─── */
+.g-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2.8rem;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+}
+.g-page-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--ds-text);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+}
+.g-page-header h2 i {
+  color: var(--ds-primary);
+  width: 2.4rem;
+  height: 2.4rem;
+}
+.g-page-header p {
+  font-size: 1.3rem;
+  color: var(--ds-text-soft);
+  margin-top: 0.4rem;
+}
+.g-page-header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* ─── CARD TABLE WRAPPER ─── */
+.g-card-table {
+  background: var(--ds-surface);
+  border-radius: 16px;
+  border: 1px solid var(--ds-border);
+  box-shadow: var(--ds-shadow);
+  overflow: hidden;
+}
+.g-card-table-header {
+  padding: 2rem 2.5rem;
+  border-bottom: 1px solid var(--ds-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+.g-card-table-header h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--ds-text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.g-card-table-header h3 i {
+  color: var(--ds-primary);
+  width: 2rem;
+  height: 2rem;
+}
+
+/* ─── SEARCH INPUT WRAPPER ─── */
+.g-search-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.g-search-box i {
+  position: absolute;
+  left: 1.2rem;
+  color: var(--ds-text-soft);
+  width: 1.6rem;
+  height: 1.6rem;
+  pointer-events: none;
+}
+.g-search-box .g-search {
+  padding-left: 3.8rem;
+  width: 24rem;
+}
+
+/* ─── RESPONSIVE TWEAKS ─── */
+@media (max-width: 768px) {
+  .g-sidebar {
+    position: fixed;
+    top: 0; left: -27rem;
+    z-index: 1000;
+    height: 100vh;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  body.sidebar-open .g-sidebar { left: 0; }
+
+  .g-main-wrapper { width: 100%; }
+  .g-content { padding: 2rem; }
+  .g-topbar { padding: 0 2rem; }
+  .g-page-header { margin-bottom: 2rem; }
+  .g-page-header h2 { font-size: 1.8rem; }
+  .ds-stat-card { padding: 1.6rem; }
+  .ds-stat-value { font-size: 2.4rem; }
+}
