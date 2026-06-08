@@ -261,15 +261,30 @@ function confirmarSalida(e, url) {
   e.preventDefault();
   Swal.fire({
     title: '¿Deseas cerrar sesión?',
-    text: "Tendrás que volver a ingresar tus credenciales.",
-    icon: 'warning',
+    html: `
+      <div class="d-flex flex-column align-items-center text-center gap-3">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; display: flex; align-items: center; justify-content: center; color: #EF4444; margin-bottom: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        </div>
+        <p style="margin: 0; font-size: 1.4rem; color: #64748B; font-weight: 500; line-height: 1.5; font-family: 'Inter', sans-serif;">
+          Tendrás que volver a ingresar tus credenciales para acceder a tu cuenta.
+        </p>
+      </div>
+    `,
     showCancelButton: true,
-    confirmButtonColor: '#1d4ed8',
-    cancelButtonColor: '#e2e8f0',
     confirmButtonText: 'Sí, cerrar sesión',
-    cancelButtonText: '<span style="color:#0f172a">Cancelar</span>',
-    background: '#ffffff',
-    customClass: { popup: 'border-0 rounded-4 shadow-lg' }
+    cancelButtonText: 'Cancelar',
+    background: '#FFFFFF',
+    color: '#0F172A',
+    backdrop: 'rgba(15, 23, 42, 0.4)',
+    buttonsStyling: false,
+    customClass: {
+      popup: 'border-0 rounded-4 shadow-lg p-4',
+      title: 'fs-3 fw-bold text-dark mt-2 mb-1',
+      actions: 'mt-4 d-flex justify-content-center gap-2 w-100',
+      confirmButton: 'btn btn-danger fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1',
+      cancelButton: 'btn btn-light fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1 border border-200'
+    }
   }).then((result) => {
     if (result.isConfirmed) {
       window.location.href = url;
