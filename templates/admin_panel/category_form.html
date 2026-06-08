@@ -24,7 +24,7 @@
     box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -8px rgba(0, 0, 0, 0.04);
   }
 
-  /* Inputs de formulario mejorados con iconos */
+  /* Inputs de formulario mejorados con iconos Lucide */
   .mpro-input-wrapper {
     position: relative;
     display: flex;
@@ -36,8 +36,12 @@
     left: 1.4rem;
     color: #94A3B8;
     pointer-events: none;
-    font-size: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
     transition: color 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .mpro-input-with-icon {
@@ -122,13 +126,13 @@
             value="{{ categoria.nombre|default:'' }}"
             placeholder="Ej: Procesadores, Tarjetas de Video, RAM..."
           >
-          <span class="material-symbols-outlined mpro-icon">category</span>
+          <i data-lucide="folder" class="mpro-icon"></i>
         </div>
       </div>
 
       <!-- Icono / Emoji -->
       <div style="margin-bottom: 2.5rem;">
-        <label class="mpro-label" for="cat-icon">Emoji o Nombre de Icono (Material Symbols)</label>
+        <label class="mpro-label" for="cat-icon">Emoji o Nombre de Icono (Lucide / Icono)</label>
         <div class="mpro-input-wrapper">
           <input
             type="text"
@@ -136,12 +140,12 @@
             name="icono"
             class="mpro-input mpro-input-with-icon"
             value="{{ categoria.icono|default:'' }}"
-            placeholder="Ej: 🔷  ó  hardware"
+            placeholder="Ej: 🔷  ó  cpu"
           >
-          <span class="material-symbols-outlined mpro-icon">token</span>
+          <i data-lucide="info" class="mpro-icon"></i>
         </div>
         <p style="font-size:1.2rem; color:#94A3B8; margin-top:0.6rem; padding-left: 0.5rem;">
-          Puedes usar un emoji directamente o un nombre de Material Symbol como <code>memory</code>, <code>storage</code>, <code>pc</code>, etc.
+          Puedes usar un emoji directamente o un nombre de icono Lucide como <code>cpu</code>, <code>database</code>, <code>hard-drive</code>, etc.
         </p>
       </div>
 
@@ -152,7 +156,7 @@
           <!-- Subir archivo -->
           <input type="file" id="cat-image-file" name="archivo_imagen" accept="image/*" style="display:none;" onchange="previewFile(this)">
           <label for="cat-image-file" class="mpro-dropzone">
-            <span class="material-symbols-outlined" style="font-size:3.6rem; color:#3B82F6; margin-bottom:0.8rem;">cloud_upload</span>
+            <i data-lucide="upload-cloud" style="width:3.6rem; height:3.6rem; color:#3B82F6; margin-bottom:0.8rem;"></i>
             <span style="font-size:1.4rem; font-weight:700; color:var(--ds-text);">Subir Imagen Local</span>
             <span style="font-size:1.2rem; color:#94A3B8; margin-top:0.4rem;">Haz click para elegir un archivo de tu PC</span>
           </label>
@@ -170,7 +174,7 @@
                 placeholder="https://ejemplo.com/foto.jpg"
                 oninput="if(!document.getElementById('cat-image-file').value){ document.getElementById('cat-preview').src = this.value || ''; }"
               >
-              <span class="material-symbols-outlined mpro-icon">link</span>
+              <i data-lucide="link" class="mpro-icon"></i>
             </div>
           </div>
 
@@ -179,7 +183,7 @@
             <span style="font-size:1.3rem; font-weight:700; color:var(--ds-text-soft);">Previsualización:</span>
             <div style="width:10rem; height:10rem; border:1px solid #E2E8F0; border-radius:1rem; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#F8FAFC; box-shadow:inset 0 2px 6px rgba(0,0,0,0.02); flex-shrink:0;">
               <img id="cat-preview" src="{{ categoria.url_imagen|default:'' }}" style="max-width:90%; max-height:90%; object-fit:contain; {% if not categoria.url_imagen %}display:none;{% endif %}" onerror="this.style.display='none'" onload="this.style.display='block'">
-              <span class="material-symbols-outlined" id="cat-preview-placeholder" style="font-size:3.6rem; color:#CBD5E1; {% if categoria.url_imagen %}display:none;{% endif %}">image</span>
+              <i data-lucide="image" id="cat-preview-placeholder" style="width:3.6rem; height:3.6rem; color:#CBD5E1; {% if categoria.url_imagen %}display:none;{% endif %}"></i>
             </div>
           </div>
         </div>
@@ -200,7 +204,7 @@
       <!-- Acciones de Guardar / Cancelar -->
       <div style="display:flex; gap:1.5rem; border-top:2px solid #F1F5F9; padding-top:2.5rem;">
         <button type="submit" class="g-btn-primary" style="padding:1.4rem 4rem; font-size:1.4rem; font-weight:800; border-radius:1.2rem; display:flex; align-items:center; gap:0.8rem; box-shadow:0 8px 25px rgba(37,99,235,0.25);">
-          <span class="material-symbols-outlined">{% if categoria %}save{% else %}add_circle{% endif %}</span>
+          <i data-lucide="{% if categoria %}save{% else %}plus-circle{% endif %}" style="width:2rem; height:2rem;"></i>
           {% if categoria %}GUARDAR CAMBIOS{% else %}CREAR CATEGORÍA{% endif %}
         </button>
         <a href="/admin-panel/categorias/" class="g-btn-secondary" style="padding:1.4rem 2.5rem; font-size:1.4rem; font-weight:700; border-radius:1.2rem;">
@@ -225,5 +229,11 @@ function previewFile(input) {
     reader.readAsDataURL(input.files[0]);
   }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+});
 </script>
 {% endblock %}

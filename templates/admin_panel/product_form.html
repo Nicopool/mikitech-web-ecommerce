@@ -7,7 +7,7 @@
   /* Contenedor principal de dos columnas */
   .mpro-layout-grid {
     display: grid;
-    grid-template-columns: 1.6fr 1fr;
+    grid-template-columns: 1.6fr 1.1fr;
     gap: 3rem;
     align-items: start;
     max-width: 1200px;
@@ -36,7 +36,7 @@
     box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -8px rgba(0, 0, 0, 0.04);
   }
 
-  /* Inputs de formulario mejorados con iconos */
+  /* Inputs de formulario mejorados con iconos Lucide */
   .mpro-input-wrapper {
     position: relative;
     display: flex;
@@ -48,8 +48,12 @@
     left: 1.4rem;
     color: #94A3B8;
     pointer-events: none;
-    font-size: 2rem;
+    width: 1.8rem;
+    height: 1.8rem;
     transition: color 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .mpro-input-with-icon {
@@ -60,25 +64,40 @@
     color: var(--ds-primary, #2563EB);
   }
 
-  /* Caja drag-and-drop */
+  /* Caja drag-and-drop y preview unificados */
   .mpro-dropzone {
     border: 2px dashed #CBD5E1;
     border-radius: 1.4rem;
     background: #F8FAFC;
     cursor: pointer;
-    min-height: 18rem;
+    min-height: 26rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    padding: 2.5rem;
     transition: all 0.25s ease;
     text-align: center;
+    position: relative;
+    overflow: hidden;
   }
 
   .mpro-dropzone:hover {
     border-color: #3B82F6;
     background: #EFF6FF;
+  }
+
+  .mpro-dropzone img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.25s ease;
+  }
+
+  .mpro-dropzone:hover img {
+    transform: scale(1.02);
   }
 
   /* Tarjeta de previsualización de descuento premium */
@@ -96,7 +115,7 @@
     color: white;
     padding: 0.3rem 0.8rem;
     border-radius: 9999px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 800;
     box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
   }
@@ -131,8 +150,8 @@
   <div>
     <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
     <div class="mpro-premium-card">
-      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem;">
-        <span class="material-symbols-outlined">inventory_2</span> Información General
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem; display: flex; align-items: center; gap: 0.8rem;">
+        <i data-lucide="package" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Información General
       </h3>
       
       <div style="display:grid; grid-template-columns:1fr; gap:2.2rem;">
@@ -141,7 +160,7 @@
           <div class="mpro-input-wrapper">
             <input type="text" id="prod-name" name="nombre" class="mpro-input mpro-input-with-icon" required
               value="{{ producto.nombre|default:'' }}" placeholder="Ej: AMD Ryzen 9 7950X — 16 Núcleos">
-            <span class="material-symbols-outlined mpro-icon">drive_file_rename_outline</span>
+            <i data-lucide="tag" class="mpro-icon"></i>
           </div>
         </div>
 
@@ -157,7 +176,7 @@
                 </option>
                 {% endfor %}
               </select>
-              <span class="material-symbols-outlined mpro-icon">category</span>
+              <i data-lucide="layers" class="mpro-icon"></i>
             </div>
           </div>
           <div>
@@ -165,7 +184,7 @@
             <div class="mpro-input-wrapper">
               <input type="text" id="prod-brand" name="marca" class="mpro-input mpro-input-with-icon"
                 value="{{ producto.marca|default:'' }}" placeholder="Ej: AMD, ASUS, Corsair...">
-              <span class="material-symbols-outlined mpro-icon">verified</span>
+              <i data-lucide="award" class="mpro-icon"></i>
             </div>
           </div>
         </div>
@@ -174,18 +193,18 @@
 
     <!-- SECCIÓN 2: PRECIOS E INVENTARIO -->
     <div class="mpro-premium-card">
-      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem;">
-        <span class="material-symbols-outlined">payments</span> Precio e Inventario
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem; display: flex; align-items: center; gap: 0.8rem;">
+        <i data-lucide="database" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Precio e Inventario
       </h3>
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:2.2rem; margin-bottom: 2rem;">
         <div>
           <label class="mpro-label" for="prod-price">Precio de Venta (COP) *</label>
           <div class="mpro-input-wrapper">
-            <span style="position:absolute; left:1.5rem; font-size:2rem; font-weight:800; color:#94A3B8;">$</span>
-            <input type="number" id="prod-price" name="precio" class="mpro-input" required min="0" step="1"
+            <input type="number" id="prod-price" name="precio" class="mpro-input mpro-input-with-icon" required min="0" step="1"
               value="{{ producto.precio|default:'0'|floatformat:0 }}"
-              style="padding-left:3.5rem; font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:800; color:var(--ds-primary);">
+              style="font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:800; color:var(--ds-primary);">
+            <i data-lucide="dollar-sign" class="mpro-icon" style="color: var(--ds-primary);"></i>
           </div>
         </div>
         <div>
@@ -193,7 +212,7 @@
           <div class="mpro-input-wrapper">
             <input type="number" id="prod-stock" name="existencias" class="mpro-input mpro-input-with-icon" required min="0"
               value="{{ producto.existencias|default:'0' }}" placeholder="Ej: 50">
-            <span class="material-symbols-outlined mpro-icon">warehouse</span>
+            <i data-lucide="box" class="mpro-icon"></i>
           </div>
         </div>
       </div>
@@ -204,7 +223,7 @@
           <input type="text" id="prod-short-desc" name="descripcion_corta" class="mpro-input mpro-input-with-icon"
             value="{{ producto.descripcion_corta|default:'' }}"
             placeholder="Resumen técnico breve visible en las tarjetas del catálogo..." maxlength="500">
-          <span class="material-symbols-outlined mpro-icon">article</span>
+          <i data-lucide="file-text" class="mpro-icon"></i>
         </div>
       </div>
     </div>
@@ -213,7 +232,7 @@
     <div class="discount-calculator-card mpro-premium-card">
       <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:2.2rem;">
         <div style="width:4.8rem; height:4.8rem; background:white; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(16,185,129,0.15); flex-shrink:0;">
-          <span class="material-symbols-outlined" style="color:#059669; font-size:2.8rem;">sell</span>
+          <i data-lucide="percent" style="color:#059669; width:2.4rem; height:2.4rem;"></i>
         </div>
         <div>
           <h3 style="font-family: 'Inter', sans-serif; font-size:1.8rem; font-weight:800; color:#047857; margin:0;">Oferta Especial y Descuentos</h3>
@@ -244,15 +263,15 @@
         <div id="preview-descuento" style="background:white; border-radius:1.4rem; padding:1.2rem; border:1px solid #A7F3D0; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:8rem; box-shadow:0 8px 20px rgba(0,0,0,0.03);">
           <div id="prev-original" style="font-size:1.2rem; color:#94A3B8; text-decoration:line-through; font-weight:600;">$0</div>
           <div id="prev-final" style="font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:900; color:#059669;">$0</div>
-          <div id="prev-desc-badge" class="badge-glow-green" style="margin-top:0.4rem;">AHORRA 0%</div>
+          <div id="prev-desc-badge" class="badge-glow-green" style="margin-top:0.4rem;">Sin descuento</div>
         </div>
       </div>
     </div>
 
     <!-- SECCIÓN 4: ESPECIFICACIONES TÉCNICAS -->
     <div class="mpro-premium-card">
-      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem;">
-        <span class="material-symbols-outlined">description</span> Especificaciones Técnicas (Detalle)
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2.2rem; display: flex; align-items: center; gap: 0.8rem;">
+        <i data-lucide="align-left" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Especificaciones Técnicas (Detalle)
       </h3>
       <textarea id="prod-desc" name="descripcion" class="mpro-input"
         style="min-height:18rem; resize:vertical; line-height:1.9;"
@@ -262,65 +281,36 @@
 
   <!-- COLUMNA DERECHA (Multimedia y Visibilidad) -->
   <div>
-    <!-- SECCIÓN 5: IMAGEN PRINCIPAL -->
+    <!-- SECCIÓN 5: IMAGEN PRINCIPAL (UNIFICADA) -->
     <div class="mpro-premium-card">
-      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2rem;">
-        <span class="material-symbols-outlined">perm_media</span> Foto Principal
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem;">
+        <i data-lucide="image" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Foto del Producto
       </h3>
 
       <div style="display:flex; flex-direction:column; gap:2rem;">
         <input type="file" id="prod-image-file" name="archivo_imagen" accept="image/*" style="display:none;" onchange="previewProductFile(this)">
-        <label for="prod-image-file" class="mpro-dropzone">
-          <span class="material-symbols-outlined" style="font-size:4rem; color:#3B82F6; margin-bottom:0.8rem;">cloud_upload</span>
-          <span style="font-size:1.4rem; font-weight:700; color:var(--ds-text);">Subir Foto Principal</span>
-          <span style="font-size:1.2rem; color:#94A3B8; margin-top:0.4rem;">Recomendado: 800×800px (WEBP/PNG)</span>
-        </label>
-
-        <!-- Preview de Imagen Principal -->
-        <div style="border:1px solid #E2E8F0; border-radius:1.4rem; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#F8FAFC; aspect-ratio: 1.2 / 1; width: 100%; box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);">
-          <img id="img-preview" src="{{ producto.url_imagen_principal|default:'' }}"
-            style="max-width:90%; max-height:90%; object-fit:contain; {% if not producto.url_imagen_principal %}display:none;{% endif %}">
-          <div id="preview-placeholder" style="display:flex; flex-direction:column; align-items:center; color:#CBD5E1; {% if producto.url_imagen_principal %}display:none;{% endif %}">
-            <span class="material-symbols-outlined" style="font-size:5rem;">image</span>
-            <span style="font-size:1.1rem; font-weight:700; margin-top:0.5rem; letter-spacing:1px;">SIN IMAGEN</span>
+        <label for="prod-image-file" class="mpro-dropzone" style="min-height: 28rem;">
+          
+          <!-- Placeholder (cuando no hay imagen) -->
+          <div id="preview-placeholder" style="display:flex; flex-direction:column; align-items:center; color:#94A3B8; {% if producto.url_imagen_principal %}display:none;{% endif %}">
+            <i data-lucide="upload-cloud" style="width: 4.8rem; height: 4.8rem; color: #3B82F6; margin-bottom: 1.2rem;"></i>
+            <span style="font-size:1.5rem; font-weight:700; color:var(--ds-text);">Subir Foto del Producto</span>
+            <span style="font-size:1.2rem; color:#94A3B8; margin-top:0.4rem;">Haz click o arrastra una imagen aquí</span>
+            <span style="font-size:1.1rem; color:#CBD5E1; margin-top:0.8rem;">Recomendado: 800×800px (WEBP/PNG)</span>
           </div>
-        </div>
+
+          <!-- Preview de Imagen -->
+          <img id="img-preview" src="{{ producto.url_imagen_principal|default:'' }}"
+            style="max-width:90%; max-height:240px; object-fit:contain; {% if not producto.url_imagen_principal %}display:none;{% endif %}">
+          
+        </label>
       </div>
     </div>
 
-    <!-- SECCIÓN 6: GALERÍA ADICIONAL -->
-    <div class="mpro-premium-card">
-      <h3 class="mpro-section-title" style="border-bottom: 2px solid #F1F5F9; padding-bottom: 1.5rem; margin-bottom: 2rem;">
-        <span class="material-symbols-outlined">add_to_photos</span> Galería Extra
-      </h3>
-
-      <input type="file" id="prod-gallery-files" name="archivos_galeria" accept="image/*" multiple style="display:none;" onchange="previewGalleryFiles(this)">
-      <label for="prod-gallery-files"
-        style="display:flex; align-items:center; justify-content:center; gap:0.8rem; padding:1.2rem; border:1.5px solid #3B82F6; border-radius:1.2rem; cursor:pointer; color:#3B82F6; font-weight:700; font-size:1.3rem; transition:all 0.25s ease; margin-bottom:2rem; background: transparent;"
-        onmouseover="this.style.background='#3B82F6'; this.style.color='white';"
-        onmouseout="this.style.background='transparent'; this.style.color='#3B82F6';">
-        <span class="material-symbols-outlined">add_photo_alternate</span> Añadir a la Galería
-      </label>
-
-      <!-- Grid de Galería -->
-      <div id="gallery-preview-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(8rem, 1fr)); gap:1.2rem;">
-        {% for extra in producto.imagenes.all %}
-        <div class="gallery-item-wrapper" data-image-id="{{ extra.id }}" style="position:relative; aspect-ratio:1/1; border:1px solid #E2E8F0; border-radius:1.2rem; overflow:hidden; background:#F8FAFC; transition: all 0.3s ease;">
-          <img src="{{ extra.url_imagen }}" style="width:100%; height:100%; object-fit:contain;">
-          <button type="button" onclick="toggleEliminarGaleria('{{ extra.id }}', this)"
-            style="position:absolute; top:0.5rem; right:0.5rem; width:2.4rem; height:2.4rem; border-radius:0.6rem; background:rgba(239,68,68,0.9); color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="Eliminar">
-            <span class="material-symbols-outlined" style="font-size:1.6rem;">close</span>
-          </button>
-        </div>
-        {% endfor %}
-      </div>
-      <div id="delete-queue" style="display:none;"></div>
-    </div>
-
-    <!-- SECCIÓN 7: VISIBILIDAD Y ESTADO -->
+    <!-- SECCIÓN 6: VISIBILIDAD Y ESTADO -->
     <div class="mpro-premium-card" style="background: #F8FAFC;">
-      <h3 class="mpro-section-title" style="border-bottom: 2px solid #E2E8F0; padding-bottom: 1.5rem; margin-bottom: 2rem;">
-        <span class="material-symbols-outlined">visibility</span> Publicación
+      <h3 class="mpro-section-title" style="border-bottom: 2px solid #E2E8F0; padding-bottom: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem;">
+        <i data-lucide="eye" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Publicación
       </h3>
 
       <div style="display:flex; flex-direction:column; gap:1.8rem;">
@@ -345,7 +335,7 @@
     <!-- ACCIONES -->
     <div style="display:flex; flex-direction:column; gap:1.2rem; margin-top:2.5rem;">
       <button type="submit" class="g-btn-primary" style="padding:1.6rem; font-size:1.5rem; font-weight:800; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; gap:0.8rem; box-shadow:0 8px 25px rgba(37,99,235,0.25);">
-        <span class="material-symbols-outlined">save</span>
+        <i data-lucide="save" style="width:2rem; height:2rem;"></i>
         {% if producto %}GUARDAR PRODUCTO{% else %}CREAR NUEVO PRODUCTO{% endif %}
       </button>
       <a href="/admin-panel/productos/" class="g-btn-secondary" style="padding:1.5rem; font-size:1.4rem; font-weight:700; border-radius:1.2rem; text-align:center;">
@@ -377,58 +367,6 @@ function previewProductFile(input) {
   }
 }
 
-function previewGalleryFiles(input) {
-  const container = document.getElementById('gallery-preview-container');
-  if (input.files) {
-    Array.from(input.files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const div = document.createElement('div');
-        div.className = 'gallery-item-wrapper';
-        div.style.cssText = 'position:relative; aspect-ratio:1/1; border:2px dashed #3B82F6; border-radius:1.2rem; overflow:hidden; background:white;';
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.cssText = 'width:100%; height:100%; object-fit:contain;';
-        const badge = document.createElement('div');
-        badge.style.cssText = 'position:absolute; bottom:0; left:0; right:0; background:#3B82F6; color:white; font-size:0.9rem; text-align:center; padding:0.2rem; font-weight:800;';
-        badge.textContent = 'NUEVO';
-        div.appendChild(img);
-        div.appendChild(badge);
-        container.appendChild(div);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-}
-
-function toggleEliminarGaleria(id, btn) {
-  const queue = document.getElementById('delete-queue');
-  const inputExistente = queue.querySelector(`input[value="${id}"]`);
-  const wrapper = btn.closest('.gallery-item-wrapper');
-
-  if (inputExistente) {
-    // Si ya estaba en cola para borrar, restaurarla
-    inputExistente.remove();
-    wrapper.style.opacity = '1';
-    wrapper.style.filter = 'none';
-    btn.style.background = 'rgba(239,68,68,0.9)';
-    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.6rem;">close</span>';
-    btn.title = "Eliminar";
-  } else {
-    // Si no estaba, agregarla a la cola y cambiar interfaz
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'eliminar_imagenes';
-    input.value = id;
-    queue.appendChild(input);
-    wrapper.style.opacity = '0.3';
-    wrapper.style.filter = 'grayscale(1)';
-    btn.style.background = '#475569';
-    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.6rem;">settings_backup_restore</span>';
-    btn.title = "Restaurar";
-  }
-}
-
 function actualizarPrevistaDescuento() {
   const pct = parseInt(document.getElementById('desc-porcentaje').value) || 0;
   const precio = parseFloat(document.getElementById('prod-price').value) || 0;
@@ -439,11 +377,13 @@ function actualizarPrevistaDescuento() {
     document.getElementById('prev-original').textContent = formatColombianPrice(precio);
     document.getElementById('prev-final').textContent = formatColombianPrice(finalPrice);
     document.getElementById('prev-desc-badge').textContent = 'AHORRA ' + pct + '%';
+    document.getElementById('prev-desc-badge').className = 'badge-glow-green';
   } else {
     preview.style.display = 'flex';
     document.getElementById('prev-original').textContent = '';
     document.getElementById('prev-final').textContent = precio > 0 ? formatColombianPrice(precio) : '$0';
     document.getElementById('prev-desc-badge').textContent = 'Sin descuento';
+    document.getElementById('prev-desc-badge').className = '';
   }
 }
 
@@ -451,6 +391,11 @@ document.addEventListener('DOMContentLoaded', function() {
   actualizarPrevistaDescuento();
   const priceInput = document.getElementById('prod-price');
   if (priceInput) priceInput.addEventListener('input', actualizarPrevistaDescuento);
+  
+  // Re-inicializar Lucide Icons
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
 });
 </script>
 {% endblock %}
