@@ -790,6 +790,9 @@ def cambiar_estado_pedido(petición, id_pedido):
                     
             estado_anterior = pedido.estado
             pedido.estado = status_to_save
+            if status_to_save == 'delivered':
+                from django.utils import timezone
+                pedido.entregado_el = timezone.now()
             pedido.save()
             
             # Notificaciones Automáticas según el estado

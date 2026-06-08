@@ -89,10 +89,21 @@
   .btn-pdf { background:linear-gradient(135deg, #1D4ED8, #7C3AED); color:white; border:none; padding:1.2rem 2rem; border-radius:1rem; font-size:1.3rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.8rem; transition:opacity 0.2s; width:100%; justify-content:center; }
   .btn-pdf:hover { opacity:0.9; }
 
-  .toast-container { position:fixed; bottom:2.5rem; right:2.5rem; z-index:9999; }
-  .custom-toast { background:var(--ds-primary); color:white; padding:1.5rem 2.5rem; border-radius:1.2rem; font-size:1.4rem; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.15); transform:translateY(6rem); opacity:0; transition:all 0.4s cubic-bezier(0.16,1,0.3,1); }
-  .custom-toast.show { transform:translateY(0); opacity:1; }
+    .toast-container { position:fixed; bottom:2.5rem; right:2.5rem; z-index:9999; }
+    .custom-toast { background:var(--ds-primary); color:white; padding:1.5rem 2.5rem; border-radius:1.2rem; font-size:1.4rem; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.15); transform:translateY(6rem); opacity:0; transition:all 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .custom-toast.show { transform:translateY(0); opacity:1; }
 
+    /* ── BADGES & ROW OVERRIDES ── */
+    .badge-status { display:inline-flex; align-items:center; gap:0.6rem; padding:0.5rem 1.2rem; border-radius:2rem; font-size:1.15rem; font-weight:600; font-family:'Inter', sans-serif; text-transform: capitalize; }
+    .status-completed { background:#DCFCE7; color:#16A34A; }
+    .status-shipped { background:#DBEAFE; color:#1D4ED8; }
+    .status-pending { background:#FEF3C7; color:#D97706; }
+    .status-cancelled { background:#FEE2E2; color:#DC2626; }
+
+    .miki-table th { padding: 1.8rem 2rem !important; font-size: 1.15rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ds-text-soft); }
+    .miki-table td { padding: 1.8rem 2rem !important; vertical-align: middle; }
+    .miki-table tbody tr.row-delivered { background-color: #F0FDF4 !important; }
+    .miki-table tbody tr.row-delivered:hover { background-color: #DCFCE7 !important; }
   </style>
 
 </head>
@@ -198,22 +209,46 @@
 
             <tbody>
               {% for order in orders %}
-              <tr data-date="{{ order.creado_el|date:'Y-m-d' }}" style="transition:background 0.2s;">
-                <td class="fw-bold" style="color:var(--ds-primary); padding:1.5rem 2rem;">#{{ order.id|stringformat:"s"|upper|truncatechars:12 }}</td>
+              <tr data-date="{{ order.creado_el|date:'Y-m-d' }}" class="{% if order.estado == 'delivered' %}row-delivered{% endif %}" style="transition:all 0.2s;">
+                <td class="fw-bold" style="color:var(--ds-primary); padding:1.5rem 2rem;">#{{ order.id|stringformat:"s"|upper|slice:":8" }}...</td>
                 <td>
-                  {% if order.estado == 'delivered' %}<span class="badge-status status-completed" style="font-size:1rem;">Entregado</span>
-                  {% elif order.estado == 'shipped' %}<span class="badge-status status-shipped" style="font-size:1rem;">En camino</span>
-                  {% elif order.estado == 'pending' or order.estado == 'processing' %}<span class="badge-status status-pending" style="font-size:1rem;">Pendiente</span>
-                  {% else %}<span class="badge-status status-pending">{{ order.estado }}</span>{% endif %}
+                  {% if order.estado == 'delivered' %}
+                  <span class="badge-status status-completed font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Entregado
+                  </span>
+                  {% elif order.estado == 'shipped' %}
+                  <span class="badge-status status-shipped font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> En Camino
+                  </span>
+                  {% elif order.estado == 'pending' or order.estado == 'processing' %}
+                  <span class="badge-status status-pending font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Pendiente
+                  </span>
+                  {% elif order.estado == 'cancelled' %}
+                  <span class="badge-status status-cancelled font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span> Cancelado
+                  </span>
+                  {% else %}
+                  <span class="badge-status status-pending font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> {{ order.estado|title }}
+                  </span>
+                  {% endif %}
                 </td>
 
                 <td style="color:var(--ds-text-soft); font-weight:500;">{{ order.creado_el|date:"d M Y" }}</td>
                 <td class="fw-bold" style="font-size:1.5rem;">{{ order.monto_total|currency_cop }}</td>
                 <td class="text-center">
+                  {% if order.estado == 'delivered' %}
+                  <button class="btn btn-sm" style="background:#ECFDF5; color:#047857; font-weight:700; border:1px solid #10B981; border-radius:0.8rem; padding:0.6rem 1.2rem; display:inline-flex; align-items:center; gap:0.5rem;" 
+                    onclick="generateInvoice('{{ order.id|stringformat:'s' }}', '{{ order.creado_el|date:'d/m/Y' }}', '{{ order.monto_total }}', [ {% for det in order.detalles.all %}{ 'nombre': '{{ det.producto.nombre|escapejs }}', 'cantidad': {{ det.cantidad }}, 'precio': {{ det.precio_unitario }} }{% if not forloop.last %},{% endif %}{% endfor %} ])">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Factura PDF
+                  </button>
+                  {% else %}
                   <button class="btn btn-sm" style="background:var(--ds-primary-light); color:var(--ds-primary); font-weight:700; border:1px solid var(--ds-primary); border-radius:0.8rem; padding:0.6rem 1.2rem; display:inline-flex; align-items:center; gap:0.5rem;" 
                     onclick="generateInvoice('{{ order.id|stringformat:'s' }}', '{{ order.creado_el|date:'d/m/Y' }}', '{{ order.monto_total }}', [ {% for det in order.detalles.all %}{ 'nombre': '{{ det.producto.nombre|escapejs }}', 'cantidad': {{ det.cantidad }}, 'precio': {{ det.precio_unitario }} }{% if not forloop.last %},{% endif %}{% endfor %} ])">
-                    <span style="font-size:1.4rem;">📄</span> Factura PDF
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Factura PDF
                   </button>
+                  {% endif %}
                 </td>
               </tr>
               {% empty %}
@@ -231,8 +266,8 @@
       </div>
     </div>
 
-    <!-- PREVIEW GENERADO -->
-    <div id="pdf-preview" style="display:none; margin-top:3rem;">
+    <!-- PREVIEW GENERADO (Renders off-screen for auto-download capture) -->
+    <div id="pdf-preview" style="position: absolute; left: -9999px; top: -9999px; width: 800px;">
       <div class="card" style="border-radius:1.6rem; border:1px solid var(--ds-border); background:var(--ds-surface);">
         <div class="card-header" style="background:var(--ds-surface); border-bottom:1px solid var(--ds-border); padding:2rem 2.5rem; font-size:1.6rem; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
           <span id="pdf-preview-title">Vista Previa del Reporte</span>
@@ -318,13 +353,21 @@ function generatePDF(type) {
   var data = reportsData[type];
   if (!data) return;
 
-  var preview = document.getElementById('pdf-preview');
   var content = document.getElementById('pdf-content');
   var titleEl = document.getElementById('pdf-preview-title');
 
-  preview.style.display = 'block';
   if (titleEl) titleEl.textContent = data.title;
   content.innerHTML = '';
+
+  // Show SweetAlert spinner
+  Swal.fire({
+    title: 'Generando Reporte...',
+    html: 'Por favor espera un momento mientras creamos el PDF.',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
 
   var headerDiv = document.createElement('div');
   headerDiv.style.cssText = 'border-bottom:2px solid #E2E8F0; margin-bottom:2rem; padding-bottom:2rem; display:flex; justify-content:space-between; align-items:center;';
@@ -347,7 +390,6 @@ function generatePDF(type) {
   content.appendChild(titleH);
 
   if (type === 'actividad') {
-    // TABLA TIPO CRUD PARA ACTIVIDAD
     var tbl = document.createElement('table');
     tbl.style.cssText = 'width:100%; border-collapse:collapse; margin-top:20px;';
     var thead = '<thead style="background:#F9FBFF; border-bottom:2px solid #EEE;"><tr>';
@@ -358,7 +400,6 @@ function generatePDF(type) {
     tbl.innerHTML = thead;
     
     var tbody = document.createElement('tbody');
-    // Combinar reseñas y votos en una sola lista para la tabla
     var all_items = [];
     {% for r in reviews %}
       all_items.push({ type:'Reseña', product:'{{ r.product.name|escapejs }}', detail:'{{ r.rating }} ⭐', date:'{{ r.created_at|date:"d/m/Y" }}' });
@@ -413,33 +454,36 @@ function generatePDF(type) {
     content.innerHTML = '<p style="color:#64748B; font-style:italic; font-size:1.4rem; padding:2rem; background:#F8FAFC; border-radius:1rem; border:1px solid #E2E8F0;">'+data.note+'</p>';
   }
 
-  preview.scrollIntoView({ behavior: 'smooth' });
-  generateReport();
+  // Trigger download immediately
+  setTimeout(downloadPDF, 500);
 }
 
 function showInvoiceToast(msg) {
   showToast(msg.replace('✅', '[OK]'));
 }
 
-function generateReport() {
-  showInvoiceToast('[OK] Reporte listo — usa el botón Imprimir para guardarlo como PDF');
-}
-
 function generateInvoice(orderId, orderDate, orderTotal, items) {
-  var preview = document.getElementById('pdf-preview');
   var content = document.getElementById('pdf-content');
   var titleEl = document.getElementById('pdf-preview-title');
 
-  preview.style.display = 'block';
   if (titleEl) titleEl.textContent = 'Factura Comercial - Pedido #' + orderId.substring(0,8).toUpperCase();
   
+  // Show SweetAlert spinner
+  Swal.fire({
+    title: 'Generando Factura...',
+    html: 'Preparando tu factura para descarga automática.',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
   const amount = parseFloat(orderTotal.toString().replace(',', '.'));
   var tax = amount * 0.19;
   var subtotal = amount - tax;
 
   var fmt = new Intl.NumberFormat('es-CO');
 
-  // Construir filas de la tabla - ESTILO CRUD
   let itemsHtml = '';
   items.forEach((item, index) => {
     let itemTotal = item.cantidad * item.precio;
@@ -456,9 +500,8 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
 
   var html = `
     <div style="font-family: 'Inter', sans-serif; background:white; color:#333; padding: 30px; border: 1px solid #EEE;">
-      <!-- CABECERA: LOGO A LA DERECHA -->
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 40px; border-bottom: 2px solid #1D4ED8; padding-bottom: 20px;">
-        <div style="flex:1;">
+        <div style="flex:1; text-align:left;">
           <h1 style="font-size: 36px; font-weight:800; color: #111; margin:0; font-family: 'Inter', sans-serif;">FACTURA</h1>
           <div style="margin-top:20px;">
             <div style="font-size:13px; color:#666; font-weight:600;">FECHA DE EMISIÓN:</div>
@@ -469,19 +512,17 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
         </div>
         
         <div style="text-align: right;">
-          <img src="/static/img/logo.png" alt="MIKITECH" style="height: 60px; margin-bottom: 10px;">
           <div style="font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 700; color: #1D4ED8; letter-spacing: 2px;">MIKITECH</div>
           <div style="font-size: 12px; color: #64748B;">Hardware de Alto Rendimiento</div>
         </div>
       </div>
 
-      <!-- DATOS DEL CLIENTE -->
       <div style="display:flex; justify-content:space-between; margin-bottom: 40px;">
-        <div style="flex:1;">
+        <div style="flex:1; text-align:left;">
           <div style="font-size: 13px; font-weight:700; color:#666; margin-bottom:8px; text-transform:uppercase;">Facturar a:</div>
           <div style="font-size: 18px; font-weight:800; color:#1D4ED8; margin-bottom:5px;">${profileData.name}</div>
-          <div style="font-size: 13px; color:#444; font-weight:500;">Email: {{ profile.email }}</div>
-          <div style="font-size: 13px; color:#444; font-weight:500;">Tel: {% if profile.phone %}{{ profile.phone }}{% else %}+57 300 000 0000{% endif %}</div>
+          <div style="font-size: 13px; color:#444; font-weight:500;">Email: {{ perfil.nombre_usuario }}@mikitech.com</div>
+          <div style="font-size: 13px; color:#444; font-weight:500;">Tel: {% if perfil.telefono %}{{ perfil.telefono }}{% else %}+57 300 000 0000{% endif %}</div>
         </div>
         <div style="text-align:right; flex:1;">
            <div style="font-size: 13px; font-weight:700; color:#666; margin-bottom:8px; text-transform:uppercase;">Información adicional:</div>
@@ -490,7 +531,6 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
         </div>
       </div>
 
-      <!-- TABLA DE ITEMS (ESTILO CRUD) -->
       <table style="width:100%; border-collapse: collapse; margin-bottom: 30px;">
         <thead>
           <tr style="background:#1D4ED8; color:white;">
@@ -506,9 +546,8 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
         </tbody>
       </table>
 
-      <!-- TOTALES -->
       <div style="display:flex; justify-content:flex-end;">
-        <div style="width: 280px; background:#F8FAFC; padding:20px; border-radius:12px; border:1px solid #E2E8F0;">
+        <div style="width: 280px; background:#F8FAFC; padding:20px; border-radius:12px; border:1px solid #E2E8F0; text-align:left;">
           <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px; color:#64748B; font-weight:500;">
             <span>Subtotal:</span>
             <span>$${fmt.format(subtotal)}</span>
@@ -528,7 +567,6 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
         </div>
       </div>
 
-      <!-- FOOTER -->
       <div style="margin-top: 50px; text-align:center; border-top:1px solid #EEE; padding-top:20px;">
         <div style="font-size:11px; color:#94A3B8; font-weight:500;">
           Gracias por tu compra en MIKITECH. Garantía de 1 año en componentes.<br>
@@ -539,19 +577,15 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
     </div>
   `;
   content.innerHTML = html;
-  preview.scrollIntoView({ behavior: 'smooth' });
-  showInvoiceToast('[OK] Factura PDF generada — usa el botón Imprimir para guardarla');
+
+  // Trigger download immediately after DOM updates
+  setTimeout(downloadPDF, 500);
 }
 
 function downloadPDF() {
-  const btn = document.getElementById('btn-download-pdf');
   const content = document.getElementById('pdf-content');
   const titleEl = document.getElementById('pdf-preview-title');
   const fileName = (titleEl ? titleEl.textContent.trim().replace(/[^a-z0-9]/gi,'_').toLowerCase() : 'reporte_mikitech') + '.pdf';
-
-  // Deshabilitar botón mientras genera
-  btn.disabled = true;
-  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.8rem; animation:spin 1s linear infinite">refresh</span> Generando...';
 
   html2canvas(content, {
     scale: 2,
@@ -565,7 +599,6 @@ function downloadPDF() {
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    // Si el contenido excede una página, agregar páginas extra
     const pageHeight = pdf.internal.pageSize.getHeight();
     let heightLeft = pdfHeight;
     let position = 0;
@@ -581,18 +614,28 @@ function downloadPDF() {
     }
 
     pdf.save(fileName);
+    Swal.close();
 
-    // Restaurar botón
-    btn.disabled = false;
-    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.8rem;">download</span> Descargar PDF';
-    Swal.fire({ toast:true, position:'top-end', showConfirmButton:false, timer:3000,
-      timerProgressBar:true, background:'#111', color:'#fff', icon:'success',
-      title: '\u2705 PDF descargado correctamente' });
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      background: '#DCFCE7',
+      color: '#15803D',
+      icon: 'success',
+      title: '✅ Reporte PDF descargado correctamente'
+    });
   }).catch(function(err) {
     console.error('Error al generar PDF:', err);
-    btn.disabled = false;
-    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.8rem;">download</span> Descargar PDF';
-    Swal.fire({ icon:'error', title:'Error al generar PDF', text:'Intenta de nuevo.', background:'#fff' });
+    Swal.close();
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al generar PDF',
+      text: 'Intenta de nuevo.',
+      background: '#fff'
+    });
   });
 }
 
@@ -600,12 +643,32 @@ function toggleSidebar() {
   document.body.classList.toggle('sidebar-open');
 }
 
-// Lógica para filtrar por fecha la tabla de pedidos
 document.addEventListener('DOMContentLoaded', function() {
+  // Lógica para notificaciones flotantes toast al recargar/cargar la página
+  const recentDeliveries = {{ recent_deliveries|safe|default:"[]" }};
+  if (recentDeliveries && recentDeliveries.length > 0) {
+    recentDeliveries.forEach(function(delivery, index) {
+      setTimeout(() => {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 5000,
+          timerProgressBar: true,
+          background: '#DCFCE7',
+          color: '#15803D',
+          icon: 'success',
+          title: `El pedido #${delivery.id_corto}... ha sido marcado como entregado`
+        });
+      }, index * 800);
+    });
+  }
+
+  // Lógica para filtrar por fecha la tabla de pedidos
   var dateFilter = document.getElementById('dateFilter');
   if(dateFilter) {
     dateFilter.addEventListener('change', function() {
-      var selectedDate = this.value; // YYYY-MM-DD
+      var selectedDate = this.value;
       var rows = document.querySelectorAll('#reports-orders-table tbody tr[data-date]');
       
       rows.forEach(function(row) {

@@ -426,6 +426,27 @@ def mis_reportes(petición):
     # Usar ORM con prefetch para tener los productos listos para la factura PDF
     pedidos = Pedido.objects.filter(usuario=perfil).prefetch_related('detalles__producto').order_by('-creado_el')
 
+    # Pedidos entregados en las últimas 24 horas para lanzar notificaciones toast
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Q
+    hace_24h = timezone.now() - timedelta(hours=24)
+    pedidos_entregados_recientes = pedidos.filter(
+        estado='delivered'
+    ).filter(
+        Q(entregado_el__gte=hace_24h) | Q(entregado_el__isnull=True, actualizado_el__gte=hace_24h)
+    )
+    
+    recientes_list = [
+        {
+            'id': str(p.id),
+            'id_corto': str(p.id)[:8].upper()
+        }
+        for p in pedidos_entregados_recientes
+    ]
+
+    import json
+
     return render(petición, 'users/reports.html', {
         'perfil': perfil,
         'titulo_pagina': 'Mis Reportes — MIKITECH',
@@ -434,6 +455,7 @@ def mis_reportes(petición):
         'resenas': reseñas,
         'orders': pedidos,
         'conteo_pedidos': pedidos.count(),
+        'recent_deliveries': json.dumps(recientes_list),
     })
 
 
