@@ -92,57 +92,44 @@
       </button>
     </div>
 
-    <!-- Interactive Filters Bar -->
-    <div class="flex items-center gap-4 flex-wrap w-full box-border">
-      <!-- Search Input -->
-      <div class="flex items-center gap-2 flex-1 min-width-[260px] bg-slate-50 border border-slate-200 rounded-xl px-4 transition-all duration-200"
-           onfocusin="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF'; this.style.boxShadow='0 0 0 3px rgba(29, 78, 216, 0.08)';"
-           onfocusout="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC'; this.style.boxShadow='none';">
-        <i data-lucide="search" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
-        <input type="text" id="orderSearch" placeholder="Buscar por referencia, cliente, ID..." class="border-none outline-none text-sm font-sans text-slate-900 w-full py-3 bg-transparent">
+    <!-- Sticky Interactive Filters Bar -->
+    <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-md py-4 border-b border-slate-200 -mx-6 px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 w-auto box-border transition-all duration-200">
+      <!-- Left side: Status chips -->
+      <div class="flex items-center gap-2 flex-wrap" id="statusChipsContainer">
+        <span class="text-xs font-bold text-slate-450 uppercase tracking-wider mr-2">Estado:</span>
+        <button type="button" data-value="all" class="status-chip active py-1.5 px-3.5 rounded-full text-xs font-bold transition duration-200 bg-techaccent text-white border-none cursor-pointer">
+          Todos
+        </button>
+        <button type="button" data-value="PENDIENTE" class="status-chip py-1.5 px-3.5 rounded-full text-xs font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span> Pendiente
+        </button>
+        <button type="button" data-value="EN CAMINO" class="status-chip py-1.5 px-3.5 rounded-full text-xs font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span> En Camino
+        </button>
+        <button type="button" data-value="ENTREGADO" class="status-chip py-1.5 px-3.5 rounded-full text-xs font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Entregado
+        </button>
+        <button type="button" data-value="CANCELADO" class="status-chip py-1.5 px-3.5 rounded-full text-xs font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-red-500"></span> Cancelado
+        </button>
       </div>
 
-      <!-- Status Filter -->
-      <div class="relative min-w-[160px] flex-initial">
-        <select id="statusFilter" class="w-full py-3 pl-4 pr-9 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer font-medium appearance-none transition-all duration-200"
-                onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
-                onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
-          <option value="all">Todos los estados</option>
-          <option value="PENDIENTE">🟡 Pendiente</option>
-          <option value="EN CAMINO">🔵 En Camino</option>
-          <option value="ENTREGADO">🟢 Entregado</option>
-          <option value="CANCELADO">🔴 Cancelado</option>
-        </select>
-        <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
-      </div>
-
-      <!-- Payment Filter -->
-      <div class="relative min-w-[180px] flex-initial">
-        <select id="paymentFilter" class="w-full py-3 pl-4 pr-9 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer font-medium appearance-none transition-all duration-200"
-                onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
-                onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
-          <option value="all">Todos los métodos de pago</option>
-          <option value="TARJETA">Tarjeta de Crédito</option>
-          <option value="EFECTIVO">Efectivo / Contraentrega</option>
-          <option value="TRANSFERENCIA">Transferencia Bancaria</option>
-        </select>
-        <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
-      </div>
-
-      <!-- Date Range -->
-      <div class="flex items-center gap-2 flex-wrap flex-initial min-w-[280px]">
-        <div class="relative flex-1 min-w-[120px]">
-          <input type="date" id="startDateFilter" title="Desde" class="w-full py-3 pl-9 pr-3 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer transition-all duration-200"
-                 onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
-                 onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
-          <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+      <!-- Right side: Search & Period Dropdown -->
+      <div class="flex items-center gap-3 flex-wrap md:flex-nowrap">
+        <!-- Period Dropdown -->
+        <div class="relative min-w-[140px]">
+          <select id="periodFilter" class="w-full py-2.5 pl-4 pr-9 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-slate-800 outline-none cursor-pointer appearance-none transition-all duration-200 hover:bg-slate-100">
+            <option value="all">🕒 Histórico</option>
+            <option value="today">☀️ Hoy</option>
+            <option value="yesterday">⛅ Ayer</option>
+          </select>
+          <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
         </div>
-        <span class="text-sm text-slate-400 font-semibold">→</span>
-        <div class="relative flex-1 min-w-[120px]">
-          <input type="date" id="endDateFilter" title="Hasta" class="w-full py-3 pl-9 pr-3 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer transition-all duration-200"
-                 onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
-                 onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
-          <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+
+        <!-- Search Input -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 w-64 transition-all duration-200 focus-within:border-techaccent focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i>
+          <input type="text" id="orderSearch" placeholder="Buscar..." class="border-none outline-none text-xs font-semibold text-slate-900 w-full py-2 bg-transparent">
         </div>
       </div>
     </div>
@@ -153,11 +140,11 @@
         <table class="w-full border-collapse text-left" id="ordersTableActive">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200">
-              <th onclick="sortTable(0, 'ordersTableActive')" class="w-[20%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
-                <div class="flex items-center gap-1.5">ID <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
+              <th onclick="sortTable(0, 'ordersTableActive')" class="w-[35%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
+                <div class="flex items-center gap-1.5">ID / Cliente <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
               </th>
-              <th class="w-[45%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">CLIENTE</th>
-              <th class="w-[20%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ESTADO</th>
+              <th class="w-[25%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">ESTADO</th>
+              <th class="w-[25%] hidden md:table-cell uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">FECHA</th>
               <th class="w-[15%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ACCIONES</th>
             </tr>
           </thead>
@@ -169,36 +156,47 @@
                 data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
                 data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
                 data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
-
-              <!-- ID / FECHA -->
+              
+              <!-- ID / CLIENTE -->
               <td class="py-4 px-5">
-                <span class="block font-mono font-extrabold text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
-                <span class="block text-[11px] text-slate-400 font-medium mt-1">{{ pedido.creado_el|fecha_relativa }}</span>
-              </td>
-
-              <!-- CLIENTE -->
-              <td class="py-4 px-5">
-                <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
-                <span class="block text-[12px] text-slate-500 mt-1 font-medium">{{ pedido.monto_total|currency_cop }} &middot; {{ pedido.telefono|default:"Sin Teléfono" }}</span>
+                <div class="flex flex-col">
+                  <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-mono font-extrabold text-[11px] text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
+                    <span class="md:hidden text-[11px] text-slate-400 font-medium">&middot; {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}</span>
+                  </div>
+                  <span class="block text-[11px] text-slate-500 mt-1 font-semibold">{{ pedido.monto_total|currency_cop }}</span>
+                </div>
               </td>
 
               <!-- ESTADO -->
-              <td class="text-center whitespace-nowrap py-4 px-5">
+              <td class="py-4 px-5 align-middle">
                 {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}
-                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-200">PREPARADO</span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-amber-50 text-amber-800 border border-amber-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    Pendiente
+                  </span>
                 {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
-                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-blue-100 text-blue-800 border border-blue-200">EN CAMINO</span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-blue-50 text-blue-800 border border-blue-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                    En camino
+                  </span>
                 {% endif %}
               </td>
 
+              <!-- FECHA (Oculta en celular) -->
+              <td class="py-4 px-5 hidden md:table-cell text-slate-600 font-semibold text-xs align-middle">
+                {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}
+              </td>
+
               <!-- ACCIONES -->
-              <td class="py-4 px-5">
+              <td class="py-4 px-5 align-middle">
                 <div class="flex justify-center items-center gap-2">
                   <!-- Cambiar estado a Enviado (En camino) -->
                   {% if pedido.estado == 'pending' or pedido.estado == 'processing' %}
                     <button onclick="updateStatus('{{ pedido.id }}', 'Enviado')"
                             title="Despachar pedido (En Camino)"
-                            class="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold text-white bg-techaccent hover:bg-blue-800 transition shadow-sm border-none cursor-pointer">
+                            class="inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-lg text-xs font-bold text-white bg-techaccent hover:bg-blue-800 transition shadow-sm border-none cursor-pointer">
                       <i data-lucide="truck" class="w-3.5 h-3.5"></i> Despachar
                     </button>
                   {% endif %}
@@ -206,7 +204,7 @@
                   {% if pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
                     <button onclick="openConfirmDeliveryModal('{{ pedido.id }}')"
                             title="Confirmar Entrega con Cédula"
-                            class="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold text-white bg-techgreen hover:bg-emerald-800 transition shadow-sm border-none cursor-pointer">
+                            class="inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-lg text-xs font-bold text-white bg-techgreen hover:bg-emerald-800 transition shadow-sm border-none cursor-pointer">
                       <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Entregar
                     </button>
                   {% endif %}
@@ -238,20 +236,17 @@
             Siguiente →
           </button>
         </div>
-      </div>
-    </div>
-
-    <!-- TABLE 2: COMPLETED HISTORICAL ORDERS -->
+     <!-- TABLE 2: COMPLETED HISTORICAL ORDERS -->
     <div id="completedTableContainer" class="hidden flex flex-col gap-5 w-full">
       <div class="overflow-x-auto w-full rounded-xl border border-slate-200 box-border">
         <table class="w-full border-collapse text-left" id="ordersTableCompleted">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200">
-              <th onclick="sortTable(0, 'ordersTableCompleted')" class="w-[20%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
-                <div class="flex items-center gap-1.5">ID <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
+              <th onclick="sortTable(0, 'ordersTableCompleted')" class="w-[35%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
+                <div class="flex items-center gap-1.5">ID / Cliente <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
               </th>
-              <th class="w-[45%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">CLIENTE</th>
-              <th class="w-[20%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ESTADO</th>
+              <th class="w-[25%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">ESTADO</th>
+              <th class="w-[25%] hidden md:table-cell uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">FECHA</th>
               <th class="w-[15%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ACCIONES</th>
             </tr>
           </thead>
@@ -260,38 +255,49 @@
             {% if pedido.estado != 'pending' and pedido.estado != 'Pendiente' and pedido.estado != 'processing' and pedido.estado != 'shipped' and pedido.estado != 'Enviado' %}
             <tr class="table-row-data completed-row-data border-b border-slate-200"
                 data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
-                data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
+                data-payment="{% if 'tarjeta' in pedido.notes|lower %}TARJETA{% elif 'efectivo' in pedido.notes|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
                 data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
                 data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
 
-              <!-- ID / FECHA -->
+              <!-- ID / CLIENTE -->
               <td class="py-4 px-5">
-                <span class="block font-mono font-extrabold text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
-                <span class="block text-[11px] text-slate-400 font-medium mt-1">{{ pedido.creado_el|fecha_relativa }}</span>
-              </td>
-
-              <!-- CLIENTE -->
-              <td class="py-4 px-5">
-                <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
-                <span class="block text-[12px] text-slate-500 mt-1 font-medium">{{ pedido.monto_total|currency_cop }} &middot; {{ pedido.telefono|default:"Sin Teléfono" }}</span>
+                <div class="flex flex-col">
+                  <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-mono font-extrabold text-[11px] text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
+                    <span class="md:hidden text-[11px] text-slate-400 font-medium">&middot; {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}</span>
+                  </div>
+                  <span class="block text-[11px] text-slate-500 mt-1 font-semibold">{{ pedido.monto_total|currency_cop }}</span>
+                </div>
               </td>
 
               <!-- ESTADO -->
-              <td class="text-center whitespace-nowrap py-4 px-5">
+              <td class="py-4 px-5 align-middle">
                 {% if pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
-                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">ENTREGADO</span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    Entregado
+                  </span>
                 {% else %}
-                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-red-100 text-red-800 border border-red-200">CANCELADO</span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-red-50 text-red-800 border border-red-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                    Cancelado
+                  </span>
                 {% endif %}
               </td>
 
+              <!-- FECHA (Oculta en celular) -->
+              <td class="py-4 px-5 hidden md:table-cell text-slate-600 font-semibold text-xs align-middle">
+                {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}
+              </td>
+
               <!-- ACCIONES -->
-              <td class="py-4 px-5">
+              <td class="py-4 px-5 align-middle text-center">
                 <div class="flex justify-center items-center gap-1.5">
                   <!-- Ver Factura -->
                   <a href="{% url 'admin_order_invoice' pedido.id %}" target="_blank"
                      title="Ver factura completa"
-                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-techaccent hover:bg-blue-50 transition-colors">
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-techaccent hover:bg-blue-50 transition-colors border-none cursor-pointer">
                     <i data-lucide="eye" class="w-4 h-4"></i>
                   </a>
                 </div>
@@ -320,35 +326,35 @@
           <button id="nextCompletedBtn" disabled
             class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
             Siguiente →
-          </button>
         </div>
       </div>
     </div>
-
   </div>
-
 </div>
 
 <!-- CONFIRM DELIVERY MODAL -->
 <div id="confirmDeliveryModal" class="hidden fixed inset-0 w-full h-full bg-slate-900/60 z-[999] backdrop-blur-sm items-center justify-center" style="display: none;">
-  <div class="bg-white rounded-2xl w-full max-w-[400px] p-8 shadow-2xl animate-slide-up" style="animation: slideUp 0.3s ease;">
-    <h3 class="text-lg font-extrabold text-slate-900 mb-2 flex items-center gap-2">
-      <i data-lucide="shield-check" class="text-techgreen w-5 h-5"></i> Confirmar Entrega
+  <div class="bg-white rounded-3xl w-full max-w-[400px] p-8 shadow-2xl animate-slide-up border-0" style="animation: slideUp 0.3s ease;">
+    <!-- Circular check icon to match premium style -->
+    <div style="width: 56px; height: 56px; border-radius: 50%; background: #D1FAE5; display: flex; align-items: center; justify-content: center; color: #059669; margin: 0 auto 16px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg>
+    </div>
+    
+    <h3 class="text-xl font-extrabold text-slate-900 text-center mb-2">
+      Confirmar Entrega
     </h3>
-    <p class="text-slate-500 text-xs mb-6">Por seguridad, solicita el número de cédula del cliente para confirmar la entrega del pedido <span id="deliveryOrderIdLabel" class="font-mono font-bold text-techaccent"></span></p>
+    <p class="text-slate-500 text-center text-xs mb-6 font-medium">Por seguridad, solicita el número de cédula del cliente para entregar el pedido <span id="deliveryOrderIdLabel" class="font-mono font-bold text-techaccent"></span></p>
 
     <form id="confirmDeliveryForm" method="post" action="">
       {% csrf_token %}
       <input type="hidden" name="nuevo_estado" value="Entregado">
       <div class="mb-6">
-        <label class="block text-xs font-bold mb-2 text-slate-600 uppercase tracking-wider">Cédula del Cliente</label>
-        <input type="text" name="cedula_cliente" required placeholder="Ingresa la cédula sin puntos" class="w-full p-3 rounded-lg border border-slate-200 outline-none text-sm bg-slate-50 text-slate-900 transition-colors focus:border-techaccent focus:bg-white">
+        <label class="block text-center text-xs font-bold mb-2 text-slate-500 uppercase tracking-wider">Cédula del Cliente</label>
+        <input type="text" name="cedula_cliente" required placeholder="Ingresa la cédula sin puntos" class="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm bg-slate-50 text-slate-900 text-center transition-colors focus:border-techaccent focus:bg-white focus:ring-4 focus:ring-blue-100 font-sans font-bold">
       </div>
-      <div class="flex gap-3 justify-end">
-        <button type="button" onclick="closeConfirmDeliveryModal()" class="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition duration-150 border-none cursor-pointer">Cancelar</button>
-        <button type="submit" class="py-2 px-4 bg-techgreen hover:bg-emerald-800 text-white font-bold rounded-lg text-xs transition duration-150 shadow-md flex items-center gap-1 border-none cursor-pointer">
-          <i data-lucide="check" class="w-3.5 h-3.5"></i> Confirmar
-        </button>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeConfirmDeliveryModal()" class="flex-grow w-1/2 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition border-none cursor-pointer">Cancelar</button>
+        <button type="submit" class="flex-grow w-1/2 py-2.5 px-4 bg-techgreen hover:bg-emerald-800 text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-1 border-none cursor-pointer">Confirmar</button>
       </div>
     </form>
   </div>
@@ -358,13 +364,18 @@
 
 {% block extra_js %}
 <script>
+  let selectedStatusVal = 'all';
+  let activeFilteredRows = [];
+  let completedFilteredRows = [];
+  let activeCurrentPage = 1;
+  let completedCurrentPage = 1;
+  const itemsPerPage = 10;
+
   document.addEventListener("DOMContentLoaded", function() {
     // 1. DYNAMIC CLIENT-SIDE FILTERING SYSTEM
     const searchInput = document.getElementById('orderSearch');
-    const statusSelect = document.getElementById('statusFilter');
-    const paymentSelect = document.getElementById('paymentFilter');
-    const startDateInput = document.getElementById('startDateFilter');
-    const endDateInput = document.getElementById('endDateFilter');
+    const periodSelect = document.getElementById('periodFilter');
+    const statusChips = document.querySelectorAll('.status-chip');
 
     // Tabs elements
     const tabActive = document.getElementById('tabActive');
@@ -376,36 +387,48 @@
     const activeRows = document.querySelectorAll('.active-row-data');
     const completedRows = document.querySelectorAll('.completed-row-data');
 
-    let activeCurrentPage = 1;
-    let completedCurrentPage = 1;
-    const itemsPerPage = 10;
+    activeFilteredRows = Array.from(activeRows);
+    completedFilteredRows = Array.from(completedRows);
 
-    let activeFilteredRows = Array.from(activeRows);
-    let completedFilteredRows = Array.from(completedRows);
+    // Date strings for comparison
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
 
-    function updateTabsCounts() {
+    function updateChipsUI() {
+      statusChips.forEach(chip => {
+        const chipVal = chip.getAttribute('data-value');
+        if (chipVal === selectedStatusVal) {
+          chip.classList.add('active', 'bg-techaccent', 'text-white');
+          chip.classList.remove('bg-slate-100', 'text-slate-650', 'hover:bg-slate-200');
+        } else {
+          chip.classList.remove('active', 'bg-techaccent', 'text-white');
+          chip.classList.add('bg-slate-100', 'text-slate-650', 'hover:bg-slate-200');
+        }
+      });
+    }
+
+    function checkRowMatch(row, rowStatus) {
+      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+      const rowDate = row.getAttribute('data-date');
       const query = searchInput.value.toLowerCase().trim();
-      const selectedStatus = statusSelect.value;
-      const selectedPayment = paymentSelect.value;
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
+      const period = periodSelect.value;
 
-      function checkRowMatch(row, rowStatus) {
-        const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
-        const rowPayment = row.getAttribute('data-payment');
-        const rowDate = row.getAttribute('data-date');
+      const matchesSearch = textContent.includes(query);
+      const matchesStatus = selectedStatusVal === 'all' || rowStatus === selectedStatusVal;
 
-        const matchesSearch = textContent.includes(query);
-        const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
-        const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
-
-        let matchesDate = true;
-        if (startDate && rowDate < startDate) matchesDate = false;
-        if (endDate && rowDate > endDate) matchesDate = false;
-
-        return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+      let matchesPeriod = true;
+      if (period === 'today') {
+        matchesPeriod = (rowDate === todayStr);
+      } else if (period === 'yesterday') {
+        matchesPeriod = (rowDate === yesterdayStr);
       }
 
+      return matchesSearch && matchesStatus && matchesPeriod;
+    }
+
+    function updateTabsCounts() {
       const activeMatchCount = Array.from(activeRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
       const completedMatchCount = Array.from(completedRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
 
@@ -413,36 +436,7 @@
       tabCompleted.innerHTML = `Historial Completado <span style="background: ${activeTab === 'completed' ? '#1D4ED8' : '#64748B'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; font-weight: 800; transition: all 0.2s;">${completedMatchCount}</span>`;
     }
 
-    function adjustStatusFilterOptions() {
-      const options = statusSelect.querySelectorAll('option');
-      options.forEach(opt => {
-        const val = opt.value;
-        if (val === 'all') {
-          opt.style.display = '';
-          return;
-        }
-        if (activeTab === 'active') {
-          if (val === 'PENDIENTE' || val === 'EN CAMINO') {
-            opt.style.display = '';
-          } else {
-            opt.style.display = 'none';
-          }
-        } else {
-          if (val === 'ENTREGADO' || val === 'CANCELADO') {
-            opt.style.display = '';
-          } else {
-            opt.style.display = 'none';
-          }
-        }
-      });
-      // Reset status value if not supported by current tab
-      const currentSelectedOption = statusSelect.querySelector(`option[value="${statusSelect.value}"]`);
-      if (currentSelectedOption && currentSelectedOption.style.display === 'none') {
-        statusSelect.value = 'all';
-      }
-    }
-
-    function updateTableUI() {
+    window.updateTableUI = function() {
       // Toggle table visibility based on tab
       const activeContainer = document.getElementById('activeTableContainer');
       const completedContainer = document.getElementById('completedTableContainer');
@@ -455,7 +449,6 @@
         completedContainer.style.display = 'flex';
       }
 
-      adjustStatusFilterOptions();
       updateTabsCounts();
 
       // Paginate active rows
@@ -497,35 +490,13 @@
     }
 
     function applyFilters() {
-      const query = searchInput.value.toLowerCase().trim();
-      const selectedStatus = statusSelect.value;
-      const selectedPayment = paymentSelect.value;
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
-
-      function matchesFilter(row, rowStatus) {
-        const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
-        const rowPayment = row.getAttribute('data-payment');
-        const rowDate = row.getAttribute('data-date');
-
-        const matchesSearch = textContent.includes(query);
-        const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
-        const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
-
-        let matchesDate = true;
-        if (startDate && rowDate < startDate) matchesDate = false;
-        if (endDate && rowDate > endDate) matchesDate = false;
-
-        return matchesSearch && matchesStatus && matchesPayment && matchesDate;
-      }
-
-      activeFilteredRows = Array.from(activeRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
-      completedFilteredRows = Array.from(completedRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
+      activeFilteredRows = Array.from(activeRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
+      completedFilteredRows = Array.from(completedRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
 
       activeCurrentPage = 1;
       completedCurrentPage = 1;
 
-      updateTableUI();
+      window.updateTableUI();
     }
 
     // Tabs Event Listeners
@@ -538,6 +509,11 @@
       tabCompleted.style.color = '#64748B';
       tabCompleted.style.fontWeight = '500';
       indicatorCompleted.style.background = 'transparent';
+
+      if (selectedStatusVal === 'ENTREGADO' || selectedStatusVal === 'CANCELADO') {
+        selectedStatusVal = 'all';
+        updateChipsUI();
+      }
 
       applyFilters();
     });
@@ -552,21 +528,58 @@
       tabActive.style.fontWeight = '500';
       indicatorActive.style.background = 'transparent';
 
+      if (selectedStatusVal === 'PENDIENTE' || selectedStatusVal === 'EN CAMINO') {
+        selectedStatusVal = 'all';
+        updateChipsUI();
+      }
+
       applyFilters();
+    });
+
+    // Chips Event Listeners
+    statusChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.getAttribute('data-value');
+        selectedStatusVal = val;
+        updateChipsUI();
+
+        if (val === 'PENDIENTE' || val === 'EN CAMINO') {
+          if (activeTab !== 'active') {
+            activeTab = 'active';
+            tabActive.style.color = '#1D4ED8';
+            tabActive.style.fontWeight = '700';
+            indicatorActive.style.background = '#1D4ED8';
+
+            tabCompleted.style.color = '#64748B';
+            tabCompleted.style.fontWeight = '500';
+            indicatorCompleted.style.background = 'transparent';
+          }
+        } else if (val === 'ENTREGADO' || val === 'CANCELADO') {
+          if (activeTab !== 'completed') {
+            activeTab = 'completed';
+            tabCompleted.style.color = '#1D4ED8';
+            tabCompleted.style.fontWeight = '700';
+            indicatorCompleted.style.background = '#1D4ED8';
+
+            tabActive.style.color = '#64748B';
+            tabActive.style.fontWeight = '500';
+            indicatorActive.style.background = 'transparent';
+          }
+        }
+
+        applyFilters();
+      });
     });
 
     // Filter Events
     searchInput.addEventListener('input', applyFilters);
-    statusSelect.addEventListener('change', applyFilters);
-    paymentSelect.addEventListener('change', applyFilters);
-    startDateInput.addEventListener('change', applyFilters);
-    endDateInput.addEventListener('change', applyFilters);
+    periodSelect.addEventListener('change', applyFilters);
 
     // Pagination Click Events
     document.getElementById('prevActiveBtn').addEventListener('click', () => {
       if (activeCurrentPage > 1) {
         activeCurrentPage--;
-        updateTableUI();
+        window.updateTableUI();
       }
     });
 
@@ -574,14 +587,14 @@
       const totalPages = Math.ceil(activeFilteredRows.length / itemsPerPage);
       if (activeCurrentPage < totalPages) {
         activeCurrentPage++;
-        updateTableUI();
+        window.updateTableUI();
       }
     });
 
     document.getElementById('prevCompletedBtn').addEventListener('click', () => {
       if (completedCurrentPage > 1) {
         completedCurrentPage--;
-        updateTableUI();
+        window.updateTableUI();
       }
     });
 
@@ -589,7 +602,7 @@
       const totalPages = Math.ceil(completedFilteredRows.length / itemsPerPage);
       if (completedCurrentPage < totalPages) {
         completedCurrentPage++;
-        updateTableUI();
+        window.updateTableUI();
       }
     });
 
@@ -624,44 +637,42 @@
     sortDirections[tableId][colIdx] = !ascending;
     rows.forEach(row => tbody.appendChild(row));
 
-    // Reapply active page slice
-    const tabActive = document.getElementById('tabActive');
-    const tabCompleted = document.getElementById('tabCompleted');
-    const query = document.getElementById('orderSearch').value.toLowerCase().trim();
-    const selectedStatus = document.getElementById('statusFilter').value;
-    const selectedPayment = document.getElementById('paymentFilter').value;
-    const startDate = document.getElementById('startDateFilter').value;
-    const endDate = document.getElementById('endDateFilter').value;
-
-    function matchesFilter(row, rowStatus) {
-      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
-      const rowPayment = row.getAttribute('data-payment');
-      const rowDate = row.getAttribute('data-date');
-
-      const matchesSearch = textContent.includes(query);
-      const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
-      const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
-
-      let matchesDate = true;
-      if (startDate && rowDate < startDate) matchesDate = false;
-      if (endDate && rowDate > endDate) matchesDate = false;
-
-      return matchesSearch && matchesStatus && matchesPayment && matchesDate;
-    }
-
+    const searchInput = document.getElementById('orderSearch');
+    const periodSelect = document.getElementById('periodFilter');
     const activeRows = document.querySelectorAll('.active-row-data');
     const completedRows = document.querySelectorAll('.completed-row-data');
-    const itemsPerPage = 10;
+    
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+    function checkRowMatch(row, rowStatus) {
+      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+      const rowDate = row.getAttribute('data-date');
+      const query = searchInput.value.toLowerCase().trim();
+      const period = periodSelect.value;
+
+      const matchesSearch = textContent.includes(query);
+      const matchesStatus = selectedStatusVal === 'all' || rowStatus === selectedStatusVal;
+
+      let matchesPeriod = true;
+      if (period === 'today') {
+        matchesPeriod = (rowDate === todayStr);
+      } else if (period === 'yesterday') {
+        matchesPeriod = (rowDate === yesterdayStr);
+      }
+
+      return matchesSearch && matchesStatus && matchesPeriod;
+    }
 
     if (tableId === 'ordersTableActive') {
-      const filtered = Array.from(activeRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
-      activeRows.forEach(r => r.style.display = 'none');
-      filtered.slice(0, itemsPerPage).forEach(r => r.style.display = '');
+      activeFilteredRows = Array.from(activeRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
     } else {
-      const filtered = Array.from(completedRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
-      completedRows.forEach(r => r.style.display = 'none');
-      filtered.slice(0, itemsPerPage).forEach(r => r.style.display = '');
+      completedFilteredRows = Array.from(completedRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
     }
+    
+    if (window.updateTableUI) window.updateTableUI();
   }
 
   // 3. DELIVERY VALIDATION MODAL
@@ -678,22 +689,42 @@
   }
 
   function updateStatus(orderId, nextStatus) {
-    let config = {
+    const isCancel = nextStatus === 'Cancelado';
+    const accentColor = isCancel ? '#EF4444' : '#1D4ED8';
+    const bgLightColor = isCancel ? '#FEE2E2' : '#DBEAFE';
+    
+    // Choose Lucide icon based on next status
+    const iconSvg = isCancel 
+      ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>`
+      : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-truck"><path d="M5 18H3c-1 0-2-1-2-2V5c0-1 1-2 2-2h4c1 0 2 1 2 2v11H5Z"/><path d="M14 9h4l4 4v5c0 1-1 2-2 2h-2"/><circle cx="6.5" cy="18.5" r="2.5"/><circle cx="16.5" cy="18.5" r="2.5"/></svg>`;
+
+    Swal.fire({
       title: '¿Confirmar actualización?',
-      text: `¿Deseas cambiar el estado del pedido a: ${nextStatus}?`,
-      icon: 'question',
+      html: `
+        <div class="d-flex flex-column align-items-center text-center gap-3">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: ${bgLightColor}; display: flex; align-items: center; justify-content: center; color: ${accentColor}; margin-bottom: 8px;">
+            ${iconSvg}
+          </div>
+          <p style="margin: 0; font-size: 1.4rem; color: #64748B; font-weight: 500; line-height: 1.5; font-family: 'Inter', sans-serif;">
+            ¿Deseas cambiar el estado del pedido a: <strong>${nextStatus}</strong>?
+          </p>
+        </div>
+      `,
       showCancelButton: true,
       confirmButtonText: 'Sí, actualizar',
       cancelButtonText: 'No, esperar',
-      confirmButtonColor: '#1D4ED8'
-    };
-
-    if(nextStatus === 'Cancelado') {
-      config.icon = 'warning';
-      config.confirmButtonColor = '#DC2626';
-    }
-
-    Swal.fire(config).then((result) => {
+      background: '#FFFFFF',
+      color: '#0F172A',
+      backdrop: 'rgba(15, 23, 42, 0.4)',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'border-0 rounded-4 shadow-lg p-4',
+        title: 'fs-3 fw-bold text-dark mt-2 mb-1',
+        actions: 'mt-4 d-flex justify-content-center gap-2 w-100',
+        confirmButton: `btn ${isCancel ? 'btn-danger' : 'btn-primary'} fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1`,
+        cancelButton: 'btn btn-light fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1 border border-200'
+      }
+    }).then((result) => {
       if (result.isConfirmed) {
         const form = document.createElement('form');
         form.method = 'POST';
