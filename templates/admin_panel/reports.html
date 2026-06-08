@@ -59,7 +59,7 @@
 
 
 <!-- CONTENEDOR PRINCIPAL FLEX PARA RESPONSIVIDAD -->
-<div style="display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;">
+<div id="reportContent" style="display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;">
 
   <!-- HERO STRIP: Métricas clave + Título + Acciones -->
   <div style="
@@ -109,7 +109,7 @@
       </div>
 
       <!-- Lado derecho: Filtro + Acciones -->
-      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:1.2rem;">
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:1.2rem;" class="export-hidden">
         <form method="GET" action="" style="margin:0;">
           <div style="display:flex; align-items:center; gap:0.8rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:0.8rem 1.4rem; backdrop-filter:blur(10px);">
             <i data-lucide="calendar" style="width:1.8rem; height:1.8rem; color:rgba(255,255,255,0.7);"></i>
@@ -121,15 +121,36 @@
             </select>
           </div>
         </form>
-        <button onclick="window.print()" style="display:flex; align-items:center; gap:0.8rem; background:rgba(255,255,255,0.12); border:1.5px solid rgba(255,255,255,0.25); border-radius:12px; padding:1.2rem 2.2rem; color:white; font-size:1.5rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; backdrop-filter:blur(10px);"
+        <button onclick="exportarReportePDF(this)" style="display:flex; align-items:center; gap:0.8rem; background:rgba(255,255,255,0.12); border:1.5px solid rgba(255,255,255,0.25); border-radius:12px; padding:1.2rem 2.2rem; color:white; font-size:1.5rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; backdrop-filter:blur(10px);"
           onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
-          <i data-lucide="printer" style="width:1.6rem; height:1.6rem;"></i> Imprimir Reporte
+          <i data-lucide="download" style="width:1.6rem; height:1.6rem;"></i> Exportar PDF
         </button>
       </div>
     </div>
   </div>
 
-  <!-- CONTENEDOR PRINCIPAL DE TRANSACCIONES -->
+  <!-- SECCIÓN DEL GRÁFICO (NUEVO / PREMIUM AESTHETICS) -->
+  <div class="print-hidden" style="
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid var(--ds-border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    padding: 24px;
+    width: 100%;
+    box-sizing: border-box;
+  ">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="trending-up" style="color: #1D4ED8; width: 2rem; height: 2rem;"></i> Tendencia de Facturación
+      </h3>
+      <span style="font-size: 12px; font-weight: 600; color: #64748B; background: #F1F5F9; padding: 4px 10px; border-radius: 12px;">Últimos 6 meses (COP Millones)</span>
+    </div>
+    <div style="height: 250px; position: relative; width: 100%;">
+      <canvas id="ventasChart"></canvas>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL DE TRANSACCIONES (HISTORIAL DE FACTURACIÓN) -->
   <div class="print-hidden" style="
     background: #FFFFFF;
     border-radius: 20px;
@@ -143,58 +164,10 @@
     box-sizing: border-box;
   ">
 
-    <!-- TABS: Pedidos en Proceso / Historial Completado -->
-    <div style="display: flex; gap: 8px; border-bottom: 1px solid #E2E8F0; padding-bottom: 0px;" class="print-hidden">
-      <button id="tabActive" class="g-tab-btn" style="
-        background: none;
-        border: none;
-        font-size: 15px;
-        font-weight: 700;
-        color: #1D4ED8;
-        padding: 12px 20px;
-        cursor: pointer;
-        position: relative;
-        font-family: 'Inter', sans-serif;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-      ">
-        Pedidos en Proceso
-        <span id="indicatorActive" style="
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          right: 0;
-          height: 2.5px;
-          background: #1D4ED8;
-          border-radius: 3px 3px 0 0;
-        "></span>
-      </button>
-      <button id="tabCompleted" class="g-tab-btn" style="
-        background: none;
-        border: none;
-        font-size: 15px;
-        font-weight: 500;
-        color: #64748B;
-        padding: 12px 20px;
-        cursor: pointer;
-        position: relative;
-        font-family: 'Inter', sans-serif;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-      ">
-        Historial Completado
-        <span id="indicatorCompleted" style="
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          right: 0;
-          height: 2.5px;
-          background: transparent;
-          border-radius: 3px 3px 0 0;
-        "></span>
-      </button>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="receipt" style="color: #059669; width: 2rem; height: 2rem;"></i> Historial de Facturas
+      </h3>
     </div>
 
     <!-- Barra de filtros premium -->
@@ -205,7 +178,7 @@
       flex-wrap: wrap;
       width: 100%;
       box-sizing: border-box;
-    " class="print-hidden">
+    " class="print-hidden export-hidden">
       
       <!-- Entrada de búsqueda -->
       <div style="
@@ -221,7 +194,7 @@
         transition: all 0.2s;
       " onfocusin="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF'; this.style.boxShadow='0 0 0 3px rgba(29, 78, 216, 0.08)';" onfocusout="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC'; this.style.boxShadow='none';">
         <i data-lucide="search" style="width:1.6rem; height:1.6rem; color:#64748B; flex-shrink:0;"></i>
-        <input type="text" id="transactionSearch" placeholder="Buscar por referencia, cliente, ID..." style="border:none; outline:none; font-size:14px; font-family:'Inter',sans-serif; color:#0F172A; width:100%; padding:12px 0; background:transparent;">
+        <input type="text" id="transactionSearch" placeholder="Buscar factura por referencia, cliente..." style="border:none; outline:none; font-size:14px; font-family:'Inter',sans-serif; color:#0F172A; width:100%; padding:12px 0; background:transparent;">
       </div>
 
       <!-- Filtro de Estado -->
@@ -319,37 +292,37 @@
       </div>
     </div>
 
-    <!-- TABLA 1: PEDIDOS EN PROCESO -->
-    <div id="activeTableContainer" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+    <!-- TABLA DE HISTORIAL DE FACTURAS -->
+    <div id="billingTableContainer" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
       <div style="overflow-x:auto; width: 100%; border-radius: 12px; border: 1px solid var(--ds-border); box-sizing: border-box;">
-        <table style="width:100%; border-collapse:collapse; text-align:left; min-width: 900px;" id="activeTable">
+        <table style="width:100%; border-collapse:collapse; text-align:left; min-width: 900px;" id="transactionsTable">
           <thead>
             <tr style="background:#F8FAFF; border-bottom:1.5px solid var(--ds-border);">
-              <th onclick="sortTable(0, 'activeTable')" style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
+              <th onclick="sortTable(0, 'transactionsTable')" style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
                 <div style="display:flex; align-items:center; gap:6px;">REF. <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
               </th>
-              <th onclick="sortTable(1, 'activeTable')" style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
+              <th onclick="sortTable(1, 'transactionsTable')" style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:nowrap;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
                 <div style="display:flex; align-items:center; gap:6px;">FECHA <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
               </th>
-              <th style="width: 20%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">CLIENTE</th>
-              <th style="width: 12%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PAGO</th>
-              <th style="width: 18%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PRODUCTOS</th>
-              <th onclick="sortTable(5, 'activeTable')" style="width: 12%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
+              <th style="width: 22%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">CLIENTE</th>
+              <th style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PAGO</th>
+              <th style="width: 20%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PRODUCTOS</th>
+              <th onclick="sortTable(5, 'transactionsTable')" style="width: 12%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
                 <div style="display:flex; align-items:center; gap:6px;">MONTO <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
               </th>
-              <th style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; text-align:center;">ESTADO</th>
+              <th style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; text-align:center;">ESTADO</th>
               <th style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; text-align:center;" class="print-hidden">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
             {% for pedido in pedidos %}
-            {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' or pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
-            <tr class="table-row-data active-row-data" style="border-bottom:1px solid var(--ds-border); transition:all 0.15s ease;"
+            <tr class="billing-row-data" style="border-bottom:1px solid var(--ds-border); transition:all 0.15s ease;"
                 onmouseover="this.style.background='#F0F7FF'; this.style.boxShadow='inset 3px 0 0 #1D4ED8';"
                 onmouseout="this.style.background=''; this.style.boxShadow='';"
                 data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
                 data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
-                data-date="{{ pedido.creado_el|date:'Y-m-d' }}">
+                data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
+                data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
 
               <!-- REF -->
               <td style="padding:20px 24px; font-family:monospace; font-size:15px; font-weight:800; color:#1D4ED8; white-space:nowrap;">
@@ -402,140 +375,7 @@
                   <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#FEF3C7; color:#92400E; border:1.5px solid #FDE68A;">PENDIENTE</span>
                 {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
                   <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#DBEAFE; color:#1E40AF; border:1.5px solid #BFDBFE;">EN CAMINO</span>
-                {% endif %}
-              </td>
-
-              <!-- ACCIONES -->
-              <td style="padding:16px 24px; text-align:center;" class="print-hidden">
-                <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
-                  <a href="{% url 'admin_order_invoice' pedido.id %}" target="_blank"
-                     title="Ver factura completa"
-                     style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:6px; background:transparent; color:#64748B; border:none; text-decoration:none; transition:all 0.2s;"
-                     onmouseover="this.style.color='#1D4ED8'; this.style.background='#F0F7FF';"
-                     onmouseout="this.style.color='#64748B'; this.style.background='transparent';">
-                    <i data-lucide="eye" style="width:16px; height:16px;"></i>
-                  </a>
-                  <button
-                    onclick="descargarFacturaPDF('{{ pedido.id }}', this)"
-                    title="Descargar factura en PDF"
-                    style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:6px; background:transparent; color:#64748B; border:none; cursor:pointer; transition:all 0.2s;"
-                    onmouseover="this.style.color='#059669'; this.style.background='#ECFDF5';"
-                    onmouseout="this.style.color='#64748B'; this.style.background='transparent';">
-                    <i data-lucide="download" style="width:16px; height:16px;"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            {% endif %}
-            {% empty %}
-            <tr class="empty-row-active"><td colspan="8" class="py-12 text-center text-[#64748B]">Ningún pedido en proceso en el sistema.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- PAGINACIÓN ACTIVOS -->
-      <div style="border-top:1px solid #E2E8F0; padding-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; width:100%; box-sizing:border-box;" class="print-hidden">
-        <div style="font-size:14px; color:var(--ds-text-soft); font-weight:500;">
-          Mostrando <strong style="color:var(--ds-text);" id="visibleActiveCount">0</strong> de
-          <strong style="color:var(--ds-text);" id="totalActiveCount">0</strong> transacciones en proceso
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <button id="prevActiveBtn" disabled
-            style="padding:8px 18px; border:1.5px solid var(--ds-border); border-radius:8px; font-size:13px; font-weight:600; color:var(--ds-text-soft); background:white; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;"
-            onmouseover="if(!this.disabled){this.style.borderColor='#1D4ED8'; this.style.color='#1D4ED8';}" onmouseout="this.style.borderColor='var(--ds-border)'; this.style.color='var(--ds-text-soft)';">
-            ← Anterior
-          </button>
-          <span id="pageActiveLabel" style="font-size:13px; font-weight:700; color:var(--ds-text); padding:0 8px;">Pág. 1 / 1</span>
-          <button id="nextActiveBtn" disabled
-            style="padding:8px 18px; border:1.5px solid var(--ds-border); border-radius:8px; font-size:13px; font-weight:600; color:var(--ds-text-soft); background:white; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;"
-            onmouseover="if(!this.disabled){this.style.borderColor='#1D4ED8'; this.style.color='#1D4ED8';}" onmouseout="this.style.borderColor='var(--ds-border)'; this.style.color='var(--ds-text-soft)';">
-            Siguiente →
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TABLA 2: HISTORIAL COMPLETADO -->
-    <div id="completedTableContainer" style="display: none; flex-direction: column; gap: 20px; width: 100%;">
-      <div style="overflow-x:auto; width: 100%; border-radius: 12px; border: 1px solid var(--ds-border); box-sizing: border-box;">
-        <table style="width:100%; border-collapse:collapse; text-align:left; min-width: 900px;" id="completedTable">
-          <thead>
-            <tr style="background:#F8FAFF; border-bottom:1.5px solid var(--ds-border);">
-              <th onclick="sortTable(0, 'completedTable')" style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
-                <div style="display:flex; align-items:center; gap:6px;">REF. <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
-              </th>
-              <th onclick="sortTable(1, 'completedTable')" style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
-                <div style="display:flex; align-items:center; gap:6px;">FECHA <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
-              </th>
-              <th style="width: 20%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">CLIENTE</th>
-              <th style="width: 12%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PAGO</th>
-              <th style="width: 18%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PRODUCTOS</th>
-              <th onclick="sortTable(5, 'completedTable')" style="width: 12%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
-                <div style="display:flex; align-items:center; gap:6px;">MONTO <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
-              </th>
-              <th style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; text-align:center;">ESTADO</th>
-              <th style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; text-align:center;" class="print-hidden">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for pedido in pedidos %}
-            {% if pedido.estado != 'pending' and pedido.estado != 'Pendiente' and pedido.estado != 'processing' and pedido.estado != 'shipped' and pedido.estado != 'Enviado' %}
-            <tr class="table-row-data completed-row-data" style="border-bottom:1px solid var(--ds-border); transition:all 0.15s ease;"
-                onmouseover="this.style.background='#F0F7FF'; this.style.boxShadow='inset 3px 0 0 #1D4ED8';"
-                onmouseout="this.style.background=''; this.style.boxShadow='';"
-                data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
-                data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
-                data-date="{{ pedido.creado_el|date:'Y-m-d' }}">
-
-              <!-- REF -->
-              <td style="padding:20px 24px; font-family:monospace; font-size:15px; font-weight:800; color:#1D4ED8; white-space:nowrap;">
-                #{{ pedido.id|stringformat:"s"|slice:":8"|upper }}
-              </td>
-
-              <!-- FECHA -->
-              <td style="padding:20px 24px; white-space:nowrap;">
-                <span style="display:block; font-weight:700; font-size:15px; color:var(--ds-text);">{{ pedido.creado_el|date:"d M Y" }}</span>
-                <span style="display:block; font-size:13px; color:var(--ds-text-soft); margin-top:3px;">{{ pedido.creado_el|date:"h:i A" }}</span>
-              </td>
-
-              <!-- CLIENTE -->
-              <td style="padding:20px 24px;">
-                <span style="display:block; font-weight:800; font-size:15px; color:var(--ds-text);">{{ pedido.usuario.nombre_mostrado }}</span>
-                <span style="display:block; font-size:13px; color:var(--ds-text-soft); margin-top:3px;">{{ pedido.cedula|default:"N/A" }} · {{ pedido.telefono|default:"N/A" }}</span>
-              </td>
-
-              <!-- METODO PAGO -->
-              <td style="padding:20px 24px; white-space:nowrap;">
-                {% if 'tarjeta' in pedido.notas|lower %}
-                  <span style="display:inline-flex; align-items:center; gap:6px; background:#EFF6FF; color:#1D4ED8; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;"><i data-lucide="credit-card" style="width:14px; height:14px;"></i> Tarjeta</span>
-                {% elif 'efectivo' in pedido.notas|lower %}
-                  <span style="display:inline-flex; align-items:center; gap:6px; background:#ECFDF5; color:#059669; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;"><i data-lucide="banknote" style="width:14px; height:14px;"></i> Efectivo</span>
-                {% else %}
-                  <span style="display:inline-flex; align-items:center; gap:6px; background:#F3F4F6; color:#6B7280; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;"><i data-lucide="landmark" style="width:14px; height:14px;"></i> Transferencia</span>
-                {% endif %}
-              </td>
-
-              <!-- PRODUCTOS -->
-              <td style="padding:20px 24px; max-width:220px;">
-                <div style="display:flex; flex-wrap:wrap; gap:5px;">
-                  {% for item in pedido.detalles.all %}
-                  <span style="background:#F8FAFF; border:1px solid #E2E8F0; color:#475569; padding:4px 10px; border-radius:8px; font-size:13px; font-weight:600; white-space:nowrap;">
-                    {{ item.cantidad }}× {{ item.producto.nombre|truncatechars:18 }}
-                  </span>
-                  {% endfor %}
-                </div>
-              </td>
-
-              <!-- MONTO -->
-              <td class="py-4 px-6 font-black text-sm text-slate-900">
-                {{ pedido.monto_total|currency_cop }}
-                <span class="block text-[9px] text-techgreen font-bold tracking-wider mt-0.5">IVA INC. (19%)</span>
-              </td>
-
-              <!-- ESTADO -->
-              <td class="py-4 px-6 text-center">
-                {% if pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
+                {% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
                   <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#DCFCE7; color:#166534; border:1.5px solid #BBF7D0;">ENTREGADO</span>
                 {% else %}
                   <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#FEE2E2; color:#991B1B; border:1.5px solid #FECACA;">CANCELADO</span>
@@ -545,13 +385,6 @@
               <!-- ACCIONES -->
               <td style="padding:16px 24px; text-align:center;" class="print-hidden">
                 <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
-                  <a href="{% url 'admin_order_invoice' pedido.id %}" target="_blank"
-                     title="Ver factura completa"
-                     style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:6px; background:transparent; color:#64748B; border:none; text-decoration:none; transition:all 0.2s;"
-                     onmouseover="this.style.color='#1D4ED8'; this.style.background='#F0F7FF';"
-                     onmouseout="this.style.color='#64748B'; this.style.background='transparent';">
-                    <i data-lucide="eye" style="width:16px; height:16px;"></i>
-                  </a>
                   <button
                     onclick="descargarFacturaPDF('{{ pedido.id }}', this)"
                     title="Descargar factura en PDF"
@@ -563,71 +396,32 @@
                 </div>
               </td>
             </tr>
-            {% endif %}
             {% empty %}
-            <tr class="empty-row-completed"><td colspan="8" class="py-12 text-center text-[#64748B]">Ningún registro de historial de ventas encontrado.</td></tr>
+            <tr class="empty-row-billing"><td colspan="8" class="py-12 text-center text-[#64748B]">Ningún registro de ventas o facturas encontrado en el sistema.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
 
-      <!-- PAGINACIÓN COMPLETADOS -->
-      <div style="border-top:1px solid #E2E8F0; padding-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; width:100%; box-sizing:border-box;" class="print-hidden">
+      <!-- PAGINACIÓN FACTURAS -->
+      <div style="border-top:1px solid #E2E8F0; padding-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; width:100%; box-sizing:border-box;" class="print-hidden export-hidden">
         <div style="font-size:14px; color:var(--ds-text-soft); font-weight:500;">
-          Mostrando <strong style="color:var(--ds-text);" id="visibleCompletedCount">0</strong> de
-          <strong style="color:var(--ds-text);" id="totalCompletedCount">0</strong> transacciones históricas
+          Mostrando <strong style="color:var(--ds-text);" id="visibleBillingCount">0</strong> de
+          <strong style="color:var(--ds-text);" id="totalBillingCount">0</strong> facturas
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <button id="prevCompletedBtn" disabled
+          <button id="prevBillingBtn" disabled
             style="padding:8px 18px; border:1.5px solid var(--ds-border); border-radius:8px; font-size:13px; font-weight:600; color:var(--ds-text-soft); background:white; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;"
             onmouseover="if(!this.disabled){this.style.borderColor='#1D4ED8'; this.style.color='#1D4ED8';}" onmouseout="this.style.borderColor='var(--ds-border)'; this.style.color='var(--ds-text-soft)';">
             ← Anterior
           </button>
-          <span id="pageCompletedLabel" style="font-size:13px; font-weight:700; color:var(--ds-text); padding:0 8px;">Pág. 1 / 1</span>
-          <button id="nextCompletedBtn" disabled
+          <span id="pageBillingLabel" style="font-size:13px; font-weight:700; color:var(--ds-text); padding:0 8px;">Pág. 1 / 1</span>
+          <button id="nextBillingBtn" disabled
             style="padding:8px 18px; border:1.5px solid var(--ds-border); border-radius:8px; font-size:13px; font-weight:600; color:var(--ds-text-soft); background:white; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;"
             onmouseover="if(!this.disabled){this.style.borderColor='#1D4ED8'; this.style.color='#1D4ED8';}" onmouseout="this.style.borderColor='var(--ds-border)'; this.style.color='var(--ds-text-soft)';">
             Siguiente →
           </button>
         </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- EXPORTACIÓN DE ACTIVOS (NO-PRINT) -->
-  <div class="bg-techsurface border border-techborder rounded-md p-6 print-hidden" id="no-print">
-    <div class="border-b border-techborder pb-3 mb-6">
-      <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-techaccent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        Exportación y Descargas
-      </h3>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="border border-techborder p-5 bg-[#F8FAFC] flex flex-col justify-between hover:border-techaccent/40 transition-colors">
-        <div>
-          <h4 class="font-bold text-sm text-slate-950 mb-1">Catálogo de Inventario</h4>
-          <p class="text-[11px] text-[#64748B] leading-relaxed mb-4">Descarga el estado del stock, especificaciones y precios de hardware actuales.</p>
-        </div>
-        <a href="{% url 'admin_excel_template' %}" class="w-full text-center py-2 bg-white hover:bg-slate-100 font-bold text-xs uppercase tracking-wider border border-techborder text-slate-800 transition-colors">Descargar Planilla</a>
-      </div>
-      
-      <div class="border border-techborder p-5 bg-[#F8FAFC] flex flex-col justify-between hover:border-techaccent/40 transition-colors">
-        <div>
-          <h4 class="font-bold text-sm text-slate-950 mb-1">Directorio de Clientes</h4>
-          <p class="text-[11px] text-[#64748B] leading-relaxed mb-4">Base de datos con nombres, contactos y números de identificación de clientes registrados.</p>
-        </div>
-        <button class="w-full py-2 bg-white hover:bg-slate-100 font-bold text-xs uppercase tracking-wider border border-techborder text-slate-850 transition-colors" onclick="alert('Descargando base de datos...')">Generar CSV</button>
-      </div>
-
-      <div class="border border-techborder p-5 bg-[#F8FAFC] flex flex-col justify-between hover:border-techaccent/40 transition-colors">
-        <div>
-          <h4 class="font-bold text-sm text-slate-950 mb-1">Resumen de Reseñas</h4>
-          <p class="text-[11px] text-[#64748B] leading-relaxed mb-4">Listado de comentarios, votaciones y análisis de opinión de productos.</p>
-        </div>
-        <button class="w-full py-2 bg-white hover:bg-slate-100 font-bold text-xs uppercase tracking-wider border border-techborder text-slate-850 transition-colors" onclick="alert('Descargando reseñas...')">Generar CSV</button>
       </div>
     </div>
   </div>
@@ -647,142 +441,34 @@
     const paymentSelect = document.getElementById('paymentFilter');
     const startDateInput = document.getElementById('startDateFilter');
     const endDateInput = document.getElementById('endDateFilter');
-    
-    // Elementos de las pestañas (Tabs)
-    const tabActive = document.getElementById('tabActive');
-    const tabCompleted = document.getElementById('tabCompleted');
-    const indicatorActive = document.getElementById('indicatorActive');
-    const indicatorCompleted = document.getElementById('indicatorCompleted');
-    let activeTab = 'active'; // 'active' o 'completed'
 
-    const activeRows = document.querySelectorAll('.active-row-data');
-    const completedRows = document.querySelectorAll('.completed-row-data');
+    const rows = document.querySelectorAll('.billing-row-data');
     
-    let activeCurrentPage = 1;
-    let completedCurrentPage = 1;
+    let currentPage = 1;
     const itemsPerPage = 10;
     
-    let activeFilteredRows = Array.from(activeRows);
-    let completedFilteredRows = Array.from(completedRows);
-
-    function updateTabsCounts() {
-      const query = searchInput.value.toLowerCase().trim();
-      const selectedStatus = statusSelect.value;
-      const selectedPayment = paymentSelect.value;
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
-
-      function checkRowMatch(row, rowStatus) {
-        const textContent = row.textContent.toLowerCase();
-        const rowPayment = row.getAttribute('data-payment');
-        const rowDate = row.getAttribute('data-date');
-
-        const matchesSearch = textContent.includes(query);
-        const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
-        const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
-        
-        let matchesDate = true;
-        if (startDate && rowDate < startDate) matchesDate = false;
-        if (endDate && rowDate > endDate) matchesDate = false;
-
-        return matchesSearch && matchesStatus && matchesPayment && matchesDate;
-      }
-
-      const activeMatchCount = Array.from(activeRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
-      const completedMatchCount = Array.from(completedRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
-
-      tabActive.innerHTML = `Pedidos en Proceso <span style="background: ${activeTab === 'active' ? '#1D4ED8' : '#64748B'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; font-weight: 800; transition: all 0.2s;">${activeMatchCount}</span>`;
-      tabCompleted.innerHTML = `Historial Completado <span style="background: ${activeTab === 'completed' ? '#1D4ED8' : '#64748B'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; font-weight: 800; transition: all 0.2s;">${completedMatchCount}</span>`;
-    }
-
-    function adjustStatusFilterOptions() {
-      const options = statusSelect.querySelectorAll('option');
-      options.forEach(opt => {
-        const val = opt.value;
-        if (val === 'all') {
-          opt.style.display = '';
-          return;
-        }
-        if (activeTab === 'active') {
-          if (val === 'PENDIENTE' || val === 'EN CAMINO') {
-            opt.style.display = '';
-          } else {
-            opt.style.display = 'none';
-          }
-        } else {
-          if (val === 'ENTREGADO' || val === 'CANCELADO') {
-            opt.style.display = '';
-          } else {
-            opt.style.display = 'none';
-          }
-        }
-      });
-
-      // Si el valor actual seleccionado ya no es visible, resetear a 'all'
-      const currentSelected = statusSelect.value;
-      if (currentSelected !== 'all') {
-        if (activeTab === 'active' && currentSelected !== 'PENDIENTE' && currentSelected !== 'EN CAMINO') {
-          statusSelect.value = 'all';
-        } else if (activeTab === 'completed' && currentSelected !== 'ENTREGADO' && currentSelected !== 'CANCELADO') {
-          statusSelect.value = 'all';
-        }
-      }
-    }
+    let filteredRows = Array.from(rows);
 
     function updateTableUI() {
-      adjustStatusFilterOptions();
+      // Paginación
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      rows.forEach(r => r.style.display = 'none');
+      filteredRows.slice(start, end).forEach(r => r.style.display = '');
 
-      if (activeTab === 'active') {
-        document.getElementById('activeTableContainer').style.display = 'flex';
-        document.getElementById('completedTableContainer').style.display = 'none';
-
-        activeRows.forEach(r => r.style.display = 'none');
-
-        const startIdx = (activeCurrentPage - 1) * itemsPerPage;
-        const endIdx = startIdx + itemsPerPage;
-        const pageRows = activeFilteredRows.slice(startIdx, endIdx);
-        pageRows.forEach(r => r.style.display = '');
-
-        // Mostrar fila vacía si no hay coincidencias
-        const emptyRow = document.querySelector('.empty-row-active');
-        if (emptyRow) {
-          emptyRow.style.display = activeFilteredRows.length === 0 ? '' : 'none';
-        }
-
-        document.getElementById('visibleActiveCount').textContent = activeFilteredRows.length;
-        document.getElementById('totalActiveCount').textContent = activeRows.length;
-
-        const totalActivePages = Math.max(1, Math.ceil(activeFilteredRows.length / itemsPerPage));
-        document.getElementById('pageActiveLabel').textContent = `Pág. ${activeCurrentPage} / ${totalActivePages}`;
-        document.getElementById('prevActiveBtn').disabled = activeCurrentPage === 1;
-        document.getElementById('nextActiveBtn').disabled = activeCurrentPage === totalActivePages;
-      } else {
-        document.getElementById('activeTableContainer').style.display = 'none';
-        document.getElementById('completedTableContainer').style.display = 'flex';
-
-        completedRows.forEach(r => r.style.display = 'none');
-
-        const startIdx = (completedCurrentPage - 1) * itemsPerPage;
-        const endIdx = startIdx + itemsPerPage;
-        const pageRows = completedFilteredRows.slice(startIdx, endIdx);
-        pageRows.forEach(r => r.style.display = '');
-
-        // Mostrar fila vacía si no hay coincidencias
-        const emptyRow = document.querySelector('.empty-row-completed');
-        if (emptyRow) {
-          emptyRow.style.display = completedFilteredRows.length === 0 ? '' : 'none';
-        }
-
-        document.getElementById('visibleCompletedCount').textContent = completedFilteredRows.length;
-        document.getElementById('totalCompletedCount').textContent = completedRows.length;
-
-        const totalCompletedPages = Math.max(1, Math.ceil(completedFilteredRows.length / itemsPerPage));
-        document.getElementById('pageCompletedLabel').textContent = `Pág. ${completedCurrentPage} / ${totalCompletedPages}`;
-        document.getElementById('prevCompletedBtn').disabled = completedCurrentPage === 1;
-        document.getElementById('nextCompletedBtn').disabled = completedCompletedPage === totalCompletedPages;
+      // Estado vacío
+      const emptyRow = document.querySelector('.empty-row-billing');
+      if (emptyRow) {
+        emptyRow.style.display = filteredRows.length === 0 ? '' : 'none';
       }
 
-      updateTabsCounts();
+      // Conteo
+      document.getElementById('visibleBillingCount').textContent = filteredRows.length;
+      document.getElementById('totalBillingCount').textContent = rows.length;
+      const totalPages = Math.ceil(filteredRows.length / itemsPerPage) || 1;
+      document.getElementById('pageBillingLabel').textContent = `Pág. ${currentPage} / ${totalPages}`;
+      document.getElementById('prevBillingBtn').disabled = currentPage === 1;
+      document.getElementById('nextBillingBtn').disabled = currentPage === totalPages;
     }
 
     function applyFilters() {
@@ -792,8 +478,9 @@
       const startDate = startDateInput.value;
       const endDate = endDateInput.value;
 
-      function matchesFilter(row, rowStatus) {
-        const textContent = row.textContent.toLowerCase();
+      filteredRows = Array.from(rows).filter(row => {
+        const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+        const rowStatus = row.getAttribute('data-status');
         const rowPayment = row.getAttribute('data-payment');
         const rowDate = row.getAttribute('data-date');
 
@@ -806,43 +493,11 @@
         if (endDate && rowDate > endDate) matchesDate = false;
 
         return matchesSearch && matchesStatus && matchesPayment && matchesDate;
-      }
+      });
 
-      activeFilteredRows = Array.from(activeRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
-      completedFilteredRows = Array.from(completedRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
-
-      activeCurrentPage = 1;
-      completedCurrentPage = 1;
-
+      currentPage = 1;
       updateTableUI();
     }
-
-    // Eventos de Pestañas (Tabs)
-    tabActive.addEventListener('click', () => {
-      activeTab = 'active';
-      tabActive.style.color = '#1D4ED8';
-      tabActive.style.fontWeight = '700';
-      indicatorActive.style.background = '#1D4ED8';
-
-      tabCompleted.style.color = '#64748B';
-      tabCompleted.style.fontWeight = '500';
-      indicatorCompleted.style.background = 'transparent';
-
-      applyFilters();
-    });
-
-    tabCompleted.addEventListener('click', () => {
-      activeTab = 'completed';
-      tabCompleted.style.color = '#1D4ED8';
-      tabCompleted.style.fontWeight = '700';
-      indicatorCompleted.style.background = '#1D4ED8';
-
-      tabActive.style.color = '#64748B';
-      tabActive.style.fontWeight = '500';
-      indicatorActive.style.background = 'transparent';
-
-      applyFilters();
-    });
 
     // Registrar Eventos de Filtro
     searchInput.addEventListener('input', applyFilters);
@@ -851,34 +506,18 @@
     startDateInput.addEventListener('change', applyFilters);
     endDateInput.addEventListener('change', applyFilters);
 
-    // Controles de Paginación Activa
-    document.getElementById('prevActiveBtn').addEventListener('click', () => {
-      if (activeCurrentPage > 1) {
-        activeCurrentPage--;
+    // Controles de Paginación
+    document.getElementById('prevBillingBtn').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
         updateTableUI();
       }
     });
 
-    document.getElementById('nextActiveBtn').addEventListener('click', () => {
-      const totalPages = Math.ceil(activeFilteredRows.length / itemsPerPage);
-      if (activeCurrentPage < totalPages) {
-        activeCurrentPage++;
-        updateTableUI();
-      }
-    });
-
-    // Controles de Paginación Completada
-    document.getElementById('prevCompletedBtn').addEventListener('click', () => {
-      if (completedCurrentPage > 1) {
-        completedCurrentPage--;
-        updateTableUI();
-      }
-    });
-
-    document.getElementById('nextCompletedBtn').addEventListener('click', () => {
-      const totalPages = Math.ceil(completedFilteredRows.length / itemsPerPage);
-      if (completedCurrentPage < totalPages) {
-        completedCurrentPage++;
+    document.getElementById('nextBillingBtn').addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
         updateTableUI();
       }
     });
@@ -890,7 +529,7 @@
     const canvas = document.getElementById('ventasChart');
     if (canvas) {
       const ctx = canvas.getContext('2d');
-      let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+      let gradient = ctx.createLinearGradient(0, 0, 0, 250);
       gradient.addColorStop(0, 'rgba(29, 78, 216, 0.15)'); // Glow azul
       gradient.addColorStop(1, 'rgba(29, 78, 216, 0.0)');
 
@@ -901,7 +540,7 @@
           datasets: [{
             label: 'Ingresos Mensuales',
             data: {{ chart_data|safe }},
-            borderColor: '#1D4ED8', // B.I. Blue
+            borderColor: '#1D4ED8',
             borderWidth: 3,
             backgroundColor: gradient,
             fill: true,
@@ -956,16 +595,13 @@
 
   // 3. LÓGICA DE ORDENACIÓN DE TABLA
   let sortDirections = {
-    'activeTable': [true, true, true, true, true, true, true],
-    'completedTable': [true, true, true, true, true, true, true]
+    'transactionsTable': [true, true, true, true, true, true, true]
   };
   function sortTable(colIdx, tableId) {
     const table = document.getElementById(tableId);
     if (!table) return;
     const tbody = table.querySelector("tbody");
-    const isactive = tableId === 'activeTable';
-    const rowClass = isactive ? ".active-row-data" : ".completed-row-data";
-    const rows = Array.from(tbody.querySelectorAll("tr" + rowClass));
+    const rows = Array.from(tbody.querySelectorAll("tr.billing-row-data"));
     const ascending = sortDirections[tableId][colIdx];
     
     rows.sort((rowA, rowB) => {
@@ -985,7 +621,33 @@
     sortDirections[tableId][colIdx] = !ascending;
     rows.forEach(row => tbody.appendChild(row));
     
-    applyFilters();
+    const itemsPerPage = 10;
+    const query = document.getElementById('transactionSearch').value.toLowerCase().trim();
+    const selectedStatus = document.getElementById('statusFilter').value;
+    const selectedPayment = document.getElementById('paymentFilter').value;
+    const startDate = document.getElementById('startDateFilter').value;
+    const endDate = document.getElementById('endDateFilter').value;
+
+    const allBillingRows = document.querySelectorAll('.billing-row-data');
+    const filtered = Array.from(allBillingRows).filter(row => {
+      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+      const rowStatus = row.getAttribute('data-status');
+      const rowPayment = row.getAttribute('data-payment');
+      const rowDate = row.getAttribute('data-date');
+
+      const matchesSearch = textContent.includes(query);
+      const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
+      const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
+      
+      let matchesDate = true;
+      if (startDate && rowDate < startDate) matchesDate = false;
+      if (endDate && rowDate > endDate) matchesDate = false;
+
+      return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+    });
+
+    allBillingRows.forEach(r => r.style.display = 'none');
+    filtered.slice(0, itemsPerPage).forEach(r => r.style.display = '');
   }
 </script>
 
@@ -998,17 +660,14 @@
  * Abre la factura en un iframe oculto, la captura con html2canvas y genera el PDF.
  */
 async function descargarFacturaPDF(pedidoId, btn) {
-  // --- Estado loading ---
   const icon = btn.querySelector('i');
-  const originalColor = btn.style.background;
   btn.disabled = true;
-  btn.style.background = '#FEF3C7';
-  btn.style.borderColor = '#FDE68A';
-  btn.style.color = '#D97706';
+  const originalStyle = btn.className;
+  btn.className = "inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 bg-amber-50 cursor-not-allowed";
+
   if (icon) icon.setAttribute('data-lucide', 'loader');
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
-  // Spinner animation
   let spinInterval = null;
   let rotation = 0;
   if (icon) {
@@ -1019,7 +678,6 @@ async function descargarFacturaPDF(pedidoId, btn) {
   }
 
   try {
-    // 1. Cargar la factura en un iframe oculto
     const facturaUrl = `/admin-panel/logistica/factura/${pedidoId}/`;
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position:fixed; left:-9999px; top:0; width:900px; height:1200px; border:none; visibility:hidden;';
@@ -1031,13 +689,11 @@ async function descargarFacturaPDF(pedidoId, btn) {
       iframe.src = facturaUrl;
     });
 
-    // Espera extra para que los estilos carguen
     await new Promise(r => setTimeout(r, 800));
 
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     const facturaEl = iframeDoc.body;
 
-    // 2. Capturar con html2canvas
     const canvas = await html2canvas(facturaEl, {
       scale: 2,
       useCORS: true,
@@ -1047,7 +703,6 @@ async function descargarFacturaPDF(pedidoId, btn) {
       windowWidth: 900,
     });
 
-    // 3. Generar PDF con jsPDF
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({
       orientation: 'portrait',
@@ -1079,9 +734,7 @@ async function descargarFacturaPDF(pedidoId, btn) {
 
     pdf.save(`Factura-${pedidoId.slice(0, 8).toUpperCase()}-MIKITECH.pdf`);
 
-    // Notificación de éxito
     if (window.adminToast) window.adminToast.success('PDF descargado correctamente');
-
     document.body.removeChild(iframe);
 
   } catch (err) {
@@ -1089,16 +742,114 @@ async function descargarFacturaPDF(pedidoId, btn) {
     if (window.adminToast) window.adminToast.error('Error al generar el PDF. Intenta de nuevo.');
     else alert('Error al generar el PDF.');
   } finally {
-    // --- Restaurar botón ---
     clearInterval(spinInterval);
     if (icon) {
       icon.style.transform = '';
       icon.setAttribute('data-lucide', 'download');
     }
     btn.disabled = false;
-    btn.style.background = '#ECFDF5';
-    btn.style.borderColor = '#A7F3D0';
-    btn.style.color = '#059669';
+    btn.className = originalStyle;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+
+/**
+ * exportarReportePDF(btn)
+ * Genera un PDF del reporte capturando el contenido HTML,
+ * lo convierte a un Blob y lo descarga automáticamente sin abrir el diálogo de impresión.
+ */
+async function exportarReportePDF(btn) {
+  const icon = btn.querySelector('i');
+  btn.disabled = true;
+  const originalStyle = btn.className;
+  const originalContent = btn.innerHTML;
+  
+  btn.style.opacity = '0.7';
+  btn.style.cursor = 'not-allowed';
+  btn.innerHTML = '<i data-lucide="loader"></i> Exportando...';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  let spinInterval = null;
+  let rotation = 0;
+  const loaderIcon = btn.querySelector('i');
+  if (loaderIcon) {
+    spinInterval = setInterval(() => {
+      rotation = (rotation + 30) % 360;
+      loaderIcon.style.transform = `rotate(${rotation}deg)`;
+    }, 50);
+  }
+
+  try {
+    // Ocultar elementos interactivos/filtros
+    const hiddenElements = document.querySelectorAll('.export-hidden');
+    hiddenElements.forEach(el => el.style.setProperty('display', 'none', 'important'));
+
+    // Esperar un momento para asegurar el renderizado
+    await new Promise(r => setTimeout(r, 300));
+
+    const reportEl = document.getElementById('reportContent');
+    const canvas = await html2canvas(reportEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#F0F2F5',
+      logging: false
+    });
+
+    // Restaurar elementos ocultos
+    hiddenElements.forEach(el => el.style.display = '');
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'px',
+      format: 'a4',
+      compress: true,
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgW = pageWidth;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    let yOffset = 0;
+    let pageCount = 0;
+    while (yOffset < imgH) {
+      if (pageCount > 0) pdf.addPage();
+      pdf.addImage(
+        canvas.toDataURL('image/jpeg', 0.95),
+        'JPEG',
+        0,
+        -yOffset,
+        imgW,
+        imgH
+      );
+      yOffset += pageHeight;
+      pageCount++;
+    }
+
+    // Generar Blob y descargar mediante enlace HTML5 (download attribute)
+    const blob = pdf.output('blob');
+    const blobURL = window.URL.createObjectURL(blob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobURL;
+    downloadLink.download = 'Reporte-Facturacion-MIKITECH.pdf';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    window.URL.revokeObjectURL(blobURL);
+
+    if (window.adminToast) window.adminToast.success('PDF descargado correctamente');
+
+  } catch (err) {
+    console.error('Error generando PDF:', err);
+    if (window.adminToast) window.adminToast.error('Error al generar el PDF del reporte. Intenta de nuevo.');
+    else alert('Error al generar el PDF.');
+  } finally {
+    clearInterval(spinInterval);
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.innerHTML = originalContent;
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 }

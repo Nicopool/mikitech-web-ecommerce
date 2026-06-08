@@ -1,0 +1,823 @@
+{% extends "admin_panel/base_admin.html" %}
+{% load static %}
+{% load miki_filters %}
+{% block page_title %}Gestión de Pedidos — MIKITECH{% endblock %}
+
+{% block admin_content %}
+<!-- Tailwind CSS CDN (Scoped for this view) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          techbg: '#F0F2F5',
+          techsurface: '#FFFFFF',
+          techborder: '#E2E8F0',
+          techaccent: '#1D4ED8',
+          techgreen: '#059669',
+          techamber: '#D97706',
+          techred: '#DC2626',
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body.g-admin-layout { background-color: #F0F2F5 !important; }
+  .g-main-wrapper { background: #F0F2F5 !important; }
+
+  /* Table styling */
+  #ordersTableActive, #ordersTableCompleted {
+    font-size: 15px !important;
+  }
+  #ordersTableActive th, #ordersTableCompleted th {
+    font-size: 12px !important;
+    padding: 18px 24px !important;
+  }
+  #ordersTableActive td, #ordersTableCompleted td {
+    font-size: 15px !important;
+    padding: 20px 24px !important;
+  }
+  #ordersTableActive tbody tr, #ordersTableCompleted tbody tr {
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+  }
+  #ordersTableActive tbody tr:hover, #ordersTableCompleted tbody tr:hover {
+    background-color: #F0F7FF !important;
+    box-shadow: inset 3px 0 0 #1D4ED8;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<div class="flex flex-col gap-6 w-full max-w-full min-w-0 box-border">
+
+  <!-- Header & Brief Stats -->
+  <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 rounded-2xl p-8 relative overflow-hidden shadow-2xl w-full box-border">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-10 -right-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none"></div>
+    <div class="absolute -bottom-15 right-48 w-72 h-72 rounded-full bg-white/3 pointer-events-none"></div>
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-xl bg-white/12 flex items-center justify-center backdrop-blur-md">
+            <i data-lucide="shopping-bag" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h2 class="text-3xl font-extrabold text-white m-0 tracking-tight">Gestión de Pedidos</h2>
+            <p class="text-sm text-white/60 mt-1 font-medium">Panel de despacho, asignación de pilotos y facturación.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN WRAPPER FOR ORDERS TABLE -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 w-full flex flex-col gap-5 box-border">
+
+    <!-- TABS: Pedidos en Proceso / Historial Completado -->
+    <div class="flex gap-2 border-b border-slate-200 pb-0">
+      <button id="tabActive" class="relative bg-none border-none text-[15px] font-bold text-techaccent px-5 py-3 cursor-pointer transition-all duration-200 flex items-center">
+        Pedidos en Proceso
+        <span id="indicatorActive" class="absolute bottom-[-1px] left-0 right-0 h-[2.5px] bg-techaccent rounded-t"></span>
+      </button>
+      <button id="tabCompleted" class="relative bg-none border-none text-[15px] font-medium text-slate-500 px-5 py-3 cursor-pointer transition-all duration-200 flex items-center">
+        Historial Completado
+        <span id="indicatorCompleted" class="absolute bottom-[-1px] left-0 right-0 h-[2.5px] bg-transparent rounded-t"></span>
+      </button>
+    </div>
+
+    <!-- Interactive Filters Bar -->
+    <div class="flex items-center gap-4 flex-wrap w-full box-border">
+      <!-- Search Input -->
+      <div class="flex items-center gap-2 flex-1 min-width-[260px] bg-slate-50 border border-slate-200 rounded-xl px-4 transition-all duration-200"
+           onfocusin="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF'; this.style.boxShadow='0 0 0 3px rgba(29, 78, 216, 0.08)';"
+           onfocusout="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC'; this.style.boxShadow='none';">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+        <input type="text" id="orderSearch" placeholder="Buscar por referencia, cliente, ID..." class="border-none outline-none text-sm font-sans text-slate-900 w-full py-3 bg-transparent">
+      </div>
+
+      <!-- Status Filter -->
+      <div class="relative min-w-[160px] flex-initial">
+        <select id="statusFilter" class="w-full py-3 pl-4 pr-9 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer font-medium appearance-none transition-all duration-200"
+                onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
+                onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <option value="all">Todos los estados</option>
+          <option value="PENDIENTE">🟡 Pendiente</option>
+          <option value="EN CAMINO">🔵 En Camino</option>
+          <option value="ENTREGADO">🟢 Entregado</option>
+          <option value="CANCELADO">🔴 Cancelado</option>
+        </select>
+        <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+      </div>
+
+      <!-- Payment Filter -->
+      <div class="relative min-w-[180px] flex-initial">
+        <select id="paymentFilter" class="w-full py-3 pl-4 pr-9 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer font-medium appearance-none transition-all duration-200"
+                onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
+                onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <option value="all">Todos los métodos de pago</option>
+          <option value="TARJETA">Tarjeta de Crédito</option>
+          <option value="EFECTIVO">Efectivo / Contraentrega</option>
+          <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+        </select>
+        <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+      </div>
+
+      <!-- Date Range -->
+      <div class="flex items-center gap-2 flex-wrap flex-initial min-w-[280px]">
+        <div class="relative flex-1 min-w-[120px]">
+          <input type="date" id="startDateFilter" title="Desde" class="w-full py-3 pl-9 pr-3 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer transition-all duration-200"
+                 onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
+                 onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+        </div>
+        <span class="text-sm text-slate-400 font-semibold">→</span>
+        <div class="relative flex-1 min-w-[120px]">
+          <input type="date" id="endDateFilter" title="Hasta" class="w-full py-3 pl-9 pr-3 rounded-xl border border-slate-200 text-sm font-sans bg-slate-50 text-slate-900 outline-none cursor-pointer transition-all duration-200"
+                 onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';"
+                 onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE 1: ACTIVE ORDERS -->
+    <div id="activeTableContainer" class="flex flex-col gap-5 w-full">
+      <div class="overflow-x-auto w-full rounded-xl border border-slate-200 box-border">
+        <table class="w-full border-collapse text-left" id="ordersTableActive">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th onclick="sortTable(0, 'ordersTableActive')" class="w-[20%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
+                <div class="flex items-center gap-1.5">ID <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
+              </th>
+              <th class="w-[45%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">CLIENTE</th>
+              <th class="w-[20%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ESTADO</th>
+              <th class="w-[15%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido in pedidos %}
+            {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' or pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+            <tr class="table-row-data active-row-data border-b border-slate-200"
+                data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
+                data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
+                data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
+                data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
+
+              <!-- ID / FECHA -->
+              <td class="py-4 px-5">
+                <span class="block font-mono font-extrabold text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
+                <span class="block text-[11px] text-slate-400 font-medium mt-1">{{ pedido.creado_el|fecha_relativa }}</span>
+              </td>
+
+              <!-- CLIENTE -->
+              <td class="py-4 px-5">
+                <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
+                <span class="block text-[12px] text-slate-500 mt-1 font-medium">{{ pedido.monto_total|currency_cop }} &middot; {{ pedido.telefono|default:"Sin Teléfono" }}</span>
+              </td>
+
+              <!-- ESTADO -->
+              <td class="text-center whitespace-nowrap py-4 px-5">
+                {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}
+                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-amber-100 text-amber-800 border border-amber-200">PREPARADO</span>
+                {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-blue-100 text-blue-800 border border-blue-200">EN CAMINO</span>
+                {% endif %}
+              </td>
+
+              <!-- ACCIONES -->
+              <td class="py-4 px-5">
+                <div class="flex justify-center items-center gap-2">
+                  <!-- Cambiar estado a Enviado (En camino) -->
+                  {% if pedido.estado == 'pending' or pedido.estado == 'processing' %}
+                    <button onclick="updateStatus('{{ pedido.id }}', 'Enviado')"
+                            title="Despachar pedido (En Camino)"
+                            class="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold text-white bg-techaccent hover:bg-blue-800 transition shadow-sm border-none cursor-pointer">
+                      <i data-lucide="truck" class="w-3.5 h-3.5"></i> Despachar
+                    </button>
+                  {% endif %}
+                  <!-- Confirmar Entrega -->
+                  {% if pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+                    <button onclick="openConfirmDeliveryModal('{{ pedido.id }}')"
+                            title="Confirmar Entrega con Cédula"
+                            class="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold text-white bg-techgreen hover:bg-emerald-800 transition shadow-sm border-none cursor-pointer">
+                      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Entregar
+                    </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr class="empty-row-active"><td colspan="4" class="py-12 text-center text-slate-400">Ningún pedido en proceso en el sistema.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACIÓN ACTIVOS -->
+      <div class="border-t border-slate-200 pt-4 flex items-center justify-between flex-wrap gap-3 w-full box-border">
+        <div class="text-sm text-slate-500 font-medium">
+          Mostrando <strong class="text-slate-800" id="visibleActiveCount">0</strong> de
+          <strong class="text-slate-800" id="totalActiveCount">0</strong> pedidos en proceso
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="prevActiveBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            ← Anterior
+          </button>
+          <span id="pageActiveLabel" class="text-xs font-bold text-slate-850 px-2">Pág. 1 / 1</span>
+          <button id="nextActiveBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE 2: COMPLETED HISTORICAL ORDERS -->
+    <div id="completedTableContainer" class="hidden flex flex-col gap-5 w-full">
+      <div class="overflow-x-auto w-full rounded-xl border border-slate-200 box-border">
+        <table class="w-full border-collapse text-left" id="ordersTableCompleted">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th onclick="sortTable(0, 'ordersTableCompleted')" class="w-[20%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
+                <div class="flex items-center gap-1.5">ID <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
+              </th>
+              <th class="w-[45%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">CLIENTE</th>
+              <th class="w-[20%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ESTADO</th>
+              <th class="w-[15%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido in pedidos %}
+            {% if pedido.estado != 'pending' and pedido.estado != 'Pendiente' and pedido.estado != 'processing' and pedido.estado != 'shipped' and pedido.estado != 'Enviado' %}
+            <tr class="table-row-data completed-row-data border-b border-slate-200"
+                data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
+                data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
+                data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
+                data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
+
+              <!-- ID / FECHA -->
+              <td class="py-4 px-5">
+                <span class="block font-mono font-extrabold text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
+                <span class="block text-[11px] text-slate-400 font-medium mt-1">{{ pedido.creado_el|fecha_relativa }}</span>
+              </td>
+
+              <!-- CLIENTE -->
+              <td class="py-4 px-5">
+                <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
+                <span class="block text-[12px] text-slate-500 mt-1 font-medium">{{ pedido.monto_total|currency_cop }} &middot; {{ pedido.telefono|default:"Sin Teléfono" }}</span>
+              </td>
+
+              <!-- ESTADO -->
+              <td class="text-center whitespace-nowrap py-4 px-5">
+                {% if pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
+                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">ENTREGADO</span>
+                {% else %}
+                  <span class="inline-block px-3 py-1 text-[10px] font-extrabold tracking-wider rounded-full bg-red-100 text-red-800 border border-red-200">CANCELADO</span>
+                {% endif %}
+              </td>
+
+              <!-- ACCIONES -->
+              <td class="py-4 px-5">
+                <div class="flex justify-center items-center gap-1.5">
+                  <!-- Ver Factura -->
+                  <a href="{% url 'admin_order_invoice' pedido.id %}" target="_blank"
+                     title="Ver factura completa"
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-techaccent hover:bg-blue-50 transition-colors">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr class="empty-row-completed"><td colspan="4" class="py-12 text-center text-slate-400">Ningún pedido completado registrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACIÓN COMPLETADOS -->
+      <div class="border-t border-slate-200 pt-4 flex items-center justify-between flex-wrap gap-3 w-full box-border">
+        <div class="text-sm text-slate-500 font-medium">
+          Mostrando <strong class="text-slate-800" id="visibleCompletedCount">0</strong> de
+          <strong class="text-slate-800" id="totalCompletedCount">0</strong> transacciones históricas
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="prevCompletedBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            ← Anterior
+          </button>
+          <span id="pageCompletedLabel" class="text-xs font-bold text-slate-850 px-2">Pág. 1 / 1</span>
+          <button id="nextCompletedBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- CONFIRM DELIVERY MODAL -->
+<div id="confirmDeliveryModal" class="hidden fixed inset-0 w-full h-full bg-slate-900/60 z-[999] backdrop-blur-sm items-center justify-center" style="display: none;">
+  <div class="bg-white rounded-2xl w-full max-w-[400px] p-8 shadow-2xl animate-slide-up" style="animation: slideUp 0.3s ease;">
+    <h3 class="text-lg font-extrabold text-slate-900 mb-2 flex items-center gap-2">
+      <i data-lucide="shield-check" class="text-techgreen w-5 h-5"></i> Confirmar Entrega
+    </h3>
+    <p class="text-slate-500 text-xs mb-6">Por seguridad, solicita el número de cédula del cliente para confirmar la entrega del pedido <span id="deliveryOrderIdLabel" class="font-mono font-bold text-techaccent"></span></p>
+
+    <form id="confirmDeliveryForm" method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="nuevo_estado" value="Entregado">
+      <div class="mb-6">
+        <label class="block text-xs font-bold mb-2 text-slate-600 uppercase tracking-wider">Cédula del Cliente</label>
+        <input type="text" name="cedula_cliente" required placeholder="Ingresa la cédula sin puntos" class="w-full p-3 rounded-lg border border-slate-200 outline-none text-sm bg-slate-50 text-slate-900 transition-colors focus:border-techaccent focus:bg-white">
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button type="button" onclick="closeConfirmDeliveryModal()" class="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition duration-150 border-none cursor-pointer">Cancelar</button>
+        <button type="submit" class="py-2 px-4 bg-techgreen hover:bg-emerald-800 text-white font-bold rounded-lg text-xs transition duration-150 shadow-md flex items-center gap-1 border-none cursor-pointer">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i> Confirmar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 1. DYNAMIC CLIENT-SIDE FILTERING SYSTEM
+    const searchInput = document.getElementById('orderSearch');
+    const statusSelect = document.getElementById('statusFilter');
+    const paymentSelect = document.getElementById('paymentFilter');
+    const startDateInput = document.getElementById('startDateFilter');
+    const endDateInput = document.getElementById('endDateFilter');
+
+    // Tabs elements
+    const tabActive = document.getElementById('tabActive');
+    const tabCompleted = document.getElementById('tabCompleted');
+    const indicatorActive = document.getElementById('indicatorActive');
+    const indicatorCompleted = document.getElementById('indicatorCompleted');
+    let activeTab = 'active'; // 'active' or 'completed'
+
+    const activeRows = document.querySelectorAll('.active-row-data');
+    const completedRows = document.querySelectorAll('.completed-row-data');
+
+    let activeCurrentPage = 1;
+    let completedCurrentPage = 1;
+    const itemsPerPage = 10;
+
+    let activeFilteredRows = Array.from(activeRows);
+    let completedFilteredRows = Array.from(completedRows);
+
+    function updateTabsCounts() {
+      const query = searchInput.value.toLowerCase().trim();
+      const selectedStatus = statusSelect.value;
+      const selectedPayment = paymentSelect.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      function checkRowMatch(row, rowStatus) {
+        const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+        const rowPayment = row.getAttribute('data-payment');
+        const rowDate = row.getAttribute('data-date');
+
+        const matchesSearch = textContent.includes(query);
+        const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
+        const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
+
+        let matchesDate = true;
+        if (startDate && rowDate < startDate) matchesDate = false;
+        if (endDate && rowDate > endDate) matchesDate = false;
+
+        return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+      }
+
+      const activeMatchCount = Array.from(activeRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
+      const completedMatchCount = Array.from(completedRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
+
+      tabActive.innerHTML = `Pedidos en Proceso <span style="background: ${activeTab === 'active' ? '#1D4ED8' : '#64748B'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; font-weight: 800; transition: all 0.2s;">${activeMatchCount}</span>`;
+      tabCompleted.innerHTML = `Historial Completado <span style="background: ${activeTab === 'completed' ? '#1D4ED8' : '#64748B'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; font-weight: 800; transition: all 0.2s;">${completedMatchCount}</span>`;
+    }
+
+    function adjustStatusFilterOptions() {
+      const options = statusSelect.querySelectorAll('option');
+      options.forEach(opt => {
+        const val = opt.value;
+        if (val === 'all') {
+          opt.style.display = '';
+          return;
+        }
+        if (activeTab === 'active') {
+          if (val === 'PENDIENTE' || val === 'EN CAMINO') {
+            opt.style.display = '';
+          } else {
+            opt.style.display = 'none';
+          }
+        } else {
+          if (val === 'ENTREGADO' || val === 'CANCELADO') {
+            opt.style.display = '';
+          } else {
+            opt.style.display = 'none';
+          }
+        }
+      });
+      // Reset status value if not supported by current tab
+      const currentSelectedOption = statusSelect.querySelector(`option[value="${statusSelect.value}"]`);
+      if (currentSelectedOption && currentSelectedOption.style.display === 'none') {
+        statusSelect.value = 'all';
+      }
+    }
+
+    function updateTableUI() {
+      // Toggle table visibility based on tab
+      const activeContainer = document.getElementById('activeTableContainer');
+      const completedContainer = document.getElementById('completedTableContainer');
+
+      if (activeTab === 'active') {
+        activeContainer.style.display = 'flex';
+        completedContainer.style.display = 'none';
+      } else {
+        activeContainer.style.display = 'none';
+        completedContainer.style.display = 'flex';
+      }
+
+      adjustStatusFilterOptions();
+      updateTabsCounts();
+
+      // Paginate active rows
+      const activeStart = (activeCurrentPage - 1) * itemsPerPage;
+      const activeEnd = activeStart + itemsPerPage;
+      activeRows.forEach(r => r.style.display = 'none');
+      activeFilteredRows.slice(activeStart, activeEnd).forEach(r => r.style.display = '');
+
+      // Paginate completed rows
+      const completedStart = (completedCurrentPage - 1) * itemsPerPage;
+      const completedEnd = completedStart + itemsPerPage;
+      completedRows.forEach(r => r.style.display = 'none');
+      completedFilteredRows.slice(completedStart, completedEnd).forEach(r => r.style.display = '');
+
+      // Remove or show empty states
+      const emptyActive = document.querySelector('.empty-row-active');
+      if (emptyActive) {
+        emptyActive.style.display = activeFilteredRows.length === 0 ? '' : 'none';
+      }
+      const emptyCompleted = document.querySelector('.empty-row-completed');
+      if (emptyCompleted) {
+        emptyCompleted.style.display = completedFilteredRows.length === 0 ? '' : 'none';
+      }
+
+      // Update paginator labels and buttons
+      document.getElementById('visibleActiveCount').textContent = activeFilteredRows.length;
+      document.getElementById('totalActiveCount').textContent = activeRows.length;
+      const activeTotalPages = Math.ceil(activeFilteredRows.length / itemsPerPage) || 1;
+      document.getElementById('pageActiveLabel').textContent = `Pág. ${activeCurrentPage} / ${activeTotalPages}`;
+      document.getElementById('prevActiveBtn').disabled = activeCurrentPage === 1;
+      document.getElementById('nextActiveBtn').disabled = activeCurrentPage === activeTotalPages;
+
+      document.getElementById('visibleCompletedCount').textContent = completedFilteredRows.length;
+      document.getElementById('totalCompletedCount').textContent = completedRows.length;
+      const completedTotalPages = Math.ceil(completedFilteredRows.length / itemsPerPage) || 1;
+      document.getElementById('pageCompletedLabel').textContent = `Pág. ${completedCurrentPage} / ${completedTotalPages}`;
+      document.getElementById('prevCompletedBtn').disabled = completedCurrentPage === 1;
+      document.getElementById('nextCompletedBtn').disabled = completedCurrentPage === completedTotalPages;
+    }
+
+    function applyFilters() {
+      const query = searchInput.value.toLowerCase().trim();
+      const selectedStatus = statusSelect.value;
+      const selectedPayment = paymentSelect.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      function matchesFilter(row, rowStatus) {
+        const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+        const rowPayment = row.getAttribute('data-payment');
+        const rowDate = row.getAttribute('data-date');
+
+        const matchesSearch = textContent.includes(query);
+        const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
+        const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
+
+        let matchesDate = true;
+        if (startDate && rowDate < startDate) matchesDate = false;
+        if (endDate && rowDate > endDate) matchesDate = false;
+
+        return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+      }
+
+      activeFilteredRows = Array.from(activeRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
+      completedFilteredRows = Array.from(completedRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
+
+      activeCurrentPage = 1;
+      completedCurrentPage = 1;
+
+      updateTableUI();
+    }
+
+    // Tabs Event Listeners
+    tabActive.addEventListener('click', () => {
+      activeTab = 'active';
+      tabActive.style.color = '#1D4ED8';
+      tabActive.style.fontWeight = '700';
+      indicatorActive.style.background = '#1D4ED8';
+
+      tabCompleted.style.color = '#64748B';
+      tabCompleted.style.fontWeight = '500';
+      indicatorCompleted.style.background = 'transparent';
+
+      applyFilters();
+    });
+
+    tabCompleted.addEventListener('click', () => {
+      activeTab = 'completed';
+      tabCompleted.style.color = '#1D4ED8';
+      tabCompleted.style.fontWeight = '700';
+      indicatorCompleted.style.background = '#1D4ED8';
+
+      tabActive.style.color = '#64748B';
+      tabActive.style.fontWeight = '500';
+      indicatorActive.style.background = 'transparent';
+
+      applyFilters();
+    });
+
+    // Filter Events
+    searchInput.addEventListener('input', applyFilters);
+    statusSelect.addEventListener('change', applyFilters);
+    paymentSelect.addEventListener('change', applyFilters);
+    startDateInput.addEventListener('change', applyFilters);
+    endDateInput.addEventListener('change', applyFilters);
+
+    // Pagination Click Events
+    document.getElementById('prevActiveBtn').addEventListener('click', () => {
+      if (activeCurrentPage > 1) {
+        activeCurrentPage--;
+        updateTableUI();
+      }
+    });
+
+    document.getElementById('nextActiveBtn').addEventListener('click', () => {
+      const totalPages = Math.ceil(activeFilteredRows.length / itemsPerPage);
+      if (activeCurrentPage < totalPages) {
+        activeCurrentPage++;
+        updateTableUI();
+      }
+    });
+
+    document.getElementById('prevCompletedBtn').addEventListener('click', () => {
+      if (completedCurrentPage > 1) {
+        completedCurrentPage--;
+        updateTableUI();
+      }
+    });
+
+    document.getElementById('nextCompletedBtn').addEventListener('click', () => {
+      const totalPages = Math.ceil(completedFilteredRows.length / itemsPerPage);
+      if (completedCurrentPage < totalPages) {
+        completedCurrentPage++;
+        updateTableUI();
+      }
+    });
+
+    // Initial Load
+    applyFilters();
+  });
+
+  // 2. TABLE SORTING FUNCTIONALITY
+  let sortDirections = {
+    'ordersTableActive': [true, true, true, true],
+    'ordersTableCompleted': [true, true, true, true]
+  };
+
+  function sortTable(colIdx, tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector("tbody");
+    const isactive = tableId === 'ordersTableActive';
+    const rowClass = isactive ? ".active-row-data" : ".completed-row-data";
+    const rows = Array.from(tbody.querySelectorAll("tr" + rowClass));
+    const ascending = sortDirections[tableId][colIdx];
+
+    rows.sort((rowA, rowB) => {
+      let cellA = rowA.cells[colIdx].textContent.trim();
+      let cellB = rowB.cells[colIdx].textContent.trim();
+
+      if (cellA < cellB) return ascending ? -1 : 1;
+      if (cellA > cellB) return ascending ? 1 : -1;
+      return 0;
+    });
+
+    sortDirections[tableId][colIdx] = !ascending;
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Reapply active page slice
+    const tabActive = document.getElementById('tabActive');
+    const tabCompleted = document.getElementById('tabCompleted');
+    const query = document.getElementById('orderSearch').value.toLowerCase().trim();
+    const selectedStatus = document.getElementById('statusFilter').value;
+    const selectedPayment = document.getElementById('paymentFilter').value;
+    const startDate = document.getElementById('startDateFilter').value;
+    const endDate = document.getElementById('endDateFilter').value;
+
+    function matchesFilter(row, rowStatus) {
+      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+      const rowPayment = row.getAttribute('data-payment');
+      const rowDate = row.getAttribute('data-date');
+
+      const matchesSearch = textContent.includes(query);
+      const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
+      const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
+
+      let matchesDate = true;
+      if (startDate && rowDate < startDate) matchesDate = false;
+      if (endDate && rowDate > endDate) matchesDate = false;
+
+      return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+    }
+
+    const activeRows = document.querySelectorAll('.active-row-data');
+    const completedRows = document.querySelectorAll('.completed-row-data');
+    const itemsPerPage = 10;
+
+    if (tableId === 'ordersTableActive') {
+      const filtered = Array.from(activeRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
+      activeRows.forEach(r => r.style.display = 'none');
+      filtered.slice(0, itemsPerPage).forEach(r => r.style.display = '');
+    } else {
+      const filtered = Array.from(completedRows).filter(row => matchesFilter(row, row.getAttribute('data-status')));
+      completedRows.forEach(r => r.style.display = 'none');
+      filtered.slice(0, itemsPerPage).forEach(r => r.style.display = '');
+    }
+  }
+
+  // 3. DELIVERY VALIDATION MODAL
+  function openConfirmDeliveryModal(orderId) {
+    document.getElementById('deliveryOrderIdLabel').textContent = '#' + orderId.substring(0,8).toUpperCase();
+    document.getElementById('confirmDeliveryModal').style.display = 'flex';
+    document.getElementById('confirmDeliveryModal').classList.remove('hidden');
+    document.getElementById('confirmDeliveryForm').action = "/admin-panel/logistica/actualizar/" + orderId + "/";
+  }
+
+  function closeConfirmDeliveryModal() {
+    document.getElementById('confirmDeliveryModal').style.display = 'none';
+    document.getElementById('confirmDeliveryModal').classList.add('hidden');
+  }
+
+  function updateStatus(orderId, nextStatus) {
+    let config = {
+      title: '¿Confirmar actualización?',
+      text: `¿Deseas cambiar el estado del pedido a: ${nextStatus}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'No, esperar',
+      confirmButtonColor: '#1D4ED8'
+    };
+
+    if(nextStatus === 'Cancelado') {
+      config.icon = 'warning';
+      config.confirmButtonColor = '#DC2626';
+    }
+
+    Swal.fire(config).then((result) => {
+      if (result.isConfirmed) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "/admin-panel/logistica/actualizar/" + orderId + "/";
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'nuevo_estado';
+        statusInput.value = nextStatus;
+
+        form.appendChild(csrfInput);
+        form.appendChild(statusInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  }
+</script>
+
+<!-- jsPDF + html2canvas for PDF Download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/**
+ * descargarFacturaPDF(pedidoId, btn)
+ * Loads invoice in a hidden iframe, captures with html2canvas and generates PDF.
+ */
+async function descargarFacturaPDF(pedidoId, btn) {
+  const icon = btn.querySelector('i');
+  btn.disabled = true;
+  const originalStyle = btn.className;
+  btn.className = "inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 bg-amber-50 cursor-not-allowed";
+  
+  if (icon) icon.setAttribute('data-lucide', 'loader');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  let spinInterval = null;
+  let rotation = 0;
+  if (icon) {
+    spinInterval = setInterval(() => {
+      rotation = (rotation + 30) % 360;
+      icon.style.transform = `rotate(${rotation}deg)`;
+    }, 50);
+  }
+
+  try {
+    const facturaUrl = `/admin-panel/logistica/factura/${pedidoId}/`;
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed; left:-9999px; top:0; width:900px; height:1200px; border:none; visibility:hidden;';
+    document.body.appendChild(iframe);
+
+    await new Promise((resolve, reject) => {
+      iframe.onload = resolve;
+      iframe.onerror = reject;
+      iframe.src = facturaUrl;
+    });
+
+    await new Promise(r => setTimeout(r, 800));
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    const facturaEl = iframeDoc.body;
+
+    const canvas = await html2canvas(facturaEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      width: 900,
+      windowWidth: 900,
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'px',
+      format: 'a4',
+      compress: true,
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgW = pageWidth;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    let yOffset = 0;
+    let pageCount = 0;
+    while (yOffset < imgH) {
+      if (pageCount > 0) pdf.addPage();
+      pdf.addImage(
+        canvas.toDataURL('image/jpeg', 0.95),
+        'JPEG',
+        0,
+        -yOffset,
+        imgW,
+        imgH
+      );
+      yOffset += pageHeight;
+      pageCount++;
+    }
+
+    pdf.save(`Factura-${pedidoId.slice(0, 8).toUpperCase()}-MIKITECH.pdf`);
+
+    if (window.adminToast) window.adminToast.success('PDF descargado correctamente');
+    document.body.removeChild(iframe);
+
+  } catch (err) {
+    console.error('Error generando PDF:', err);
+    if (window.adminToast) window.adminToast.error('Error al generar el PDF. Intenta de nuevo.');
+    else alert('Error al generar el PDF.');
+  } finally {
+    clearInterval(spinInterval);
+    if (icon) {
+      icon.style.transform = '';
+      icon.setAttribute('data-lucide', 'download');
+    }
+    btn.disabled = false;
+    btn.className = originalStyle;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+</script>
+{% endblock %}

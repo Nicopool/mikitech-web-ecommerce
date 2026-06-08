@@ -53,3 +53,51 @@ def modulo(num, val):
         return int(num) % int(val)
     except (ValueError, TypeError, ZeroDivisionError):
         return 0
+
+
+@register.filter(name='fecha_relativa')
+def fecha_relativa(value):
+    """
+    Retorna la fecha en formato relativo amigable en español:
+    - Hoy
+    - Ayer
+    - El lunes, El martes, etc. (si es de la última semana)
+    - dd Mes yyyy (si es anterior)
+    """
+    from django.utils import timezone
+    import datetime
+    
+    if not value:
+        return ""
+    
+    try:
+        # Comparar fechas locales de Django
+        local_fecha = timezone.localtime(value).date()
+        local_ahora = timezone.localtime(timezone.now()).date()
+        
+        diferencia = (local_ahora - local_fecha).days
+        
+        if diferencia == 0:
+            return "Hoy"
+        elif diferencia == 1:
+            return "Ayer"
+        elif 1 < diferencia < 7:
+            dias_semana = {
+                0: "El lunes",
+                1: "El martes",
+                2: "El miércoles",
+                3: "El jueves",
+                4: "El viernes",
+                5: "El sábado",
+                6: "El domingo"
+            }
+            return dias_semana.get(local_fecha.weekday(), "")
+        else:
+            meses = {
+                1: "Ene", 2: "Feb", 3: "Mar", 4: "Abr", 5: "May", 6: "Jun",
+                7: "Jul", 8: "Ago", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dic"
+            }
+            return f"{local_fecha.day} {meses.get(local_fecha.month, '')} {local_fecha.year}"
+    except Exception:
+        return value
+

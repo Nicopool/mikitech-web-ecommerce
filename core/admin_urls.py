@@ -40,4 +40,7 @@ urlpatterns = [
     
     # Reportes
     path('reportes/', admin_views.reportes_dashboard, name='admin_reports'),
+    
+    # Pedidos
+    path('pedidos/', admin_views.gestion_pedidos, name='admin_orders'),
 ]

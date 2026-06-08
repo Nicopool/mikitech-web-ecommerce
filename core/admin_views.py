@@ -754,6 +754,9 @@ def asignar_repartidor_admin(petición, id_pedido):
     else:
         messages.warning(petición, 'No se seleccionó ningún repartidor.')
         
+    referer = petición.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
     return redirect('admin_logistics')
 
 
@@ -776,6 +779,15 @@ def cambiar_estado_pedido(petición, id_pedido):
         status_to_save = mapping.get(nuevo_estado_es)
         
         if status_to_save:
+            if status_to_save == 'delivered':
+                cedula_cliente = petición.POST.get('cedula_cliente', '').strip()
+                if not cedula_cliente or cedula_cliente != pedido.cedula:
+                    messages.error(petición, f"Validación de Cédula Fallida: La cédula ingresada no coincide.")
+                    referer = petición.META.get('HTTP_REFERER')
+                    if referer:
+                        return redirect(referer)
+                    return redirect('admin_orders')
+                    
             estado_anterior = pedido.estado
             pedido.estado = status_to_save
             pedido.save()
@@ -801,6 +813,9 @@ def cambiar_estado_pedido(petición, id_pedido):
             else:
                 messages.success(petición, f"Estado del pedido #{str(pedido.id)[:8]} actualizado a {nuevo_estado_es}.")
             
+    referer = petición.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
     return redirect('admin_logistics')
 
 
@@ -956,4 +971,17 @@ def carga_masiva_productos(petición):
         'campos_referencia': campos_referencia,
         'reporte': reporte,
         'titulo_pagina': 'Carga Masiva — MIKITECH'
+    })
+
+
+@requerir_administrador
+def gestion_pedidos(petición):
+    """Gestión interactiva de pedidos (pedidos en proceso e historial)."""
+    pedidos = Pedido.objects.select_related('usuario', 'repartidor').prefetch_related('detalles__producto').order_by('-creado_el')
+    repartidores = Perfil.objects.filter(rol='repartidor', esta_activo=True).order_by('nombre_usuario')
+    
+    return render(petición, 'admin_panel/orders.html', {
+        'pedidos': pedidos,
+        'repartidores': repartidores,
+        'titulo_pagina': 'Gestión de Pedidos — MIKITECH',
     })
