@@ -266,8 +266,8 @@
       </div>
     </div>
 
-    <!-- PREVIEW GENERADO (Renders off-screen for auto-download capture) -->
-    <div id="pdf-preview" style="position: absolute; left: -9999px; top: -9999px; width: 800px;">
+    <!-- PREVIEW GENERADO (Renders behind the page for auto-download capture) -->
+    <div id="pdf-preview" style="position: fixed; top: 0; left: 0; width: 800px; z-index: -1000; pointer-events: none; background: white;">
       <div class="card" style="border-radius:1.6rem; border:1px solid var(--ds-border); background:var(--ds-surface);">
         <div class="card-header" style="background:var(--ds-surface); border-bottom:1px solid var(--ds-border); padding:2rem 2.5rem; font-size:1.6rem; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
           <span id="pdf-preview-title">Vista Previa del Reporte</span>
@@ -591,7 +591,34 @@ function downloadPDF() {
     scale: 2,
     useCORS: true,
     backgroundColor: '#ffffff',
-    logging: false
+    logging: true, // Enable logging to help diagnose issues if any persist
+    scrollX: 0,
+    scrollY: 0,
+    windowWidth: 800,
+    onclone: (clonedDoc) => {
+      const preview = clonedDoc.getElementById('pdf-preview');
+      if (preview) {
+        preview.style.position = 'relative';
+        preview.style.zIndex = '9999';
+        preview.style.left = '0';
+        preview.style.top = '0';
+        preview.style.visibility = 'visible';
+        preview.style.opacity = '1';
+        preview.style.display = 'block';
+        preview.style.background = '#ffffff';
+      }
+      const pContent = clonedDoc.getElementById('pdf-content');
+      if (pContent) {
+        pContent.style.position = 'relative';
+        pContent.style.zIndex = '9999';
+        pContent.style.left = '0';
+        pContent.style.top = '0';
+        pContent.style.visibility = 'visible';
+        pContent.style.opacity = '1';
+        pContent.style.display = 'block';
+        pContent.style.background = '#ffffff';
+      }
+    }
   }).then(function(canvas) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
