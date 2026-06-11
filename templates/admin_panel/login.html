@@ -137,6 +137,13 @@
     .auth-left { display: block; }
     .auth-right { padding: 6rem 7rem; order: 1; }
   }
+  .inp-field.is-invalid {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+  }
+  .inp-field.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  }
 </style>
 {% endblock %}
 
@@ -153,7 +160,9 @@
     <div class="auth-form-wrap">
 
       <div class="auth-logo-wrap">
-        <img src="{% static 'img/logo.png' %}" alt="MIKITECH">
+        <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+          <span style="color: #38BDF8;">MIKI</span>TECH
+        </div>
       </div>
 
       <div class="auth-heading">
@@ -174,12 +183,15 @@
       </div>
       {% endif %}
 
-      <form method="POST" action="/admin-panel/login/" id="admin-login-form">
+      <form method="POST" action="/admin-panel/login/" id="admin-login-form" novalidate>
         {% csrf_token %}
 
         <!-- Correo -->
         <div class="inp-group">
-          <label class="inp-label" for="id_correo">Correo de Administrador</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_correo" style="margin-bottom: 0;">Correo de Administrador</label>
+            <span id="error_correo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="inp-wrap">
             <i data-lucide="mail" class="inp-icon"></i>
             <input type="email" name="correo" id="id_correo" class="inp-field"
@@ -189,12 +201,32 @@
 
         <!-- Contraseña -->
         <div class="inp-group">
-          <label class="inp-label" for="id_clave">Contraseña</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_clave" style="margin-bottom: 0;">Contraseña</label>
+            <span id="error_clave" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="inp-wrap">
             <i data-lucide="lock" class="inp-icon"></i>
             <input type="password" name="clave" id="id_clave" class="inp-field"
-                   required placeholder="••••••••••" autocomplete="new-password">
+                   required placeholder="••••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pass" id="toggleClave"
+                    aria-label="Mostrar/ocultar contraseña"
+                    onclick="togglePassword('id_clave','toggleClave','iconClave')"
+                    style="position: absolute; right: 1.4rem; background: none; border: none; cursor: pointer; color: #9CA3AF; display: flex; align-items: center; padding: 0.5rem;">
+              <i data-lucide="eye" id="iconClave" style="width:1.8rem;height:1.8rem;"></i>
+            </button>
           </div>
+        </div>
+
+        <!-- Términos y condiciones -->
+        <div class="checkbox-group" style="display: flex; align-items: flex-start; gap: 1.2rem; margin-bottom: 2.4rem; font-size: 1.3rem; color: #4B5563;">
+          <input type="checkbox" name="terminos" id="terminos" required>
+          <label for="terminos" style="position: relative; cursor: pointer;">
+            He leído y acepto los
+            <a href="#" style="color:#2563EB;text-decoration:none;font-weight:600;">Términos y Condiciones</a>
+            y la <a href="#" style="color:#2563EB;text-decoration:none;font-weight:600;">Política de Privacidad</a>.
+            <span id="error_terminos" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: block; margin-top: 0.4rem; display: none;"></span>
+          </label>
         </div>
 
         <button type="submit" class="btn-login" id="submit-btn">
@@ -228,13 +260,96 @@
 </div>
 
 <script>
+  function togglePassword(inputId, btnId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.setAttribute('data-lucide', 'eye-off');
+    } else {
+      input.type = 'password';
+      icon.setAttribute('data-lucide', 'eye');
+    }
+    lucide.createIcons();
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
+    
     const form = document.getElementById('admin-login-form');
-    form.addEventListener('submit', () => {
+    const correoInput = document.getElementById('id_correo');
+    const claveInput = document.getElementById('id_clave');
+    const terminosInput = document.getElementById('terminos');
+    
+    form.addEventListener('submit', (e) => {
+      // Clear previous errors
+      document.getElementById('error_correo').style.display = 'none';
+      document.getElementById('error_clave').style.display = 'none';
+      document.getElementById('error_terminos').style.display = 'none';
+      correoInput.classList.remove('is-invalid');
+      claveInput.classList.remove('is-invalid');
+
+      const correo = correoInput.value.trim();
+      const clave = claveInput.value.trim();
+      const terminos = terminosInput.checked;
+      const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      let hasError = false;
+
+      if (!correo) {
+        const errEl = document.getElementById('error_correo');
+        errEl.textContent = 'El correo es requerido';
+        errEl.style.display = 'block';
+        correoInput.classList.add('is-invalid');
+        hasError = true;
+      } else if (!emailRe.test(correo)) {
+        const errEl = document.getElementById('error_correo');
+        errEl.textContent = 'Formato no válido';
+        errEl.style.display = 'block';
+        correoInput.classList.add('is-invalid');
+        hasError = true;
+      }
+
+      if (!clave) {
+        const errEl = document.getElementById('error_clave');
+        errEl.textContent = 'La contraseña es requerida';
+        errEl.style.display = 'block';
+        claveInput.classList.add('is-invalid');
+        hasError = true;
+      }
+
+      if (!terminos) {
+        const errEl = document.getElementById('error_terminos');
+        errEl.textContent = 'Debes aceptar los términos y condiciones';
+        errEl.style.display = 'block';
+        hasError = true;
+      }
+
+      if (hasError) {
+        e.preventDefault();
+        if (!correo || !emailRe.test(correo)) {
+          correoInput.focus();
+        } else if (!clave) {
+          claveInput.focus();
+        }
+        return;
+      }
+
       document.getElementById('btn-text').textContent = 'Verificando...';
+    });
+
+    // Clear error states on input
+    correoInput.addEventListener('input', () => {
+      correoInput.classList.remove('is-invalid');
+      document.getElementById('error_correo').style.display = 'none';
+    });
+    claveInput.addEventListener('input', () => {
+      claveInput.classList.remove('is-invalid');
+      document.getElementById('error_clave').style.display = 'none';
+    });
+    terminosInput.addEventListener('change', () => {
+      document.getElementById('error_terminos').style.display = 'none';
     });
   });
 </script>

@@ -198,6 +198,13 @@
     .auth-left { display: block; }
     .auth-right { padding: 6rem 7rem; order: 1; }
   }
+  .inp-field.is-invalid {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+  }
+  .inp-field.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  }
 </style>
 {% endblock %}
 
@@ -214,7 +221,9 @@
     <div class="auth-form-wrap">
 
       <div class="auth-logo-wrap">
-        <img src="{% static 'img/logo.png' %}" alt="MIKITECH">
+        <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+          <span style="color: #38BDF8;">MIKI</span>TECH
+        </div>
       </div>
 
       <div class="auth-heading">
@@ -243,7 +252,10 @@
 
         <!-- Correo -->
         <div class="inp-group">
-          <label class="inp-label" for="id_correo">Correo Electrónico</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_correo" style="margin-bottom: 0;">Correo Electrónico</label>
+            <span id="error_correo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="inp-wrap">
             <i data-lucide="mail" class="inp-icon"></i>
             <input type="email" name="correo" id="id_correo" class="inp-field"
@@ -255,7 +267,10 @@
 
         <!-- Contraseña -->
         <div class="inp-group">
-          <label class="inp-label" for="id_clave">Contraseña</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_clave" style="margin-bottom: 0;">Contraseña</label>
+            <span id="error_clave" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="inp-wrap">
             <i data-lucide="lock" class="inp-icon"></i>
             <input type="password" name="clave" id="id_clave" class="inp-field"
@@ -337,19 +352,69 @@ function togglePassword(inputId, btnId, iconId) {
 }
 
 function handleLoginSubmit(btn) {
+  // Clear previous errors
+  document.getElementById('error_correo').style.display = 'none';
+  document.getElementById('error_clave').style.display = 'none';
+  document.getElementById('id_correo').classList.remove('is-invalid');
+  document.getElementById('id_clave').classList.remove('is-invalid');
+
   if (!navigator.onLine) { showAlert('warning', 'Sin conexión a internet.'); return; }
-  const correo  = document.getElementById('id_correo').value.trim();
-  const clave   = document.getElementById('id_clave').value.trim();
+  
+  const correoInput = document.getElementById('id_correo');
+  const claveInput = document.getElementById('id_clave');
+  const correo  = correoInput.value.trim();
+  const clave   = claveInput.value.trim();
   const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-  if (!correo && !clave) { showAlert('error', 'Ingresa tu correo y contraseña.'); return; }
-  if (!correo) { showAlert('error', 'El correo es obligatorio.'); return; }
-  if (!clave) { showAlert('error', 'La contraseña es obligatoria.'); return; }
-  if (!emailRe.test(correo)) { showAlert('error', 'Correo electrónico no válido.'); return; }
+  
+  let hasError = false;
+
+  if (!correo) {
+    const errEl = document.getElementById('error_correo');
+    errEl.textContent = 'El correo es obligatorio';
+    errEl.style.display = 'block';
+    correoInput.classList.add('is-invalid');
+    hasError = true;
+  } else if (!emailRe.test(correo)) {
+    const errEl = document.getElementById('error_correo');
+    errEl.textContent = 'Formato de correo no válido';
+    errEl.style.display = 'block';
+    correoInput.classList.add('is-invalid');
+    hasError = true;
+  }
+
+  if (!clave) {
+    const errEl = document.getElementById('error_clave');
+    errEl.textContent = 'La contraseña es obligatoria';
+    errEl.style.display = 'block';
+    claveInput.classList.add('is-invalid');
+    hasError = true;
+  }
+
+  if (hasError) {
+    // Focus first invalid field
+    if (!correo || !emailRe.test(correo)) {
+      correoInput.focus();
+    } else {
+      claveInput.focus();
+    }
+    return;
+  }
+
   btn.disabled = true;
   btn.innerHTML = '<i data-lucide="loader-2" style="width:2rem;height:2rem;animation:spin 1s linear infinite;"></i> Verificando...';
   lucide.createIcons();
   document.getElementById('loginForm').submit();
 }
+
+// Clear errors dynamically on input
+document.getElementById('id_correo').addEventListener('input', function() {
+  this.classList.remove('is-invalid');
+  document.getElementById('error_correo').style.display = 'none';
+});
+document.getElementById('id_clave').addEventListener('input', function() {
+  this.classList.remove('is-invalid');
+  document.getElementById('error_clave').style.display = 'none';
+});
 
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof lucide !== 'undefined') lucide.createIcons();

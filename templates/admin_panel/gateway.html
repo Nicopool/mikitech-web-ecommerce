@@ -137,6 +137,13 @@
     .auth-left { display: block; }
     .auth-right { padding: 6rem 7rem; order: 1; }
   }
+  .inp-field.is-invalid {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+  }
+  .inp-field.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  }
 </style>
 {% endblock %}
 
@@ -153,7 +160,9 @@
     <div class="auth-form-wrap">
 
       <div class="auth-logo-wrap">
-        <img src="{% static 'img/logo.png' %}" alt="MIKITECH">
+        <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+          <span style="color: #38BDF8;">MIKI</span>TECH
+        </div>
       </div>
 
       <div class="auth-heading">
@@ -173,12 +182,15 @@
       </div>
       {% endif %}
 
-      <form method="POST" action="/admin-panel/pasarela/" id="gateway-form">
+      <form method="POST" action="/admin-panel/pasarela/" id="gateway-form" novalidate>
         {% csrf_token %}
 
         <!-- Código Secreto -->
         <div class="inp-group">
-          <label class="inp-label" for="id_codigo_secreto">Código de Acceso</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_codigo_secreto" style="margin-bottom: 0;">Código de Acceso</label>
+            <span id="error_codigo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="inp-wrap">
             <i data-lucide="shield-check" class="inp-icon"></i>
             <input type="password" name="codigo_secreto" id="id_codigo_secreto" class="inp-field"
@@ -220,9 +232,39 @@
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
+    
     const form = document.getElementById('gateway-form');
-    form.addEventListener('submit', () => {
+    const codigoInput = document.getElementById('id_codigo_secreto');
+    
+    form.addEventListener('submit', (e) => {
+      // Clear previous errors
+      document.getElementById('error_codigo').style.display = 'none';
+      codigoInput.classList.remove('is-invalid');
+
+      const code = codigoInput.value.trim();
+      let hasError = false;
+
+      if (!code) {
+        const errEl = document.getElementById('error_codigo');
+        errEl.textContent = 'El código es requerido';
+        errEl.style.display = 'block';
+        codigoInput.classList.add('is-invalid');
+        hasError = true;
+      }
+
+      if (hasError) {
+        e.preventDefault();
+        codigoInput.focus();
+        return;
+      }
+
       document.getElementById('btn-text').textContent = 'Verificando...';
+    });
+
+    // Clear error states on input
+    codigoInput.addEventListener('input', () => {
+      codigoInput.classList.remove('is-invalid');
+      document.getElementById('error_codigo').style.display = 'none';
     });
   });
 </script>

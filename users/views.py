@@ -225,33 +225,66 @@ def editar_perfil(petición):
 
     if petición.method == 'POST':
         import html
-        perfil.nombre_completo = html.escape(petición.POST.get('nombre_completo', perfil.nombre_completo))
-        perfil.biografia = html.escape(petición.POST.get('biografia', perfil.biografia))
-        perfil.telefono = html.escape(petición.POST.get('telefono', perfil.telefono))
-        perfil.ciudad = html.escape(petición.POST.get('ciudad', perfil.ciudad))
-        perfil.pais = html.escape(petición.POST.get('pais', perfil.pais))
 
-        # Avatar
+        # Actualizar campos de texto solo si están presentes en la petición POST
+        # Esto evita errores de None y permite peticiones parciales (como subir solo el avatar)
+        if 'nombre_completo' in petición.POST:
+            val = petición.POST.get('nombre_completo')
+            perfil.nombre_completo = html.escape(val.strip()) if val else ''
+        if 'biografia' in petición.POST:
+            val = petición.POST.get('biografia')
+            perfil.biografia = html.escape(val.strip()) if val else ''
+        if 'telefono' in petición.POST:
+            val = petición.POST.get('telefono')
+            perfil.telefono = html.escape(val.strip()) if val else ''
+        if 'ciudad' in petición.POST:
+            val = petición.POST.get('ciudad')
+            perfil.ciudad = html.escape(val.strip()) if val else ''
+        if 'pais' in petición.POST:
+            val = petición.POST.get('pais')
+            perfil.pais = html.escape(val.strip()) if val else 'Colombia'
+
+        # Manejo del Avatar
         if 'avatar' in petición.FILES:
             import os
+            from django.core.files.storage import default_storage
             archivo_avatar = petición.FILES['avatar']
             extension = os.path.splitext(archivo_avatar.name)[1].lower()
             if extension in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                # Borrar el avatar anterior si existe para no acumular archivos en el almacenamiento
+                if perfil.url_avatar and perfil.url_avatar.startswith('/media/avatars/'):
+                    ruta_vieja = perfil.url_avatar.replace('/media/', '')
+                    if default_storage.exists(ruta_vieja):
+                        try:
+                            default_storage.delete(ruta_vieja)
+                        except Exception as e:
+                            print(f"[!] Error eliminando avatar viejo: {e}")
+                
                 nombre_archivo = f"avatars/{perfil.id}{extension}"
-                from django.core.files.storage import default_storage
-                default_storage.save(nombre_archivo, archivo_avatar)
-                perfil.url_avatar = f'/media/{nombre_archivo}'
-                petición.session['avatar_url'] = perfil.url_avatar
-                petición.session.modified = True
+                if default_storage.exists(nombre_archivo):
+                    try:
+                        default_storage.delete(nombre_archivo)
+                    except Exception as e:
+                        print(f"[!] Error eliminando avatar existente: {e}")
+                
+                nombre_guardado = default_storage.save(nombre_archivo, archivo_avatar)
+                perfil.url_avatar = f'/media/{nombre_guardado}'
 
         perfil.save()
+
+        # Sincronizar los datos en la sesión de Django para que se reflejen en toda la app inmediatamente
         petición.session['avatar_url'] = perfil.url_avatar or ''
+        petición.session['nombre_usuario'] = perfil.nombre_usuario
         petición.session.modified = True
         
-        # AJAX response for Fetch API
+        # Respuesta JSON para peticiones AJAX (fetch)
         if petición.headers.get('x-requested-with') == 'XMLHttpRequest' or petición.content_type == 'application/json':
             from django.http import JsonResponse
-            return JsonResponse({'success': True, 'message': 'Perfil actualizado correctamente'})
+            return JsonResponse({
+                'success': True, 
+                'message': 'Perfil actualizado correctamente',
+                'avatar_url': perfil.url_avatar or ''
+            })
             
         messages.success(petición, "Perfil actualizado correctamente.")
         return redirect('users:profile')

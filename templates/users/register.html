@@ -139,6 +139,13 @@
     .input-row .input-group { margin-bottom: 2rem; }
     .password-reqs { grid-template-columns: 1fr; }
   }
+  .input-field.is-invalid {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+  }
+  .input-field.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  }
 </style>
 {% endblock %}
 
@@ -150,7 +157,9 @@
     <div class="auth-form-wrap">
 
       <div class="auth-logo-wrap">
-        <img src="{% static 'img/logo.png' %}" alt="MIKITECH">
+        <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+          <span style="color: #38BDF8;">MIKI</span>TECH
+        </div>
       </div>
 
       <div class="auth-heading">
@@ -170,7 +179,10 @@
         {# ── Fila 1: Nombre + Usuario ── #}
         <div class="input-row">
           <div class="input-group">
-            <label class="input-label" for="id_nombre">NOMBRE COMPLETO</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+              <label class="input-label" for="id_nombre" style="margin-bottom: 0;">NOMBRE COMPLETO</label>
+              <span id="error_nombre" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: none;"></span>
+            </div>
             <div class="input-wrapper">
               <i data-lucide="user" class="input-icon"></i>
               <input type="text" name="nombre_completo" id="id_nombre" class="input-field"
@@ -179,7 +191,10 @@
             </div>
           </div>
           <div class="input-group">
-            <label class="input-label" for="id_usuario">USUARIO PÚBLICO</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+              <label class="input-label" for="id_usuario" style="margin-bottom: 0;">USUARIO PÚBLICO</label>
+              <span id="error_usuario" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: none;"></span>
+            </div>
             <div class="input-wrapper">
               <i data-lucide="at-sign" class="input-icon"></i>
               <input type="text" name="nombre_usuario" id="id_usuario" class="input-field"
@@ -191,7 +206,10 @@
 
         {# ── Correo ── #}
         <div class="input-group">
-          <label class="input-label" for="id_correo">CORREO ELECTRÓNICO</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="input-label" for="id_correo" style="margin-bottom: 0;">CORREO ELECTRÓNICO</label>
+            <span id="error_correo" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="input-wrapper">
             <i data-lucide="mail" class="input-icon"></i>
             <input type="email" name="correo" id="id_correo" class="input-field"
@@ -203,7 +221,10 @@
 
         {# ── Contraseña + Ojito ── #}
         <div class="input-group" style="margin-bottom:0.8rem;">
-          <label class="input-label" for="password">CONTRASEÑA</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="input-label" for="password" style="margin-bottom: 0;">CONTRASEÑA</label>
+            <span id="error_clave" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="input-wrapper">
             <i data-lucide="lock" class="input-icon"></i>
             <input type="password" name="clave" id="password" class="input-field"
@@ -225,7 +246,10 @@
 
         {# ── Confirmar contraseña + Ojito ── #}
         <div class="input-group">
-          <label class="input-label" for="password2">CONFIRMAR CONTRASEÑA</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="input-label" for="password2" style="margin-bottom: 0;">CONFIRMAR CONTRASEÑA</label>
+            <span id="error_clave2" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: none;"></span>
+          </div>
           <div class="input-wrapper">
             <i data-lucide="lock" class="input-icon"></i>
             <input type="password" name="clave2" id="password2" class="input-field"
@@ -238,12 +262,13 @@
         </div>
 
         {# ── Términos y condiciones ── #}
-        <div class="checkbox-group">
+        <div class="checkbox-group" style="margin-bottom: 1.5rem;">
           <input type="checkbox" name="terminos" id="terminos" required>
-          <label for="terminos">
+          <label for="terminos" style="position: relative;">
             He leído y acepto los
             <a href="#" style="color:#2563EB;text-decoration:none;">Términos y Condiciones</a>
             y la <a href="#" style="color:#2563EB;text-decoration:none;">Política de Privacidad</a>.
+            <span id="error_terminos" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: block; margin-top: 0.4rem; display: none;"></span>
           </label>
         </div>
 
@@ -313,70 +338,157 @@ document.getElementById('password').addEventListener('input', function() {
 
 /* ── Submit con todas las validaciones ── */
 document.getElementById('registerForm').addEventListener('submit', function(e) {
-  const nombre  = document.getElementById('id_nombre').value.trim();
-  const usuario = document.getElementById('id_usuario').value.trim();
-  const correo  = document.getElementById('id_correo').value.trim();
-  const clave   = document.getElementById('password').value;
-  const clave2  = document.getElementById('password2').value;
-  const terminos = document.getElementById('terminos').checked;
+  // Clear previous errors
+  const fields = ['nombre', 'usuario', 'correo', 'clave', 'clave2', 'terminos'];
+  fields.forEach(f => {
+    const el = document.getElementById('error_' + f);
+    if (el) el.style.display = 'none';
+  });
+  
+  const inputs = ['id_nombre', 'id_usuario', 'id_correo', 'password', 'password2'];
+  inputs.forEach(i => {
+    document.getElementById(i).classList.remove('is-invalid');
+  });
+
+  const nombreInput = document.getElementById('id_nombre');
+  const usuarioInput = document.getElementById('id_usuario');
+  const correoInput = document.getElementById('id_correo');
+  const passwordInput = document.getElementById('password');
+  const password2Input = document.getElementById('password2');
+  const terminosInput = document.getElementById('terminos');
+
+  const nombre  = nombreInput.value.trim();
+  const usuario = usuarioInput.value.trim();
+  const correo  = correoInput.value.trim();
+  const clave   = passwordInput.value;
+  const clave2  = password2Input.value;
+  const terminos = terminosInput.checked;
   const emailRe  = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  let hasError = false;
 
   /* CP-MK-009: bloquear caracteres HTML/SQL en nombre */
   if (/<|>|'|--|;/i.test(nombre)) {
     e.preventDefault();
-    if (window.toast) window.toast.error("Caracteres inválidos en el nombre.");
-    return;
+    const errEl = document.getElementById('error_nombre');
+    errEl.textContent = 'Caracteres inválidos';
+    errEl.style.display = 'block';
+    nombreInput.classList.add('is-invalid');
+    hasError = true;
   }
 
-  if (!nombre || !usuario || !correo || !clave) {
+  if (!nombre) {
     e.preventDefault();
-    if (window.toast) window.toast.aviso("Por favor, completa todos los campos obligatorios.");
-    return;
+    const errEl = document.getElementById('error_nombre');
+    errEl.textContent = 'El nombre es requerido';
+    errEl.style.display = 'block';
+    nombreInput.classList.add('is-invalid');
+    hasError = true;
   }
 
-  /* CP-MK-004: email inválido */
-  if (!emailRe.test(correo)) {
+  if (!usuario) {
     e.preventDefault();
-    if (window.toast) window.toast.error("Formato de correo electrónico no válido.");
-    document.getElementById('id_correo').classList.add('is-invalid');
-    return;
+    const errEl = document.getElementById('error_usuario');
+    errEl.textContent = 'El usuario es requerido';
+    errEl.style.display = 'block';
+    usuarioInput.classList.add('is-invalid');
+    hasError = true;
+  }
+
+  if (!correo) {
+    e.preventDefault();
+    const errEl = document.getElementById('error_correo');
+    errEl.textContent = 'El correo es requerido';
+    errEl.style.display = 'block';
+    correoInput.classList.add('is-invalid');
+    hasError = true;
+  } else if (!emailRe.test(correo)) {
+    e.preventDefault();
+    const errEl = document.getElementById('error_correo');
+    errEl.textContent = 'Correo no válido';
+    errEl.style.display = 'block';
+    correoInput.classList.add('is-invalid');
+    hasError = true;
+  }
+
+  if (!clave) {
+    e.preventDefault();
+    const errEl = document.getElementById('error_clave');
+    errEl.textContent = 'La contraseña es requerida';
+    errEl.style.display = 'block';
+    passwordInput.classList.add('is-invalid');
+    hasError = true;
+  } else {
+    /* CP-MK-005 / 007: fuerza de contraseña */
+    const isSecure = rules.length(clave) && rules.upper(clave) && rules.number(clave) && rules.special(clave);
+    if (!isSecure) {
+      e.preventDefault();
+      const errEl = document.getElementById('error_clave');
+      errEl.textContent = 'Debe ser más segura';
+      errEl.style.display = 'block';
+      passwordInput.classList.add('is-invalid');
+      hasError = true;
+    }
+  }
+
+  if (!clave2) {
+    e.preventDefault();
+    const errEl = document.getElementById('error_clave2');
+    errEl.textContent = 'Confirma tu contraseña';
+    errEl.style.display = 'block';
+    password2Input.classList.add('is-invalid');
+    hasError = true;
+  } else if (clave !== clave2) {
+    e.preventDefault();
+    const errEl = document.getElementById('error_clave2');
+    errEl.textContent = 'No coinciden';
+    errEl.style.display = 'block';
+    password2Input.classList.add('is-invalid');
+    hasError = true;
   }
 
   /* CP-MK-008: términos */
   if (!terminos) {
     e.preventDefault();
-    if (window.toast) window.toast.aviso("Es obligatorio aceptar los Términos y Condiciones.");
-    return;
+    const errEl = document.getElementById('error_terminos');
+    errEl.textContent = 'Debes aceptar los términos';
+    errEl.style.display = 'block';
+    hasError = true;
   }
 
-  /* CP-MK-005 / 007: fuerza de contraseña */
-  const isSecure = rules.length(clave) & rules.upper(clave) & rules.number(clave) & rules.special(clave);
-  if (!isSecure) {
-    e.preventDefault();
-    if (window.toast) window.toast.aviso("Tu contraseña debe tener al menos 8 caracteres, mayúscula, número y símbolo especial.");
-    return;
-  }
-
-  /* CP-MK-006: contraseñas no coinciden */
-  if (clave !== clave2) {
-    e.preventDefault();
-    if (window.toast) window.toast.error("Las contraseñas no coinciden. Verifícalo e intenta de nuevo.");
-    document.getElementById('password2').classList.add('is-invalid');
+  if (hasError) {
     return;
   }
 
   const btn = document.getElementById('btn-submit');
-  btn.innerHTML = '<i data-lucide="loader-2" style="width:20px;height:20px;"></i> CREANDO CUENTA...';
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:20px;height:20px;animation:spin 1s linear infinite;"></i> CREANDO CUENTA...';
   btn.disabled = true;
   lucide.createIcons();
 });
 
-/* Limpiar borde rojo al escribir */
+/* Limpiar alertas y borde rojo al escribir */
+document.getElementById('id_nombre').addEventListener('input', function() {
+  this.classList.remove('is-invalid');
+  document.getElementById('error_nombre').style.display = 'none';
+});
+document.getElementById('id_usuario').addEventListener('input', function() {
+  this.classList.remove('is-invalid');
+  document.getElementById('error_usuario').style.display = 'none';
+});
 document.getElementById('id_correo').addEventListener('input', function() {
   this.classList.remove('is-invalid');
+  document.getElementById('error_correo').style.display = 'none';
+});
+document.getElementById('password').addEventListener('input', function() {
+  this.classList.remove('is-invalid');
+  document.getElementById('error_clave').style.display = 'none';
 });
 document.getElementById('password2').addEventListener('input', function() {
   this.classList.remove('is-invalid');
+  document.getElementById('error_clave2').style.display = 'none';
+});
+document.getElementById('terminos').addEventListener('change', function() {
+  document.getElementById('error_terminos').style.display = 'none';
 });
 
 document.addEventListener('DOMContentLoaded', function() {

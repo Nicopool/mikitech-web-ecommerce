@@ -70,6 +70,14 @@ def login_administrador(petición):
         from users.supabase_auth import iniciar_sesion_usuario
         correo = petición.POST.get('correo', '').strip()
         clave = petición.POST.get('clave', '')
+        terminos = petición.POST.get('terminos')
+
+        if not terminos:
+            return render(petición, 'admin_panel/login.html', {
+                'error': 'Debes aceptar los Términos y Condiciones.',
+                'correo': correo,
+                'titulo_pagina': 'Login Administrador — MIKITECH',
+            })
 
         datos, error = iniciar_sesion_usuario(correo, clave)
 
@@ -149,6 +157,7 @@ def registro_administrador(petición):
         correo = petición.POST.get('correo', '').strip()
         clave = petición.POST.get('clave', '')
         confirmar_clave = petición.POST.get('confirmar_clave', '')
+        terminos = petición.POST.get('terminos')
 
         contexo = {
             'nombre_completo': nombre_completo,
@@ -170,6 +179,17 @@ def registro_administrador(petición):
                 petición.session.modified = True
                 messages.info(petición, f"Acceso bypass concedido como {perfil.nombre_usuario}.")
                 return redirect('/admin-panel/')
+
+        if not terminos:
+            contexo['error'] = 'Debes aceptar los Términos y Condiciones.'
+            return render(petición, 'admin_panel/register.html', contexo)
+
+        import re
+        # Requerir contraseña segura: mín 8 chars, 1 mayúscula, 1 número, 1 carácter especial
+        patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}$"
+        if not re.match(patron, clave):
+            contexo['error'] = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial (@$!%*?&).'
+            return render(petición, 'admin_panel/register.html', contexo)
 
         if Perfil.objects.filter(nombre_usuario=nombre_usuario).exists():
             perfil = Perfil.objects.get(nombre_usuario=nombre_usuario)
