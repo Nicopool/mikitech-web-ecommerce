@@ -26,9 +26,14 @@ def lista_productos(petición):
             Q(modelo__icontains=consulta)
         )
 
-    # Filtrar por categoría
+    # Filtrar por categoría (acepta UUID o slug)
     if id_categoría:
-        productos = productos.filter(categoria_id=id_categoría)
+        import uuid
+        try:
+            uuid.UUID(id_categoría)
+            productos = productos.filter(categoria_id=id_categoría)
+        except ValueError:
+            productos = productos.filter(categoria__enlace=id_categoría)
 
     # Filtrar por precio
     if precio_min:

@@ -5,7 +5,7 @@
 {% block extra_head %}
 <style>
   :root {
-    --accent: #2563EB;
+    --accent: #0284C7;
     --navy: #0F172A;
     --slate: #64748B;
     --border: #E2E8F0;
@@ -13,11 +13,17 @@
   }
   
   /* Mobile-First layout: base para pantallas pequeñas */
-  .detail-section { padding: 2rem 1.5rem; background: #FFFFFF; }
+  .detail-section {
+    padding: 2rem 1.5rem;
+    background: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+    color: #0F172A;
+    font-family: 'Outfit', 'Inter', sans-serif;
+  }
   .detail-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: start; }
   
   @media (min-width: 900px) { 
-    .detail-section { padding: 4rem 2rem; }
+    .detail-section { padding: 5rem 2rem 8rem; }
     .detail-grid { grid-template-columns: 1.1fr 0.9fr; gap: 6rem; } 
   }
 
@@ -28,7 +34,7 @@
   }
   
   .main-image-box { 
-    background: #FFF; 
+    background: #F8FAFC; 
     border: 1px solid var(--border); 
     border-radius: 2.4rem; 
     aspect-ratio: 1/1; 
@@ -36,11 +42,10 @@
     align-items: center; 
     justify-content: center; 
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.05);
     transition: all 0.5s ease;
   }
-  /* Cambio clave: object-fit cover para adaptar imagen */
-  .main-image-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+  .main-image-box img { width: 100%; height: 100%; object-fit: contain; padding: 2rem; transition: transform 0.5s ease; }
   .main-image-box:hover img { transform: scale(1.05); }
 
   .thumb-strip { display: flex; gap: 1.5rem; margin-top: 2rem; overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; }
@@ -52,55 +57,53 @@
     border-radius: 1.2rem; 
     border: 1px solid var(--border); 
     cursor: pointer; 
-    background: #FFF; 
+    background: #F8FAFC; 
     display: flex; 
     align-items: center; 
     justify-content: center;
     overflow: hidden;
   }
-  .thumb-item.active { border-color: var(--accent); border-width: 2px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
-  /* object-fit cover para miniaturas */
-  .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb-item.active { border-color: var(--accent); border-width: 2px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15); }
+  .thumb-item img { width: 100%; height: 100%; object-fit: contain; padding: 0.8rem; }
 
   /* INFO SIDE */
   .p-header { margin-bottom: 3rem; }
-  .p-tag { font-size: 1.1rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem; display: block; }
-  .p-name { font-family: 'Inter', sans-serif; font-size: 3.2rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; color: var(--navy); margin-bottom: 1.5rem; }
+  .p-tag { font-size: 1.15rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem; display: block; text-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+  .p-name { font-family: 'Outfit', sans-serif; font-size: 3.2rem; font-weight: 800; line-height: 1.25; letter-spacing: -0.5px; color: var(--navy); margin-bottom: 1.5rem; }
   
   .p-rating { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; color: var(--slate); font-size: 1.3rem; }
   
   .p-price-block { margin: 3rem 0; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
-  .price-main { font-family: 'Inter', sans-serif; font-size: 2.8rem; font-weight: 500; color: var(--navy); letter-spacing: -0.5px; }
-  .price-label { font-size: 1.1rem; color: var(--slate); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 0.5rem; }
+  .price-main { font-family: 'Outfit', sans-serif; font-size: 3.2rem; font-weight: 800; color: #38BDF8; letter-spacing: -0.5px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+  .price-label { font-size: 1.15rem; color: var(--slate); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 0.8rem; }
 
-  .stock-status { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.2rem; border-radius: 6px; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 2rem; }
-  .stock-in { background: #F8FAFC; color: #334155; border: 1px solid #E2E8F0; }
-  .stock-low { background: #FEF3C7; color: #B45309; }
-  .stock-out { background: #FEE2E2; color: #B91C1C; }
+  .stock-status { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.4rem; border-radius: 30px; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2.5rem; text-transform: uppercase; }
+  .stock-in { background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+  .stock-low { background: rgba(245, 158, 11, 0.1); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .stock-out { background: rgba(239, 68, 68, 0.1); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
-  /* Fila de acciones adaptativa */
+  /* Fila de acciones */
   .actions-row { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 3rem; }
-  .btn-premium { height: 4.8rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 1rem; font-family: 'Inter', sans-serif; font-size: 1.3rem; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s ease; border: none; cursor: pointer; width: 100%; }
+  .btn-premium { height: 5.2rem; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 1rem; font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s ease; border: none; cursor: pointer; width: 100%; }
   
   @media (min-width: 640px) {
     .actions-row { flex-direction: row; gap: 2rem; }
     .btn-premium { width: auto; }
   }
   
-  .btn-add-cart { flex: 1; background: var(--navy); color: #FFF; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); }
-  .btn-add-cart:hover { background: #1E293B; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15); }
+  .btn-add-cart { flex: 1; background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%); color: #FFF; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4); border: 1px solid rgba(56, 189, 248, 0.2); }
+  .btn-add-cart:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(56, 189, 248, 0.5); }
   .btn-add-cart:active { transform: translateY(0); }
 
   /* SPECS TAB */
   .specs-container { margin-top: 6rem; border-top: 1px solid var(--border); padding-top: 6rem; }
-  .specs-title { font-family: 'Inter', sans-serif; font-size: 2.8rem; text-transform: uppercase; margin-bottom: 3rem; }
+  .specs-title { font-family: 'Outfit', sans-serif; font-size: 2.4rem; text-transform: uppercase; margin-bottom: 3rem; font-weight: 800; }
   .specs-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
   @media (min-width: 600px) { .specs-grid { grid-template-columns: repeat(2, 1fr); } }
-  .spec-card { background: var(--bg-premium); padding: 2rem; border-radius: 1.2rem; border: 1px solid rgba(0,0,0,0.02); }
-  .spec-label { font-size: 1.1rem; color: var(--slate); text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 0.5rem; }
-  .spec-value { font-size: 1.5rem; font-weight: 600; color: var(--navy); }
-
-</style>
+  .spec-card { background: var(--bg-premium); padding: 2.2rem; border-radius: 14px; border: 1px solid var(--border); }
+  .spec-label { font-size: 1.15rem; color: var(--slate); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 0.5rem; letter-spacing: 1px; }
+  .spec-value { font-size: 1.55rem; font-weight: 600; color: #FFF; }
+</style>>
 {% endblock %}
 
 {% block content %}
@@ -155,7 +158,7 @@
           <div class="stock-status stock-in">Stock Disponible — Envío Inmediato</div>
         {% endif %}
 
-        <div style="font-size: 1.6rem; color: #475569; line-height: 1.8; margin-bottom: 4rem;">
+        <div style="font-size: 1.6rem; color: #334155; line-height: 1.8; margin-bottom: 4rem;">
           {{ producto.descripcion }}
         </div>
 
@@ -165,7 +168,7 @@
           <div style="font-size:1.4rem; color:#94A3B8; text-decoration:line-through; margin-bottom:0.5rem;">{{ producto.precio|currency_cop }}</div>
           <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:1rem;">
             <span style="font-family: 'Inter', sans-serif; font-size:2.8rem; font-weight:600; color:var(--navy); letter-spacing:-0.5px; line-height:1;">{{ producto.precio_con_descuento|currency_cop }}</span>
-            <span style="background:#F1F5F9; color:#334155; font-weight:600; font-size:1.2rem; padding:0.4rem 0.8rem; border-radius:4px; border:1px solid #E2E8F0; letter-spacing:1px;">-{{ producto.descuento_porcentaje }}% OFF</span>
+            <span style="background: rgba(239, 68, 68, 0.08); color: #EF4444; font-weight: 600; font-size: 1.2rem; padding: 0.4rem 0.8rem; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.2); letter-spacing: 1px;">-{{ producto.descuento_porcentaje }}% OFF</span>
           </div>
           <div style="font-size:1.1rem; color:var(--slate); line-height:1.6;">IVA del 19% incluido<br>Garantía oficial de 1 año cubierta por el fabricante</div>
           {% else %}
@@ -189,15 +192,15 @@
             {% for key, val in producto.especificaciones.items %}
             <div class="spec-card">
               <span class="spec-label">{{ key|title }}</span>
-              <span class="spec-value">{{ val }}</span>
+              <span class="spec-value" style="color: var(--navy);">{{ val }}</span>
             </div>
             {% endfor %}
           </div>
         </div>
         {% endif %}
 
-        <div style="margin-top: 4rem; padding: 2rem; border-radius: 8px; border: 1px solid #F1F5F9; background: #FAFAFA; font-size: 1.2rem; color: var(--slate); line-height: 1.7;">
-          <div style="display:flex; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #F1F5F9;">
+        <div style="margin-top: 4rem; padding: 2rem; border-radius: 8px; border: 1px solid #E2E8F0; background: #F8FAFC; font-size: 1.2rem; color: var(--slate); line-height: 1.7;">
+          <div style="display:flex; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #E2E8F0;">
             <span>SKU: <span style="color:var(--navy); font-family: monospace; font-size: 1.1rem;">#{{ producto.codigo_sku|default:"MIKI-2026-X" }}</span></span>
             <span>Marca: <span style="color:var(--navy); font-weight: 500;">{{ producto.marca|default:"MIKITECH" }}</span></span>
           </div>
