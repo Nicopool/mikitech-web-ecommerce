@@ -105,7 +105,7 @@ if os.path.exists(BASE_DIR / 'dist'):
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Almacenamiento de archivos estáticos comprimidos para producción con WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Archivos de media (avatares, imágenes)
 MEDIA_URL = '/media/'
