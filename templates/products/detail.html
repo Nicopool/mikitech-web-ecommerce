@@ -103,6 +103,27 @@
   .spec-card { background: var(--bg-premium); padding: 2.2rem; border-radius: 14px; border: 1px solid var(--border); }
   .spec-label { font-size: 1.15rem; color: var(--slate); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 0.5rem; letter-spacing: 1px; }
   .spec-value { font-size: 1.55rem; font-weight: 600; color: #FFF; }
+
+  /* ── MOBILE RESPONSIVE ── */
+  @media (max-width: 767px) {
+    .detail-section { padding: 1.5rem 1rem; }
+    .p-name { font-size: 2.4rem; margin-bottom: 1rem; }
+    .p-tag { font-size: 1rem; letter-spacing: 1.5px; margin-bottom: 1rem; }
+    .p-price-block { margin: 2rem 0; padding-bottom: 2rem; }
+    .price-main { font-size: 2.6rem; }
+    .specs-container { margin-top: 3rem; padding-top: 3rem; }
+    .specs-title { font-size: 1.8rem; margin-bottom: 2rem; }
+    .thumb-strip { gap: 1rem; }
+    .thumb-item { flex: 0 0 7rem; height: 7rem; }
+    .main-image-box { border-radius: 1.6rem; }
+    .actions-row { margin-top: 2rem; }
+    .btn-premium { height: 4.8rem; font-size: 1.3rem; letter-spacing: 1.5px; }
+  }
+  @media (max-width: 400px) {
+    .p-name { font-size: 2rem; }
+    .price-main { font-size: 2.2rem; }
+    .thumb-item { flex: 0 0 6rem; height: 6rem; }
+  }
 </style>>
 {% endblock %}
 
@@ -200,7 +221,7 @@
         {% endif %}
 
         <div style="margin-top: 4rem; padding: 2rem; border-radius: 8px; border: 1px solid #E2E8F0; background: #F8FAFC; font-size: 1.2rem; color: var(--slate); line-height: 1.7;">
-          <div style="display:flex; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #E2E8F0;">
+        <div style="display:flex; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #E2E8F0; flex-wrap: wrap; gap: 0.8rem;">
             <span>SKU: <span style="color:var(--navy); font-family: monospace; font-size: 1.1rem;">#{{ producto.codigo_sku|default:"MIKI-2026-X" }}</span></span>
             <span>Marca: <span style="color:var(--navy); font-weight: 500;">{{ producto.marca|default:"MIKITECH" }}</span></span>
           </div>

@@ -512,6 +512,134 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+
+    /* ═══════════════════════════════════════════
+       MOBILE RESPONSIVE ORGANIZATION (< 768px)
+       Solo organización/espaciado, no diseño.
+       ═══════════════════════════════════════════ */
+    @media (max-width: 767px) {
+      /* ── NAVBAR ── */
+      .nav-wix {
+        padding: 0 1.6rem;
+        height: 7rem;
+      }
+      .nav-logo {
+        height: 4.5rem;
+      }
+      .nav-logo div {
+        font-size: 2rem !important;
+      }
+      .nav-right {
+        gap: 0.6rem;
+      }
+      .nav-action-wrapper {
+        gap: 0.4rem;
+      }
+      .nav-action-btn,
+      .nav-notif-btn {
+        width: 3.6rem;
+        height: 3.6rem;
+      }
+      .nav-action-btn svg,
+      .nav-notif-btn svg {
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+      .nav-avatar,
+      .nav-avatar-placeholder {
+        width: 3.6rem;
+        height: 3.6rem;
+        font-size: 1.3rem;
+      }
+      .hamburger {
+        width: 3.8rem;
+        height: 3.8rem;
+        margin-left: 0.4rem;
+        padding: 0.8rem;
+      }
+
+      /* ── PRODUCT CARDS: BOTONES SIEMPRE VISIBLES ── */
+      .p-actions {
+        height: auto !important;
+        opacity: 1 !important;
+        margin-top: 1.2rem !important;
+        overflow: visible;
+      }
+      .btn-action {
+        height: 3.6rem;
+        font-size: 1.1rem;
+        min-height: 4.4rem; /* touch target */
+      }
+
+      /* ── CARD INFO PADDING ── */
+      .wix-p-info {
+        padding: 1.4rem;
+      }
+      .wix-p-title {
+        font-size: 1.3rem;
+        min-height: 3.6rem;
+        margin-bottom: 0.6rem;
+      }
+      .badge-cat {
+        font-size: 0.95rem;
+        padding: 0.3rem 0.8rem;
+        top: 1rem;
+        left: 1rem;
+      }
+
+      /* ── FOOTER ── */
+      .miki-footer {
+        padding: 4rem 2rem 3rem;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      .footer-col h4 {
+        margin-bottom: 1.5rem;
+      }
+      .footer-bottom {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1.5rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+      }
+
+      /* ── CATEGORY BUTTONS ── */
+      .cat-nav {
+        gap: 0.8rem;
+        padding: 0 1.6rem;
+        margin-bottom: 2.5rem;
+      }
+      .cat-btn {
+        font-size: 1.1rem;
+        padding: 0.7rem 1.4rem;
+      }
+
+      /* ── CAROUSEL ── */
+      .detail-section {
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    /* ── Pantallas muy pequeñas (< 400px) ── */
+    @media (max-width: 400px) {
+      .nav-wix {
+        padding: 0 1.2rem;
+      }
+      .wix-p-info {
+        padding: 1.2rem;
+      }
+      .wix-p-title {
+        font-size: 1.2rem;
+      }
+      .btn-action {
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+      }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Inyección de Vite para React -->
