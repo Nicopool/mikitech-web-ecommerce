@@ -105,7 +105,14 @@ if os.path.exists(BASE_DIR / 'dist'):
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Almacenamiento de archivos estáticos comprimidos para producción con WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Archivos de media (avatares, imágenes)
 MEDIA_URL = '/media/'
