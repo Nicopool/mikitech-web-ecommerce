@@ -32,6 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,7 +93,13 @@ USE_THOUSAND_SEPARATOR = True
 # Archivos estáticos
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+if os.path.exists(BASE_DIR / 'dist'):
+    STATICFILES_DIRS.append(BASE_DIR / 'dist')
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Almacenamiento de archivos estáticos comprimidos para producción con WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Archivos de media (avatares, imágenes)
 MEDIA_URL = '/media/'

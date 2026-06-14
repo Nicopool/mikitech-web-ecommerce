@@ -515,8 +515,13 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Inyección de Vite para React -->
-  <script type="module" src="http://localhost:3000/@vite/client"></script>
-  <script type="module" src="http://localhost:3000/src/main.tsx"></script>
+  {% if debug %}
+    <script type="module" src="http://localhost:3000/@vite/client"></script>
+    <script type="module" src="http://localhost:3000/src/main.tsx"></script>
+  {% else %}
+    <script type="module" src="{% static 'assets/index.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'assets/index.css' %}">
+  {% endif %}
   {% block extra_head %}{% endblock %}
 </head>
 <body>

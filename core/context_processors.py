@@ -30,9 +30,12 @@ def global_context(request):
         conteo_notificaciones = len(todas_notif_no_leidas)
         notificaciones_previas = todas_notif_no_leidas[:5]  # Mostrar máximo 5
     
+    from django.conf import settings
+    
     return {
         'nav_categorias': nav_categorias,
         'conteo_carrito': conteo_carrito,
         'conteo_notificaciones': conteo_notificaciones,
         'ultimas_notificaciones': notificaciones_previas,
+        'debug': settings.DEBUG,
     }
