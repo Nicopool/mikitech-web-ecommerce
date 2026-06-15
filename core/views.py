@@ -419,3 +419,9 @@ def blog(petición):
 def puerta_administrador(petición):
     """Página intermedia para acceso administrativo."""
     return redirect('core:admin_gateway') # Redirección a la vista en admin_views para consistencia
+
+
+def ping(petición):
+    """Endpoint simple para pruebas de carga con k6."""
+    from django.http import JsonResponse
+    return JsonResponse({'status': 'ok', 'msg': 'pong'})
