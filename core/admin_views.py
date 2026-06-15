@@ -4,6 +4,7 @@ import uuid
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.views.decorators.http import require_POST
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.contrib import messages
 from products.models import Producto, Categoria, ImagenProducto
 from interactions.models import Reseña, Pedido
@@ -843,10 +844,36 @@ def cambiar_estado_pedido(petición, id_pedido):
 
 
 @requerir_administrador
+@xframe_options_sameorigin
 def ver_factura_pedido(petición, id_pedido):
-    """Vista detallada de factura para impresión administrativa."""
+    """Vista detallada de factura para impresión administrativa o datos JSON."""
     pedido = get_object_or_404(Pedido.objects.prefetch_related('detalles__producto'), id=id_pedido)
     perfil = pedido.usuario
+
+    if petición.GET.get('format') == 'json':
+        from django.http import JsonResponse
+        detalles_list = []
+        for det in pedido.detalles.all():
+            detalles_list.append({
+                'nombre': det.producto.nombre if det.producto else "Producto descatalogado",
+                'cantidad': det.cantidad,
+                'precio': float(det.precio_unitario)
+            })
+        
+        # Localized/formatted date
+        fecha_str = pedido.creado_el.strftime('%d/%m/%Y') if pedido.creado_el else ''
+        
+        return JsonResponse({
+            'order_id': str(pedido.id),
+            'creado_el': fecha_str,
+            'monto_total': float(pedido.monto_total),
+            'cliente_nombre': perfil.nombre_mostrado if perfil else "Cliente Genérico",
+            'cliente_username': perfil.nombre_usuario if perfil else "cliente",
+            'cliente_telefono': pedido.telefono or (perfil.telefono if perfil and perfil.telefono else '') or '+57 300 000 0000',
+            'direccion_envio': pedido.direccion_envio or 'Retiro en tienda',
+            'cedula': pedido.cedula or 'N/A',
+            'detalles': detalles_list
+        })
     
     # Cálculos de impuestos para la factura legal
     import decimal

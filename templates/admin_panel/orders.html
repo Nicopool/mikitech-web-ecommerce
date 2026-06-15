@@ -779,69 +779,197 @@ async function descargarFacturaPDF(pedidoId, btn) {
   }
 
   try {
-    const facturaUrl = `/admin-panel/logistica/factura/${pedidoId}/`;
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed; left:-9999px; top:0; width:900px; height:1200px; border:none; visibility:hidden;';
-    document.body.appendChild(iframe);
+    const response = await fetch(`/admin-panel/logistica/factura/${pedidoId}/?format=json`);
+    if (!response.ok) throw new Error('Error al obtener los datos de la factura');
+    const orderData = await response.json();
 
-    await new Promise((resolve, reject) => {
-      iframe.onload = resolve;
-      iframe.onerror = reject;
-      iframe.src = facturaUrl;
+    const amount   = orderData.monto_total;
+    const tax      = amount * 0.19;
+    const subtotal = amount - tax;
+    const fmt      = new Intl.NumberFormat('es-CO');
+
+    let itemsHtml = '';
+    orderData.detalles.forEach(function(item, index) {
+      const itemTotal = item.cantidad * item.precio;
+      itemsHtml += `
+        <tr style="border-bottom:1px solid #E2E8F0; background:${index % 2 === 0 ? '#FFFFFF' : '#F8FAFC'};">
+          <td style="padding:14px 12px; font-size:12px; color:#64748B; font-weight:600;">${(index + 1).toString().padStart(2, '0')}</td>
+          <td style="padding:14px 12px; font-size:13px; color:#0F172A; font-weight:600;">${item.nombre}</td>
+          <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center;">${fmt.format(item.precio)}</td>
+          <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center; font-weight:700;">${item.cantidad}</td>
+          <td style="padding:14px 12px; font-size:13px; color:#0F172A; text-align:right; font-weight:700;">${fmt.format(itemTotal)}</td>
+        </tr>`;
     });
 
-    await new Promise(r => setTimeout(r, 800));
+    if (orderData.detalles.length === 0) {
+      itemsHtml = `<tr><td colspan="5" style="padding:24px; text-align:center; color:#94A3B8; font-size:13px;">Sin productos registrados.</td></tr>`;
+    }
 
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    const facturaEl = iframeDoc.body;
+    const invoiceHtml = `
+      <div style="font-family:Arial,Helvetica,sans-serif; background:#FFFFFF; color:#0F172A; width:794px; padding:48px 56px; box-sizing:border-box;">
 
-    const canvas = await html2canvas(facturaEl, {
+        <!-- ── HEADER ── -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:28px; border-bottom:3px solid #1D4ED8; margin-bottom:36px;">
+          <div>
+            <div style="font-size:32px; font-weight:900; letter-spacing:2px; color:#0F172A; line-height:1;">
+              <span style="color:#1D4ED8;">⚡ MIKI</span>TECH
+            </div>
+            <div style="font-size:12px; color:#64748B; margin-top:6px; font-weight:500;">Componentes y Hardware de Alto Rendimiento</div>
+            <div style="font-size:11px; color:#94A3B8; margin-top:3px;">mikitech.com &nbsp;|&nbsp; soporte@mikitech.com</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:36px; font-weight:900; color:#1D4ED8; letter-spacing:-1px; line-height:1;">FACTURA</div>
+            <div style="margin-top:14px;">
+              <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">N.° de Referencia</div>
+              <div style="font-size:16px; font-weight:800; color:#1D4ED8; margin-top:2px;">#${orderData.order_id.substring(0, 8).toUpperCase()}</div>
+            </div>
+            <div style="margin-top:10px;">
+              <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Fecha de Emisión</div>
+              <div style="font-size:14px; font-weight:700; color:#0F172A; margin-top:2px;">${orderData.creado_el}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── BILLING INFO ── -->
+        <div style="display:flex; justify-content:space-between; margin-bottom:36px; gap:24px;">
+          <div style="flex:1; background:#EFF6FF; border-radius:12px; padding:20px 24px; border-left:4px solid #1D4ED8;">
+            <div style="font-size:11px; font-weight:800; color:#1D4ED8; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Facturar a</div>
+            <div style="font-size:17px; font-weight:800; color:#0F172A; margin-bottom:6px;">${orderData.cliente_nombre}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Usuario: @${orderData.cliente_username}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Identificación: ${orderData.cedula}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500;">Tel: ${orderData.cliente_telefono}</div>
+          </div>
+          <div style="flex:1; background:#F8FAFC; border-radius:12px; padding:20px 24px; border-left:4px solid #E2E8F0;">
+            <div style="font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Información del Pedido</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Dirección:</span>
+              <span style="margin-left:6px; color:#0F172A; font-weight:600;">${orderData.direccion_envio}</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Envío:</span>
+              <span style="color:#16A34A; font-weight:700; margin-left:6px;">GRATIS</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Puntos ganados:</span>
+              <span style="color:#7C3AED; font-weight:700; margin-left:6px;">${Math.floor(amount / 100000)} pts</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500;">
+              <span style="font-weight:700; color:#0F172A;">Garantía:</span>
+              <span style="margin-left:6px;">1 año en componentes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LINE ITEMS TABLE ── -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:32px; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
+          <thead>
+            <tr style="background:linear-gradient(135deg,#1D4ED8,#7C3AED); color:#FFFFFF;">
+              <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:48px;">#</th>
+              <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;">Descripción del Producto</th>
+              <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:110px;">Precio Unit.</th>
+              <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:70px;">Cant.</th>
+              <th style="padding:14px 12px; text-align:right; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:120px;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <!-- ── TOTALS ── -->
+        <div style="display:flex; justify-content:flex-end; margin-bottom:48px;">
+          <div style="width:300px; background:#F8FAFC; border-radius:14px; border:1px solid #E2E8F0; overflow:hidden;">
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
+              <span>Subtotal (sin IVA):</span>
+              <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(subtotal))} COP</span>
+            </div>
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
+              <span>IVA (19%):</span>
+              <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(tax))} COP</span>
+            </div>
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#16A34A; font-weight:600;">
+              <span>Envío:</span>
+              <span style="font-weight:700;">GRATIS</span>
+            </div>
+            <div style="padding:20px; background:linear-gradient(135deg,#1D4ED8,#7C3AED); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:15px; font-weight:800; color:#FFFFFF;">TOTAL A PAGAR:</span>
+              <span style="font-size:20px; font-weight:900; color:#FFFFFF;">${fmt.format(amount)} COP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── FOOTER ── -->
+        <div style="border-top:1px solid #E2E8F0; padding-top:20px; text-align:center;">
+          <div style="font-size:11px; color:#94A3B8; font-weight:500; line-height:1.7;">
+            Gracias por tu compra en MIKITECH. Esta es una representación electrónica válida de tu pedido.<br>
+            Garantía de 1 año en todos los componentes. Para soporte: soporte@mikitech.com
+          </div>
+          <div style="margin-top:10px; font-size:12px; font-weight:800; color:#1D4ED8; letter-spacing:1px;">
+            <span style="color:#38BDF8;">MIKI</span>TECH &nbsp;·&nbsp; mikitech.com
+          </div>
+        </div>
+      </div>`;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:absolute; top:0; left:-9999px; width:794px; background:#FFFFFF; z-index:-1; pointer-events:none;';
+    wrapper.innerHTML = invoiceHtml;
+    document.body.appendChild(wrapper);
+
+    await new Promise(r => requestAnimationFrame(r));
+
+    const canvas = await html2canvas(wrapper, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
-      width: 900,
-      windowWidth: 900,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: 794,
     });
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
+    document.body.removeChild(wrapper);
+
+    let jsPDFClass;
+    if (window.jspdf && window.jspdf.jsPDF) {
+      jsPDFClass = window.jspdf.jsPDF;
+    } else if (window.jsPDF) {
+      jsPDFClass = window.jsPDF;
+    } else {
+      throw new Error('La librería jsPDF no está cargada.');
+    }
+
+    const pdf = new jsPDFClass({
       orientation: 'portrait',
-      unit: 'px',
+      unit: 'mm',
       format: 'a4',
-      compress: true,
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgData = canvas.toDataURL('image/png');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgW = pageWidth;
-    const imgH = (canvas.height * imgW) / canvas.width;
 
-    let yOffset = 0;
-    let pageCount = 0;
-    while (yOffset < imgH) {
-      if (pageCount > 0) pdf.addPage();
-      pdf.addImage(
-        canvas.toDataURL('image/jpeg', 0.95),
-        'JPEG',
-        0,
-        -yOffset,
-        imgW,
-        imgH
-      );
-      yOffset += pageHeight;
-      pageCount++;
+    let heightLeft = pdfHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - pdfHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
     }
 
     pdf.save(`Factura-${pedidoId.slice(0, 8).toUpperCase()}-MIKITECH.pdf`);
 
     if (window.adminToast) window.adminToast.success('PDF descargado correctamente');
-    document.body.removeChild(iframe);
 
   } catch (err) {
     console.error('Error generando PDF:', err);
-    if (window.adminToast) window.adminToast.error('Error al generar el PDF. Intenta de nuevo.');
-    else alert('Error al generar el PDF.');
+    if (window.adminToast) window.adminToast.error('Error al generar el PDF: ' + err.message);
+    else alert('Error al generar el PDF: ' + err.message);
   } finally {
     clearInterval(spinInterval);
     if (icon) {
