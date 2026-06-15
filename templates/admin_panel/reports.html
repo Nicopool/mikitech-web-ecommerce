@@ -926,8 +926,15 @@ async function exportarReportePDF(btn) {
     // Restaurar elementos ocultos
     hiddenElements.forEach(el => el.style.display = '');
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
+    let jsPDFClass;
+    if (window.jspdf && window.jspdf.jsPDF) {
+      jsPDFClass = window.jspdf.jsPDF;
+    } else if (window.jsPDF) {
+      jsPDFClass = window.jsPDF;
+    } else {
+      throw new Error('La librería jsPDF no está cargada.');
+    }
+    const pdf = new jsPDFClass({
       orientation: 'portrait',
       unit: 'px',
       format: 'a4',

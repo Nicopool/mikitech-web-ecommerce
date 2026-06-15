@@ -248,27 +248,25 @@ def editar_perfil(petición):
         if 'avatar' in petición.FILES:
             import os
             from django.core.files.storage import default_storage
+            from .supabase_auth import subir_a_supabase_storage
             archivo_avatar = petición.FILES['avatar']
             extension = os.path.splitext(archivo_avatar.name)[1].lower()
             if extension in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
-                # Borrar el avatar anterior si existe para no acumular archivos en el almacenamiento
-                if perfil.url_avatar and perfil.url_avatar.startswith('/media/avatars/'):
-                    ruta_vieja = perfil.url_avatar.replace('/media/', '')
-                    if default_storage.exists(ruta_vieja):
-                        try:
-                            default_storage.delete(ruta_vieja)
-                        except Exception as e:
-                            print(f"[!] Error eliminando avatar viejo: {e}")
-                
                 nombre_archivo = f"avatars/{perfil.id}{extension}"
-                if default_storage.exists(nombre_archivo):
-                    try:
-                        default_storage.delete(nombre_archivo)
-                    except Exception as e:
-                        print(f"[!] Error eliminando avatar existente: {e}")
-                
-                nombre_guardado = default_storage.save(nombre_archivo, archivo_avatar)
-                perfil.url_avatar = f'/media/{nombre_guardado}'
+                try:
+                    datos_archivo = archivo_avatar.read()
+                    archivo_avatar.seek(0)  # Reset pointer in case fallback needs it
+                    public_url, error_storage = subir_a_supabase_storage(nombre_archivo, datos_archivo, archivo_avatar.content_type)
+                    if public_url:
+                        perfil.url_avatar = public_url
+                    else:
+                        print(f"[!] Fallback a local. Error de storage: {error_storage}")
+                        nombre_guardado = default_storage.save(nombre_archivo, archivo_avatar)
+                        perfil.url_avatar = f'/media/{nombre_guardado}'
+                except Exception as ex:
+                    print(f"[!] Fallback a local. Excepción: {ex}")
+                    nombre_guardado = default_storage.save(nombre_archivo, archivo_avatar)
+                    perfil.url_avatar = f'/media/{nombre_guardado}'
 
         perfil.save()
 

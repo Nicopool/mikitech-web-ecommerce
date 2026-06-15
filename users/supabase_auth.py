@@ -152,3 +152,49 @@ def verificar_otp_recuperacion(correo, token_otp, nueva_clave):
         return None, error_actualizacion
         
     return datos_actualizacion, None
+
+
+def subir_a_supabase_storage(nombre_archivo, datos_archivo, content_type=None):
+    """
+    Sube un archivo al bucket 'mikitech' de Supabase Storage.
+    Retorna la URL pública del archivo si es exitoso, o None y el error si falla.
+    """
+    import mimetypes
+    url = f"{NUCLEO_URL_SUPABASE}/storage/v1/object/mikitech/{nombre_archivo}"
+    
+    # MIME type guess if not provided
+    mime = content_type
+    if not mime:
+        mime = mimetypes.guess_type(nombre_archivo)[0] or 'application/octet-stream'
+        
+    cabeceras = {
+        'apikey': CLAVE_SUPABASE,
+        'Authorization': f'Bearer {CLAVE_SUPABASE}',
+        'Content-Type': mime
+    }
+    
+    # Realizar petición POST (creación)
+    req = urllib.request.Request(url, data=datos_archivo, headers=cabeceras, method='POST')
+    
+    try:
+        with urllib.request.urlopen(req) as respuesta:
+            public_url = f"{NUCLEO_URL_SUPABASE}/storage/v1/object/public/mikitech/{nombre_archivo}"
+            return public_url, None
+    except urllib.error.HTTPError as e:
+        # Si ya existe (400/409), intentar actualizar con PUT
+        if e.code in [400, 409]:
+            req_update = urllib.request.Request(url, data=datos_archivo, headers=cabeceras, method='PUT')
+            try:
+                with urllib.request.urlopen(req_update) as respuesta:
+                    public_url = f"{NUCLEO_URL_SUPABASE}/storage/v1/object/public/mikitech/{nombre_archivo}"
+                    return public_url, None
+            except Exception as ex:
+                return None, f"Error al sobreescribir en storage: {str(ex)}"
+        try:
+            cuerpo_error = json.loads(e.read().decode('utf-8'))
+            mensaje = cuerpo_error.get('error') or cuerpo_error.get('message') or str(e)
+        except Exception:
+            mensaje = str(e)
+        return None, f"Error HTTP {e.code} en storage: {mensaje}"
+    except Exception as e:
+        return None, f"Error inesperado de red en storage: {str(e)}"

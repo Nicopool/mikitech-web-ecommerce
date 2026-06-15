@@ -15,6 +15,25 @@ from django.core.files.storage import default_storage
 
 from functools import wraps
 
+def guardar_archivo_hibrido(nombre_unico, archivo):
+    """
+    Sube el archivo a Supabase Storage. Si falla, lo guarda localmente en el FileSystemStorage.
+    """
+    from users.supabase_auth import subir_a_supabase_storage
+    try:
+        datos = archivo.read()
+        archivo.seek(0)
+        url_publica, error = subir_a_supabase_storage(nombre_unico, datos, archivo.content_type)
+        if url_publica:
+            return url_publica
+        else:
+            print(f"[!] Error Supabase Storage: {error}, usando fallback local...")
+    except Exception as ex:
+        print(f"[!] Excepción Supabase Storage: {ex}, usando fallback local...")
+        
+    ruta_guardada = default_storage.save(nombre_unico, archivo)
+    return f"{settings.MEDIA_URL}{ruta_guardada}"
+
 CODIGO_ADMIN = getattr(settings, 'ADMIN_GATEWAY_CODE', 'SENA-2026')
 
 
@@ -361,18 +380,17 @@ def crear_producto(petición):
                 if 'archivo_imagen' in petición.FILES:
                     archivo = petición.FILES['archivo_imagen']
                     nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-                    ruta_guardada = default_storage.save(nombre_unico, archivo)
-                    nuevo_prod.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
+                    nuevo_prod.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
                     nuevo_prod.save()
 
                 # Galería de Imágenes
                 if 'archivos_galeria' in petición.FILES:
                     for f in petición.FILES.getlist('archivos_galeria'):
                         nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
-                        ruta_extra = default_storage.save(nombre_extra, f)
+                        url_extra = guardar_archivo_hibrido(nombre_extra, f)
                         ImagenProducto.objects.create(
                             producto=nuevo_prod,
-                            url_imagen=f"{settings.MEDIA_URL}{ruta_extra}"
+                            url_imagen=url_extra
                         )
                 
                 messages.success(petición, f'Producto "{nombre}" creado con éxito.')
@@ -408,17 +426,16 @@ def editar_producto(petición, id_producto):
         if 'archivo_imagen' in petición.FILES:
             archivo = petición.FILES['archivo_imagen']
             nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-            ruta_guardada = default_storage.save(nombre_unico, archivo)
-            producto.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
+            producto.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
             
         # Galería: Nuevas Imágenes
         if 'archivos_galeria' in petición.FILES:
             for f in petición.FILES.getlist('archivos_galeria'):
                 nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
-                ruta_extra = default_storage.save(nombre_extra, f)
+                url_extra = guardar_archivo_hibrido(nombre_extra, f)
                 ImagenProducto.objects.create(
                     producto=producto,
-                    url_imagen=f"{settings.MEDIA_URL}{ruta_extra}"
+                    url_imagen=url_extra
                 )
 
         # Galería: Eliminaciones
@@ -493,8 +510,7 @@ def crear_categoria(petición):
         if 'archivo_imagen' in petición.FILES:
             archivo = petición.FILES['archivo_imagen']
             nombre_unico = f"categories/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-            ruta_guardada = default_storage.save(nombre_unico, archivo)
-            url_imagen = f"{settings.MEDIA_URL}{ruta_guardada}"
+            url_imagen = guardar_archivo_hibrido(nombre_unico, archivo)
         
         if not nombre:
             return render(petición, 'admin_panel/category_form.html', {
@@ -541,8 +557,7 @@ def editar_categoria(petición, id_cat):
         if 'archivo_imagen' in petición.FILES:
             archivo = petición.FILES['archivo_imagen']
             nombre_unico = f"categories/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-            ruta_guardada = default_storage.save(nombre_unico, archivo)
-            categoría.url_imagen = f"{settings.MEDIA_URL}{ruta_guardada}"
+            categoría.url_imagen = guardar_archivo_hibrido(nombre_unico, archivo)
         else:
             categoría.url_imagen = petición.POST.get('url_imagen', categoría.url_imagen).strip()
         categoría.save()
