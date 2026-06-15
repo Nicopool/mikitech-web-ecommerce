@@ -602,6 +602,70 @@ def gestion_usuarios(petición):
 
 
 @requerir_administrador
+def editar_usuario(petición, id_usuario):
+    """Permite al administrador editar cualquier usuario (datos de texto y foto)."""
+    usuario = get_object_or_404(Perfil, id=id_usuario)
+    
+    if petición.method == 'POST':
+        from users.photo_manager import UserPhotoManager
+        
+        nombre_completo = petición.POST.get('nombre_completo', '').strip()
+        nombre_usuario = petición.POST.get('nombre_usuario', '').strip()
+        email = petición.POST.get('email', '').strip()
+        rol = petición.POST.get('rol', '').strip()
+        esta_activo = petición.POST.get('esta_activo') == 'on'
+        telefono = petición.POST.get('telefono', '').strip()
+        biografia = petición.POST.get('biografia', '').strip()
+        ciudad = petición.POST.get('ciudad', '').strip()
+        pais = petición.POST.get('pais', '').strip()
+        
+        # Validar campos requeridos
+        if not nombre_usuario:
+            messages.error(petición, "El nombre de usuario es obligatorio.")
+            return render(petición, 'admin_panel/edit_user.html', {
+                'usuario': usuario,
+                'titulo_pagina': f'Editar Usuario: {usuario.nombre_mostrado} — MIKITECH',
+            })
+            
+        # Comprobar si el nombre de usuario ya existe en otro perfil
+        if Perfil.objects.filter(nombre_usuario=nombre_usuario).exclude(id=usuario.id).exists():
+            messages.error(petición, "El nombre de usuario ya está en uso.")
+            return render(petición, 'admin_panel/edit_user.html', {
+                'usuario': usuario,
+                'titulo_pagina': f'Editar Usuario: {usuario.nombre_mostrado} — MIKITECH',
+            })
+            
+        data = {
+            'nombre_completo': nombre_completo,
+            'nombre_usuario': nombre_usuario,
+            'rol': rol,
+            'esta_activo': esta_activo,
+            'telefono': telefono,
+            'biografia': biografia,
+            'ciudad': ciudad,
+            'pais': pais,
+        }
+        
+        if email:
+            data['email'] = email
+            
+        photo_file = petición.FILES.get('avatar')
+        
+        updated_profile, error = UserPhotoManager.update_user(id_usuario, data, photo_file)
+        
+        if error:
+            messages.error(petición, f"Error actualizando el usuario: {error}")
+        else:
+            messages.success(petición, f"Usuario '{updated_profile.nombre_mostrado}' actualizado correctamente.")
+            return redirect('/admin-panel/usuarios/')
+            
+    return render(petición, 'admin_panel/edit_user.html', {
+        'usuario': usuario,
+        'titulo_pagina': f'Editar Usuario: {usuario.nombre_mostrado} — MIKITECH',
+    })
+
+
+@requerir_administrador
 def moderacion_resenas(petición):
     """Panel de moderación para comentarios de productos."""
     reseñas = Reseña.objects.select_related('producto', 'usuario').order_by('-creado_el')

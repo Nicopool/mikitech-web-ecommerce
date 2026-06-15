@@ -1,0 +1,457 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block nav_users %}active{% endblock %}
+
+{% block admin_content %}
+<style>
+  .mpro-centered-layout {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .mpro-premium-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 1.6rem;
+    padding: 3.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2.5rem;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .mpro-premium-card:hover {
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -8px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Avatar Premium Uploader Section */
+  .avatar-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+    background: #F8FAFC;
+    padding: 3rem;
+    border-radius: 2rem;
+    border: 1px solid #E2E8F0;
+  }
+
+  .avatar-preview-container {
+    position: relative;
+    width: 14rem;
+    height: 14rem;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--ds-primary-light, #EFF6FF);
+    border: 4px solid #FFFFFF;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .avatar-preview-container:hover {
+    transform: scale(1.03);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+  }
+
+  .avatar-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-initials {
+    font-size: 5rem;
+    font-weight: 800;
+    color: var(--ds-primary, #1D4ED8);
+  }
+
+  .avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .avatar-preview-container:hover .avatar-overlay {
+    opacity: 1;
+  }
+
+  .avatar-overlay span {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Form Fields */
+  .mpro-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .mpro-input-wrapper .mpro-icon {
+    position: absolute;
+    left: 1.4rem;
+    color: #94A3B8;
+    pointer-events: none;
+    width: 1.8rem;
+    height: 1.8rem;
+    transition: color 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mpro-input-with-icon {
+    padding-left: 4.2rem !important;
+  }
+
+  .mpro-input:focus + .mpro-icon {
+    color: var(--ds-primary, #2563EB);
+  }
+
+  /* Form Grid */
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .form-grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Status Toggle */
+  .status-toggle-wrapper {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 1.2rem;
+    padding: 1.6rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 5rem;
+    height: 2.6rem;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #CBD5E1;
+    transition: .3s;
+    border-radius: 3.4rem;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 1.8rem;
+    width: 1.8rem;
+    left: 0.4rem;
+    bottom: 0.4rem;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  input:checked + .slider {
+    background-color: #10B981;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(2.4rem);
+  }
+</style>
+
+<div class="mpro-centered-layout">
+  <!-- ===== ENCABEZADO ===== -->
+  <div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 3rem; display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <h2 style="font-size:2.8rem; font-weight:900; font-family: 'Inter', sans-serif; color:var(--ds-text); display:flex; align-items:center; gap:1.2rem; margin:0;">
+        <i data-lucide="user-cog" style="width:2.8rem; height:2.8rem; color:var(--ds-primary);"></i> Editar Usuario
+      </h2>
+      <p style="font-size:1.4rem; color:#64748B; margin-top:0.4rem; margin-bottom:0;">
+        Modifica los datos del perfil de <strong>{{ usuario.nombre_mostrado }}</strong> y su rol administrativo.
+      </p>
+    </div>
+    <a href="/admin-panel/usuarios/" class="g-btn-secondary" style="font-weight: 700; border-radius: 1.2rem; text-decoration:none;">
+      ← Volver a Usuarios
+    </a>
+  </div>
+
+  <!-- Mensajes de Alerta -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="g-alert {% if message.tags == 'error' %}g-alert-error{% else %}g-alert-success{% endif %}" style="margin-bottom: 2.5rem;">
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- ===== FORMULARIO PREMIUM ===== -->
+  <div class="mpro-premium-card">
+    <form method="POST" enctype="multipart/form-data" id="edit-user-form">
+      {% csrf_token %}
+
+      <!-- Sección de Avatar Interactiva (Drag & Drop + Preview) -->
+      <div class="avatar-upload-section" id="avatar-drop-zone">
+        <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display:none;">
+        <div class="avatar-preview-container" onclick="document.getElementById('avatar-input').click()">
+          {% if usuario.url_avatar %}
+            <img id="avatar-preview" src="{{ usuario.url_avatar }}" class="avatar-preview-img" alt="Avatar">
+            <span id="avatar-placeholder" class="avatar-initials" style="display:none;">{{ usuario.nombre_mostrado|first|upper }}</span>
+          {% else %}
+            <img id="avatar-preview" class="avatar-preview-img" style="display:none;" alt="Avatar">
+            <span id="avatar-placeholder" class="avatar-initials">{{ usuario.nombre_mostrado|first|upper }}</span>
+          {% endif %}
+          <div class="avatar-overlay">
+            <i data-lucide="camera" style="width:2.8rem; height:2.8rem;"></i>
+            <span>Subir Foto</span>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:1.4rem; font-weight:700; color:var(--ds-text);">Foto de Perfil del Usuario</div>
+          <div style="font-size:1.2rem; color:#94A3B8; margin-top:0.3rem;">Arrastra una imagen aquí o haz click para seleccionar (Máx. 2MB, JPG/PNG/WEBP)</div>
+        </div>
+      </div>
+
+      <!-- Grid de Datos Principales -->
+      <div class="form-grid-2" style="margin-bottom: 2.5rem;">
+        
+        <!-- ID del Usuario (Read-Only) -->
+        <div>
+          <label class="mpro-label">ID del Usuario (Supabase UUID)</label>
+          <div class="mpro-input-wrapper">
+            <input type="text" class="mpro-input mpro-input-with-icon" value="{{ usuario.id }}" readonly style="background:#F1F5F9; color:#64748B; cursor:not-allowed;">
+            <i data-lucide="key" class="mpro-icon"></i>
+          </div>
+        </div>
+
+        <!-- Nombre de Usuario (Username) -->
+        <div>
+          <label class="mpro-label" for="username">Nombre de Usuario *</label>
+          <div class="mpro-input-wrapper">
+            <input type="text" id="username" name="nombre_usuario" class="mpro-input mpro-input-with-icon" required value="{{ usuario.nombre_usuario|default:'' }}" placeholder="Ej: nicolas_dev">
+            <i data-lucide="at-sign" class="mpro-icon"></i>
+          </div>
+        </div>
+
+        <!-- Nombre Completo -->
+        <div>
+          <label class="mpro-label" for="full-name">Nombre Completo *</label>
+          <div class="mpro-input-wrapper">
+            <input type="text" id="full-name" name="nombre_completo" class="mpro-input mpro-input-with-icon" required value="{{ usuario.nombre_completo|default:'' }}" placeholder="Ej: Nicolás Turca">
+            <i data-lucide="user" class="mpro-icon"></i>
+          </div>
+        </div>
+
+        <!-- Correo Electrónico (Auth Email) -->
+        <div>
+          <label class="mpro-label" for="email">Correo Electrónico (Login) *</label>
+          <div class="mpro-input-wrapper">
+            <input type="email" id="email" name="email" class="mpro-input mpro-input-with-icon" required value="{{ usuario.email|default:'' }}" placeholder="Ej: nicolas@gmail.com">
+            <i data-lucide="mail" class="mpro-icon"></i>
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div>
+          <label class="mpro-label" for="phone">Teléfono de Contacto</label>
+          <div class="mpro-input-wrapper">
+            <input type="text" id="phone" name="telefono" class="mpro-input mpro-input-with-icon" value="{{ usuario.telefono|default:'' }}" placeholder="Ej: +57 312 345 6789">
+            <i data-lucide="phone" class="mpro-icon"></i>
+          </div>
+        </div>
+
+        <!-- Rol del Usuario -->
+        <div>
+          <label class="mpro-label" for="role">Rol del Sistema *</label>
+          <div class="mpro-input-wrapper">
+            <select id="role" name="rol" class="mpro-input mpro-input-with-icon" style="appearance:none; -webkit-appearance:none; cursor:pointer;" required>
+              <option value="client" {% if usuario.rol == 'client' %}selected{% endif %}>Cliente</option>
+              <option value="admin" {% if usuario.rol == 'admin' %}selected{% endif %}>Administrador</option>
+              <option value="repartidor" {% if usuario.rol == 'repartidor' %}selected{% endif %}>Repartidor</option>
+            </select>
+            <i data-lucide="shield-alert" class="mpro-icon"></i>
+            <i data-lucide="chevron-down" style="position:absolute; right:1.5rem; color:#94A3B8; pointer-events:none; width:1.6rem; height:1.6rem;"></i>
+          </div>
+        </div>
+
+        <!-- Ciudad -->
+        <div>
+          <label class="mpro-label" for="city">Ciudad</label>
+          <div class="mpro-input-wrapper">
+            <input type="text" id="city" name="ciudad" class="mpro-input mpro-input-with-icon" value="{{ usuario.ciudad|default:'' }}" placeholder="Ej: Bogotá">
+            <i data-lucide="map-pin" class="mpro-icon"></i>
+          </div>
+        </div>
+
+        <!-- País -->
+        <div>
+          <label class="mpro-label" for="country">País</label>
+          <div class="mpro-input-wrapper">
+            <input type="text" id="country" name="pais" class="mpro-input mpro-input-with-icon" value="{{ usuario.pais|default:'Colombia' }}" placeholder="Ej: Colombia">
+            <i data-lucide="globe" class="mpro-icon"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Estado de la Cuenta Toggle -->
+      <div class="status-toggle-wrapper">
+        <div>
+          <div style="font-size:1.4rem; font-weight:700; color:var(--ds-text);">Cuenta Habilitada / Activa</div>
+          <div style="font-size:1.2rem; color:#94A3B8; margin-top:0.2rem;">Permite al usuario iniciar sesión y realizar transacciones en la plataforma.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" name="esta_activo" {% if usuario.esta_activo %}checked{% endif %}>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Biografía -->
+      <div style="margin-bottom: 3.5rem;">
+        <label class="mpro-label" for="bio">Biografía / Notas del Perfil</label>
+        <textarea id="bio" name="biografia" class="mpro-input" style="min-height:10rem; resize:vertical; line-height:1.6;" placeholder="Detalles de perfil, anotaciones de soporte o historial de compras...">{{ usuario.biografia|default:'' }}</textarea>
+      </div>
+
+      <!-- Acciones del Formulario -->
+      <div style="display:flex; gap:1.5rem; border-top:2px solid #F1F5F9; padding-top:2.5rem;">
+        <button type="submit" class="g-btn-primary" style="padding:1.4rem 4rem; font-size:1.4rem; font-weight:800; border-radius:1.2rem; display:flex; align-items:center; gap:0.8rem; box-shadow:0 8px 25px rgba(37,99,235,0.25);">
+          <i data-lucide="save" style="width:2rem; height:2rem;"></i>
+          GUARDAR CAMBIOS
+        </button>
+        <a href="/admin-panel/usuarios/" class="g-btn-secondary" style="padding:1.4rem 2.5rem; font-size:1.4rem; font-weight:700; border-radius:1.2rem; text-decoration:none;">
+          CANCELAR
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+
+  const fileInput = document.getElementById('avatar-input');
+  const previewImg = document.getElementById('avatar-preview');
+  const placeholder = document.getElementById('avatar-placeholder');
+  const dropZone = document.getElementById('avatar-drop-zone');
+
+  // Preview local file function
+  function handleFile(file) {
+    if (!file) return;
+
+    // Validate size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Archivo demasiado grande',
+        text: 'La imagen excede el tamaño máximo permitido de 2MB.',
+        background: '#FFFFFF',
+        confirmButtonColor: '#1D4ED8'
+      });
+      fileInput.value = '';
+      return;
+    }
+
+    // Validate type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Formato no soportado',
+        text: 'Por favor selecciona una imagen válida (JPG, PNG, GIF o WEBP).',
+        background: '#FFFFFF',
+        confirmButtonColor: '#1D4ED8'
+      });
+      fileInput.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      previewImg.src = e.target.result;
+      previewImg.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Handle select via input
+  fileInput.addEventListener('change', function() {
+    handleFile(this.files[0]);
+  });
+
+  // Drag and Drop implementation
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#3B82F6';
+      dropZone.style.background = '#EFF6FF';
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#E2E8F0';
+      dropZone.style.background = '#F8FAFC';
+    }, false);
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length) {
+      fileInput.files = files; // bind files to the input field
+      handleFile(files[0]);
+    }
+  }, false);
+
+  // Form submit loading
+  const form = document.getElementById('edit-user-form');
+  form.addEventListener('submit', function() {
+    Swal.fire({
+      title: 'Guardando Cambios...',
+      text: 'Por favor espera mientras actualizamos los datos del perfil.',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

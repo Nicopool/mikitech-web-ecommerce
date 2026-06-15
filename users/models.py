@@ -36,6 +36,30 @@ class Perfil(models.Model):
     def nombre_mostrado(self):
         return self.nombre_completo or self.nombre_usuario or 'Usuario'
 
+    @property
+    def email(self):
+        from django.db import connection
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT email FROM auth.users WHERE id = %s", [str(self.id)])
+                row = cursor.fetchone()
+                return row[0] if row else None
+        except Exception as e:
+            print(f"[Perfil.email] Error getting email: {e}")
+            return None
+
+    @email.setter
+    def email(self, value):
+        from django.db import connection
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE auth.users SET email = %s, email_confirmed_at = NOW() WHERE id = %s",
+                    [value, str(self.id)]
+                )
+        except Exception as e:
+            print(f"[Perfil.email] Error setting email: {e}")
+
 
 class Notificacion(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

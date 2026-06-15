@@ -26,6 +26,7 @@ urlpatterns = [
     
     # Gestión de usuarios
     path('usuarios/', admin_views.gestion_usuarios, name='admin_users'),
+    path('usuarios/editar/<str:id_usuario>/', admin_views.editar_usuario, name='admin_user_edit'),
     
     # Moderación de interacciones
     path('resenas/', admin_views.moderacion_resenas, name='admin_reviews'),

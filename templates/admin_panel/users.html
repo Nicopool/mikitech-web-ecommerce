@@ -127,9 +127,14 @@
           </td>
           <td style="color:#64748B; font-size:1.2rem;">{{ usuario.creado_el|date:"d M, Y" }}</td>
           <td class="u-text-center">
-            <button class="g-action-btn" onclick="verDetalleHTML('user-data-{{ usuario.id }}')" style="background:#EFF6FF; color:#1D4ED8; border: 1px solid #DBEAFE; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px; cursor:pointer;" title="Ver Detalle">
-              <i data-lucide="eye" style="width:1.6rem; height:1.6rem;"></i>
-            </button>
+            <div style="display:flex; justify-content:center; gap:8px; align-items:center;">
+              <button class="g-action-btn" onclick="verDetalleHTML('user-data-{{ usuario.id }}')" style="background:#EFF6FF; color:#1D4ED8; border: 1px solid #DBEAFE; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px; cursor:pointer;" title="Ver Detalle">
+                <i data-lucide="eye" style="width:1.6rem; height:1.6rem;"></i>
+              </button>
+              <a href="{% url 'admin_user_edit' usuario.id %}" class="g-action-btn" style="background:#FEF3C7; color:#D97706; border: 1px solid #FDE68A; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px; cursor:pointer; text-decoration:none;" title="Editar Perfil">
+                <i data-lucide="edit-3" style="width:1.6rem; height:1.6rem;"></i>
+              </a>
+            </div>
             <div id="user-data-{{ usuario.id }}" style="display:none;">
               <div style="font-size:1.4rem; font-weight:800; margin-bottom:10px; color:var(--ds-text);">Perfil Principal</div>
               <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--ds-border);">
