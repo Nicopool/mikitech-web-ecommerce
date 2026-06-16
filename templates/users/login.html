@@ -233,9 +233,19 @@
 
       {# Mensajes del servidor #}
       {% if error %}
+      <div style="background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">{{ error }}</span>
+      </div>
       <script>document.addEventListener("DOMContentLoaded",function(){showAlert('error',"{{ error|escapejs }}")});</script>
       {% endif %}
       {% if messages %}
+      {% for message in messages %}
+      <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span style="color: #166534; font-size: 1.35rem; font-weight: 600;">{{ message }}</span>
+      </div>
+      {% endfor %}
       <script>
         document.addEventListener("DOMContentLoaded",function(){
           {% for message in messages %}showAlert('success',"{{ message|escapejs }}");{% endfor %}
@@ -243,8 +253,13 @@
       </script>
       {% endif %}
       {% if success %}
+      <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span style="color: #166534; font-size: 1.35rem; font-weight: 600;">{{ success }}</span>
+      </div>
       <script>document.addEventListener("DOMContentLoaded",function(){showAlert('success',"{{ success|escapejs }}")});</script>
       {% endif %}
+      <style>@keyframes bannerSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}</style>
 
       <form id="loginForm" method="POST" action="{% url 'users:login' %}" novalidate>
         {% csrf_token %}

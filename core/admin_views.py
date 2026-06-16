@@ -118,7 +118,7 @@ def login_administrador(petición):
                 petición.session['nombre_usuario'] = perfil.nombre_usuario
                 petición.session['avatar_url'] = perfil.url_avatar or ''
                 petición.session.modified = True
-                messages.info(petición, f"Acceso bypass concedido como {perfil.nombre_usuario}.")
+                messages.success(petición, f"✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.")
                 return redirect('/admin-panel/')
             else:
                 return render(petición, 'admin_panel/login.html', {
@@ -140,6 +140,7 @@ def login_administrador(petición):
             petición.session['nombre_usuario'] = perfil.nombre_usuario
             petición.session['avatar_url'] = perfil.url_avatar or ''
             petición.session.modified = True
+            messages.success(petición, f'✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
             return redirect('/admin-panel/')
         except Perfil.DoesNotExist:
             # Si no existe localmente, intentamos usar un bypass con el primer admin disponible
@@ -151,6 +152,7 @@ def login_administrador(petición):
                 petición.session['nombre_usuario'] = perfil.nombre_usuario
                 petición.session['avatar_url'] = perfil.url_avatar or ''
                 petición.session.modified = True
+                messages.success(petición, f'✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
                 return redirect('/admin-panel/')
             return render(petición, 'admin_panel/login.html', {
                 'error': 'Perfil de administrador no encontrado y bypass no disponible.',
@@ -269,6 +271,7 @@ def registro_administrador(petición):
         petición.session['nombre_usuario'] = perfil.nombre_usuario
         petición.session['avatar_url'] = perfil.url_avatar or ''
         petición.session.modified = True
+        messages.success(petición, f'✅ ¡Registro exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
         return redirect('/admin-panel/')
 
     return render(petición, 'admin_panel/register.html', {

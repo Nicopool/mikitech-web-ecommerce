@@ -526,6 +526,55 @@
   <!-- SCROLL -->
   <div class="dash-scroll">
 
+    <!-- DJANGO MESSAGES (login exitoso, etc.) -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="miki-success-banner" style="background: linear-gradient(135deg, #059669 0%, #10B981 100%); border-radius: 1.4rem; padding: 2rem 2.5rem; color: white; display: flex; align-items: center; gap: 1.6rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3); animation: bannerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <div style="width: 4.8rem; height: 4.8rem; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 1.6rem; font-weight: 700;">{{ message }}</div>
+        <div style="font-size: 1.2rem; opacity: 0.8; margin-top: 0.3rem;">Tu sesión está activa y segura.</div>
+      </div>
+    </div>
+    {% endfor %}
+    <style>
+      @keyframes bannerPop{from{opacity:0;transform:translateY(-15px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+    </style>
+    <script>
+      // Auto-ocultar el banner después de 6 segundos
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          document.querySelectorAll('.miki-success-banner').forEach(function(el) {
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-10px)';
+            setTimeout(function() { el.remove(); }, 500);
+          });
+        }, 6000);
+
+        // También mostrar como SweetAlert toast
+        if (typeof Swal !== 'undefined') {
+          {% for message in messages %}
+          Swal.fire({
+            icon: 'success',
+            title: "{{ message|escapejs }}",
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: '#F0FDF4',
+            color: '#166534',
+            iconColor: '#16A34A'
+          });
+          {% endfor %}
+        }
+      });
+    </script>
+    {% endif %}
+
     <!-- WELCOME BANNER -->
     <div class="welcome-banner">
       <div class="wb-text" style="position:relative;z-index:1;">

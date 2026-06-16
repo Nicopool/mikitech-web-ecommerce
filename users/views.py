@@ -58,6 +58,7 @@ def vista_ingreso(petición):
         petición.session['token_acceso']  = datos.get('access_token')
 
         # Obtener o crear perfil
+        perfil = None
         try:
             perfil = Perfil.objects.get(id=id_usuario)
             petición.session['rol_usuario']    = perfil.rol
@@ -68,7 +69,8 @@ def vista_ingreso(petición):
             petición.session['avatar_url']  = ''
 
         proxima_url = petición.GET.get('next', '/cuenta/perfil/')
-        messages.success(petición, '¡Bienvenido de nuevo!')
+        nombre = perfil.nombre_mostrado if perfil else 'Usuario'
+        messages.success(petición, f'✅ ¡Login exitoso! Bienvenido de vuelta a tu panel, {nombre}.')
         return redirect(proxima_url)
 
     return render(petición, 'users/login.html', {
@@ -159,7 +161,7 @@ def vista_registro(petición):
         )
 
         return render(petición, 'users/login.html', {
-            'success': '¡Cuenta creada con éxito! Ya puedes iniciar sesión.',
+            'success': '✅ ¡Tu registro ha sido exitoso! Ya puedes iniciar sesión con tus credenciales.',
             'titulo_pagina': 'Iniciar Sesión — MIKITECH'
         })
 
