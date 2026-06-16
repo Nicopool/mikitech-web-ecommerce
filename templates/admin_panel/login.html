@@ -175,12 +175,58 @@
         <i data-lucide="alert-circle" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
         <span>{{ error }}</span>
       </div>
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          if (window.Swal) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error de Acceso',
+              text: "{{ error|escapejs }}",
+              confirmButtonColor: '#2563EB',
+              background: '#FFFFFF',
+              color: '#0F172A'
+            });
+          }
+        });
+      </script>
       {% endif %}
       {% if success %}
       <div class="alert-wix success">
         <i data-lucide="check-circle" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
         <span>{{ success }}</span>
       </div>
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          if (window.Swal) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Operación Exitosa!',
+              text: "{{ success|escapejs }}",
+              confirmButtonColor: '#2563EB',
+              background: '#FFFFFF',
+              color: '#0F172A'
+            });
+          }
+        });
+      </script>
+      {% endif %}
+      {% if messages %}
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          if (window.Swal) {
+            {% for message in messages %}
+            Swal.fire({
+              icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}",
+              title: 'Aviso',
+              text: "{{ message|escapejs }}",
+              confirmButtonColor: '#2563EB',
+              background: '#FFFFFF',
+              color: '#0F172A'
+            });
+            {% endfor %}
+          }
+        });
+      </script>
       {% endif %}
 
       <form method="POST" action="/admin-panel/login/" id="admin-login-form" novalidate>
