@@ -123,7 +123,7 @@ def login_administrador(petición):
             petición.session['nombre_usuario'] = perfil.nombre_usuario
             petición.session['avatar_url'] = perfil.url_avatar or ''
             petición.session.modified = True
-            messages.success(petición, f'✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
+            messages.success(petición, f'✅ ¡Haz ingresado exitosamente! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
             return redirect('/admin-panel/')
         except Perfil.DoesNotExist:
             user_data = datos.get('user', {})
@@ -146,7 +146,7 @@ def login_administrador(petición):
                 petición.session['nombre_usuario'] = perfil.nombre_usuario
                 petición.session['avatar_url'] = perfil.url_avatar or ''
                 petición.session.modified = True
-                messages.success(petición, f'✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
+                messages.success(petición, f'✅ ¡Haz ingresado exitosamente! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
                 return redirect('/admin-panel/')
             else:
                 return render(petición, 'admin_panel/login.html', {
