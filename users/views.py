@@ -137,7 +137,15 @@ def vista_registro(petición):
             contexto['error'] = f'Error en el registro: {error}'
             return render(petición, 'users/register.html', contexto)
 
-        id_usuario = datos.get('user', {}).get('id')
+        # Supabase devuelve un response exitoso con identities=[] cuando el email ya existe,
+        # en vez de devolver un error explícito. Detectamos este caso.
+        user_data = datos.get('user', {}) if datos else {}
+        id_usuario = user_data.get('id')
+        identities = user_data.get('identities', None)
+
+        if not id_usuario or (isinstance(identities, list) and len(identities) == 0):
+            contexto['error'] = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.'
+            return render(petición, 'users/register.html', contexto)
         
         # Sincronizar el perfil local inmediatamente.
         # Usamos update_or_create porque un trigger en Supabase puede haber creado ya el registro.
@@ -151,7 +159,7 @@ def vista_registro(petición):
         )
 
         return render(petición, 'users/login.html', {
-            'success': '¡Cuenta creada con éxito!',
+            'success': '¡Cuenta creada con éxito! Ya puedes iniciar sesión.',
             'titulo_pagina': 'Iniciar Sesión — MIKITECH'
         })
 
