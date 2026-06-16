@@ -102,38 +102,21 @@ def login_administrador(petición):
         datos, error = iniciar_sesion_usuario(correo, clave)
 
         if error:
-            # BYPASS DEVELOPER: Si falla el login con Supabase, usar un admin existente local
-            print(f"Auth falló ({error}), usando bypass de desarrollador con admin existente...")
-            perfil = Perfil.objects.filter(rol='admin').first()
-            if not perfil:
-                perfil = Perfil.objects.first()
-                if perfil:
-                    perfil.rol = 'admin'
-                    perfil.save()
-            
-            if perfil:
-                petición.session['usuario_id'] = str(perfil.id)
-                petición.session['token_acceso'] = 'dev-bypass-token'
-                petición.session['rol_usuario'] = 'admin'
-                petición.session['nombre_usuario'] = perfil.nombre_usuario
-                petición.session['avatar_url'] = perfil.url_avatar or ''
-                petición.session.modified = True
-                messages.success(petición, f"✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.")
-                return redirect('/admin-panel/')
-            else:
-                return render(petición, 'admin_panel/login.html', {
-                    'error': 'Error de autenticación y no hay perfiles locales para bypass.',
-                    'correo': correo,
-                    'titulo_pagina': 'Login Administrador — MIKITECH',
-                })
+            return render(petición, 'admin_panel/login.html', {
+                'error': f'Credenciales incorrectas: {error}',
+                'correo': correo,
+                'titulo_pagina': 'Login Administrador — MIKITECH',
+            })
 
         id_usuario = datos.get('user', {}).get('id')
         try:
             perfil = Perfil.objects.get(id=id_usuario)
             if perfil.rol != 'admin':
-                # BYPASS DEVELOPER: Forzar admin
-                perfil.rol = 'admin'
-                perfil.save()
+                return render(petición, 'admin_panel/login.html', {
+                    'error': 'Acceso denegado: Este usuario no tiene permisos de administrador.',
+                    'correo': correo,
+                    'titulo_pagina': 'Login Administrador — MIKITECH',
+                })
             petición.session['usuario_id'] = id_usuario
             petición.session['token_acceso'] = datos.get('access_token')
             petición.session['rol_usuario'] = 'admin'
@@ -143,10 +126,21 @@ def login_administrador(petición):
             messages.success(petición, f'✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
             return redirect('/admin-panel/')
         except Perfil.DoesNotExist:
-            # Si no existe localmente, intentamos usar un bypass con el primer admin disponible
-            perfil = Perfil.objects.filter(rol='admin').first()
-            if perfil:
-                petición.session['usuario_id'] = str(perfil.id)
+            user_data = datos.get('user', {})
+            metadata = user_data.get('user_metadata', {})
+            role = metadata.get('role')
+            
+            if role == 'admin':
+                nombre_completo = metadata.get('full_name', 'Administrador')
+                nombre_usuario = metadata.get('username', correo.split('@')[0])
+                perfil = Perfil.objects.create(
+                    id=id_usuario,
+                    nombre_completo=nombre_completo,
+                    nombre_usuario=nombre_usuario,
+                    rol='admin',
+                    esta_activo=True
+                )
+                petición.session['usuario_id'] = id_usuario
                 petición.session['token_acceso'] = datos.get('access_token')
                 petición.session['rol_usuario'] = 'admin'
                 petición.session['nombre_usuario'] = perfil.nombre_usuario
@@ -154,10 +148,12 @@ def login_administrador(petición):
                 petición.session.modified = True
                 messages.success(petición, f'✅ ¡Login exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
                 return redirect('/admin-panel/')
-            return render(petición, 'admin_panel/login.html', {
-                'error': 'Perfil de administrador no encontrado y bypass no disponible.',
-                'titulo_pagina': 'Login Administrador — MIKITECH',
-            })
+            else:
+                return render(petición, 'admin_panel/login.html', {
+                    'error': 'Acceso denegado: Tu usuario no tiene el rol de administrador asignado.',
+                    'correo': correo,
+                    'titulo_pagina': 'Login Administrador — MIKITECH',
+                })
 
     return render(petición, 'admin_panel/login.html', {
         'titulo_pagina': 'Login Administrador — MIKITECH',
@@ -188,19 +184,13 @@ def registro_administrador(petición):
             'titulo_pagina': 'Registro Administrador — MIKITECH',
         }
 
-        # En lugar de bloquear con errores, si falta algo o falla, hacemos bypass usando admin existente
-        if not all([nombre_completo, nombre_usuario, correo, clave]) or clave != confirmar_clave or len(clave) < 6:
-            print("Datos incompletos o inválidos en registro, usando bypass...")
-            perfil = Perfil.objects.filter(rol='admin').first()
-            if perfil:
-                petición.session['usuario_id'] = str(perfil.id)
-                petición.session['token_acceso'] = 'dev-bypass-token'
-                petición.session['rol_usuario'] = 'admin'
-                petición.session['nombre_usuario'] = perfil.nombre_usuario
-                petición.session['avatar_url'] = perfil.url_avatar or ''
-                petición.session.modified = True
-                messages.info(petición, f"Acceso bypass concedido como {perfil.nombre_usuario}.")
-                return redirect('/admin-panel/')
+        if not all([nombre_completo, nombre_usuario, correo, clave, confirmar_clave]):
+            contexo['error'] = 'Por favor completa todos los campos del formulario.'
+            return render(petición, 'admin_panel/register.html', contexo)
+
+        if clave != confirmar_clave:
+            contexo['error'] = 'Las contraseñas no coinciden.'
+            return render(petición, 'admin_panel/register.html', contexo)
 
         if not terminos:
             contexo['error'] = 'Debes aceptar los Términos y Condiciones.'
@@ -214,32 +204,12 @@ def registro_administrador(petición):
             return render(petición, 'admin_panel/register.html', contexo)
 
         if Perfil.objects.filter(nombre_usuario=nombre_usuario).exists():
-            perfil = Perfil.objects.get(nombre_usuario=nombre_usuario)
-            perfil.rol = 'admin'
-            perfil.save()
-            petición.session['usuario_id'] = str(perfil.id)
-            petición.session['token_acceso'] = 'dev-bypass-token'
-            petición.session['rol_usuario'] = 'admin'
-            petición.session['nombre_usuario'] = perfil.nombre_usuario
-            petición.session['avatar_url'] = perfil.url_avatar or ''
-            petición.session.modified = True
-            return redirect('/admin-panel/')
+            contexo['error'] = 'Ese nombre de usuario ya está registrado.'
+            return render(petición, 'admin_panel/register.html', contexo)
 
         datos, error = registrar_usuario(correo, clave, nombre_completo, nombre_usuario, rol='admin')
 
         if error:
-            # BYPASS DEVELOPER: Si falla registrar en Supabase, usar bypass con admin existente
-            print(f"Registro en Supabase falló ({error}), usando bypass con admin existente...")
-            perfil = Perfil.objects.filter(rol='admin').first()
-            if perfil:
-                petición.session['usuario_id'] = str(perfil.id)
-                petición.session['token_acceso'] = 'dev-bypass-token'
-                petición.session['rol_usuario'] = 'admin'
-                petición.session['nombre_usuario'] = perfil.nombre_usuario
-                petición.session['avatar_url'] = perfil.url_avatar or ''
-                petición.session.modified = True
-                messages.info(petición, f"Acceso bypass concedido como {perfil.nombre_usuario}.")
-                return redirect('/admin-panel/')
             contexo['error'] = f'Error en el registro: {error}'
             return render(petición, 'admin_panel/register.html', contexo)
 
