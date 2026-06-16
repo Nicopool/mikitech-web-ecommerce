@@ -1195,3 +1195,65 @@ def gestion_pedidos(petición):
         'repartidores': repartidores,
         'titulo_pagina': 'Gestión de Pedidos — MIKITECH',
     })
+
+
+def asegurar_notificaciones_admin(usuario_id):
+    """
+    Genera dinámicamente notificaciones para el administrador si existen:
+    - Productos con bajo stock (<= 5).
+    - Reseñas pendientes de aprobación.
+    - Pedidos pendientes.
+    """
+    from products.models import Producto
+    from interactions.models import Reseña, Pedido
+    from users.models import Notificacion
+    
+    # 1. Bajo stock
+    productos_bajo_stock = Producto.objects.filter(existencias__lte=5, esta_activo=True)
+    for p in productos_bajo_stock:
+        mensaje = f"⚠️ Bajo stock en {p.nombre} ({p.existencias} unidades). Reabastece aquí.|/admin-panel/productos/editar/{p.id}/"
+        if not Notificacion.objects.filter(usuario_id=usuario_id, mensaje__startswith=f"⚠️ Bajo stock en {p.nombre}", esta_leida=False).exists():
+            Notificacion.objects.create(
+                usuario_id=usuario_id,
+                mensaje=mensaje,
+                esta_leida=False
+            )
+            
+    # 2. Reseñas pendientes
+    resenas_pendientes = Reseña.objects.filter(esta_aprobada=False)
+    for r in resenas_pendientes:
+        mensaje = f"💬 Nueva reseña pendiente de moderación para {r.producto.nombre}.|/admin-panel/resenas/"
+        if not Notificacion.objects.filter(usuario_id=usuario_id, mensaje__startswith="💬 Nueva reseña pendiente de moderación", esta_leida=False).exists():
+            Notificacion.objects.create(
+                usuario_id=usuario_id,
+                mensaje=mensaje,
+                esta_leida=False
+            )
+            
+    # 3. Pedidos pendientes
+    pedidos_pendientes = Pedido.objects.filter(estado__in=['pending', 'processing', 'Pendiente'])
+    for ped in pedidos_pendientes:
+        id_corto = str(ped.id)[:8]
+        mensaje = f"📦 Pedido pendiente #{id_corto} esperando asignación de logística.|/admin-panel/logistica/"
+        if not Notificacion.objects.filter(usuario_id=usuario_id, mensaje__startswith=f"📦 Pedido pendiente #{id_corto}", esta_leida=False).exists():
+            Notificacion.objects.create(
+                usuario_id=usuario_id,
+                mensaje=mensaje,
+                esta_leida=False
+            )
+
+
+@requerir_administrador
+def leer_notificacion_admin(petición, id_notificacion):
+    """Marca una notificación específica como leída y redirige al destino."""
+    notificacion = get_object_or_404(Notificacion, id=id_notificacion)
+    notificacion.esta_leida = True
+    notificacion.save()
+    
+    mensaje = notificacion.mensaje
+    if '|' in mensaje:
+        partes = mensaje.split('|')
+        url_destino = partes[1].strip()
+        return redirect(url_destino)
+        
+    return redirect('/admin-panel/')

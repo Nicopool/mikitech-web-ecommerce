@@ -18,15 +18,35 @@ def global_context(request):
     # Conteo de notificaciones (si hay sesión)
     conteo_notificaciones = 0
     notificaciones_previas = []
-    if request.session.get('usuario_id'):
+    usuario_id = request.session.get('usuario_id')
+    
+    if usuario_id:
+        # Si el usuario es admin, asegurar alertas del sistema antes de cargar
+        if request.session.get('rol_usuario') == 'admin':
+            try:
+                from core.admin_views import asegurar_notificaciones_admin
+                asegurar_notificaciones_admin(usuario_id)
+            except Exception as e:
+                print("Error al generar notificaciones de admin:", e)
+                
         from users.models import Notificacion
-        # Traer todas las notificaciones no leídas en una sola consulta para evitar dos round-trips
         todas_notif_no_leidas = list(
             Notificacion.objects.filter(
-                usuario_id=request.session.get('usuario_id'),
+                usuario_id=usuario_id,
                 esta_leida=False
             ).order_by('-creado_el')
         )
+        
+        # Mutar para extraer mensaje visible y link
+        for n in todas_notif_no_leidas:
+            if '|' in n.mensaje:
+                partes = n.mensaje.split('|')
+                n.mensaje_visible = partes[0]
+                n.url_destino = partes[1]
+            else:
+                n.mensaje_visible = n.mensaje
+                n.url_destino = '#'
+                
         conteo_notificaciones = len(todas_notif_no_leidas)
         notificaciones_previas = todas_notif_no_leidas[:5]  # Mostrar máximo 5
     

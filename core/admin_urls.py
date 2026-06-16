@@ -44,4 +44,7 @@ urlpatterns = [
     
     # Pedidos
     path('pedidos/', admin_views.gestion_pedidos, name='admin_orders'),
+
+    # Notificaciones Admin
+    path('notificaciones/leer/<uuid:id_notificacion>/', admin_views.leer_notificacion_admin, name='admin_read_notification'),
 ]

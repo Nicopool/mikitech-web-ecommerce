@@ -64,11 +64,41 @@
       <h1>{% block page_title %}Panel de Control{% endblock %}</h1>
       <p id="g-current-date" style="font-size: 1.2rem; color: var(--ds-text-soft); margin-top: 2px;"></p>
     </div>
-    <div class="g-top-actions">
-      <a href="/" target="_blank" class="g-btn-secondary" style="font-size: 12px; padding: 8px 14px; border-radius: 20px;">
+    <div class="g-top-actions" style="display:flex; align-items:center; gap:12px;">
+      <!-- Campana de Alertas y Notificaciones -->
+      <div class="nav-notif-btn" id="adminNotifBtn" onclick="toggleAdminNotifDropdown(event)" aria-label="Notificaciones" style="position: relative; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 3.8rem; height: 3.8rem; border-radius: 12px; background: #1E293B; border: 1px solid #334155; color: #E2E8F0; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#38BDF8';" onmouseout="this.style.background='#1E293B'; this.style.color='#E2E8F0';">
+        <i data-lucide="bell" style="width: 1.8rem; height: 1.8rem;"></i>
+        {% if conteo_notificaciones > 0 %}
+          <span style="position: absolute; top: -5px; right: -5px; background: #EF4444; color: white; border-radius: 50%; min-width: 1.8rem; height: 1.8rem; font-size: 1rem; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 1.5px solid #0F172A;">{{ conteo_notificaciones }}</span>
+        {% endif %}
+        
+        <!-- Dropdown Alertas -->
+        <div id="admin-notif-dropdown" style="display:none; position:absolute; top:4.5rem; right:0; width:32rem; background:#1E293B; border:1px solid #334155; box-shadow:0 10px 25px rgba(0,0,0,0.5); border-radius:12px; z-index:1000; padding:1.5rem; cursor:default; color: #F8FAFC; text-align: left;" onclick="event.stopPropagation()">
+          <h4 style="font-family: 'Outfit', sans-serif; font-size:1.4rem; font-weight: 700; margin: 0 0 1.5rem 0; border-bottom:1px solid #334155; padding-bottom:1rem; display:flex; justify-content:space-between; align-items:center; color:#FFF;">
+            Alertas del Sistema
+            {% if conteo_notificaciones > 0 %}
+            <a href="{% url 'users:mark_notifications_read' %}" style="font-size:1.1rem; color:#38BDF8; font-weight:400; text-decoration: none;">Limpiar todo</a>
+            {% endif %}
+          </h4>
+          <div style="max-height:28rem; overflow-y:auto; display: flex; flex-direction: column; gap: 8px;">
+            {% for n in ultimas_notificaciones %}
+            <a href="/admin-panel/notificaciones/leer/{{ n.id }}/" style="display: block; text-decoration: none; color: inherit; padding: 1rem 1.2rem; border-radius: 8px; transition: background-color 0.2s; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03);" onmouseover="this.style.background='rgba(56, 189, 248, 0.08)'; this.style.borderColor='rgba(56, 189, 248, 0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.02)'; this.style.borderColor='rgba(255,255,255,0.03)';">
+              <p style="font-size:1.25rem; line-height:1.4; color:#E2E8F0; margin:0; font-weight: 500;">
+                {{ n.mensaje_visible }}
+              </p>
+              <small style="font-size:1rem; color:#38BDF8; display:block; margin-top:0.4rem; font-weight: 700;">{{ n.creado_el|timesince }}</small>
+            </a>
+            {% empty %}
+            <p style="text-align:center; padding:2rem; color:#94A3B8; font-size:1.3rem; margin: 0;">Sin alertas pendientes. ¡Buen trabajo!</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <a href="/" target="_blank" class="g-btn-secondary" style="font-size: 12px; padding: 8px 14px; border-radius: 20px; height: 3.8rem; display: inline-flex; align-items: center; justify-content: center; margin: 0;">
         <i data-lucide="external-link" style="width: 1.4rem; height: 1.4rem;"></i> Ver Tienda
       </a>
-      <a href="{% url 'admin_logout' %}" class="g-btn-ghost">
+      <a href="{% url 'admin_logout' %}" class="g-btn-ghost" style="height: 3.8rem; display: inline-flex; align-items: center; justify-content: center; margin: 0;">
         <i data-lucide="log-out" style="width: 1.5rem; height: 1.5rem;"></i> Cerrar Sesión
       </a>
     </div>
@@ -197,6 +227,28 @@
     // Inicializar Lucide Icons
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
+    }
+  });
+
+  // Funciones de control de notificaciones del administrador
+  function toggleAdminNotifDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('admin-notif-dropdown');
+    if (dropdown) {
+      if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+      } else {
+        dropdown.style.display = 'none';
+      }
+    }
+  }
+
+  // Cerrar el dropdown al hacer clic en cualquier parte fuera de él
+  document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('admin-notif-dropdown');
+    const button = document.getElementById('adminNotifBtn');
+    if (dropdown && !dropdown.contains(event.target) && event.target !== button && !button.contains(event.target)) {
+      dropdown.style.display = 'none';
     }
   });
 </script>
