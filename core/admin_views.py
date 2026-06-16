@@ -257,10 +257,113 @@ def cerrar_sesion_administrador(petición):
 
 @requerir_administrador
 def tablero_administrador(petición):
-    """Estadísticas principales del panel."""
+    """Estadísticas principales del panel con filtro de tiempo (Semana, Mes, Año, Todo)."""
     from django.db.models import Sum, F
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    filtro_tiempo = petición.GET.get('filtro_tiempo', 'mes')
+    if filtro_tiempo not in ['semana', 'mes', 'anio', 'todo']:
+        filtro_tiempo = 'mes'
+        
+    ahora = timezone.now()
+    fecha_inicio = None
+    
+    if filtro_tiempo == 'semana':
+        fecha_inicio = ahora - timedelta(days=7)
+    elif filtro_tiempo == 'mes':
+        fecha_inicio = ahora - timedelta(days=30)
+    elif filtro_tiempo == 'anio':
+        fecha_inicio = ahora - timedelta(days=365)
+        
+    # Calcular ingresos estimados del periodo seleccionado
+    pedido_qs = Pedido.objects.filter(estado__in=['delivered', 'shipped'])
+    if fecha_inicio:
+        pedido_qs = pedido_qs.filter(creado_el__gte=fecha_inicio)
+        
+    ingresos_estimados = pedido_qs.aggregate(total=Sum('monto_total'))['total'] or 0
+    
+    # Calcular ingresos del periodo anterior para porcentaje de cambio
+    porcentaje_cambio = 0
+    comparacion_texto = "vs periodo anterior"
+    
+    if fecha_inicio:
+        duracion = ahora - fecha_inicio
+        fecha_inicio_anterior = fecha_inicio - duracion
+        
+        ingresos_periodo_anterior = Pedido.objects.filter(
+            estado__in=['delivered', 'shipped'],
+            creado_el__range=[fecha_inicio_anterior, fecha_inicio]
+        ).aggregate(total=Sum('monto_total'))['total'] or 0
+        
+        if ingresos_periodo_anterior > 0:
+            porcentaje_cambio = ((ingresos_estimados - ingresos_periodo_anterior) / ingresos_periodo_anterior) * 100
+        else:
+            porcentaje_cambio = 100 if ingresos_estimados > 0 else 0
+            
+        if filtro_tiempo == 'semana':
+            comparacion_texto = "vs semana anterior"
+        elif filtro_tiempo == 'mes':
+            comparacion_texto = "vs mes anterior"
+        elif filtro_tiempo == 'anio':
+            comparacion_texto = "vs año anterior"
+    else:
+        comparacion_texto = "en total histórico"
+        porcentaje_cambio = 100
+        
+    # Calcular datos del gráfico
+    chart_labels = []
+    chart_data = []
+    
+    if filtro_tiempo == 'semana':
+        for i in range(6, -1, -1):
+            dia = ahora.date() - timedelta(days=i)
+            label = dia.strftime('%d %b')
+            chart_labels.append(label)
+            
+            ingresos_dia = Pedido.objects.filter(
+                estado__in=['delivered', 'shipped'],
+                creado_el__date=dia
+            ).aggregate(total=Sum('monto_total'))['total'] or 0
+            chart_data.append(float(ingresos_dia))
+            
+    elif filtro_tiempo == 'mes':
+        for i in range(3, -1, -1):
+            fin_periodo = ahora - timedelta(days=i*7)
+            inicio_periodo = fin_periodo - timedelta(days=6)
+            label = f"Semana {4-i}"
+            chart_labels.append(label)
+            
+            ingresos_periodo = Pedido.objects.filter(
+                estado__in=['delivered', 'shipped'],
+                creado_el__range=[inicio_periodo, fin_periodo]
+            ).aggregate(total=Sum('monto_total'))['total'] or 0
+            chart_data.append(float(ingresos_periodo))
+            
+    else:  # 'anio' o 'todo'
+        for i in range(11, -1, -1):
+            año_ref = ahora.year
+            mes_ref = ahora.month - i
+            while mes_ref <= 0:
+                mes_ref += 12
+                año_ref -= 1
+            
+            import calendar
+            _, ultimo_dia = calendar.monthrange(año_ref, mes_ref)
+            
+            inicio_mes = timezone.make_aware(timezone.datetime(año_ref, mes_ref, 1, 0, 0, 0))
+            fin_mes = timezone.make_aware(timezone.datetime(año_ref, mes_ref, ultimo_dia, 23, 59, 59))
+            
+            nombre_mes = inicio_mes.strftime('%b %y')
+            chart_labels.append(nombre_mes)
+            
+            ingresos_mes = Pedido.objects.filter(
+                estado__in=['delivered', 'shipped'],
+                creado_el__range=[inicio_mes, fin_mes]
+            ).aggregate(total=Sum('monto_total'))['total'] or 0
+            chart_data.append(float(ingresos_mes))
+            
     valor_total_inv = Producto.objects.aggregate(total=Sum(F('precio') * F('existencias')))['total'] or 0
-    ingresos_estimados = Pedido.objects.filter(estado__in=['delivered', 'shipped']).aggregate(total=Sum('monto_total'))['total'] or 0
     
     estadísticas = {
         'total_productos': Producto.objects.count(),
@@ -279,6 +382,11 @@ def tablero_administrador(petición):
         'estadisticas': estadísticas,
         'productos_recientes': productos_recientes,
         'resenas_recientes': reseñas_recientes,
+        'porcentaje_cambio': porcentaje_cambio,
+        'comparacion_texto': comparacion_texto,
+        'filtro_tiempo': filtro_tiempo,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
         'titulo_pagina': 'Tablero de Control — MIKITECH',
     })
 

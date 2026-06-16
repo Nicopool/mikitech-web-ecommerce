@@ -4,6 +4,20 @@
 {% block page_title %}Panel Admin — Resumen General{% endblock %}
 
 {% block admin_content %}
+  <!-- FILTRO DE TIEMPO PREMIUM -->
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom: 30px; background:#1E293B; padding:12px 20px; border-radius:12px; border:1px solid #334155;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <i data-lucide="calendar" style="color:#38BDF8; width:2rem; height:2rem;"></i>
+      <span style="font-size:1.4rem; font-weight:700; color:#F8FAFC; font-family:'Outfit',sans-serif;">Filtro Temporal del Tablero:</span>
+    </div>
+    <div style="display:flex; background:#0F172A; padding:4px; border-radius:30px; gap:4px; border:1px solid #334155;">
+      <a href="?filtro_tiempo=semana" style="font-size:1.2rem; font-weight:700; padding:6px 16px; border-radius:20px; text-decoration:none; transition:all 0.2s; {% if filtro_tiempo == 'semana' %}background:#38BDF8; color:#0F172A;{% else %}color:#94A3B8;{% endif %}" onmouseover="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#FFF';" onmouseout="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#94A3B8';">Semana</a>
+      <a href="?filtro_tiempo=mes" style="font-size:1.2rem; font-weight:700; padding:6px 16px; border-radius:20px; text-decoration:none; transition:all 0.2s; {% if filtro_tiempo == 'mes' %}background:#38BDF8; color:#0F172A;{% else %}color:#94A3B8;{% endif %}" onmouseover="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#FFF';" onmouseout="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#94A3B8';">Mes</a>
+      <a href="?filtro_tiempo=anio" style="font-size:1.2rem; font-weight:700; padding:6px 16px; border-radius:20px; text-decoration:none; transition:all 0.2s; {% if filtro_tiempo == 'anio' %}background:#38BDF8; color:#0F172A;{% else %}color:#94A3B8;{% endif %}" onmouseover="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#FFF';" onmouseout="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#94A3B8';">Año</a>
+      <a href="?filtro_tiempo=todo" style="font-size:1.2rem; font-weight:700; padding:6px 16px; border-radius:20px; text-decoration:none; transition:all 0.2s; {% if filtro_tiempo == 'todo' %}background:#38BDF8; color:#0F172A;{% else %}color:#94A3B8;{% endif %}" onmouseover="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#FFF';" onmouseout="if(this.getAttribute('href').includes(window.location.search.split('=')[1])) return; this.style.color='#94A3B8';">Todo</a>
+    </div>
+  </div>
+
   <div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 30px;">
     <div>
       <h2 style="font-size:2.4rem; font-weight:800; color:var(--ds-text); margin:0; display:flex; align-items:center; gap:10px;">
@@ -40,7 +54,9 @@
         
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top: 15px; z-index:1;">
           <div>
-            <div style="font-weight:700; font-size:1.2rem; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px;">+12.4% vs mes anterior</div>
+            <div style="font-weight:700; font-size:1.2rem; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px;">
+              {% if porcentaje_cambio >= 0 %}+{% endif %}{{ porcentaje_cambio|floatformat:1 }}% {{ comparacion_texto }}
+            </div>
           </div>
           <div style="font-size:2.8rem; font-weight:900; opacity:0.15;">MIKI</div>
         </div>
@@ -157,18 +173,17 @@
   document.addEventListener("DOMContentLoaded", function() {
     const ctxMini = document.getElementById('miniDashboardChart').getContext('2d');
     
-    // Un gráfico de línea sencillo y elegante sobre fondo azul
     new Chart(ctxMini, {
       type: 'line',
       data: {
-        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+        labels: {{ chart_labels|safe }},
         datasets: [{
-          data: [12, 19, 15, 25],
+          data: {{ chart_data|safe }},
           borderColor: 'rgba(255, 255, 255, 0.9)',
           backgroundColor: 'rgba(255, 255, 255, 0.1)',
           borderWidth: 3,
           pointBackgroundColor: '#FFFFFF',
-          pointBorderColor: '#3B82F6',
+          pointBorderColor: '#38BDF8',
           pointRadius: 4,
           fill: true,
           tension: 0.4
@@ -183,11 +198,17 @@
             titleFont: { family: 'Inter', size: 12 },
             bodyFont: { family: 'Inter', size: 13, weight: 'bold' },
             displayColors: false,
+            callbacks: {
+              label: function(context) {
+                let val = context.raw;
+                return 'Ingresos: $' + val.toLocaleString('es-CO');
+              }
+            }
           }
         },
         scales: {
           x: { display: false },
-          y: { display: false, min: 0 }
+          y: { display: false }
         },
         layout: { padding: 0 }
       }
