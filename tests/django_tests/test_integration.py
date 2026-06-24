@@ -63,7 +63,7 @@ class TestWebRoutesIntegration(unittest.TestCase):
         from django.conf import settings
         
         table_name = '"auth.users"' if getattr(settings, 'USE_SQLITE', False) else 'auth.users'
-        email_dup = f"duplicate_email_{uuid.uuid4().hex[:8]}@mikitech.test"
+        email_dup = f"duplicate_email_{uuid.uuid4().hex[:8]}@gmail.com"
         unique_username = f"user_{uuid.uuid4().hex[:10]}"
         
         # 1. Limpieza inicial
@@ -130,7 +130,7 @@ class TestWebRoutesIntegration(unittest.TestCase):
         from django.conf import settings
         
         table_name = '"auth.users"' if getattr(settings, 'USE_SQLITE', False) else 'auth.users'
-        email_dup = f"duplicate_email_admin_{uuid.uuid4().hex[:8]}@mikitech.test"
+        email_dup = f"duplicate_email_admin_{uuid.uuid4().hex[:8]}@gmail.com"
         unique_username = f"admin_{uuid.uuid4().hex[:10]}"
         
         # 1. Limpieza inicial

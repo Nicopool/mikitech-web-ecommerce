@@ -4,6 +4,7 @@ import uuid
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .supabase_auth import iniciar_sesion_usuario, registrar_usuario
+from .decorators import requerir_usuario_autenticado
 from .models import Perfil
 from interactions.models import Favorito
 
@@ -236,11 +237,9 @@ def vista_cerrar_sesion(petición):
     return redirect('core:home')
 
 
+@requerir_usuario_autenticado
 def mi_perfil(petición):
     """Área privada: Tablero principal del perfil del usuario."""
-    if not petición.session.get('usuario_id'):
-        return redirect(f'/cuenta/login/?next=/cuenta/perfil/')
-
     try:
         perfil = Perfil.objects.get(id=petición.session['usuario_id'])
     except Perfil.DoesNotExist:
@@ -284,11 +283,9 @@ def mi_perfil(petición):
     })
 
 
+@requerir_usuario_autenticado
 def editar_perfil(petición):
     """Formulario para actualizar los datos personales y avatar."""
-    if not petición.session.get('usuario_id'):
-        return redirect(f'/cuenta/login/?next=/cuenta/perfil/editar/')
-
     try:
         perfil = Perfil.objects.get(id=petición.session['usuario_id'])
     except Perfil.DoesNotExist:
@@ -364,11 +361,9 @@ def editar_perfil(petición):
     })
 
 
+@requerir_usuario_autenticado
 def mis_favoritos(petición):
     """Lista de productos marcados como favoritos por el usuario."""
-    if not petición.session.get('usuario_id'):
-        return redirect(f'/cuenta/login/?next=/cuenta/favoritos/')
-
     try:
         perfil = Perfil.objects.get(id=petición.session['usuario_id'])
         favoritos = Favorito.objects.filter(usuario=perfil).select_related('producto').order_by('-creado_el')
@@ -382,11 +377,9 @@ def mis_favoritos(petición):
     })
 
 
+@requerir_usuario_autenticado
 def mis_pedidos(petición):
     """Historial de transacciones y estados de envío."""
-    if not petición.session.get('usuario_id'):
-        return redirect(f'/cuenta/login/?next=/cuenta/pedidos/')
-
     try:
         from users.models import Perfil
         perfil = Perfil.objects.get(id=petición.session['usuario_id'])
@@ -478,11 +471,9 @@ def restablecer_contraseña(petición):
     return render(petición, 'users/reset_password.html', {'email': correo, 'titulo_pagina': 'Ingresar Código'})
 
 
+@requerir_usuario_autenticado
 def mi_historial(petición):
     """Resumen de toda la actividad del usuario en la plataforma."""
-    if not petición.session.get('usuario_id'):
-        return redirect('users:login')
-
     try:
         perfil = Perfil.objects.get(id=petición.session['usuario_id'])
     except Perfil.DoesNotExist:
@@ -508,11 +499,9 @@ def mi_historial(petición):
     })
 
 
+@requerir_usuario_autenticado
 def mis_reportes(petición):
     """Acceso a archivos PDF y estadísticas descargables."""
-    if not petición.session.get('usuario_id'):
-        return redirect('users:login')
-
     try:
         perfil = Perfil.objects.get(id=petición.session['usuario_id'])
     except Perfil.DoesNotExist:
