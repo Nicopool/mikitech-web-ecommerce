@@ -36,10 +36,48 @@ def vista_ingreso(petición):
 
         datos, error = iniciar_sesion_usuario(correo, clave)
 
-        # CP-MK-012 / 013: Siempre mensaje genérico (nunca revelar si el correo existe)
         if error:
+            # Clasificar el error de Supabase para mostrar alertas espíficas
+            error_lower = str(error).lower()
+
+            if 'invalid login credentials' in error_lower or 'invalid email or password' in error_lower:
+                # Correo o contraseña incorrectos
+                mensaje_error = 'El correo electrónico o la contraseña son incorrectos. Verifica tus datos e intenta de nuevo.'
+                tipo_error = 'credenciales'
+
+            elif 'email not confirmed' in error_lower or 'email link is invalid' in error_lower:
+                # Correo no verificado en Supabase
+                mensaje_error = 'Tu correo aún no ha sido verificado. Revisa tu bandeja de entrada y haz clic en el enlace de confirmación.'
+                tipo_error = 'no_confirmado'
+
+            elif 'user not found' in error_lower or 'no user found' in error_lower:
+                # Correo no registrado
+                mensaje_error = 'No existe ninguna cuenta con ese correo electrónico. ¿Quieres <a href="/cuenta/registro/">crear una cuenta</a>?'
+                tipo_error = 'no_encontrado'
+
+            elif 'google' in error_lower or 'oauth' in error_lower or 'provider' in error_lower or 'social' in error_lower:
+                # Cuenta creada con Google (OAuth), no tiene contraseña de email
+                mensaje_error = 'Esta cuenta fue creada con Google. Usa el botón “Iniciar sesión con Google” o recupera tu contraseña.'
+                tipo_error = 'google'
+
+            elif 'rate limit' in error_lower or 'too many' in error_lower:
+                # Límite de intentos excedido
+                mensaje_error = 'Demasiados intentos fallidos. Espera unos minutos antes de intentarlo de nuevo.'
+                tipo_error = 'rate_limit'
+
+            elif 'network' in error_lower or 'connection' in error_lower or 'timeout' in error_lower or 'urlopen error' in error_lower:
+                # Error de red / Supabase caído
+                mensaje_error = 'No se pudo conectar con el servidor de autenticación. Verifica tu conexión a internet e intenta de nuevo.'
+                tipo_error = 'red'
+
+            else:
+                # Error genérico desconocido
+                mensaje_error = 'Ocurrió un error al iniciar sesión. Intenta de nuevo o contacta con soporte.'
+                tipo_error = 'desconocido'
+
             return render(petición, 'users/login.html', {
-                'error': 'Credenciales incorrectas. Intenta de nuevo.',
+                'error': mensaje_error,
+                'error_tipo': tipo_error,
                 'correo': correo,
                 'next': petición.POST.get('next', '')
             })
@@ -125,6 +163,19 @@ def vista_registro(petición):
         if Perfil.objects.filter(nombre_usuario=nombre_usuario).exists():
             contexto['error'] = 'Ese nombre de usuario ya está registrado.'
             return render(petición, 'users/register.html', contexto)
+
+        # Verificar si el correo electrónico ya existe en auth.users
+        from django.db import connection
+        from django.conf import settings
+        table_name = '"auth.users"' if getattr(settings, 'USE_SQLITE', False) else 'auth.users'
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT id FROM {table_name} WHERE email = %s", [correo])
+                if cursor.fetchone():
+                    contexto['error'] = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.'
+                    return render(petición, 'users/register.html', contexto)
+        except Exception as e:
+            print(f"[vista_registro] Error verificando duplicidad de correo: {e}")
 
         from .supabase_auth import registrar_usuario, registrar_usuario_sql
         datos, error = registrar_usuario(correo, clave, nombre_completo, nombre_usuario)
