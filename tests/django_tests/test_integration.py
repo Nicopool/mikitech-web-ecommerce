@@ -304,6 +304,75 @@ class TestTripleLockSecurity(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn('/repartidor/pasarela/', response.url)
 
+    def test_admin_session_flushed_on_navigating_away(self):
+        """
+        RBAC & Aislamiento Estricto: Si un admin intenta acceder a una ruta de cliente 
+        (ej: /cuenta/perfil/), su sesión debe cerrarse (flush) y ser redirigido a '/'.
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.middleware import RoleVerificationMiddleware
+        
+        # Simular petición a /cuenta/perfil/
+        rf = RequestFactory()
+        request = rf.get('/cuenta/perfil/')
+        
+        # Aplicar middleware de sesión
+        session_middleware = SessionMiddleware(get_response=lambda r: None)
+        session_middleware.process_request(request)
+        
+        # Configurar rol de admin en la sesión
+        request.session['usuario_id'] = 'fake-admin-id'
+        request.session['rol_usuario'] = 'admin'
+        request.session.save()
+        
+        # Ejecutar middleware de verificación de rol
+        role_middleware = RoleVerificationMiddleware(get_response=lambda r: None)
+        response = role_middleware(request)
+        
+        # Debe redirigir a '/'
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+        
+        # La sesión debe haberse limpiado (usuario_id y rol_usuario borrados)
+        self.assertNotIn('usuario_id', request.session)
+        self.assertNotIn('rol_usuario', request.session)
+
+    def test_repartidor_session_flushed_on_navigating_away(self):
+        """
+        RBAC & Aislamiento Estricto: Si un repartidor intenta acceder a una ruta de cliente 
+        (ej: /cuenta/perfil/), su sesión debe cerrarse (flush) y ser redirigido a '/'.
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.middleware import RoleVerificationMiddleware
+        
+        # Simular petición a /cuenta/perfil/
+        rf = RequestFactory()
+        request = rf.get('/cuenta/perfil/')
+        
+        # Aplicar middleware de sesión
+        session_middleware = SessionMiddleware(get_response=lambda r: None)
+        session_middleware.process_request(request)
+        
+        # Configurar rol de repartidor en la sesión
+        request.session['usuario_id'] = 'fake-repartidor-id'
+        request.session['rol_usuario'] = 'repartidor'
+        request.session.save()
+        
+        # Ejecutar middleware de verificación de rol
+        role_middleware = RoleVerificationMiddleware(get_response=lambda r: None)
+        response = role_middleware(request)
+        
+        # Debe redirigir a '/'
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+        
+        # La sesión debe haberse limpiado
+        self.assertNotIn('usuario_id', request.session)
+        self.assertNotIn('rol_usuario', request.session)
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

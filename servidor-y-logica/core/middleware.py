@@ -8,6 +8,9 @@ RoleVerificationMiddleware: Sincroniza el rol de sesión con la base de datos en
 """
 
 
+from django.shortcuts import redirect
+from django.contrib import messages
+
 class NoCacheMiddleware:
     """
     Agrega headers Cache-Control a las rutas protegidas (/cuenta/, /admin-panel/)
@@ -66,6 +69,12 @@ class RoleVerificationMiddleware:
 
     def __call__(self, request):
         self._verificar_y_sincronizar_rol(request)
+        
+        # Enforce strict segregation of duties (RBAC)
+        response = self._enforce_strict_panel_isolation(request)
+        if response:
+            return response
+            
         return self.get_response(request)
 
     def _verificar_y_sincronizar_rol(self, request):
@@ -101,3 +110,44 @@ class RoleVerificationMiddleware:
             # Si el perfil no existe o hay error de BD, no interrumpir la petición
             # — los decoradores individuales se encargarán de redirigir si hace falta
             pass
+
+    def _enforce_strict_panel_isolation(self, request):
+        """
+        Enforce strict segregation of duties (RBAC).
+        If an admin or delivery user attempts to leave their panel and access a public or client page,
+        their active session is immediately flushed (closing the session) and they are redirected to '/'.
+        """
+        rol_sesion = request.session.get('rol_usuario')
+        if not rol_sesion:
+            return None
+
+        path = request.path
+
+        # Ignore static, media, assets, and debug toolbar
+        if (path.startswith('/static/') or 
+            path.startswith('/media/') or 
+            path.startswith('/__debug__/') or
+            path in ('/favicon.ico', '/robots.txt', '/sitemap.xml')):
+            return None
+
+        # Admin panel isolation: must only access /admin-panel/
+        if rol_sesion == 'admin':
+            if not path.startswith('/admin-panel/'):
+                request.session.flush()
+                try:
+                    messages.warning(request, 'Sesión de administrador cerrada por políticas de seguridad al salir del panel.')
+                except Exception:
+                    pass
+                return redirect('/')
+
+        # Repartidor panel isolation: must only access /repartidor/
+        elif rol_sesion == 'repartidor':
+            if not path.startswith('/repartidor/'):
+                request.session.flush()
+                try:
+                    messages.warning(request, 'Sesión de repartidor cerrada por políticas de seguridad al salir del panel.')
+                except Exception:
+                    pass
+                return redirect('/')
+
+        return None
