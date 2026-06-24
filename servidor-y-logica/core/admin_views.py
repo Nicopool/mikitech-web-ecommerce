@@ -228,6 +228,16 @@ def registro_administrador(petición):
             contexo['error'] = 'Ese nombre de usuario ya está registrado.'
             return render(petición, 'admin_panel/register.html', contexo)
 
+        # Verificar que el correo sea de un proveedor permitido (Gmail o Hotmail/Outlook)
+        DOMINIOS_PERMITIDOS = {
+            'gmail.com', 'hotmail.com', 'hotmail.es',
+            'outlook.com', 'outlook.es', 'live.com', 'live.com.mx'
+        }
+        dominio_correo = correo.split('@')[-1].lower() if '@' in correo else ''
+        if dominio_correo not in DOMINIOS_PERMITIDOS:
+            contexo['error'] = 'Solo se aceptan correos de Gmail (@gmail.com) o Hotmail/Outlook (@hotmail.com, @outlook.com).'
+            return render(petición, 'admin_panel/register.html', contexo)
+
         # Verificar si el correo electrónico ya existe en auth.users
         from django.db import connection
         from django.conf import settings

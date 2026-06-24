@@ -151,6 +151,16 @@ def vista_registro(petición):
             contexto['error'] = 'Formato de correo inválido.'
             return render(petición, 'users/register.html', contexto)
 
+        # Solo se permiten correos de Gmail o Hotmail/Outlook
+        DOMINIOS_PERMITIDOS = {
+            'gmail.com', 'hotmail.com', 'hotmail.es',
+            'outlook.com', 'outlook.es', 'live.com', 'live.com.mx'
+        }
+        dominio_correo = correo.split('@')[-1].lower() if '@' in correo else ''
+        if dominio_correo not in DOMINIOS_PERMITIDOS:
+            contexto['error'] = 'Solo se aceptan correos de Gmail (@gmail.com) o Hotmail/Outlook (@hotmail.com, @outlook.com).'
+            return render(petición, 'users/register.html', contexto)
+
         if clave != clave2:
             contexto['error'] = 'Las contraseñas no coinciden.'
             return render(petición, 'users/register.html', contexto)

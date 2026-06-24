@@ -221,7 +221,7 @@
           <div class="input-wrapper">
             <i data-lucide="mail" class="input-icon"></i>
             <input type="email" name="correo" id="correo" class="input-field"
-                   required placeholder="tu_correo@admin.com" autocomplete="off"
+                   required placeholder="tu@gmail.com o tu@hotmail.com" autocomplete="off"
                    value="{{ correo|default:'' }}">
           </div>
         </div>
@@ -419,8 +419,18 @@
       } else if (!emailRe.test(correo)) {
         e.preventDefault();
         const errEl = document.getElementById('error_correo');
-        errEl.textContent = 'Formato no v\u00e1lido'; errEl.style.display = 'block';
+        errEl.textContent = 'Formato no válido'; errEl.style.display = 'block';
         correoInput.classList.add('is-invalid'); hasError = true;
+      } else {
+        // Solo se aceptan Gmail o Hotmail/Outlook
+        const dominiosPermitidos = ['gmail.com','hotmail.com','hotmail.es','outlook.com','outlook.es','live.com','live.com.mx'];
+        const dominio = correo.split('@')[1]?.toLowerCase() || '';
+        if (!dominiosPermitidos.includes(dominio)) {
+          e.preventDefault();
+          const errEl = document.getElementById('error_correo');
+          errEl.textContent = 'Solo Gmail o Hotmail'; errEl.style.display = 'block';
+          correoInput.classList.add('is-invalid'); hasError = true;
+        }
       }
       if (!pass) {
         e.preventDefault();
