@@ -40,14 +40,13 @@ def requiere_repartidor(función_vista):
 
 def pasarela_repartidor(petición):
     """Pasarela de seguridad inicial solicitando código para repartidores."""
+    # 1. Si no hay sesión activa (usuario no autenticado), denegar acceso de inmediato
+    if not petición.session.get('usuario_id'):
+        return redirect('/cuenta/ingreso/?next=/repartidor/pasarela/')
+
     rol = petición.session.get('rol_usuario')
     if rol == 'repartidor':
         return redirect('/repartidor/')
-
-    if not petición.session.get('usuario_id'):
-        if 'pasarela_repartidor_superada' in petición.session:
-            del petición.session['pasarela_repartidor_superada']
-            petición.session.modified = True
 
     if petición.session.get('pasarela_repartidor_superada'):
         return redirect('/repartidor/login/')

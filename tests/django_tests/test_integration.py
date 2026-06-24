@@ -207,6 +207,21 @@ class TestWebRoutesIntegration(unittest.TestCase):
 
 
 
+    def test_anonymous_redirected_from_admin_pasarela(self):
+        """Verifica que un usuario anónimo sea redirigido de la pasarela de administrador al login público."""
+        response = self.client.get('/admin-panel/pasarela/')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/cuenta/ingreso/', response.url)
+        self.assertIn('next=/admin-panel/pasarela/', response.url)
+
+    def test_anonymous_redirected_from_repartidor_pasarela(self):
+        """Verifica que un usuario anónimo sea redirigido de la pasarela de repartidor al login público."""
+        response = self.client.get('/repartidor/pasarela/')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/cuenta/ingreso/', response.url)
+        self.assertIn('next=/repartidor/pasarela/', response.url)
+
+
 class TestTripleLockSecurity(unittest.TestCase):
     """
     ISO 25010 – Pruebas del sistema de triple cerrojo (RBAC en tiempo real).

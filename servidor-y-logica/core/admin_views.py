@@ -68,15 +68,13 @@ def requerir_administrador(función_vista):
 
 def pasarela(petición):
     """Pasarela de seguridad inicial solicitando el código SENA-2026."""
+    # 1. Si no hay sesión activa (usuario no autenticado), denegar acceso de inmediato
+    if not petición.session.get('usuario_id'):
+        return redirect('/cuenta/ingreso/?next=/admin-panel/pasarela/')
+
     # Si ya está logueado como admin, ir directo al panel
     if petición.session.get('rol_usuario') == 'admin':
         return redirect('/admin-panel/')
-
-    # Si NO hay sesión de admin activa, limpiar la pasarela para forzar el código siempre
-    if not petición.session.get('usuario_id'):
-        if 'pasarela_administrador_superada' in petición.session:
-            del petición.session['pasarela_administrador_superada']
-            petición.session.modified = True
 
     if petición.session.get('pasarela_administrador_superada'):
         return redirect('/admin-panel/login/')
