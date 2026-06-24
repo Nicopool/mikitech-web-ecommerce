@@ -6,7 +6,10 @@
 {% block extra_head %}
 <style>
   /* ═══ RESET FOR AUTH PAGE ═══ */
-  body { background: #0A0F1E; overflow: auto; }
+  body {
+    background: #0A0F1E;
+    overflow: auto;
+  }
 
   /* ═══ AUTH LAYOUT SPLIT SCREEN ═══ */
   .auth-wrap {
@@ -27,76 +30,150 @@
   /* ═══ RIGHT PANEL (form) ═══ */
   .auth-right {
     background: #FFFFFF;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 5rem 3rem;
   }
-  .auth-form-wrap { width: 100%; max-width: 46rem; }
+
+  .auth-form-wrap {
+    width: 100%;
+    max-width: 46rem;
+  }
 
   .auth-logo-wrap {
-    display: flex; align-items: center; margin-bottom: 4rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 4rem;
   }
-  .auth-logo-wrap img { height: 4.2rem; object-fit: contain; }
 
-  .auth-heading { margin-bottom: 3.5rem; }
-  .auth-heading h1 {
-    font-size: 3rem; font-weight: 800; color: #0F172A;
-    letter-spacing: -0.03em; margin-bottom: 0.8rem;
+  .auth-logo-wrap img {
+    height: 4.2rem;
+    object-fit: contain;
   }
-  .auth-heading p { font-size: 1.5rem; color: #64748B; }
+
+  .auth-heading {
+    margin-bottom: 3.5rem;
+  }
+
+  .auth-heading h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.8rem;
+  }
+
+  .auth-heading p {
+    font-size: 1.5rem;
+    color: #64748B;
+  }
 
   /* ═══ INPUTS ═══ */
-  .inp-group { margin-bottom: 2.5rem; }
+  .inp-group {
+    margin-bottom: 2.5rem;
+  }
+
   .inp-label {
-    display: block; font-size: 1.2rem; font-weight: 700;
-    color: #374151; margin-bottom: 0.8rem;
-    text-transform: uppercase; letter-spacing: 0.06em;
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
-  .inp-wrap { position: relative; display: flex; align-items: center; }
+
+  .inp-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
   .inp-icon {
-    position: absolute; left: 1.6rem;
-    color: #9CA3AF; width: 1.8rem; height: 1.8rem; pointer-events: none;
+    position: absolute;
+    left: 1.6rem;
+    color: #9CA3AF;
+    width: 1.8rem;
+    height: 1.8rem;
+    pointer-events: none;
   }
+
   .inp-field {
-    width: 100%; padding: 1.5rem 1.6rem 1.5rem 4.8rem;
-    font-family: 'Inter', sans-serif; font-size: 1.5rem;
-    border: 1.5px solid #E2E8F0; border-radius: 1rem;
-    background: #F8FAFC; color: #0F172A;
-    transition: all 0.2s; outline: none;
+    width: 100%;
+    padding: 1.5rem 1.6rem 1.5rem 4.8rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 1rem;
+    background: #F8FAFC;
+    color: #0F172A;
+    transition: all 0.2s;
+    outline: none;
   }
+
   .inp-field:focus {
     border-color: #2563EB;
     background: #fff;
-    box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
   }
-  .inp-field::placeholder { color: #9CA3AF; }
+
+  .inp-field::placeholder {
+    color: #9CA3AF;
+  }
 
   /* ═══ BUTTON ═══ */
   .btn-login {
-    width: 100%; padding: 1.7rem;
+    width: 100%;
+    padding: 1.7rem;
     background: linear-gradient(135deg, #1D4ED8, #2563EB);
-    color: white; border: none; border-radius: 1rem;
-    font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 700;
-    cursor: pointer; transition: all 0.3s;
-    display: flex; justify-content: center; align-items: center; gap: 1rem;
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
     letter-spacing: 0.03em;
-    box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
   }
+
   .btn-login:hover {
     background: linear-gradient(135deg, #1E40AF, #1D4ED8);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(37,99,235,0.4);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
   }
-  .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+  .btn-login:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+  }
 
   .auth-links {
-    margin-top: 2.5rem; text-align: center;
-    font-size: 1.4rem; color: #64748B;
+    margin-top: 2.5rem;
+    text-align: center;
+    font-size: 1.4rem;
+    color: #64748B;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-  .auth-links a { color: #2563EB; font-weight: 600; text-decoration: none; }
-  .auth-links a:hover { text-decoration: underline; }
+
+  .auth-links a {
+    color: #2563EB;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .auth-links a:hover {
+    text-decoration: underline;
+  }
 
   .alert-wix {
     padding: 12px 16px;
@@ -109,11 +186,13 @@
     align-items: center;
     gap: 8px;
   }
+
   .alert-wix.error {
     background: #FEE2E2;
     border: 1px solid #FCA5A5;
     color: #DC2626;
   }
+
   .alert-wix.info {
     background: #EFF6FF;
     border: 1px solid #BFDBFE;
@@ -122,25 +201,49 @@
 
   /* ═══ TRUST BADGES ═══ */
   .trust-row {
-    display: flex; align-items: center; justify-content: center;
-    gap: 2rem; margin-top: 3rem; flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
   }
+
   .trust-item {
-    display: flex; align-items: center; gap: 0.6rem;
-    font-size: 1.2rem; color: #94A3B8;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+    color: #94A3B8;
   }
-  .trust-item .material-symbols-outlined { font-size: 1.5rem; color: #10B981; }
+
+  .trust-item .material-symbols-outlined {
+    font-size: 1.5rem;
+    color: #10B981;
+  }
 
   /* ═══ RESPONSIVE ═══ */
   @media (min-width: 1024px) {
-    .auth-wrap { grid-template-columns: 1fr 1fr; min-height: calc(100vh - 8rem); }
-    .auth-left { display: block; }
-    .auth-right { padding: 6rem 7rem; order: 1; }
+    .auth-wrap {
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 8rem);
+    }
+
+    .auth-left {
+      display: block;
+    }
+
+    .auth-right {
+      padding: 6rem 7rem;
+      order: 1;
+    }
   }
+
   .inp-field.is-invalid {
     border-color: #EF4444 !important;
     background: #FEF2F2 !important;
   }
+
   .inp-field.is-invalid:focus {
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
   }
@@ -160,7 +263,8 @@
     <div class="auth-form-wrap">
 
       <div class="auth-logo-wrap">
-        <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+        <div
+          style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
           <span style="color: #38BDF8;">MIKI</span>TECH
         </div>
       </div>
@@ -188,15 +292,15 @@
         <!-- Código Secreto -->
         <div class="inp-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-            <label class="inp-label" for="id_codigo_secreto_admin_acceso" style="margin-bottom: 0;">Código de Acceso</label>
+            <label class="inp-label" for="id_codigo_secreto_admin_acceso" style="margin-bottom: 0;">Código de
+              Acceso</label>
             <span id="error_codigo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
           </div>
           <div class="inp-wrap">
             <i data-lucide="shield-check" class="inp-icon"></i>
             <input type="text" name="codigo_secreto_admin_acceso" id="id_codigo_secreto_admin_acceso" class="inp-field"
-                   required placeholder="" autocomplete="new-password" autofocus readonly
-                   onfocus="this.removeAttribute('readonly');"
-                   style="-webkit-text-security: disc; text-security: disc;">
+              required placeholder="" autofocus readonly onfocus="this.removeAttribute('readonly');"
+              style="-webkit-text-security: disc; text-security: disc;">
           </div>
         </div>
 
@@ -234,10 +338,10 @@
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
-    
+
     const form = document.getElementById('gateway-form');
     const codigoInput = document.getElementById('id_codigo_secreto_admin_acceso');
-    
+
     form.addEventListener('submit', (e) => {
       // Clear previous errors
       document.getElementById('error_codigo').style.display = 'none';
