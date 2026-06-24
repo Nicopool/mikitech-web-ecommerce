@@ -194,7 +194,8 @@
             <div class="input-wrapper">
               <i data-lucide="user" class="input-icon"></i>
               <input type="text" name="nombre_completo" id="nombre_completo" class="input-field"
-                     required placeholder="Ej: John Doe" autocomplete="off" autofocus>
+                     required placeholder="Ej: John Doe" autocomplete="off" autofocus
+                     value="{{ nombre_completo|default:'' }}">
             </div>
           </div>
           <div class="input-group">
@@ -205,7 +206,8 @@
             <div class="input-wrapper">
               <i data-lucide="at-sign" class="input-icon"></i>
               <input type="text" name="nombre_usuario" id="nombre_usuario" class="input-field"
-                     required placeholder="Ej: johndoe" autocomplete="off">
+                     required placeholder="Ej: johndoe" autocomplete="off"
+                     value="{{ nombre_usuario|default:'' }}">
             </div>
           </div>
         </div>
@@ -219,7 +221,8 @@
           <div class="input-wrapper">
             <i data-lucide="mail" class="input-icon"></i>
             <input type="email" name="correo" id="correo" class="input-field"
-                   required placeholder="tu_correo@admin.com" autocomplete="off">
+                   required placeholder="tu_correo@admin.com" autocomplete="off"
+                   value="{{ correo|default:'' }}">
           </div>
         </div>
 
@@ -315,41 +318,61 @@
 
 </div>
 
-<script>
-  /* ── Toggle password visibility ── */
-  function togglePass(inputId, btnId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon  = document.getElementById(iconId);
-    if (input.type === 'password') {
-      input.type = 'text';
-      icon.setAttribute('data-lucide', 'eye-off');
-    } else {
-      input.type = 'password';
-      icon.setAttribute('data-lucide', 'eye');
-    }
-    lucide.createIcons();
+  /* ─────────────────────────────────────────
+     PERSISTENCIA CON localStorage
+     Guarda nombre, usuario y correo en cada
+     keystroke. Las contraseñas NUNCA se guardan
+     (seguridad). Se restaura al cargar la página
+     y se limpia cuando el registro es exitoso.
+  ───────────────────────────────────────────── */
+  const STORE_KEY = 'mikitech_admin_reg';
+
+  function guardarEnStorage() {
+    const data = {
+      nombre_completo: document.getElementById('nombre_completo').value,
+      nombre_usuario:  document.getElementById('nombre_usuario').value,
+      correo:          document.getElementById('correo').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
   }
 
-  /* ── Password strength validation rules ── */
-  const rules = {
-    length:  v => v.length >= 8,
-    upper:   v => /[A-Z]/.test(v),
-    number:  v => /[0-9]/.test(v),
-    special: v => /[@$!%*?]/.test(v)
-  };
+  function restaurarDesdeStorage() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      // Solo restaurar si el campo está vacío (no sobreescribir lo que vino del servidor)
+      const nc = document.getElementById('nombre_completo');
+      const nu = document.getElementById('nombre_usuario');
+      const co = document.getElementById('correo');
+      if (!nc.value && data.nombre_completo) nc.value = data.nombre_completo;
+      if (!nu.value && data.nombre_usuario)  nu.value = data.nombre_usuario;
+      if (!co.value && data.correo)          co.value = data.correo;
+    } catch(e) {}
+  }
+
+  function limpiarStorage() {
+    localStorage.removeItem(STORE_KEY);
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
-    
-    const form = document.getElementById('admin-register-form');
-    const nombreInput = document.getElementById('nombre_completo');
-    const usuarioInput = document.getElementById('nombre_usuario');
-    const correoInput = document.getElementById('correo');
-    const claveInput = document.getElementById('password');
-    const claveConfirmInput = document.getElementById('password_confirm');
-    const terminosInput = document.getElementById('terminos');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    const form             = document.getElementById('admin-register-form');
+    const nombreInput      = document.getElementById('nombre_completo');
+    const usuarioInput     = document.getElementById('nombre_usuario');
+    const correoInput      = document.getElementById('correo');
+    const claveInput       = document.getElementById('password');
+    const claveConfirmInput= document.getElementById('password_confirm');
+    const terminosInput    = document.getElementById('terminos');
+
+    // Restaurar datos guardados (solo si el campo llegó vacío desde el servidor)
+    restaurarDesdeStorage();
+
+    // Guardar en localStorage en cada keystroke (nombre, usuario, correo)
+    [nombreInput, usuarioInput, correoInput].forEach(inp => {
+      inp.addEventListener('input', guardarEnStorage);
+    });
 
     // Real-time password strength check
     claveInput.addEventListener('input', function() {
@@ -360,21 +383,18 @@
     });
 
     form.addEventListener('submit', function(e) {
-      // Clear previous errors
-      const fields = ['nombre', 'usuario', 'correo', 'clave', 'clave_confirm', 'terminos'];
-      fields.forEach(f => {
+      // Limpiar errores previos
+      ['nombre', 'usuario', 'correo', 'clave', 'clave_confirm', 'terminos'].forEach(f => {
         document.getElementById('error_' + f).style.display = 'none';
       });
-      
-      const inputs = [nombreInput, usuarioInput, correoInput, claveInput, claveConfirmInput];
-      inputs.forEach(inp => inp.classList.remove('is-invalid'));
+      [nombreInput, usuarioInput, correoInput, claveInput, claveConfirmInput].forEach(inp => inp.classList.remove('is-invalid'));
 
-      const nombre = nombreInput.value.trim();
+      const nombre  = nombreInput.value.trim();
       const usuario = usuarioInput.value.trim();
-      const correo = correoInput.value.trim();
-      const pass = claveInput.value;
+      const correo  = correoInput.value.trim();
+      const pass    = claveInput.value;
       const confirm = claveConfirmInput.value;
-      const terminos = terminosInput.checked;
+      const terminos= terminosInput.checked;
       const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 
       let hasError = false;
@@ -382,115 +402,74 @@
       if (!nombre) {
         e.preventDefault();
         const errEl = document.getElementById('error_nombre');
-        errEl.textContent = 'Requerido';
-        errEl.style.display = 'block';
-        nombreInput.classList.add('is-invalid');
-        hasError = true;
+        errEl.textContent = 'Requerido'; errEl.style.display = 'block';
+        nombreInput.classList.add('is-invalid'); hasError = true;
       }
-
       if (!usuario) {
         e.preventDefault();
         const errEl = document.getElementById('error_usuario');
-        errEl.textContent = 'Requerido';
-        errEl.style.display = 'block';
-        usuarioInput.classList.add('is-invalid');
-        hasError = true;
+        errEl.textContent = 'Requerido'; errEl.style.display = 'block';
+        usuarioInput.classList.add('is-invalid'); hasError = true;
       }
-
       if (!correo) {
         e.preventDefault();
         const errEl = document.getElementById('error_correo');
-        errEl.textContent = 'Requerido';
-        errEl.style.display = 'block';
-        correoInput.classList.add('is-invalid');
-        hasError = true;
+        errEl.textContent = 'Requerido'; errEl.style.display = 'block';
+        correoInput.classList.add('is-invalid'); hasError = true;
       } else if (!emailRe.test(correo)) {
         e.preventDefault();
         const errEl = document.getElementById('error_correo');
-        errEl.textContent = 'Formato no válido';
-        errEl.style.display = 'block';
-        correoInput.classList.add('is-invalid');
-        hasError = true;
+        errEl.textContent = 'Formato no v\u00e1lido'; errEl.style.display = 'block';
+        correoInput.classList.add('is-invalid'); hasError = true;
       }
-
       if (!pass) {
         e.preventDefault();
         const errEl = document.getElementById('error_clave');
-        errEl.textContent = 'Requerida';
-        errEl.style.display = 'block';
-        claveInput.classList.add('is-invalid');
-        hasError = true;
+        errEl.textContent = 'Requerida'; errEl.style.display = 'block';
+        claveInput.classList.add('is-invalid'); hasError = true;
       } else {
-        // Enforce strict password policy
         const isSecure = rules.length(pass) && rules.upper(pass) && rules.number(pass) && rules.special(pass);
         if (!isSecure) {
           e.preventDefault();
           const errEl = document.getElementById('error_clave');
-          errEl.textContent = 'No es segura';
-          errEl.style.display = 'block';
-          claveInput.classList.add('is-invalid');
-          hasError = true;
+          errEl.textContent = 'No es segura'; errEl.style.display = 'block';
+          claveInput.classList.add('is-invalid'); hasError = true;
         }
       }
-
       if (!confirm) {
         e.preventDefault();
         const errEl = document.getElementById('error_clave_confirm');
-        errEl.textContent = 'Confirma contraseña';
-        errEl.style.display = 'block';
-        claveConfirmInput.classList.add('is-invalid');
-        hasError = true;
+        errEl.textContent = 'Confirma contrase\u00f1a'; errEl.style.display = 'block';
+        claveConfirmInput.classList.add('is-invalid'); hasError = true;
       } else if (pass !== confirm) {
         e.preventDefault();
         const errEl = document.getElementById('error_clave_confirm');
-        errEl.textContent = 'No coinciden';
-        errEl.style.display = 'block';
-        claveConfirmInput.classList.add('is-invalid');
-        hasError = true;
+        errEl.textContent = 'No coinciden'; errEl.style.display = 'block';
+        claveConfirmInput.classList.add('is-invalid'); hasError = true;
       }
-
       if (!terminos) {
         e.preventDefault();
         const errEl = document.getElementById('error_terminos');
-        errEl.textContent = 'Debes aceptar los términos';
-        errEl.style.display = 'block';
+        errEl.textContent = 'Debes aceptar los t\u00e9rminos'; errEl.style.display = 'block';
         hasError = true;
       }
 
-      if (hasError) {
-        return;
-      }
-      
+      if (hasError) return;
+
+      // Formulario v\u00e1lido → limpiar storage (el registro ser\u00e1 exitoso)
+      limpiarStorage();
       const btn = document.getElementById('admin-register-submit');
-      const btnText = document.getElementById('btn-text');
-      btnText.textContent = 'Registrando...';
+      document.getElementById('btn-text').textContent = 'Registrando...';
       btn.disabled = true;
     });
 
-    // Clear error states on input
-    nombreInput.addEventListener('input', () => {
-      nombreInput.classList.remove('is-invalid');
-      document.getElementById('error_nombre').style.display = 'none';
-    });
-    usuarioInput.addEventListener('input', () => {
-      usuarioInput.classList.remove('is-invalid');
-      document.getElementById('error_usuario').style.display = 'none';
-    });
-    correoInput.addEventListener('input', () => {
-      correoInput.classList.remove('is-invalid');
-      document.getElementById('error_correo').style.display = 'none';
-    });
-    claveInput.addEventListener('input', () => {
-      claveInput.classList.remove('is-invalid');
-      document.getElementById('error_clave').style.display = 'none';
-    });
-    claveConfirmInput.addEventListener('input', () => {
-      claveConfirmInput.classList.remove('is-invalid');
-      document.getElementById('error_clave_confirm').style.display = 'none';
-    });
-    terminosInput.addEventListener('change', () => {
-      document.getElementById('error_terminos').style.display = 'none';
-    });
+    // Limpiar estado de error al escribir
+    nombreInput.addEventListener('input',       () => { nombreInput.classList.remove('is-invalid');       document.getElementById('error_nombre').style.display = 'none'; });
+    usuarioInput.addEventListener('input',      () => { usuarioInput.classList.remove('is-invalid');      document.getElementById('error_usuario').style.display = 'none'; });
+    correoInput.addEventListener('input',       () => { correoInput.classList.remove('is-invalid');       document.getElementById('error_correo').style.display = 'none'; });
+    claveInput.addEventListener('input',        () => { claveInput.classList.remove('is-invalid');        document.getElementById('error_clave').style.display = 'none'; });
+    claveConfirmInput.addEventListener('input', () => { claveConfirmInput.classList.remove('is-invalid'); document.getElementById('error_clave_confirm').style.display = 'none'; });
+    terminosInput.addEventListener('change',    () => { document.getElementById('error_terminos').style.display = 'none'; });
   });
 </script>
 {% endblock %}
