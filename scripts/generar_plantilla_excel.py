@@ -257,6 +257,7 @@ def main():
 
     ruta_salida = os.path.join(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        'servidor-y-logica',
         'static',
         'plantilla_carga_masiva_mikitech.xlsx'
     )
