@@ -188,13 +188,14 @@
         <!-- Código Secreto -->
         <div class="inp-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-            <label class="inp-label" for="id_codigo_secreto" style="margin-bottom: 0;">Código de Acceso</label>
+            <label class="inp-label" for="id_codigo_secreto_admin_acceso" style="margin-bottom: 0;">Código de Acceso</label>
             <span id="error_codigo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
           </div>
           <div class="inp-wrap">
             <i data-lucide="shield-check" class="inp-icon"></i>
-            <input type="text" name="codigo_secreto" id="id_codigo_secreto" class="inp-field"
-                   required placeholder="••••••••" autocomplete="off" autofocus
+            <input type="text" name="codigo_secreto_admin_acceso" id="id_codigo_secreto_admin_acceso" class="inp-field"
+                   required placeholder="••••••••" autocomplete="new-password" autofocus readonly
+                   onfocus="this.removeAttribute('readonly');"
                    style="-webkit-text-security: disc; text-security: disc;">
           </div>
         </div>
@@ -235,7 +236,7 @@
     }
     
     const form = document.getElementById('gateway-form');
-    const codigoInput = document.getElementById('id_codigo_secreto');
+    const codigoInput = document.getElementById('id_codigo_secreto_admin_acceso');
     
     form.addEventListener('submit', (e) => {
       // Clear previous errors

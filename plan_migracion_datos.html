@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Mitigación y Carga Inicial de Datos - MIKITECH v1.3</title>
+    <meta name="description" content="Plan de Mitigación y Carga Inicial de Datos para el sistema de comercio electrónico MIKITECH v1.3.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --border-color: #e2e8f0;
+            --text-main: #334155;
+            --text-dark: #0f172a;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: sticky;
+            top: 40px;
+            height: fit-content;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .sidebar h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 12px;
+        }
+
+        .sidebar-menu a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            color: var(--accent);
+            background-color: var(--accent-glow);
+            font-weight: 600;
+        }
+
+        /* Document / Report Layout */
+        .document {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 45px 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+
+        .doc-section {
+            margin-bottom: 45px;
+            scroll-margin-top: 40px;
+        }
+
+        .doc-section:not(:last-child) {
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 35px;
+        }
+
+        .doc-section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--accent);
+            padding-left: 12px;
+        }
+
+        .doc-section h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            color: var(--text-dark);
+            margin: 24px 0 12px;
+            font-weight: 600;
+        }
+
+        .doc-section p {
+            margin-bottom: 16px;
+            color: var(--text-main);
+            font-size: 15px;
+        }
+
+        /* Lists */
+        ul.styled-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        ul.styled-list li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        ul.styled-list li::before {
+            content: "•";
+            color: var(--accent);
+            font-size: 20px;
+            position: absolute;
+            left: 8px;
+            top: -2px;
+        }
+
+        /* Tables style (Word-like, premium) */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: var(--primary-light);
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        table td {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            background-color: #ffffff;
+        }
+
+        table tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+
+        /* Alert / Callout Boxes */
+        .callout {
+            background-color: #f0f7ff;
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .callout.success {
+            background-color: #ecfdf5;
+            border-left-color: var(--success);
+        }
+
+        .callout.warning {
+            background-color: #fffbeb;
+            border-left-color: #f59e0b;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-size: 14px;
+            font-weight: 550;
+            color: var(--text-dark);
+        }
+
+        /* Code snippets */
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        pre {
+            background-color: #0f172a;
+            color: #38bdf8;
+            padding: 16px 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid #1e293b;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+            font-size: 13.5px;
+        }
+
+        /* Action Buttons */
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-print {
+            background-color: var(--accent);
+            color: #ffffff;
+        }
+
+        .btn-print:hover {
+            background-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-word {
+            background-color: #2b579a;
+            color: #ffffff;
+        }
+
+        .btn-word:hover {
+            background-color: #1e3d6b;
+            box-shadow: 0 4px 12px rgba(43, 87, 154, 0.2);
+        }
+
+        /* Print Media Styles */
+        @media print {
+            body {
+                background-color: #ffffff;
+                color: #000000;
+                padding-bottom: 0;
+            }
+
+            .container {
+                display: block;
+                padding: 0;
+                margin: 0;
+            }
+
+            .sidebar, .btn-container, header p {
+                display: none;
+            }
+
+            .document {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .doc-section {
+                page-break-inside: avoid;
+            }
+
+            header {
+                background: none !important;
+                color: #000000 !important;
+                border-bottom: 2px solid #000000;
+                padding: 20px 0;
+            }
+
+            header h1 {
+                color: #000000 !important;
+            }
+
+            table th {
+                background-color: #f1f5f9 !important;
+                color: #000000 !important;
+            }
+
+            pre {
+                background-color: #f8fafc !important;
+                color: #000000 !important;
+                border: 1px solid #cbd5e1;
+                page-break-inside: avoid;
+            }
+
+            pre code {
+                color: #000000 !important;
+            }
+        }
+
+        /* Responsiveness */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: relative;
+                top: 0;
+                width: 100%;
+            }
+            .document {
+                padding: 25px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Plan de Mitigación y Carga Inicial de Datos</h1>
+        <p>Sistema de Gestión y Comercio Electrónico MIKITECH E-Commerce</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <h3>Contenido</h3>
+            <ul class="sidebar-menu">
+                <li><a href="#control" class="active" id="link-control"><i data-lucide="edit-3"></i> Control de Cambios</a></li>
+                <li><a href="#objeto" id="link-objeto"><i data-lucide="file-text"></i> 1. Objeto y Alcance</a></li>
+                <li><a href="#participantes" id="link-participantes"><i data-lucide="users"></i> 2. Participantes</a></li>
+                <li><a href="#preparacion" id="link-preparacion"><i data-lucide="clipboard-list"></i> 3.0. Preparación Entorno</a></li>
+                <li><a href="#mitigacion" id="link-mitigacion"><i data-lucide="shield-alert"></i> 3. Mitigación y Pruebas</a></li>
+                <li><a href="#carga" id="link-carga"><i data-lucide="database"></i> 4. Carga Inicial</a></li>
+                <li><a href="#riesgos" id="link-riesgos"><i data-lucide="alert-triangle"></i> 6. Riesgos y Contingencias</a></li>
+                <li><a href="#anexos" id="link-anexos"><i data-lucide="paperclip"></i> 5. Referencias</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN DOCUMENT -->
+        <main class="document">
+            
+            <!-- PRINT/EXPORT BUTTONS -->
+            <div class="btn-container">
+                <button class="btn btn-secondary" onclick="window.location.href='consola_pruebas.html'"><i data-lucide="terminal"></i> Consola Pruebas</button>
+                <button class="btn btn-word" onclick="exportHTMLtoWord()"><i data-lucide="file-text"></i> Descargar Word</button>
+                <button class="btn btn-print" onclick="window.print()"><i data-lucide="printer"></i> Imprimir Reporte</button>
+            </div>
+
+            <!-- CONTROL DE CAMBIOS -->
+            <section id="control" class="doc-section">
+                <h2>Control de Cambios del Documento</h2>
+                
+                <h3>Registro de Cambios</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Autor</th>
+                            <th>Versión</th>
+                            <th>Referencia de cambios</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Nelson Ariza</td>
+                            <td>1.0</td>
+                            <td>Generación del primer corte del plan</td>
+                            <td>15/06/2026</td>
+                        </tr>
+                        <tr>
+                            <td>Gildardo Aguirre Ríos</td>
+                            <td>1.2</td>
+                            <td>Integración del cargue inicial de datos en Supabase</td>
+                            <td>19/06/2026</td>
+                        </tr>
+                        <tr>
+                            <td>Equipo QA MIKITECH</td>
+                            <td>1.3</td>
+                            <td>Alineación con staging, k6 smoke test, métricas de hardware y plan de riesgos</td>
+                            <td>23/06/2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Revisiones y Aprobaciones</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Versión</th>
+                            <th>Posición</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Gildardo Aguirre</td>
+                            <td>1.3</td>
+                            <td>Líder de Calidad / QA</td>
+                            <td>23/06/2026</td>
+                            <td><span style="color:var(--success); font-weight:600;">Aprobado</span></td>
+                        </tr>
+                        <tr>
+                            <td>Nelson Ariza</td>
+                            <td>1.3</td>
+                            <td>Arquitecto de Software</td>
+                            <td>23/06/2026</td>
+                            <td><span style="color:var(--success); font-weight:600;">Aprobado</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Propiedades del Documento</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Propiedad</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Título</strong></td>
+                            <td>Plan de Mitigación y Carga Inicial de Datos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Proyecto</strong></td>
+                            <td>MIKITECH E-Commerce</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Autores</strong></td>
+                            <td>Gildardo Aguirre, Nelson Ariza, Equipo MIKITECH</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nombre de fichero</strong></td>
+                            <td>MIKITECH_PlanMitigacionCarga_v1.3.docx</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fecha de creación</strong></td>
+                            <td>15/06/2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Última actualización</strong></td>
+                            <td>23/06/2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 1. OBJETO Y ALCANCE -->
+            <section id="objeto" class="doc-section">
+                <h2>1. Objeto y Alcance</h2>
+                <h3>1.1. Objeto del Documento</h3>
+                <p>Presentar de forma clara y formal el procedimiento técnico para asegurar la estabilidad del servidor ante picos de tráfico en tiempo real (Plan de Mitigación) y realizar la población inicial de datos de inventario y seguridad en la base de datos Supabase en la nube para el aplicativo <strong>MIKITECH E-Commerce</strong>.</p>
+                
+                <h3>1.2. Alcance del Documento</h3>
+                <p>Este documento abarca:</p>
+                <ul class="styled-list">
+                    <li>La ejecución de pruebas de estrés y mitigación de sockets mediante <strong>k6</strong>.</li>
+                    <li>Los scripts de siembra en Python (seeding de productos, categorías y usuarios de prueba).</li>
+                    <li>Las tareas de importación del catálogo inicial a través de hojas de cálculo de Microsoft Excel.</li>
+                </ul>
+            </section>
+
+            <!-- 2. PARTICIPANTES Y ROLES -->
+            <section id="participantes" class="doc-section">
+                <h2>2. Participantes y Roles</h2>
+                <p>Para la ejecución de los planes descritos se requiere personal técnico con acceso administrador a la consola del servidor local y al gestor de la base de datos PostgreSQL de Supabase en la nube.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Departamento</th>
+                            <th>Teléfono / Canal</th>
+                            <th>Rol asignado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Nelson Ariza</td>
+                            <td>Infraestructura y BD</td>
+                            <td>nelson.ariza@mikitech.com</td>
+                            <td>Líder DBA / Implementador</td>
+                        </tr>
+                        <tr>
+                            <td>Gildardo Aguirre</td>
+                            <td>Aseguramiento de Calidad</td>
+                            <td>gildardo.aguirre@mikitech.com</td>
+                            <td>Analista de Pruebas y Despliegue</td>
+                        </tr>
+                        <tr>
+                            <td>Desarrollador MIKITECH</td>
+                            <td>Desarrollo Backend</td>
+                            <td>Interno de la compañía</td>
+                            <td>Desarrollador de Soporte</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 3.0. ENTORNO Y PREPARACIÓN -->
+            <section id="preparacion" class="doc-section">
+                <h2>3.0. Entorno y Preparación de la Prueba de Mitigación</h2>
+                <p>Para garantizar que el sistema MIKITECH se evalúe bajo condiciones reales y controladas sin afectar la experiencia de clientes activos, el entorno objetivo de las pruebas será estrictamente el <strong>Entorno de Pruebas (Staging)</strong>, el cual refleja de forma idéntica la configuración de red y la base de datos PostgreSQL de producción.</p>
+                
+                <p>Previo a la ejecución de cualquier prueba de mitigación o estrés, el analista de control de calidad debe verificar la disponibilidad de los siguientes endpoints críticos del backend:</p>
+                <ul class="styled-list">
+                    <li><code>GET /api/products</code> - Disponibilidad y tiempo de lectura de productos en inventario.</li>
+                    <li><code>POST /api/orders</code> - Disponibilidad del controlador de registro de transacciones de compra.</li>
+                    <li><code>POST /api/auth/login</code> - Disponibilidad del servicio de autenticación y generación de tokens de Supabase Auth.</li>
+                </ul>
+                
+                <div class="callout warning">
+                    <p><strong>⚠️ Verificación Obligatoria de Entorno:</strong> Compruebe en el archivo <code>.env</code> que los tokens apuntan a los buckets de almacenamiento y credenciales del esquema de Staging. Nunca inicie pruebas de carga activa si el backend está direccionado al entorno productivo.</p>
+                </div>
+            </section>
+
+            <!-- 3. PLAN DE MITIGACIÓN -->
+            <section id="mitigacion" class="doc-section">
+                <h2>3. Plan de Mitigación (Tráfico y Concurrencia)</h2>
+                <h3>3.1. Análisis y Diseño de Mitigación</h3>
+                <p>Ante sobrecargas de peticiones en el servidor monohilo de Django, se detectaron caídas físicas de sockets. Se configuró un plan de contención de tráfico para asegurar que el sistema se estabilice automáticamente tras recibir picos inesperados de usuarios virtuales.</p>
+                
+                <div class="callout">
+                    <p><strong>Configuración de la simulación de mitigación:</strong> Se escala instantáneamente a 60 usuarios virtuales (VUs), y en menos de 20 segundos se reduce y estabiliza a 20 usuarios residuales, analizando que la velocidad de procesamiento del servidor retorne a valores de latencia normales.</p>
+                </div>
+
+                <h3>3.2. Procedimiento de Ejecución y Métricas Clave</h3>
+                <p>Antes de iniciar la prueba de carga de k6, el analista de QA debe ejecutar la prueba de humo del sistema para certificar que el endpoint y la red responden de forma correcta bajo una carga de 1 único usuario virtual (1 VU):</p>
+                <pre><code>k6 run tests/k6/smoke_test.js</code></pre>
+                
+                <p>Si la prueba de humo se ejecuta satisfactoriamente (tasa de éxito del 100%), se procede a correr el test de mitigación principal mediante el siguiente comando en la consola de comandos de PowerShell:</p>
+                <pre><code>k6 run tests/k6/k6_mitigation.js</code></pre>
+
+                <p>Durante la ejecución de la prueba, además de la latencia media y máxima reportada por k6 en la consola, se monitoreará el estado del servidor a través de las métricas clave de hardware y base de datos:</p>
+                <ul class="styled-list">
+                    <li><strong>Uso de CPU (CPU usage) y Memoria RAM (Memory usage):</strong> Validar que no superen el 85% de capacidad para evitar bloqueos del sistema operativo.</li>
+                    <li><strong>Conexiones Activas a la Base de Datos:</strong> Vigilar en el panel de Supabase que el pooler de PostgreSQL (`6543`) amortigüe la carga sin sobrepasar las conexiones concurrentes permitidas.</li>
+                    <li><strong>Ratio de Errores HTTP (`http_req_failed`):</strong> Monitorear la salida de k6 en tiempo real. Para considerar la prueba como exitosa, el ratio de fallos final debe ser menor al **1%** (`rate < 0.01`).</li>
+                </ul>
+
+                <h3>3.3. Plan de Vuelta Atrás (Rollback)</h3>
+                <p>En caso de bloqueo total del servicio local o falla en la conexión debido a saturación física de puertos TCP/IP:</p>
+                <ul class="styled-list">
+                    <li>Matar forzosamente el proceso del intérprete Python en la consola local: <code>Stop-Process -Name "python" -Force</code>.</li>
+                    <li>Limpiar la tabla de puertos y reiniciar el servidor en producción Waitress utilizando 20 hilos concurrentes: <code>waitress-serve --port=8000 --threads=20 mickytech.wsgi:application</code>.</li>
+                </ul>
+
+                <h3>3.4. Registro y Análisis de Resultados</h3>
+                <p>Una vez concluido el tiempo establecido de la prueba de mitigación (60 segundos), el analista de QA ejecutará el comando de exportación automatizada de k6 para generar un informe dinámico en formato HTML que consolide los datos de rendimiento:</p>
+                <pre><code>k6 run --out html=reporte_mitigacion.html tests/k6/k6_mitigation.js</code></pre>
+                <p>Los resultados de latencia, transacciones por segundo (RPS) y ratio de errores obtenidos de dicho reporte se anexarán al final de este documento técnico en un informe ejecutivo oficial que será evaluado por el líder de infraestructura.</p>
+            </section>
+
+            <!-- 4. PLAN DE CARGA INICIAL -->
+            <section id="carga" class="doc-section">
+                <h2>4. Plan de Carga Inicial de Datos</h2>
+                <h3>4.1. Componente de Carga de Datos Origen</h3>
+                <p>El cargue utiliza scripts independientes programados en Python que leen las variables de entorno de la base de datos PostgreSQL de Supabase en la nube para inyectar datos estructurados en lote.</p>
+                
+                <h3>4.2. Proceso de Carga Inicial Paso a Paso</h3>
+                
+                <div class="callout warning">
+                    <p><strong>⚠️ ADVERTENCIA DE SEGURIDAD:</strong> Todos los scripts de población de base de datos descritos abajo deben ejecutarse única y exclusivamente sobre el entorno de Desarrollo Local o Pruebas (Staging). Queda estrictamente prohibido apuntar scripts de seeding hacia la base de datos productiva sin la autorización explícita y escrita del Líder de Infraestructura.</p>
+                </div>
+                
+                <p>Siga secuencialmente las instrucciones del terminal para realizar el aprovisionamiento de datos iniciales en la base de datos:</p>
+                
+                <ul class="styled-list">
+                    <li>
+                        <strong>Paso 1: Ejecutar Migraciones.</strong> Crea las tablas lógicas en el esquema PostgreSQL de Supabase:<br>
+                        <code>.venv\Scripts\python.exe servidor-y-logica/manage.py migrate</code>
+                    </li>
+                    <li>
+                        <strong>Paso 2: Siembra de Datos Maestros.</strong> Registra categorías, 107 productos tecnológicos de catálogo, reseñas, likes e interacciones de usuarios de prueba:<br>
+                        <code>.venv\Scripts\python.exe scripts/database/seed_completo.py</code>
+                    </li>
+                    <li>
+                        <strong>Paso 3: Carga de Pedidos e Historial.</strong> Crea 10 ventas de prueba en base de datos para probar la consolidación financiera del panel de control:<br>
+                        <code>.venv\Scripts\python.exe scripts/seed_test_orders.py</code>
+                    </li>
+                    <li>
+                        <strong>Paso 4: Generación de Excel para Carga Masiva.</strong> Genera un archivo con 40 productos válidos para probar la importación masiva por archivo Excel del administrador:<br>
+                        <code>.venv\Scripts\python.exe scripts/generar_40_productos.py</code>
+                    </li>
+                </ul>
+
+                <div class="callout success">
+                    <p><strong>✓ Confirmación Exitosa:</strong> Al ejecutar el proceso, podrás ver la consolidación en el panel administrativo de Django o en el dashboard del cliente con datos en vivo directamente desde la API en la nube.</p>
+                </div>
+            </section>
+
+            <!-- 6. RIESGOS Y CONTINGENCIAS -->
+            <section id="riesgos" class="doc-section">
+                <h2>6. Riesgos y Contingencias Adicionales</h2>
+                
+                <h3>Riesgo 1: Fallo de Conexión a Supabase durante el Seeding de Datos</h3>
+                <p><strong>Impacto:</strong> Alto. La base de datos queda incompletamente poblada impidiendo las pruebas de negocio.</p>
+                <p><strong>Plan de Contingencia:</strong> Reintentar automáticamente la ejecución del script de seeding configurando un temporizador (timeout) de 30 segundos entre cada intento. Si tras tres intentos consecutivos la conexión sigue siendo rechazada, abortar el proceso y notificar inmediatamente al líder de infraestructura para revisar el estado del clúster de base de datos.</p>
+                
+                <h3>Riesgo 2: Corrupción de Datos en Staging durante la Carga Masiva de Excel</h3>
+                <p><strong>Impacto:</strong> Crítico. Inyección de datos mal formateados, duplicidades o caída de la integridad referencial en las tablas lógicas.</p>
+                <p><strong>Plan de Contingencia:</strong> Detener la carga y ejecutar de inmediato el comando de vaciado de tablas en Django para limpiar las áreas afectadas:</p>
+                <pre><code>.venv\Scripts\python.exe servidor-y-logica/manage.py flush --no-input</code></pre>
+                <p>Una vez limpiadas las tablas, proceder a restaurar el backup del esquema de Staging desde la última instantánea (snapshot) almacenada en la consola de administración de Supabase.</p>
+            </section>
+
+            <!-- 5. ANEXOS Y REFERENCIAS -->
+            <section id="anexos" class="doc-section">
+                <h2>5. Referencias y Anexos</h2>
+                <h3>Documentación de Soporte Relacionada</h3>
+                <ul class="styled-list">
+                    <li><strong>[DIAGRAMASP.md](file:///c:/Users/turca/Desktop/MIKITECH-APP/DIAGRAMASP.md)</strong>: Contiene los diagramas de clases, diagramas de procesos y modelos entidad-relación del sistema.</li>
+                    <li><strong>[MANUALPRUEBAS.MD](file:///c:/Users/turca/Desktop/MIKITECH-APP/docs/MANUALPRUEBAS.MD)</strong>: Trazabilidad completa de las 31 Historias de Usuario contra casos de prueba.</li>
+                    <li><strong>[pruebas_explicadas.md](file:///c:/Users/turca/Desktop/MIKITECH-APP/pruebas_explicadas.md)</strong>: Guías detalladas y reportes históricos de las ejecuciones de estrés realizadas mediante k6.</li>
+                </ul>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Active Navigation Logic -->
+    <script>
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        // Table of contents active link tracking on scroll
+        const sections = document.querySelectorAll('.doc-section');
+        const navLinks = document.querySelectorAll('.sidebar-menu a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - 80)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Word Export Function
+        function exportHTMLtoWord() {
+            var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+                    "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+                    "xmlns='http://www.w3.org/TR/REC-html40'>" +
+                    "<head><title>Plan de Mitigacion y Carga Inicial de Datos v1.3</title>" +
+                    "<meta charset='utf-8'>" +
+                    "<style>" +
+                    "body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }" +
+                    "h1, h2, h3 { color: #0f172a; font-family: Arial, sans-serif; }" +
+                    "table { border-collapse: collapse; width: 100%; margin: 20px 0; }" +
+                    "table, th, td { border: 1px solid #cbd5e1; padding: 10px; }" +
+                    "th { background-color: #1e293b; color: white; }" +
+                    "pre { background-color: #f1f5f9; padding: 15px; border-radius: 5px; font-family: monospace; border: 1px solid #cbd5e1; }" +
+                    ".callout { background-color: #f0f7ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 6px; }" +
+                    ".callout.success { background-color: #ecfdf5; border-left-color: #10b981; }" +
+                    ".callout.warning { background-color: #fffbeb; border-left-color: #f59e0b; }" +
+                    "ul { padding-left: 20px; }" +
+                    "li { margin-bottom: 8px; }" +
+                    "</style>" +
+                    "</head><body>";
+            var footer = "</body></html>";
+            
+            // Get content and clone it
+            var docContent = document.querySelector('.document').cloneNode(true);
+            
+            // Remove interactive button container from the cloned element
+            var btnContainer = docContent.querySelector('.btn-container');
+            if (btnContainer) {
+                btnContainer.remove();
+            }
+            
+            var sourceHTML = header + docContent.innerHTML + footer;
+            
+            var blob = new Blob(['\ufeff' + sourceHTML], {
+                type: 'application/msword'
+            });
+            
+            // Create download link
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'MIKITECH_PlanMitigacionCarga_v1.3.doc';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>

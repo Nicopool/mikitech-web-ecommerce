@@ -34,3 +34,5 @@ urlpatterns = [
     path('blog/', views.blog, name='blog'),
     path('ping/', views.ping, name='ping'),
 ]
+
+

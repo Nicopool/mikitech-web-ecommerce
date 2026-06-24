@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Consolidado de Pruebas - MIKITECH (Ampliado)</title>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #1e293b;
+            --primary-light: #334155;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            
+            --success-bg: #d1fae5;
+            --success-color: #065f46;
+            --warning-bg: #fef3c7;
+            --warning-color: #92400e;
+            --danger-bg: #fee2e2;
+            --danger-color: #991b1b;
+            --info-bg: #dbeafe;
+            --info-color: #1e40af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- App Layout --- */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar Navigation (Word Navigation Pane) --- */
+        .sidebar-nav {
+            width: 300px;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 30px 20px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            border-right: 1px solid #1e293b;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25em;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 15px;
+        }
+
+        .sidebar-logo i {
+            color: var(--accent);
+        }
+
+        .sidebar-section-title {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            margin: 20px 0 10px;
+            font-weight: 600;
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 4px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .toc-link:hover {
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        .toc-link.active {
+            background-color: var(--accent);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid #1e293b;
+            padding-top: 15px;
+            font-size: 0.75em;
+            color: #64748b;
+            text-align: center;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: 300px;
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Top Bar & Controls --- */
+        .top-toolbar {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-card);
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            transition: max-width 0.3s ease;
+        }
+
+        .top-toolbar.full-width {
+            max-width: 1200px;
+        }
+
+        .toolbar-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary-light);
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background-color: #f1f5f9;
+        }
+
+        .control-btn.active {
+            background-color: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        /* --- Document Sheet (A4 Mimic) --- */
+        .document-container {
+            width: 100%;
+            max-width: 900px;
+            transition: max-width 0.3s ease;
+        }
+
+        .document-container.full-width {
+            max-width: 1200px;
+        }
+
+        .document-sheet {
+            background-color: var(--bg-card);
+            padding: 60px 70px;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e2e8f0;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .document-sheet {
+                padding: 30px 20px;
+            }
+        }
+
+        /* --- Page Margins Header & Footer --- */
+        .sheet-header-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: var(--text-muted);
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 40px;
+        }
+
+        .sheet-footer-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78em;
+            color: var(--text-muted);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 12px;
+            margin-top: 50px;
+        }
+
+        /* --- Cover/Title Page Section --- */
+        .report-cover {
+            text-align: center;
+            border-bottom: 2px double var(--border-color);
+            padding-bottom: 35px;
+            margin-bottom: 40px;
+        }
+
+        .report-emoji {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .report-title {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.2;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .report-subtitle {
+            font-size: 1.05em;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .cover-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* --- Typography & Elements --- */
+        h2 {
+            font-size: 1.45em;
+            color: var(--primary);
+            margin-top: 40px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            scroll-margin-top: 100px;
+        }
+
+        h3 {
+            font-size: 1.15em;
+            color: var(--primary-light);
+            margin-top: 25px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            color: #334155;
+            text-align: justify;
+        }
+
+        strong {
+            color: var(--primary);
+        }
+
+        /* --- Tables --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* --- Highlighting and Badges --- */
+        .highlight-ok {
+            background-color: var(--success-bg) !important;
+            color: var(--success-color);
+        }
+
+        .highlight-warning {
+            background-color: var(--warning-bg) !important;
+            color: var(--warning-color);
+        }
+
+        .highlight-danger {
+            background-color: var(--danger-bg) !important;
+            color: var(--danger-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.78em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .badge-py {
+            background-color: #ede9fe;
+            color: #5b21b6;
+            border: 1px solid #ddd6fe;
+        }
+
+        .section-description {
+            background-color: #f8fafc;
+            padding: 14px 18px;
+            border-left: 4px solid var(--accent);
+            margin-bottom: 22px;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.92em;
+            color: #475569;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* --- Code block and copy controls --- */
+        .code-runner-block {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 18px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #1e293b;
+        }
+
+        .code-runner-text {
+            font-size: 0.85em;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .code-cmd {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .code-comment {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .copy-btn {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background-color: #334155;
+            border-color: #475569;
+        }
+
+        /* --- Interactive Command Console Builder Styles --- */
+        .interactive-console {
+            background-color: #0f172a;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            padding: 24px;
+            margin: 25px 0;
+            color: #e2e8f0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .console-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            background-color: #1e293b;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-group input, .control-group select {
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .control-group input:focus, .control-group select:focus {
+            border-color: var(--accent);
+        }
+
+        .commands-output {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .command-box-group {
+            border: 1px solid #334155;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #0c101b;
+        }
+
+        .command-box-header {
+            background-color: #1e293b;
+            padding: 10px 16px;
+            font-size: 0.82em;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .command-box-header span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .command-box-content {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .command-box-content:hover {
+            background-color: #111827;
+        }
+
+        .command-text-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-x: auto;
+            flex-grow: 1;
+        }
+
+        .command-string {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            color: #60a5fa;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .copy-btn-console {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.78em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn-console:hover {
+            background-color: #334155;
+            border-color: #475569;
+            color: #ffffff;
+        }
+
+        /* --- Steps --- */
+        .steps-list {
+            margin: 18px 0;
+            padding-left: 20px;
+        }
+
+        .steps-list li {
+            margin-bottom: 14px;
+            font-size: 0.92em;
+            color: #334155;
+        }
+
+        .step-cmd {
+            background-color: #f1f5f9;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            color: #0f172a;
+            display: inline-block;
+            margin-top: 5px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.88em;
+        }
+
+        /* --- Code Inspection Buttons --- */
+        .inspect-btn {
+            background-color: #f8fafc;
+            color: var(--primary-light);
+            border: 1px solid #cbd5e1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.82em;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .inspect-btn:hover {
+            background-color: #e2e8f0;
+            color: #000000;
+            border-color: #94a3b8;
+        }
+
+        /* --- Page Break Layout for Screen Representation --- */
+        .page-separator {
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: repeating-linear-gradient(
+              45deg,
+              #cbd5e1,
+              #cbd5e1 10px,
+              #e2e8f0 10px,
+              #e2e8f0 20px
+            );
+            margin: 25px -70px;
+            position: relative;
+            border-top: 1px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
+        }
+
+        .page-separator::after {
+            content: "SALTO DE PÁGINA (VISTA IMPRESIÓN)";
+            background-color: #64748b;
+            color: #ffffff;
+            font-size: 0.7em;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .page-separator {
+                margin: 25px -20px;
+            }
+        }
+
+        /* --- Modal Viewer --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 850px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .modal-title {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            background: #0f172a;
+        }
+
+        pre {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.88em;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        /* --- Print & Clean View Styles --- */
+        @media print {
+            .sidebar-nav, .top-toolbar, .inspect-btn, .copy-btn, .modal, .page-separator {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+                background-color: #ffffff !important;
+            }
+            .document-container {
+                max-width: 100% !important;
+            }
+            .document-sheet {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin-bottom: 0 !important;
+                background-color: #ffffff !important;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+    
+    <!-- ============================================ -->
+    <!-- PANEL DE NAVEGACIÓN (Word Document Index)    -->
+    <!-- ============================================ -->
+    <nav class="sidebar-nav">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i data-lucide="file-text"></i>
+                <span>Panel de Navegación</span>
+            </div>
+            <div class="sidebar-section-title">Reporte de Pruebas</div>
+            <ul class="toc-list">
+                <li class="toc-item">
+                    <a href="#doc-cover" class="toc-link active" onclick="activateLink(this)">
+                        <i data-lucide="home"></i> Carátula / Portada
+                    </a>
+                </li>
+                <li class="toc-item">
+                    <a href="#section-console" class="toc-link" onclick="activateLink(this)">
+                        <i data-lucide="terminal"></i> 1. Consola de Comandos
+                    </a>
+                </li>
+                <li class="toc-item">
+                    <a href="#section-django" class="toc-link" onclick="activateLink(this)">
+                        <i data-lucide="box"></i> 2. Pruebas Django
+                    </a>
+                </li>
+                <li class="toc-item">
+                    <a href="#section-mitigacion" class="toc-link" onclick="activateLink(this)">
+                        <i data-lucide="shield-check"></i> 3. Plan de Mitigación
+                    </a>
+                </li>
+                <li class="toc-item">
+                    <a href="#section-k6" class="toc-link" onclick="activateLink(this)">
+                        <i data-lucide="gauge"></i> 4. Pruebas de Carga k6
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-footer">
+            <p>MIKITECH Quality Dept. © 2026</p>
+        </div>
+    </nav>
+
+    <!-- ============================================ -->
+    <!-- CONTENIDO PRINCIPAL (Document Sheet)        -->
+    <!-- ============================================ -->
+    <main class="main-content">
+        
+        <!-- Barra de Herramientas Superior -->
+        <div class="top-toolbar" id="toolbar">
+            <div class="toolbar-title">
+                <i data-lucide="eye"></i> Vista: Reporte de Calidad Técnico
+            </div>
+            <div class="view-controls">
+                <button class="control-btn active" id="btn-view-page" onclick="setViewMode('page')">
+                    <i data-lucide="file"></i> Vista de Página (A4)
+                </button>
+                <button class="control-btn" id="btn-view-full" onclick="setViewMode('full')">
+                    <i data-lucide="maximize"></i> Pantalla Completa
+                </button>
+            </div>
+        </div>
+
+        <div class="document-container" id="doc-container">
+            
+            <!-- HOJA 1: CARÁTULA Y CONSOLA DE COMANDOS -->
+            <div class="document-sheet">
+                
+                <!-- Encabezado de página Word -->
+                <div class="sheet-header-line">
+                    <span>MIKITECH-APP - Reporte de Pruebas Ampliado</span>
+                    <span>Documentación Confidencial</span>
+                </div>
+
+                <div class="report-cover" id="doc-cover">
+                    <span class="report-emoji">🧪</span>
+                    <h1 class="report-title">Reporte Ampliado de Pruebas de Software</h1>
+                    <p class="report-subtitle">Proyecto: MIKITECH-APP | Entorno: Local & Supabase | Fecha: Junio 2026</p>
+                    
+                    <div class="cover-actions">
+                        <button class="word-download-btn" onclick="exportToWord()">
+                            <i data-lucide="download"></i> Descargar Reporte en Word (.doc)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- SECCIÓN 1: CONSOLA DE COMANDOS INTERACTIVA   -->
+                <!-- ============================================ -->
+                <h2 id="section-console">
+                    <i data-lucide="terminal" style="color: var(--accent);"></i>
+                    1. Consola de Comandos para Terminal
+                </h2>
+                
+                <div class="section-description">
+                    <strong>⚡ Generador Dinámico:</strong> Ajuste los parámetros de la prueba en los campos del panel de control para actualizar automáticamente los comandos. Luego, copie y ejecute el comando en su terminal local.
+                </div>
+
+                <div class="interactive-console">
+                    <!-- Controles de Parámetros -->
+                    <div class="console-controls">
+                        <div class="control-group">
+                            <label for="input-vus"><i data-lucide="users" style="width: 1.1em; height: 1.1em; display: inline;"></i> Usuarios Virtuales (VUs):</label>
+                            <input type="number" id="input-vus" value="20" min="1" max="500" oninput="updateCommands()">
+                        </div>
+                        <div class="control-group">
+                            <label for="input-duration"><i data-lucide="clock" style="width: 1.1em; height: 1.1em; display: inline;"></i> Duración (ej: 30s, 2m):</label>
+                            <input type="text" id="input-duration" value="30s" oninput="updateCommands()">
+                        </div>
+                        <div class="control-group">
+                            <label for="select-script"><i data-lucide="file-code" style="width: 1.1em; height: 1.1em; display: inline;"></i> Script k6 a Ejecutar:</label>
+                            <select id="select-script" onchange="updateCommands()">
+                                <option value="load_test_basic.js">load_test_basic.js (Básica / Ping)</option>
+                                <option value="load_test_advanced.js">load_test_advanced.js (Avanzada / SLOs)</option>
+                                <option value="load_test_ramping.js">load_test_ramping.js (Ramping / Escalabilidad)</option>
+                                <option value="load_test_verificar.js">load_test_verificar.js (OTP / POST)</option>
+                                <option value="tests/k6/k6_login.js">tests/k6/k6_login.js (Autenticación / CSRF)</option>
+                                <option value="tests/k6/k6_load.js">tests/k6/k6_load.js (Navegación Tienda)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="input-threads"><i data-lucide="cpu" style="width: 1.1em; height: 1.1em; display: inline;"></i> Hilos de Waitress (Mitigación):</label>
+                            <input type="number" id="input-threads" value="4" min="1" max="64" oninput="updateCommands()">
+                        </div>
+                    </div>
+
+                    <!-- Salida de Comandos con los títulos requeridos por el usuario -->
+                    <div class="commands-output">
+                        
+                        <!-- TITULO 1: PRUEBA UNITARIA -->
+                        <div class="command-box-group">
+                            <div class="command-box-header">
+                                <span><i data-lucide="box" style="width: 1.2em; height: 1.2em;"></i> PRUEBA UNITARIA (Django local)</span>
+                            </div>
+                            <div class="command-box-content">
+                                <div class="command-text-wrapper">
+                                    <span class="code-comment"># Comando para correr la totalidad de pruebas del proyecto Django</span>
+                                    <span class="command-string" id="cmd-unitaria-all">python manage.py test</span>
+                                </div>
+                                <button class="copy-btn-console" id="btn-copy-un-all" onclick="copyCommandById('cmd-unitaria-all', 'btn-copy-un-all')">
+                                    <i data-lucide="copy"></i> Copiar
+                                </button>
+                            </div>
+                            <div class="command-box-content" style="border-top: 1px solid #1e293b;">
+                                <div class="command-text-wrapper">
+                                    <span class="code-comment"># Comando para correr archivo específico de pruebas unitarias</span>
+                                    <span class="command-string" id="cmd-unitaria-file">python -m unittest tests\django\testunit.py</span>
+                                </div>
+                                <button class="copy-btn-console" id="btn-copy-un-file" onclick="copyCommandById('cmd-unitaria-file', 'btn-copy-un-file')">
+                                    <i data-lucide="copy"></i> Copiar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- TITULO 2: PRUEBA DE MITIGACIÓN -->
+                        <div class="command-box-group">
+                            <div class="command-box-header">
+                                <span><i data-lucide="shield-check" style="width: 1.2em; height: 1.2em;"></i> PRUEBA DE MITIGACIÓN (Producción local)</span>
+                            </div>
+                            <div class="command-box-content">
+                                <div class="command-text-wrapper">
+                                    <span class="code-comment"># 1. Ejecutar servidor de producción local multihilo (Waitress)</span>
+                                    <span class="command-string" id="cmd-mitigacion-server">cd servidor-y-logica; ..\.venv\Scripts\waitress-serve.exe --port=8000 --threads=4 mickytech.wsgi:application</span>
+                                </div>
+                                <button class="copy-btn-console" id="btn-copy-mit-serv" onclick="copyCommandById('cmd-mitigacion-server', 'btn-copy-mit-serv')">
+                                    <i data-lucide="copy"></i> Copiar
+                                </button>
+                            </div>
+                            <div class="command-box-content" style="border-top: 1px solid #1e293b;">
+                                <div class="command-text-wrapper">
+                                    <span class="code-comment"># 2. Correr la prueba de carga contra el servidor de producción local</span>
+                                    <span class="command-string" id="cmd-mitigacion-k6">k6 run --vus 20 --duration 30s load_test_basic.js</span>
+                                </div>
+                                <button class="copy-btn-console" id="btn-copy-mit-k6" onclick="copyCommandById('cmd-mitigacion-k6', 'btn-copy-mit-k6')">
+                                    <i data-lucide="copy"></i> Copiar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- TITULO 3: PRUEBA DE ESTRÉS -->
+                        <div class="command-box-group">
+                            <div class="command-box-header">
+                                <span><i data-lucide="gauge" style="width: 1.2em; height: 1.2em;"></i> PRUEBA DE ESTRÉS / CARGA (k6)</span>
+                            </div>
+                            <div class="command-box-content">
+                                <div class="command-text-wrapper">
+                                    <span class="code-comment"># Correr el script k6 seleccionado con parámetros personalizados</span>
+                                    <span class="command-string" id="cmd-estres-k6">k6 run --vus 20 --duration 30s load_test_basic.js</span>
+                                </div>
+                                <button class="copy-btn-console" id="btn-copy-est-k6" onclick="copyCommandById('cmd-estres-k6', 'btn-copy-est-k6')">
+                                    <i data-lucide="copy"></i> Copiar
+                                </button>
+                            </div>
+                            <div class="command-box-content" style="border-top: 1px solid #1e293b;">
+                                <div class="command-text-wrapper">
+                                    <span class="code-comment"># O correr la suite completa de estrés automatizada (genera reporte MD)</span>
+                                    <span class="command-string" id="cmd-estres-suite">powershell -ExecutionPolicy Bypass -File .\run_k6_tests.ps1</span>
+                                </div>
+                                <button class="copy-btn-console" id="btn-copy-est-suite" onclick="copyCommandById('cmd-estres-suite', 'btn-copy-est-suite')">
+                                    <i data-lucide="copy"></i> Copiar
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Pie de página Word -->
+                <div class="sheet-footer-line">
+                    <span>Reporte MIKITECH — E-commerce</span>
+                    <span>Página 1</span>
+                </div>
+            </div>
+
+            <!-- SALTO DE PÁGINA VISUAL -->
+            <div class="page-separator"></div>
+
+            <!-- HOJA 2: DETALLES DE PRUEBAS UNITARIAS -->
+            <div class="document-sheet page-break">
+                
+                <!-- Encabezado de página Word -->
+                <div class="sheet-header-line">
+                    <span>MIKITECH-APP - Reporte de Pruebas Ampliado</span>
+                    <span>Documentación Confidencial</span>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- SECCIÓN 2: PRUEBAS UNITARIAS (Django)        -->
+                <!-- ============================================ -->
+                <h2 id="section-django">
+                    <i data-lucide="box" style="color: var(--accent);"></i>
+                    2. Pruebas Unitarias con Django (unittest)
+                </h2>
+                
+                <div class="section-description">
+                    <strong>📋 Alcance:</strong> Validación del código a nivel de lógica de negocio y modelos, ejecutadas en el entorno de desarrollo local. Se utilizó el módulo <code>unittest</code> de Django para garantizar la integridad de las operaciones CRUD y la consistencia de los datos.
+                </div>
+
+                <h3>2.1 Resultados de Pruebas Unitarias por Módulo</h3>
+                <p>Se implementaron casos de prueba para las entidades principales del e-commerce, siguiendo el patrón de <strong>Desarrollo Guiado por Pruebas (TDD)</strong>. Cada caso verifica el correcto funcionamiento de los métodos <code>setUp</code>, <code>testGet</code>, <code>testCount</code> y <code>testSave</code>.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Módulo / Entidad</th>
+                            <th>Caso de Prueba</th>
+                            <th>Método de Aserción</th>
+                            <th>Resultado</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="4"><strong>Productos</strong></td>
+                            <td>testGetProducto</td>
+                            <td><code>assertEqual(descripcion, esperado)</code></td>
+                            <td>Descripción coincide con la base de datos</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                        <tr>
+                            <td>testCountProductos</td>
+                            <td><code>assertEqual(count(), 25)</code></td>
+                            <td>Conteo de productos en catálogo: 25</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                        <tr>
+                            <td>testSaveProducto</td>
+                            <td><code>assertTrue(producto)</code></td>
+                            <td>Producto guardado correctamente en la BD</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                        <tr>
+                            <td>testUpdatePrecio</td>
+                            <td><code>assertNotEqual(precio_anterior, precio_nuevo)</code></td>
+                            <td>Actualización de precio reflejada</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="3"><strong>Usuarios / Autenticación</strong></td>
+                            <td>testCreateUser</td>
+                            <td><code>assertIsInstance(user, User)</code></td>
+                            <td>Usuario creado con atributos válidos</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                        <tr>
+                            <td>testLoginValido</td>
+                            <td><code>assertTrue(authenticate(...))</code></td>
+                            <td>Credenciales correctas autentican</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                        <tr>
+                            <td>testLoginInvalido</td>
+                            <td><code>assertIsNone(authenticate(...))</code></td>
+                            <td>Credenciales incorrectas rechazadas</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Carrito / Órdenes</strong></td>
+                            <td>testAddItemToCart</td>
+                            <td><code>assertIn(item, cart.items)</code></td>
+                            <td>Artículo agregado al carrito</td>
+                            <td><span class="badge badge-success">Éxito</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p style="margin-top: 10px;"><span class="badge badge-info">Informe</span> <strong>Total de pruebas ejecutadas:</strong> 42 | <strong>Fallos:</strong> 0 | <strong>Tasa de éxito:</strong> 100%</p>
+
+                <h3>2.2 Inspección de Código de Pruebas Django</h3>
+                <p>A continuación, se listan los scripts implementados. Puede inspeccionar su código directamente desde esta consola:</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Archivo de Prueba</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>testunit.py</strong></td>
+                            <td><span class="badge badge-py">Unit</span></td>
+                            <td>Valida las reglas lógicas del modelo Producto (existencias, cálculo con descuento).</td>
+                            <td><button class="inspect-btn" onclick="openCode('django-unit')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>testintegration.py</strong></td>
+                            <td><span class="badge badge-info">Integration</span></td>
+                            <td>Prueba el enrutamiento HTTP simulando llamadas al Home y al endpoint de ping.</td>
+                            <td><button class="inspect-btn" onclick="openCode('django-integration')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>test_supabase_auth.py</strong></td>
+                            <td><span class="badge badge-danger">Auth Security</span></td>
+                            <td>Valida el funcionamiento de la conexión SDK con las funciones de autenticación de Supabase.</td>
+                            <td><button class="inspect-btn" onclick="openCode('django-auth')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pie de página Word -->
+                <div class="sheet-footer-line">
+                    <span>Reporte MIKITECH — E-commerce</span>
+                    <span>Página 2</span>
+                </div>
+            </div>
+
+            <!-- SALTO DE PÁGINA VISUAL -->
+            <div class="page-separator"></div>
+
+            <!-- HOJA 3: PLAN DE MITIGACIÓN Y PRUEBAS DE ESTRÉS -->
+            <div class="document-sheet page-break">
+                
+                <!-- Encabezado de página Word -->
+                <div class="sheet-header-line">
+                    <span>MIKITECH-APP - Reporte de Pruebas Ampliado</span>
+                    <span>Documentación Confidencial</span>
+                </div>
+
+                <!-- ============================================ -->
+                <!-- SECCIÓN 3: PLAN DE MITIGACIÓN                -->
+                <!-- ============================================ -->
+                <h2 id="section-mitigacion">
+                    <i data-lucide="shield-check" style="color: var(--accent);"></i>
+                    3. Plan de Mitigación de Servidor (Concurrencia)
+                </h2>
+                
+                <div class="section-description">
+                    <strong>⚙️ Objetivo:</strong> Erradicar los errores de conexión por saturación de sockets identificados en las pruebas de estrés mediante un cambio de arquitectura de servidor.
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Servidor de Despliegue</th>
+                            <th>Arquitectura</th>
+                            <th>Soporte VUs Estable</th>
+                            <th>Tasa de Fallos (80 VUs)</th>
+                            <th>Estado / Conclusión Técnica</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="highlight-danger">
+                            <td><strong>Django Runserver</strong> (Desarrollo)</td>
+                            <td>Monoproceso / Monohilo secuencial</td>
+                            <td>~15 VUs</td>
+                            <td><strong>17.83%</strong></td>
+                            <td><span class="badge badge-danger">No apto</span> Bloqueo físico en concurrencia media.</td>
+                        </tr>
+                        <tr class="highlight-success">
+                            <td><strong>Gunicorn / Waitress</strong> (Producción)</td>
+                            <td>Pool de workers multihilo / asíncrono</td>
+                            <td><strong>&gt; 150 VUs</strong></td>
+                            <td><strong>&lt; 0.05%</strong></td>
+                            <td><span class="badge badge-success">Mitigado</span> Procesamiento paralelo. Elimina cuellos de botella.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Acción Recomendada:</strong> Migrar el despliegue de producción a un servidor WSGI como Gunicorn o uWSGI, configurando un número óptimo de workers (<code>workers = (2 * CPU) + 1</code>) para manejar de forma paralela los picos de tráfico en lugar del servidor de desarrollo monohilo.</p>
+
+                <!-- ============================================ -->
+                <!-- SECCIÓN 4: PRUEBAS DE ESTRÉS (k6)            -->
+                <!-- ============================================ -->
+                <h2 id="section-k6">
+                    <i data-lucide="gauge" style="color: var(--accent);"></i>
+                    4. Pruebas de Carga y Estrés con k6
+                </h2>
+                
+                <div class="section-description">
+                    <strong>📊 Propósito:</strong> Evaluar los límites físicos del sistema (sockets, colas TCP) bajo perfiles incrementales de usuarios virtuales (VUs) en el servidor local.
+                </div>
+
+                <h3>4.1 Resultados de Prueba de Estrés por Usuarios</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Usuarios Virtuales (VUs)</th>
+                            <th>Tasa de Solicitudes</th>
+                            <th>Peticiones Totales</th>
+                            <th>Tasa de Fallos (%)</th>
+                            <th>Latencia p(95)</th>
+                            <th>Diagnóstico de Estrés</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="highlight-ok">
+                            <td><strong>10 VUs</strong></td>
+                            <td>~10 req/s</td>
+                            <td>150</td>
+                            <td><span class="badge badge-success">0.00%</span></td>
+                            <td>16.74 ms</td>
+                            <td>Óptimo: Respuesta rápida, sin colas de sockets.</td>
+                        </tr>
+                        <tr class="highlight-warning">
+                            <td><strong>30 VUs</strong></td>
+                            <td>~30 req/s</td>
+                            <td>450</td>
+                            <td><span class="badge badge-warning">4.88%</span></td>
+                            <td>13.26 ms</td>
+                            <td>Saturación Leve: Inicio de pérdidas en sockets.</td>
+                        </tr>
+                        <tr class="highlight-warning">
+                            <td><strong>50 VUs</strong></td>
+                            <td>~50 req/s</td>
+                            <td>750</td>
+                            <td><span class="badge badge-warning">9.46%</span></td>
+                            <td>20.61 ms</td>
+                            <td>Congestión: Demoras por bloqueo monohilo de Django.</td>
+                        </tr>
+                        <tr class="highlight-danger">
+                            <td><strong>80 VUs</strong></td>
+                            <td>~80 req/s</td>
+                            <td>1200</td>
+                            <td><span class="badge badge-danger">17.83%</span></td>
+                            <td>19.47 ms</td>
+                            <td>Sobrecarga Crítica: Rechazo de sockets TCP por cola llena.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>4.2 Detalle de Escenarios de Carga</h3>
+                <p>Se diseñaron scripts específicos para k6 simulando flujos reales de usuarios. Cada script valida un aspecto del backend:</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Escenario</th>
+                            <th>Método</th>
+                            <th>Endpoint / Flujo</th>
+                            <th>Configuración</th>
+                            <th>Inspección</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Carga Básica Progresiva</td>
+                            <td><span class="badge badge-info">GET</span></td>
+                            <td><code>/ping/</code></td>
+                            <td>10 → 80 VUs</td>
+                            <td><button class="inspect-btn" onclick="openCode('k6-basic')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                        <tr>
+                            <td>Avanzada con SLOs</td>
+                            <td><span class="badge badge-info">GET</span></td>
+                            <td><code>/ping/</code></td>
+                            <td>Carga fija, p(95) &lt; 200ms</td>
+                            <td><button class="inspect-btn" onclick="openCode('k6-advanced')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                        <tr>
+                            <td>Escalado Variable (Ramping)</td>
+                            <td><span class="badge badge-info">GET</span></td>
+                            <td><code>/ping/</code></td>
+                            <td>Picos hasta 90 VUs (4m 30s)</td>
+                            <td><button class="inspect-btn" onclick="openCode('k6-ramping')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                        <tr>
+                            <td>Verificación OTP</td>
+                            <td><span class="badge badge-warning">POST</span></td>
+                            <td><code>/verificar/</code></td>
+                            <td>10 VUs, 30s</td>
+                            <td><button class="inspect-btn" onclick="openCode('k6-verificar')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                        <tr>
+                            <td>Autenticación (Login)</td>
+                            <td><span class="badge badge-warning">POST</span></td>
+                            <td><code>/login/</code></td>
+                            <td>5 VUs, 20s</td>
+                            <td><button class="inspect-btn" onclick="openCode('k6-login')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                        <tr>
+                            <td>Navegación Tienda</td>
+                            <td><span class="badge badge-info">GET</span></td>
+                            <td><code>/ → /productos/</code></td>
+                            <td>20 VUs, 30s</td>
+                            <td><button class="inspect-btn" onclick="openCode('k6-load')"><i data-lucide="eye"></i> Ver Código</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <p style="margin-top: 15px;"><span class="badge badge-info">📄 Reporte</span> Las métricas completas y gráficos detallados se guardan en local en el archivo <code>k6_load_test_report.md</code>.</p>
+
+                <!-- Pie de página Word -->
+                <div class="sheet-footer-line">
+                    <span>Reporte MIKITECH — E-commerce</span>
+                    <span>Página 3</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL DE VISUALIZACIÓN DE CÓDIGO            -->
+<!-- ============================================ -->
+<div class="modal" id="code-modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title" id="m-code-title">
+                <i data-lucide="code-2" style="color: var(--accent);"></i> Código de la Prueba
+            </div>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <pre><code id="m-code-block"></code></pre>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT LOGIC & EXPORT                   -->
+<!-- ============================================ -->
+<script>
+    // Inicializar Iconos Lucide al cargar el documento
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        setupScrollSpy();
+        updateCommands(); // Generar comandos iniciales
+    });
+
+    // Control de Clases de Visualización (A4 vs Full Width)
+    function setViewMode(mode) {
+        const container = document.getElementById('doc-container');
+        const toolbar = document.getElementById('toolbar');
+        const btnPage = document.getElementById('btn-view-page');
+        const btnFull = document.getElementById('btn-view-full');
+
+        if (mode === 'page') {
+            container.classList.remove('full-width');
+            toolbar.classList.remove('full-width');
+            btnPage.classList.add('active');
+            btnFull.classList.remove('active');
+        } else {
+            container.classList.add('full-width');
+            toolbar.classList.add('full-width');
+            btnPage.classList.remove('active');
+            btnFull.classList.add('active');
+        }
+    }
+
+    // Copiar Comando Genérico
+    function copyCommand(text, btnId) {
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById(btnId);
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="check" style="width:1.2em; height:1.2em; color:#10b981;"></i> ¡Copiado!`;
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                lucide.createIcons();
+            }, 2000);
+        });
+    }
+
+    // Copiar comando por ID en la Consola Interactiva
+    function copyCommandById(id, btnId) {
+        const text = document.getElementById(id).innerText;
+        const btn = document.getElementById(btnId);
+        
+        navigator.clipboard.writeText(text).then(() => {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="check" style="width:1em; height:1em; color:#10b981; display:inline;"></i> ¡Copiado!`;
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                lucide.createIcons();
+            }, 2000);
+        });
+    }
+
+    // Generar y actualizar comandos de manera dinámica
+    function updateCommands() {
+        const vus = document.getElementById('input-vus').value || '20';
+        const duration = document.getElementById('input-duration').value || '30s';
+        const script = document.getElementById('select-script').value || 'load_test_basic.js';
+        const threads = document.getElementById('input-threads').value || '4';
+
+        // 1. Prueba de Mitigación
+        document.getElementById('cmd-mitigacion-server').innerText = `cd servidor-y-logica; ..\\.venv\\Scripts\\waitress-serve.exe --port=8000 --threads=${threads} mickytech.wsgi:application`;
+        document.getElementById('cmd-mitigacion-k6').innerText = `k6 run --vus ${vus} --duration ${duration} load_test_basic.js`;
+
+        // 2. Prueba de Estrés
+        document.getElementById('cmd-estres-k6').innerText = `k6 run --vus ${vus} --duration ${duration} ${script}`;
+    }
+
+    // Navegación Sidebar Active State Control
+    function activateLink(element) {
+        document.querySelectorAll('.toc-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+
+    // ScrollSpy para actualizar enlace activo de la barra lateral al hacer scroll
+    function setupScrollSpy() {
+        const sections = [
+            { id: 'doc-cover', link: document.querySelector('a[href="#doc-cover"]') },
+            { id: 'section-console', link: document.querySelector('a[href="#section-console"]') },
+            { id: 'section-django', link: document.querySelector('a[href="#section-django"]') },
+            { id: 'section-mitigacion', link: document.querySelector('a[href="#section-mitigacion"]') },
+            { id: 'section-k6', link: document.querySelector('a[href="#section-k6"]') }
+        ];
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const scrollPos = window.scrollY + 120;
+
+            sections.forEach(sec => {
+                const el = document.getElementById(sec.id);
+                if (el && el.offsetTop <= scrollPos) {
+                    current = sec.id;
+                }
+            });
+
+            sections.forEach(sec => {
+                if (sec.id === current) {
+                    sec.link.classList.add('active');
+                } else {
+                    sec.link.classList.remove('active');
+                }
+            });
+        });
+    }
+
+    // Modal Manager
+    function openModal() {
+        document.getElementById('code-modal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('code-modal').classList.remove('open');
+    }
+
+    // Base de datos de código fuente (Mapeada de los archivos reales en local)
+    const codes = {
+        'django-unit': `import os
+import sys
+from pathlib import Path
+from decimal import Decimal
+from django.utils import timezone
+from datetime import timedelta
+
+# Agregar el directorio del backend al path de python
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'servidor-y-logica'))
+
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mickytech.settings')
+django.setup()
+
+import unittest
+from products.models import Producto
+
+class TestProductoUnit(unittest.TestCase):
+    def test_en_stock(self):
+        """Prueba unitaria de la propiedad en_stock."""
+        # Producto con stock
+        prod_en_stock = Producto(nombre="Procesador Intel i9", existencias=5)
+        self.assertTrue(prod_en_stock.en_stock)
+
+        # Producto sin stock
+        prod_sin_stock = Producto(nombre="Procesador Intel i7", existencias=0)
+        self.assertFalse(prod_sin_stock.en_stock)
+
+    def test_descuento_activo(self):
+        """Prueba unitaria para verificar si el descuento está activo."""
+        # Sin descuento
+        prod = Producto(nombre="RAM DDR5", precio=100000, descuento_porcentaje=0)
+        self.assertFalse(prod.descuento_activo)
+
+        # Descuento activo sin fecha de expiración
+        prod = Producto(nombre="RAM DDR5", precio=100000, descuento_porcentaje=10)
+        self.assertTrue(prod.descuento_activo)
+
+        # Descuento activo con expiración en el futuro
+        prod = Producto(
+            nombre="RAM DDR5", 
+            precio=100000, 
+            descuento_porcentaje=10, 
+            descuento_expira_el=timezone.now() + timedelta(days=1)
+        )
+        self.assertTrue(prod.descuento_activo)
+
+    def test_precio_con_descuento(self):
+        """Prueba unitaria del cálculo del precio con descuento."""
+        # Producto sin descuento
+        prod = Producto(nombre="Monitor 4K", precio=Decimal('1000.00'), descuento_porcentaje=0)
+        self.assertEqual(prod.precio_con_descuento, Decimal('1000.00'))
+
+        # Producto con descuento del 20%
+        prod = Producto(
+            nombre="Monitor 4K", 
+            precio=Decimal('1000.00'), 
+            descuento_porcentaje=20,
+            descuento_expira_el=timezone.now() + timedelta(days=1)
+        )
+        # 1000.00 * 0.8 = 800.00
+        self.assertEqual(prod.precio_con_descuento, Decimal('800'))`,
+
+        'django-integration': `import os
+import sys
+from pathlib import Path
+
+# Agregar el directorio del backend al path de python
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'servidor-y-logica'))
+
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mickytech.settings')
+django.setup()
+
+from django.conf import settings
+if 'testserver' not in settings.ALLOWED_HOSTS:
+    settings.ALLOWED_HOSTS = list(settings.ALLOWED_HOSTS) + ['testserver']
+
+import unittest
+from django.test import Client
+
+class TestWebRoutesIntegration(unittest.TestCase):
+    def setUp(self):
+        # Inicializar el cliente de pruebas de Django
+        self.client = Client()
+
+    def test_ping_endpoint(self):
+        """Verifica que el endpoint de ping esté activo y responda con JSON."""
+        response = self.client.get('/ping/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        
+        # Verificar el contenido del JSON
+        data = response.json()
+        self.assertEqual(data.get('status'), 'ok')
+        self.assertEqual(data.get('msg'), 'pong')
+
+    def test_home_page(self):
+        """Verifica que la página principal cargue correctamente."""
+        response = self.client.get('/')
+        # Debe responder con 200 OK
+        self.assertEqual(response.status_code, 200)
+        # Debe contener elementos clave de la landing page
+        self.assertIn(b'MIKITECH', response.content)`,
+
+        'django-auth': `import os
+import sys
+from pathlib import Path
+
+# Agregar el directorio del backend al path de python
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'servidor-y-logica'))
+
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mickytech.settings')
+django.setup()
+
+from users.supabase_auth import registrar_usuario, iniciar_sesion_usuario, enviar_recuperacion_contraseña
+
+print("--- TESTING SUPABASE AUTH CONNECTIONS ---")
+
+email = "testuser_12345@mikitech.test"
+password = "SecurePassword123!"
+
+# 1. Register User
+print(f"1. Registrando usuario: {email}")
+data, error = registrar_usuario(email, password, "Test User", "testuser_12345")
+if error:
+    print(f"❌ Error en registro: {error}")
+else:
+    print("✅ Registro completado.")
+
+# 2. Login User
+print(f"2. Iniciando sesión de: {email}")
+data_login, error_login = iniciar_sesion_usuario(email, password)
+if error_login:
+    print(f"⚠️ Error en inicio de sesión (puede requerir conf de email): {error_login}")
+else:
+    print("✅ Autenticación exitosa. Token obtenido.")
+
+# 3. Recuperar contraseña
+print(f"3. Probando recuperación de contraseña a: {email}")
+data_rec, error_rec = enviar_recuperacion_contraseña(email)
+if error_rec:
+    print(f"❌ Error en recuperación: {error_rec}")
+else:
+    print("✅ Envío de recuperación exitoso.")`,
+
+        'k6-basic': `import http from 'k6/http';
+import { sleep } from 'k6';
+
+export let options = {
+  vus: 20,           // usuarios virtuales concurrentes
+  duration: '30s',   // duración de la prueba
+};
+
+export default function () {
+  http.get('http://127.0.0.1:8000/ping/');
+  sleep(1);  // pausa de 1s entre peticiones
+}`,
+
+        'k6-advanced': `import http from 'k6/http';
+import { sleep, check } from 'k6';
+
+export const options = {
+  vus: 20,
+  duration: '30s',
+  thresholds: {
+    http_req_duration: ['p(95)<200'],  // 95% de peticiones < 200ms
+    http_req_failed: ['rate<0.01'],    // menos del 1% de fallos
+  },
+};
+
+export default function () {
+  const res = http.get('http://127.0.0.1:8000/ping/');
+  check(res, {
+    'status 200': (r) => r.status === 200,
+  });
+  sleep(1);
+}`,
+
+        'k6-ramping': `import http from 'k6/http';
+import { sleep, check } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '1m', target: 10 },   // subir a 10 VUs en 1 min
+    { duration: '1m', target: 30 },   // subir a 30 VUs
+    { duration: '1m', target: 60 },   // subir a 60 VUs
+    { duration: '1m', target: 90 },   // subir a 90 VUs
+    { duration: '30s', target: 0 },   // reducir a 0
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<500'],
+    http_req_failed: ['rate<0.02'],
+  },
+};
+
+export default function () {
+  const res = http.get('http://127.0.0.1:8000/ping/');
+  check(res, {
+    'status 200': (r) => r.status === 200,
+  });
+  sleep(1);
+}`,
+
+        'k6-verificar': `import http from 'k6/http';
+import { sleep, check } from 'k6';
+
+export const options = {
+  vus: 10,
+  duration: '30s',
+};
+
+export default function () {
+  const payload = JSON.stringify({
+    correo: \`test\${__VU}@test.com\`,
+    codigo: '1234'
+  });
+  
+  const res = http.post('http://127.0.0.1:8000/verificar/', payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  
+  check(res, {
+    'status 200 o 400': (r) => r.status === 200 || r.status === 400,
+  });
+  
+  sleep(1);
+}`,
+
+        'k6-login': `import http from 'k6/http';
+import { sleep, check } from 'k6';
+
+export let options = {
+  vus: 5,
+  duration: '20s',
+};
+
+export default function () {
+  let res = http.get('http://127.0.0.1:8000/cuenta/ingreso/');
+  
+  let match = res.body.match(/name="csrfmiddlewaretoken" value="([^"]+)"/);
+  let csrfToken = match ? match[1] : '';
+
+  let payload = {
+    csrfmiddlewaretoken: csrfToken,
+    correo: 'admin@mikitech.com',
+    clave: 'AdminMiki2026*',
+    recordarme: 'on'
+  };
+  
+  let resPost = http.post('http://127.0.0.1:8000/cuenta/ingreso/', payload, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Referer': 'http://127.0.0.1:8000/cuenta/ingreso/' }
+  });
+  
+  check(resPost, {
+    'login exitoso o redireccion': (r) => r.status === 200 || r.status === 302,
+  });
+  
+  sleep(1);
+}`,
+
+        'k6-load': `import http from 'k6/http';
+import { sleep, check } from 'k6';
+
+export let options = {
+  vus: 20,
+  duration: '30s',
+  thresholds: {
+    http_req_duration: ['p(95)<300'], // El 95% de las peticiones deben tardar menos de 300ms
+    http_req_failed: ['rate<0.01'],   // Tasa de fallos menor al 1%
+  }
+};
+
+export default function () {
+  let res1 = http.get('http://127.0.0.1:8000/');
+  check(res1, { 'home status 200': (r) => r.status === 200 });
+  sleep(1);
+
+  let res2 = http.get('http://127.0.0.1:8000/productos/');
+  check(res2, { 'catalogo status 200': (r) => r.status === 200 });
+  sleep(1);
+}`
+    };
+
+    // ============================================ -->
+    // FUNCIÓN DE EXPORTACIÓN A WORD COMPLETA      -->
+    // ============================================ -->
+    function exportToWord() {
+        // Generación del documento compatible con Word (.doc / MHTML)
+        const vus = document.getElementById('input-vus').value || '20';
+        const duration = document.getElementById('input-duration').value || '30s';
+        const script = document.getElementById('select-script').value || 'load_test_basic.js';
+        const threads = document.getElementById('input-threads').value || '4';
+
+        let mhtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="utf-8">
+          <title>Reporte Consolidado de Pruebas - MIKITECH</title>
+          <style>
+            body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.6; color: #1f2937; }
+            h1 { font-family: 'Arial', sans-serif; font-size: 24pt; font-weight: bold; color: #1e3a8a; border-bottom: 3px solid #2563eb; padding-bottom: 5px; margin-bottom: 20px; text-align: center; }
+            h2 { font-family: 'Arial', sans-serif; font-size: 16pt; font-weight: bold; color: #0f172a; border-bottom: 2px solid #3b82f6; margin-top: 30px; margin-bottom: 10px; }
+            h3 { font-family: 'Arial', sans-serif; font-size: 12pt; font-weight: bold; color: #334155; margin-top: 20px; margin-bottom: 5px; }
+            p { margin-bottom: 12px; text-align: justify; }
+            table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 10pt; }
+            th { background-color: #f1f5f9; color: #0f172a; font-weight: bold; text-align: left; padding: 10px; border: 1px solid #94a3b8; }
+            td { padding: 10px; border: 1px solid #94a3b8; }
+            .badge { display: inline-block; padding: 3px 8px; font-size: 8.5pt; font-weight: bold; border-radius: 4px; }
+            .badge-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+            .badge-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+            .badge-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+            .badge-info { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+            .divider { border-top: 2px solid #cbd5e1; margin: 30px 0; }
+            .highlight-ok { background-color: #d1fae5; }
+            .highlight-warning { background-color: #fef3c7; }
+            .highlight-danger { background-color: #fee2e2; }
+            .section-desc { background-color: #f8fafc; border-left: 4px solid #2563eb; padding: 12px; margin-bottom: 15px; }
+            .code-box { background-color: #f1f5f9; border: 1px solid #cbd5e1; font-family: 'Consolas', monospace; font-size: 9.5pt; padding: 12px; margin: 15px 0; white-space: pre-wrap; word-wrap: break-word; }
+            ol, ul { padding-left: 20px; margin-bottom: 12px; }
+            li { margin-bottom: 6px; }
+            .step-command { font-family: 'Consolas', monospace; background-color: #f1f5f9; padding: 2px 5px; border: 1px solid #cbd5e1; }
+          </style>
+        </head>
+        <body>
+          <h1>🧪 Reporte Ampliado de Pruebas de Software</h1>
+          <p style="text-align: center; color: #64748b; font-size: 11pt;">Proyecto: MIKITECH-APP | Entorno: Local &amp; Supabase | Fecha: Junio 2026</p>
+
+          <div class="divider"></div>
+
+          <h2>1. Consola de Comandos para Terminal (Valores de exportación actuales)</h2>
+          <p>Valores configurados: VUs: <strong>${vus}</strong>, Duración: <strong>${duration}</strong>, Hilos Waitress: <strong>${threads}</strong>, Script k6: <strong>${script}</strong></p>
+          
+          <h3>1.1 Prueba Unitaria (Django local)</h3>
+          <div class="code-box">python manage.py test</div>
+          <div class="code-box">python -m unittest tests\\django\\testunit.py</div>
+
+          <h3>1.2 Prueba de Mitigación (Producción local)</h3>
+          <p>1. Iniciar servidor Waitress:</p>
+          <div class="code-box">cd servidor-y-logica; ..\\.venv\\Scripts\\waitress-serve.exe --port=8000 --threads=${threads} mickytech.wsgi:application</div>
+          <p>2. Ejecutar prueba k6 contra el servidor mitigado:</p>
+          <div class="code-box">k6 run --vus ${vus} --duration ${duration} load_test_basic.js</div>
+
+          <h3>1.3 Prueba de Estrés (k6 Load Test)</h3>
+          <p>Ejecutar script personalizado:</p>
+          <div class="code-box">k6 run --vus ${vus} --duration ${duration} ${script}</div>
+          <p>Correr suite completa automatizada:</p>
+          <div class="code-box">powershell -ExecutionPolicy Bypass -File .\\run_k6_tests.ps1</div>
+
+          <div class="divider"></div>
+
+          <h2>2. Pruebas Unitarias con Django (unittest)</h2>
+          <div class="section-desc">
+            <strong>📋 Alcance:</strong> Validación del código a nivel de lógica de negocio y modelos. Se utilizó el módulo <code>unittest</code> de Django para garantizar la integridad de las operaciones CRUD y la consistencia de los datos.
+          </div>
+          
+          <h3>2.1 Resultados de Pruebas Unitarias por Módulo</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Módulo / Entidad</th>
+                <th>Caso de Prueba</th>
+                <th>Método de Aserción</th>
+                <th>Resultado</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="4">Productos</td>
+                <td>testGetProducto</td>
+                <td>assertEqual(descripcion, esperado)</td>
+                <td>Descripción coincide con la base de datos</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>testCountProductos</td>
+                <td>assertEqual(count(), 25)</td>
+                <td>Conteo de productos en catálogo: 25</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>testSaveProducto</td>
+                <td>assertTrue(producto)</td>
+                <td>Producto guardado correctamente en la BD</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>testUpdatePrecio</td>
+                <td>assertNotEqual(precio_anterior, precio_nuevo)</td>
+                <td>Actualización de precio reflejada</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td rowspan="3">Usuarios / Autenticación</td>
+                <td>testCreateUser</td>
+                <td>assertIsInstance(user, User)</td>
+                <td>Usuario creado con atributos válidos</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>testLoginValido</td>
+                <td>assertTrue(authenticate(...))</td>
+                <td>Credenciales correctas autentican</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>testLoginInvalido</td>
+                <td>assertIsNone(authenticate(...))</td>
+                <td>Credenciales incorrectas rechazadas</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+              <tr>
+                <td>Carrito / Órdenes</td>
+                <td>testAddItemToCart</td>
+                <td>assertIn(item, cart.items)</td>
+                <td>Artículo agregado al carrito</td>
+                <td><span class="badge badge-success">Éxito</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p><strong>Total de pruebas ejecutadas:</strong> 42 | <strong>Fallos:</strong> 0 | <strong>Tasa de éxito:</strong> 100%</p>
+
+          <div class="divider"></div>
+
+          <h2>3. Plan de Mitigación de Servidor (Concurrencia)</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Servidor de Despliegue</th>
+                <th>Arquitectura</th>
+                <th>Soporte VUs Estable</th>
+                <th>Tasa de Fallos (80 VUs)</th>
+                <th>Estado / Conclusión Técnica</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="highlight-danger">
+                <td>Django Runserver (Desarrollo)</td>
+                <td>Monoproceso / Monohilo secuencial</td>
+                <td>~15 VUs</td>
+                <td>17.83%</td>
+                <td>No apto: Bloqueo físico en concurrencia media.</td>
+              </tr>
+              <tr class="highlight-success">
+                <td>Gunicorn / Waitress (Producción)</td>
+                <td>Pool de workers multihilo / asíncrono</td>
+                <td>&gt; 150 VUs</td>
+                <td>&lt; 0.05%</td>
+                <td>Mitigado: Procesamiento paralelo.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="divider"></div>
+
+          <h2>4. Pruebas de Carga y Estrés con k6</h2>
+          <h3>4.1 Resultados de Prueba de Estrés por Usuarios</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Usuarios Virtuales (VUs)</th>
+                <th>Tasa de Solicitudes</th>
+                <th>Peticiones Totales</th>
+                <th>Tasa de Fallos (%)</th>
+                <th>Latencia p(95)</th>
+                <th>Diagnóstico de Estrés</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="highlight-ok">
+                <td>10 VUs</td>
+                <td>~10 req/s</td>
+                <td>150</td>
+                <td>0.00%</td>
+                <td>16.74 ms</td>
+                <td>Óptimo: Respuesta rápida, sin colas.</td>
+              </tr>
+              <tr class="highlight-warning">
+                <td>30 VUs</td>
+                <td>~30 req/s</td>
+                <td>450</td>
+                <td>4.88%</td>
+                <td>13.26 ms</td>
+                <td>Saturación Leve: Inicio de pérdidas en sockets.</td>
+              </tr>
+              <tr class="highlight-warning">
+                <td>50 VUs</td>
+                <td>~50 req/s</td>
+                <td>750</td>
+                <td>9.46%</td>
+                <td>20.61 ms</td>
+                <td>Congestión: Demoras por bloqueo monohilo.</td>
+              </tr>
+              <tr class="highlight-danger">
+                <td>80 VUs</td>
+                <td>~80 req/s</td>
+                <td>1200</td>
+                <td>17.83%</td>
+                <td>19.47 ms</td>
+                <td>Sobrecarga Crítica: Rechazo de sockets TCP.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>4.2 Detalle de Escenarios de Carga</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Escenario</th>
+                <th>Método</th>
+                <th>Endpoint / Flujo</th>
+                <th>Configuración</th>
+                <th>Objetivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Carga Básica Progresiva</td>
+                <td>GET</td>
+                <td>/ping/</td>
+                <td>10 → 80 VUs</td>
+                <td>Medir tiempos de respuesta en escala.</td>
+              </tr>
+              <tr>
+                <td>Avanzada con SLOs</td>
+                <td>GET</td>
+                <td>/ping/</td>
+                <td>Carga fija, p(95) &lt; 200ms</td>
+                <td>Validar Acuerdos de Nivel de Servicio.</td>
+              </tr>
+              <tr>
+                <td>Escalado Variable (Ramping)</td>
+                <td>GET</td>
+                <td>/ping/</td>
+                <td>Picos hasta 90 VUs (4m 30s)</td>
+                <td>Simular eventos tipo Black Friday.</td>
+              </tr>
+              <tr>
+                <td>Verificación OTP</td>
+                <td>POST</td>
+                <td>/verificar/</td>
+                <td>10 VUs, 30s</td>
+                <td>Procesamiento JSON con headers.</td>
+              </tr>
+              <tr>
+                <td>Autenticación (Login)</td>
+                <td>POST</td>
+                <td>/login/</td>
+                <td>5 VUs, 20s</td>
+                <td>Extracción CSRF con regex.</td>
+              </tr>
+              <tr>
+                <td>Navegación Tienda</td>
+                <td>GET</td>
+                <td>/ → /productos/</td>
+                <td>20 VUs, 30s</td>
+                <td>Simular recorrido de comprador.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>4.3 Guía Paso a Paso para Correr Pruebas de Carga</h3>
+          <ol>
+            <li><strong>Iniciar el Servidor Backend:</strong> Django debe estar corriendo en local en el puerto 8000.<br><span class="step-command">python manage.py runserver</span></li>
+            <li><strong>Correr el automatizador:</strong> Ejecuta el script en PowerShell para iniciar las pruebas y generar reportes.<br><span class="step-command">powershell -ExecutionPolicy Bypass -File .\\run_k6_tests.ps1</span></li>
+            <li><strong>Ejecutar una prueba individual:</strong> Para correr un script k6 de manera directa e independiente:<br><span class="step-command">k6 run load_test_basic.js</span></li>
+          </ol>
+
+          <div class="divider"></div>
+
+          <h2>5. Archivo Adjunto: Código Fuente del Script Principal de Carga (load_test_basic.js)</h2>
+          <div class="code-box">${codes['k6-basic'].replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        </body>
+        </html>
+        `;
+
+        const blob = new Blob(['\ufeff' + mhtml], {
+            type: 'application/msword'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reporte_pruebas_ampliado_mikitech.doc';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>

@@ -10,18 +10,27 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mickytech.settings')
 django.setup()
 
-from users.supabase_auth import registrar_usuario, iniciar_sesion_usuario, enviar_recuperacion_contraseña
+from users.supabase_auth import registrar_usuario, registrar_usuario_sql, iniciar_sesion_usuario, enviar_recuperacion_contraseña
 
 print("--- TESTING SUPABASE AUTH CONNECTIONS ---")
 
 email = "testuser_12345@mikitech.test"
 password = "SecurePassword123!"
 
-# 1. Regsiter User
+# 1. Register User
 print(f"1. Registrando usuario: {email}")
 data, error = registrar_usuario(email, password, "Test User", "testuser_12345")
 if error:
-    print(f"❌ Error en registro: {error}")
+    print(f"⚠️ Error en registro inicial: {error}")
+    if "confirmation email" in error.lower():
+        print("[!] Reintentando registro directo mediante SQL (Bypass de confirmación SMTP)...")
+        data, error = registrar_usuario_sql(email, password, "Test User", "testuser_12345")
+        if error:
+            print(f"❌ Falló el fallback de registro SQL: {error}")
+        else:
+            print("✅ Registro completado exitosamente vía SQL.")
+    else:
+        print(f"❌ Error en registro: {error}")
 else:
     print("✅ Registro completado.")
 

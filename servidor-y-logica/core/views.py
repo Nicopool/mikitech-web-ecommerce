@@ -425,3 +425,5 @@ def ping(petición):
     """Endpoint simple para pruebas de carga con k6."""
     from django.http import JsonResponse
     return JsonResponse({'status': 'ok', 'msg': 'pong'})
+
+

@@ -150,7 +150,7 @@
       Carga Masiva de Productos
     </h2>
     <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
-      Importa múltiples productos desde un archivo Excel (.xlsx) en un solo paso.
+      Importa múltiples productos desde un archivo Excel (.xlsx) o JSON (.json) en un solo paso.
     </p>
   </div>
   <a href="/admin-panel/productos/" class="g-btn-primary"
@@ -182,7 +182,7 @@
       Descarga la plantilla oficial
     </h3>
     <p style="font-size:1.3rem; color:#94A3B8; margin:0; max-width:45rem;">
-      Usa nuestro archivo Excel con formato correcto, ejemplos de datos y hoja de instrucciones incluida.
+      Usa nuestro archivo Excel con formato correcto, o crea un archivo JSON siguiendo el formato de ejemplo más abajo.
     </p>
   </div>
   <a href="/admin-panel/productos/plantilla-excel/"
@@ -206,7 +206,7 @@
     </div>
     <div>
       <h3 style="font-size:1.9rem; font-weight:800; margin:0;">Paso 2 — Sube tu archivo</h3>
-      <p style="font-size:1.3rem; color:#64748B; margin:0.3rem 0 0;">Arrastra el Excel sobre la zona o haz clic para seleccionarlo.</p>
+      <p style="font-size:1.3rem; color:#64748B; margin:0.3rem 0 0;">Arrastra el archivo Excel o JSON sobre la zona o haz clic para seleccionarlo.</p>
     </div>
   </div>
 
@@ -223,7 +223,7 @@
         Arrastra tu archivo Excel aquí
       </h3>
       <p id="drop-subtitulo" style="font-size:1.3rem; color:#64748B; margin:0 0 1.5rem;">
-        O haz clic para seleccionarlo · Solo archivos <strong>.xlsx</strong>
+        O haz clic para seleccionarlo · Archivos <strong>.xlsx</strong> o <strong>.json</strong>
       </p>
       <div id="archivo-nombre-display" style="display:none; background:white; border:1px solid #BBF7D0;
            border-radius:1rem; padding:1rem 2rem; font-size:1.4rem; font-weight:700; color:#15803D;
@@ -231,7 +231,7 @@
         <span class="material-symbols-outlined" style="font-size:2rem; color:#16A34A;">description</span>
         <span id="nombre-archivo-texto">—</span>
       </div>
-      <input type="file" id="archivo-xlsx" name="archivo_excel" accept=".xlsx" style="display:none;" required>
+      <input type="file" id="archivo-xlsx" name="archivo_excel" accept=".xlsx,.json" style="display:none;" required>
     </div>
 
     <!-- Opciones de importación -->
@@ -389,6 +389,54 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════════
+     EJEMPLO JSON — Copiar y pegar
+═══════════════════════════════════════════════════════════════ -->
+<div class="mpro-card u-mt-4" style="position:relative;">
+  <h4 style="font-size:1.7rem; font-weight:800; margin:0 0 1rem; display:flex; align-items:center; gap:1rem;">
+    <span style="width:3.6rem; height:3.6rem; background:linear-gradient(135deg,#F59E0B,#FBBF24); border-radius:1rem;
+                display:flex; align-items:center; justify-content:center; flex-shrink:0;
+                box-shadow:0 6px 15px rgba(245,158,11,0.3);">
+      <span class="material-symbols-outlined" style="color:white; font-size:2rem;">data_object</span>
+    </span>
+    Formato JSON alternativo
+  </h4>
+  <p style="font-size:1.3rem; color:#64748B; margin:0 0 1.5rem;">
+    Crea un archivo <strong>.json</strong> con este formato. Las claves son las mismas columnas del Excel.
+  </p>
+  <div style="position:relative;">
+    <button onclick="copiarJSON()" id="btn-copiar-json"
+            style="position:absolute; top:1rem; right:1rem; background:rgba(255,255,255,0.9); border:1px solid #CBD5E1;
+                   border-radius:0.8rem; padding:0.5rem 1.2rem; cursor:pointer; font-size:1.15rem; font-weight:600;
+                   color:#475569; display:flex; align-items:center; gap:0.5rem; z-index:2; transition:all 0.2s;">
+      <span class="material-symbols-outlined" style="font-size:1.4rem;" id="icono-copiar">content_copy</span>
+      <span id="texto-copiar">Copiar</span>
+    </button>
+    <pre id="json-ejemplo" style="background:#0F172A; color:#E2E8F0; border-radius:1.4rem; padding:2rem 2.5rem;
+                font-size:1.2rem; line-height:1.7; overflow-x:auto; margin:0; font-family:'Fira Code','Cascadia Code',monospace;">
+[
+  {
+    <span style="color:#7DD3FC;">"NOMBRE"</span>: <span style="color:#FDE68A;">"Audífonos Bluetooth Pro"</span>,
+    <span style="color:#7DD3FC;">"CATEGORIA"</span>: <span style="color:#FDE68A;">"Electrónica"</span>,
+    <span style="color:#7DD3FC;">"PRECIO"</span>: <span style="color:#86EFAC;">150000</span>,
+    <span style="color:#7DD3FC;">"STOCK"</span>: <span style="color:#86EFAC;">50</span>,
+    <span style="color:#7DD3FC;">"MARCA"</span>: <span style="color:#FDE68A;">"Sony"</span>,
+    <span style="color:#7DD3FC;">"DESCRIPCION"</span>: <span style="color:#FDE68A;">"Audífonos con cancelación de ruido"</span>,
+    <span style="color:#7DD3FC;">"URL_IMAGEN"</span>: <span style="color:#FDE68A;">"https://ejemplo.com/imagen.jpg"</span>
+  },
+  {
+    <span style="color:#7DD3FC;">"NOMBRE"</span>: <span style="color:#FDE68A;">"Mouse Gamer RGB"</span>,
+    <span style="color:#7DD3FC;">"CATEGORIA"</span>: <span style="color:#FDE68A;">"Periféricos"</span>,
+    <span style="color:#7DD3FC;">"PRECIO"</span>: <span style="color:#86EFAC;">85000</span>,
+    <span style="color:#7DD3FC;">"STOCK"</span>: <span style="color:#86EFAC;">120</span>,
+    <span style="color:#7DD3FC;">"MARCA"</span>: <span style="color:#FDE68A;">"Logitech"</span>,
+    <span style="color:#7DD3FC;">"DESCRIPCION"</span>: <span style="color:#FDE68A;">"Mouse gaming con 12000 DPI"</span>,
+    <span style="color:#7DD3FC;">"URL_IMAGEN"</span>: <span style="color:#FDE68A;">""</span>
+  }
+]</pre>
+  </div>
+</div>
+
 <script>
 // ─── Drag & Drop ────────────────────────────────────────────────────────────
 const dropZone = document.getElementById('drop-zone');
@@ -405,11 +453,16 @@ const fileInput = document.getElementById('archivo-xlsx');
   dropZone.addEventListener(event, function(e) {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
-    if (event === 'drop' & e.dataTransfer.files.length) {
-      const dt = new DataTransfer();
-      dt.items.add(e.dataTransfer.files[0]);
-      fileInput.files = dt.files;
-      actualizarUIConArchivo(e.dataTransfer.files[0]);
+    if (event === 'drop' && e.dataTransfer.files.length) {
+      const file = e.dataTransfer.files[0];
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.json')) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        actualizarUIConArchivo(file);
+      } else {
+        alert('Solo se aceptan archivos .xlsx o .json');
+      }
     }
   });
 });
@@ -452,6 +505,46 @@ document.getElementById('form-carga-masiva').addEventListener('submit', function
   btn.disabled = true;
   btn.style.opacity = '0.8';
 });
+
+// ─── Copiar JSON de ejemplo ─────────────────────────────────────────────────
+function copiarJSON() {
+  const jsonTexto = `[
+  {
+    "NOMBRE": "Audífonos Bluetooth Pro",
+    "CATEGORIA": "Electrónica",
+    "PRECIO": 150000,
+    "STOCK": 50,
+    "MARCA": "Sony",
+    "DESCRIPCION": "Audífonos con cancelación de ruido",
+    "URL_IMAGEN": "https://ejemplo.com/imagen.jpg"
+  },
+  {
+    "NOMBRE": "Mouse Gamer RGB",
+    "CATEGORIA": "Periféricos",
+    "PRECIO": 85000,
+    "STOCK": 120,
+    "MARCA": "Logitech",
+    "DESCRIPCION": "Mouse gaming con 12000 DPI",
+    "URL_IMAGEN": ""
+  }
+]`;
+  navigator.clipboard.writeText(jsonTexto).then(() => {
+    const icono = document.getElementById('icono-copiar');
+    const texto = document.getElementById('texto-copiar');
+    icono.textContent = 'check';
+    texto.textContent = '¡Copiado!';
+    document.getElementById('btn-copiar-json').style.background = '#DCFCE7';
+    document.getElementById('btn-copiar-json').style.borderColor = '#86EFAC';
+    document.getElementById('btn-copiar-json').style.color = '#16A34A';
+    setTimeout(() => {
+      icono.textContent = 'content_copy';
+      texto.textContent = 'Copiar';
+      document.getElementById('btn-copiar-json').style.background = 'rgba(255,255,255,0.9)';
+      document.getElementById('btn-copiar-json').style.borderColor = '#CBD5E1';
+      document.getElementById('btn-copiar-json').style.color = '#475569';
+    }, 2000);
+  });
+}
 
 // ─── Auto-scroll al reporte si existe ───────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {

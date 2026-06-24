@@ -143,7 +143,7 @@ SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://abhnnxuqmbjkqiakebmv.supa
 SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
 
 # Admin gateway code
-ADMIN_GATEWAY_CODE = os.environ.get('ADMIN_GATEWAY_CODE', 'SENA-2026')
+ADMIN_GATEWAY_CODE = os.environ.get('ADMIN_GATEWAY_CODE', '')
 
 # Paginación
 PRODUCTS_PER_PAGE = 12

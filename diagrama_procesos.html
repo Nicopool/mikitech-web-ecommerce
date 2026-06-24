@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diagrama de Procesos BPMN - E-commerce MIKITECH</title>
+    
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #020617;
+            --primary-light: #0f172a;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.35);
+            --border-color: rgba(255, 255, 255, 0.08);
+            
+            --client-color: #3b82f6;
+            --system-color: #a855f7;
+            --logistics-color: #f59e0b;
+            
+            --task-bg: rgba(30, 41, 59, 0.7);
+            --task-hover-bg: rgba(30, 41, 59, 0.9);
+            
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top left, #0f172a, #020617);
+            color: #f8fafc;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(16px);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .header h1 span {
+            font-weight: 300;
+            color: #94a3b8;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 0 15px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        /* --- Legend --- */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 16px 24px;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .legend-item .shape-indicator {
+            width: 24px;
+            height: 14px;
+            border-radius: 4px;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Scrollable Diagram Wrapper --- */
+        .diagram-outer-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background-color: #020617;
+        }
+
+        /* --- Diagram Canvas --- */
+        #diagram-canvas {
+            position: relative;
+            width: 1150px;
+            height: 740px;
+            background-color: #050b14;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        /* --- Swimlanes backgrounds --- */
+        .swimlane-bg-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .swimlane-row {
+            display: flex;
+            height: 246px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .swimlane-row:last-child {
+            border-bottom: none;
+            height: 246px;
+        }
+
+        .swimlane-header {
+            width: 45px;
+            background-color: #0b0f19;
+            border-right: 3px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12.5px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+        }
+
+        .swimlane-row:nth-child(1) .swimlane-header {
+            border-right-color: var(--client-color);
+            color: var(--client-color);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+        }
+
+        .swimlane-row:nth-child(2) .swimlane-header {
+            border-right-color: var(--system-color);
+            color: var(--system-color);
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+        }
+
+        .swimlane-row:nth-child(3) .swimlane-header {
+            border-right-color: var(--logistics-color);
+            color: var(--logistics-color);
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+        }
+
+        .swimlane-content-bg {
+            flex-grow: 1;
+            background-color: rgba(9, 15, 28, 0.6);
+        }
+
+        .swimlane-row:nth-child(even) .swimlane-content-bg {
+            background-color: rgba(13, 22, 38, 0.8);
+        }
+
+        /* --- SVG Overlay for flow lines --- */
+        .flow-lines {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Active line flow pulse keyframe */
+        @keyframes line-flow {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+
+        .flow-active-line {
+            stroke-dasharray: 6 4;
+            animation: line-flow 1.2s linear infinite;
+        }
+
+        /* --- BPMN Nodes --- */
+        .node {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        /* Task (Rounded Rect) */
+        .node-task {
+            background-color: var(--task-bg);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f1f5f9;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 11.5px;
+            font-weight: 600;
+            text-align: center;
+            width: 140px;
+            min-height: 52px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        .node-task:hover {
+            transform: translateY(-3px) scale(1.02);
+            background-color: var(--task-hover-bg);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+        }
+
+        /* Color branding for tasks */
+        .lane-client .node-task { border-left: 4px solid var(--client-color); }
+        .lane-client .node-task:hover { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25); border-color: var(--client-color); }
+        
+        .lane-system .node-task { border-left: 4px solid var(--system-color); }
+        .lane-system .node-task:hover { box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25); border-color: var(--system-color); }
+        
+        .lane-logistics .node-task { border-left: 4px solid var(--logistics-color); }
+        .lane-logistics .node-task:hover { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); border-color: var(--logistics-color); }
+
+        /* Waiting/Subprocess task */
+        .node-task.subprocess {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-style: dashed;
+        }
+
+        /* Gateway (Diamond) */
+        .node-gateway {
+            width: 44px;
+            height: 44px;
+            background-color: #0f172a;
+            border: 2px solid var(--gate-border);
+            transform: rotate(45deg);
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(234, 88, 12, 0.15);
+        }
+
+        .node-gateway:hover {
+            transform: rotate(45deg) scale(1.08);
+            box-shadow: 0 0 18px rgba(234, 88, 12, 0.35);
+            background-color: #1e293b;
+        }
+
+        .node-gateway span {
+            display: block;
+            transform: rotate(-45deg);
+            font-size: 8px;
+            font-weight: 800;
+            color: var(--gate-text);
+            text-transform: uppercase;
+            text-shadow: 0 0 4px rgba(234, 88, 12, 0.2);
+        }
+
+        /* Text label placed above or below gateways */
+        .gateway-label {
+            position: absolute;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-align: center;
+            width: 140px;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* Start Event (Green Circle) */
+        .node-start {
+            width: 32px;
+            height: 32px;
+            background-color: #064e3b;
+            border: 2.5px solid var(--success-color);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            animation: start-pulse 2s infinite alternate;
+        }
+
+        @keyframes start-pulse {
+            to {
+                box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
+            }
+        }
+
+        /* End Event (Red Double Circle) */
+        .node-end {
+            width: 32px;
+            height: 32px;
+            background-color: #7f1d1d;
+            border: 4px double var(--danger-color);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            animation: end-pulse 2s infinite alternate;
+        }
+
+        @keyframes end-pulse {
+            to {
+                box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+            }
+        }
+
+        /* Footer note */
+        .footer-note {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12.5px;
+            color: #64748b;
+        }
+
+        .footer-note .badge {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>
+            <i data-lucide="shopping-bag" style="color: var(--accent);"></i>
+            Diagrama de Procesos <span>· Flujo de Compra y Checkout MIKITECH</span>
+        </h1>
+        <a href="consola_pruebas.html" class="btn-back">
+            <i data-lucide="arrow-left"></i> Volver a Consola de Pruebas
+        </a>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="shape-indicator" style="background:rgba(30, 41, 59, 0.7); border-color:#3b82f6; border-left-width:4px;"></div>
+            <span>Actividad Cliente</span>
+        </div>
+        <div class="legend-item">
+            <div class="shape-indicator" style="background:rgba(30, 41, 59, 0.7); border-color:#a855f7; border-left-width:4px;"></div>
+            <span>Backend / Supabase</span>
+        </div>
+        <div class="legend-item">
+            <div class="shape-indicator" style="background:rgba(30, 41, 59, 0.7); border-color:#f59e0b; border-left-width:4px;"></div>
+            <span>Logística / Bodega</span>
+        </div>
+        <div class="legend-item">
+            <div class="shape-indicator" style="width:16px; height:16px; border-radius:50%; background:#064e3b; border-color:#10b981; border-width: 2.5px; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4)"></div>
+            <span>Inicio</span>
+        </div>
+        <div class="legend-item">
+            <div class="shape-indicator" style="width:16px; height:16px; border-radius:50%; background:#7f1d1d; border-color:#ef4444; border-width: 3.5px; border-style:double; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4)"></div>
+            <span>Fin</span>
+        </div>
+        <div class="legend-item">
+            <div class="shape-indicator" style="width:14px; height:14px; transform:rotate(45deg); background:#0f172a; border-color:#ea580c; border-width:1.5px;"></div>
+            <span>Gateway / Decisión</span>
+        </div>
+    </div>
+
+    <!-- DIAGRAM CANVAS IN SCROLLABLE BOX -->
+    <div class="diagram-outer-wrapper">
+        <div id="diagram-canvas">
+            
+            <!-- Swimlane Rows Background Structure -->
+            <div class="swimlane-bg-container">
+                <div class="swimlane-row">
+                    <div class="swimlane-header">Cliente (Usuario)</div>
+                    <div class="swimlane-content-bg"></div>
+                </div>
+                <div class="swimlane-row">
+                    <div class="swimlane-header">Sistema y Supabase</div>
+                    <div class="swimlane-content-bg"></div>
+                </div>
+                <div class="swimlane-row">
+                    <div class="swimlane-header">Logística y Despacho</div>
+                    <div class="swimlane-content-bg"></div>
+                </div>
+            </div>
+
+            <!-- SVG Container for Flow Lines -->
+            <svg class="flow-lines">
+                <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 2 L 8 5 L 0 8 z" fill="#475569" />
+                    </marker>
+                    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 2 L 8 5 L 0 8 z" fill="#3b82f6" />
+                    </marker>
+                    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 2 L 8 5 L 0 8 z" fill="#10b981" />
+                    </marker>
+                    <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 2 L 8 5 L 0 8 z" fill="#ef4444" />
+                    </marker>
+                </defs>
+            </svg>
+
+            <!-- ============================================ -->
+            <!-- NODOS CARRIL 1: CLIENTE (USUARIO)            -->
+            <!-- ============================================ -->
+            <div class="lane-client">
+                <!-- Start Event -->
+                <div class="node node-start" id="node-start" style="left: 60px; top: 105px;" title="Inicio de Compra"></div>
+                
+                <!-- Explorar Catálogo -->
+                <div class="node node-task" id="node-browse" style="left: 130px; top: 95px;">Explorar catálogo de hardware</div>
+                
+                <!-- Agregar al Carrito -->
+                <div class="node node-task" id="node-cart" style="left: 290px; top: 95px;">Agregar productos al carrito</div>
+                
+                <!-- Iniciar Checkout -->
+                <div class="node node-task" id="node-checkout" style="left: 460px; top: 95px;">Proceder al Checkout (Ingresar datos)</div>
+                
+                <!-- Realizar Pago -->
+                <div class="node node-task" id="node-pay" style="left: 640px; top: 95px;">Confirmar y Realizar Pago</div>
+                
+                <!-- Esperar Entrega -->
+                <div class="node node-task subprocess" id="node-wait" style="left: 820px; top: 95px;">Esperar entrega de transportadora</div>
+
+                <!-- Recibir Pedido -->
+                <div class="node node-task" id="node-receive" style="left: 980px; top: 95px;">Recibir pedido y verificar hardware</div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- NODOS CARRIL 2: SISTEMA Y SUPABASE           -->
+            <!-- ============================================ -->
+            <div class="lane-system">
+                <!-- Validar Stock -->
+                <div class="node node-task subprocess" id="node-check-stock" style="left: 290px; top: 290px;">Validar stock de productos</div>
+                
+                <!-- ¿Hay stock? -->
+                <div class="node node-task subprocess" id="node-dec-stock" style="left: 460px; top: 290px;">¿Hay stock disponible?</div>
+                
+                <!-- Gateway Stock (Diamond) -->
+                <div class="node node-gateway" id="node-gate-stock" style="left: 512px; top: 350px;"><span style="display:none">G</span></div>
+                <div class="gateway-label" style="left: 463px; top: 395px; width: 140px;">Gateway Stock</div>
+
+                <!-- NO: Notificar falta de stock -->
+                <div class="node node-task subprocess" id="node-no-stock" style="left: 600px; top: 260px;">No, Notificar falta de stock</div>
+                
+                <!-- Processar Pago -->
+                <div class="node node-task subprocess" id="node-process-pay" style="left: 640px; top: 350px;">Procesar Pago (Stripe/Simulación)</div>
+
+                <!-- ¿Pago Exitoso? -->
+                <div class="node node-task subprocess" id="node-dec-pay" style="left: 810px; top: 350px;">¿Transacción aprobada?</div>
+
+                <!-- Gateway Pago (Diamond) -->
+                <div class="node node-gateway" id="node-gate-pay" style="left: 862px; top: 410px;"><span style="display:none">G</span></div>
+                <div class="gateway-label" style="left: 813px; top: 455px; width: 140px;">Gateway Pago</div>
+
+                <!-- NO: Notificar fallo de pago -->
+                <div class="node node-task subprocess" id="node-no-pay" style="left: 950px; top: 320px;">No, Notificar fallo de pago</div>
+
+                <!-- SÍ: Generar Orden -->
+                <div class="node node-task" id="node-create-order" style="left: 950px; top: 415px;">Sí, Registrar Orden y Descontar stock</div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- NODOS CARRIL 3: LOGÍSTICA Y DESPACHO         -->
+            <!-- ============================================ -->
+            <div class="lane-logistics">
+                <!-- Preparar Paquete -->
+                <div class="node node-task" id="node-pack" style="left: 600px; top: 560px;">Empacar hardware y alistar pedido</div>
+                
+                <!-- Despachar Transportadora -->
+                <div class="node node-task" id="node-ship" style="left: 780px; top: 560px;">Despachar paquete con transportadora</div>
+                
+                <!-- Registrar Guía -->
+                <div class="node node-task subprocess" id="node-register-ship" style="left: 950px; top: 560px;">Registrar número de guía y enviar email</div>
+
+                <!-- Fin (Red Event) -->
+                <div class="node node-end" id="node-fin" style="left: 1080px; top: 570px;" title="Pedido Entregado y Cerrado"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-note">
+        <span>📌 Diagrama reactivo trazado mediante SVG y CSS con Outfit Typography</span>
+        <span class="badge">MIKITECH E-Commerce Operations Board</span>
+    </div>
+
+</div>
+
+<!-- JAVASCRIPT: SVG FLOW LINES DRAWING ROUTINE -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        drawLines();
+        window.addEventListener('resize', drawLines);
+    });
+
+    function drawLines() {
+        const svg = document.querySelector('.flow-lines');
+        const container = document.getElementById('diagram-canvas');
+        const containerRect = container.getBoundingClientRect();
+        
+        // Limpiar elementos de trazado previos
+        const paths = svg.querySelectorAll('path:not(defs path)');
+        paths.forEach(p => p.remove());
+        const texts = svg.querySelectorAll('text');
+        texts.forEach(t => t.remove());
+
+        function getPos(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const rect = el.getBoundingClientRect();
+            return {
+                x: rect.left - containerRect.left + rect.width / 2,
+                y: rect.top - containerRect.top + rect.height / 2,
+                left: rect.left - containerRect.left,
+                right: rect.right - containerRect.left,
+                top: rect.top - containerRect.top,
+                bottom: rect.bottom - containerRect.top,
+                width: rect.width,
+                height: rect.height
+            };
+        }
+
+        function drawArrow(fromId, toId, route = 'straight', type = 'normal', label = '') {
+            const from = getPos(fromId);
+            const to = getPos(toId);
+            if (!from || !to) return;
+
+            let startX, startY, endX, endY;
+            let d = '';
+
+            if (route === 'straight') {
+                if (Math.abs(from.y - to.y) < 15) {
+                    startX = from.x < to.x ? from.right : from.left;
+                    startY = from.y;
+                    endX = from.x < to.x ? to.left : to.right;
+                    endY = to.y;
+                } else {
+                    startX = from.x;
+                    startY = from.y < to.y ? from.bottom : from.top;
+                    endX = to.x;
+                    endY = from.y < to.y ? to.top : to.bottom;
+                }
+                d = `M ${startX} ${startY} L ${endX} ${endY}`;
+            } 
+            else if (route === 'H-V') {
+                startX = from.x < to.x ? from.right : from.left;
+                startY = from.y;
+                endX = to.x;
+                endY = from.y < to.y ? to.top : to.bottom;
+                d = `M ${startX} ${startY} H ${endX} V ${endY}`;
+            }
+            else if (route === 'V-H') {
+                startX = from.x;
+                startY = from.y < to.y ? from.bottom : from.top;
+                endX = from.x < to.x ? to.left : to.right;
+                endY = to.y;
+                d = `M ${startX} ${startY} V ${endY} H ${endX}`;
+            }
+            else if (route === 'Z-H') {
+                startX = from.x < to.x ? from.right : from.left;
+                startY = from.y;
+                endX = from.x < to.x ? to.left : to.right;
+                endY = to.y;
+                const midX = (startX + endX) / 2;
+                d = `M ${startX} ${startY} H ${midX} V ${endY} H ${endX}`;
+            }
+
+            let marker = 'url(#arrow)';
+            let strokeColor = '#475569';
+            let lineClass = '';
+            
+            if (type === 'active') {
+                marker = 'url(#arrow-blue)';
+                strokeColor = '#3b82f6';
+                lineClass = 'flow-active-line';
+            } else if (type === 'success') {
+                marker = 'url(#arrow-green)';
+                strokeColor = '#10b981';
+                lineClass = 'flow-active-line';
+            } else if (type === 'danger') {
+                marker = 'url(#arrow-red)';
+                strokeColor = '#ef4444';
+                lineClass = 'flow-active-line';
+            }
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', strokeColor);
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('marker-end', marker);
+            if (lineClass) {
+                path.setAttribute('class', lineClass);
+            }
+            svg.appendChild(path);
+
+            if (label) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                let labelX, labelY;
+                
+                if (route === 'H-V') {
+                    labelX = startX + (from.x < to.x ? 15 : -15);
+                    labelY = startY - 6;
+                } else if (route === 'V-H') {
+                    labelX = startX + 12;
+                    labelY = startY + (from.y < to.y ? 15 : -15);
+                } else {
+                    labelX = (startX + endX) / 2;
+                    labelY = (startY + endY) / 2 - 6;
+                }
+                
+                text.setAttribute('x', labelX);
+                text.setAttribute('y', labelY);
+                text.setAttribute('fill', type === 'danger' ? '#ef4444' : '#10b981');
+                text.setAttribute('font-size', '10px');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = label;
+                svg.appendChild(text);
+            }
+        }
+
+        // ============================================ -->
+        // CONEXIONES DE LÍNEA Y FLUJOS CON ANIMACIÓN   -->
+        // ============================================ -->
+        
+        // --- Flujo Principal de Compra (Activo en azul) ---
+        drawArrow('node-start', 'node-browse', 'straight', 'active');
+        drawArrow('node-browse', 'node-cart', 'straight', 'active');
+        drawArrow('node-cart', 'node-check-stock', 'V-H', 'active');
+        drawArrow('node-check-stock', 'node-dec-stock', 'straight', 'active');
+        drawArrow('node-dec-stock', 'node-gate-stock', 'straight', 'active');
+
+        // Gateway de stock
+        drawArrow('node-gate-stock', 'node-no-stock', 'H-V', 'danger', 'NO');
+        drawArrow('node-gate-stock', 'node-checkout', 'V-H', 'success', 'SÍ');
+
+        // Retorno por falta de stock
+        drawArrow('node-no-stock', 'node-cart', 'V-H', 'danger');
+
+        // Continuación checkout y pago
+        drawArrow('node-checkout', 'node-pay', 'straight', 'active');
+        drawArrow('node-pay', 'node-process-pay', 'V-H', 'active');
+        drawArrow('node-process-pay', 'node-dec-pay', 'straight', 'active');
+        drawArrow('node-dec-pay', 'node-gate-pay', 'straight', 'active');
+
+        // Gateway de pago
+        drawArrow('node-gate-pay', 'node-no-pay', 'H-V', 'danger', 'NO');
+        drawArrow('node-gate-pay', 'node-create-order', 'H-V', 'success', 'SÍ');
+
+        // Retorno por pago fallido
+        drawArrow('node-no-pay', 'node-pay', 'V-H', 'danger');
+
+        // Alistamiento y logística
+        drawArrow('node-create-order', 'node-pack', 'V-H', 'active');
+        drawArrow('node-pack', 'node-ship', 'straight', 'active');
+        drawArrow('node-ship', 'node-register-ship', 'straight', 'active');
+
+        // Envío actualiza espera del cliente
+        drawArrow('node-register-ship', 'node-wait', 'V-H', 'active');
+        drawArrow('node-wait', 'node-receive', 'straight', 'active');
+        drawArrow('node-receive', 'node-fin', 'V-H', 'active');
+    }
+</script>
+</body>
+</html>

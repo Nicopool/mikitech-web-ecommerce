@@ -44,9 +44,9 @@ class TestWebRoutesIntegration(unittest.TestCase):
         """Verifica que un usuario sin rol de administrador sea rechazado y redirigido del panel admin."""
         # Intentar acceder al dashboard de administración sin sesión activa
         response = self.client.get('/admin-panel/')
-        # Debe redirigir (302 Redirect) a la pasarela de seguridad
+        # Debe redirigir (302 Redirect) al login de administración
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/admin-panel/pasarela/', response.url)
+        self.assertIn('/admin-panel/login/', response.url)
 
     def test_client_denied_repartidor_panel(self):
         """Verifica que un usuario sin rol de repartidor sea rechazado y redirigido del panel de repartidor."""
@@ -208,11 +208,10 @@ class TestWebRoutesIntegration(unittest.TestCase):
 
 
     def test_anonymous_redirected_from_admin_pasarela(self):
-        """Verifica que un usuario anónimo sea redirigido de la pasarela de administrador al login público."""
+        """Verifica que un usuario anónimo sea redirigido de la pasarela de administrador al login de administración."""
         response = self.client.get('/admin-panel/pasarela/')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/cuenta/ingreso/', response.url)
-        self.assertIn('next=/admin-panel/pasarela/', response.url)
+        self.assertIn('/admin-panel/login/', response.url)
 
     def test_anonymous_redirected_from_repartidor_pasarela(self):
         """Verifica que un usuario anónimo sea redirigido de la pasarela de repartidor al login público."""
@@ -235,19 +234,15 @@ class TestTripleLockSecurity(unittest.TestCase):
 
     def test_admin_panel_blocked_without_gateway_flag(self):
         """
-        Cerrojo 3: Un admin con rol correcto pero sin haber pasado la pasarela
-        debe ser redirigido a la pasarela, no al panel.
+        Un usuario sin sesión activa debe ser redirigido al login.
         """
-        # No se puede simular 'admin' genuino en test sin BD real, pero
-        # sí podemos verificar que sin sesión el panel siempre bloquea.
         response = self.client.get('/admin-panel/')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/admin-panel/pasarela/', response.url)
+        self.assertIn('/admin-panel/login/', response.url)
 
     def test_admin_panel_blocked_with_client_role_and_gateway(self):
         """
-        Cerrojo 2: Un usuario con rol 'client' que logra insertar el flag de pasarela
-        igual debe ser rechazado porque su rol no es 'admin'.
+        Cerrojo 2: Un usuario con rol 'client' debe ser rechazado porque su rol no es 'admin'.
         """
         from django.test import RequestFactory
         from django.contrib.sessions.middleware import SessionMiddleware
@@ -258,16 +253,15 @@ class TestTripleLockSecurity(unittest.TestCase):
         middleware = SessionMiddleware(get_response=lambda r: None)
         middleware.process_request(request)
 
-        # Simular un usuario con rol 'client' que manipuló el flag de pasarela
+        # Simular un usuario con rol 'client'
         request.session['usuario_id'] = 'fake-user-id'
         request.session['rol_usuario'] = 'client'  # Rol incorrecto
-        request.session['pasarela_administrador_superada'] = True  # Intento de bypass
         request.session.save()
 
         response = tablero_administrador(request)
-        # El cerrojo 2 debe rechazarlo y redirigir a /admin-panel/pasarela/
+        # El cerrojo 2 debe rechazarlo y redirigir a /admin-panel/login/
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/admin-panel/pasarela/', response.url)
+        self.assertIn('/admin-panel/login/', response.url)
 
     def test_repartidor_panel_blocked_without_gateway_flag(self):
         """

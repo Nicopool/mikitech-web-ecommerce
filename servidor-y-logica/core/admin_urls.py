@@ -1,4 +1,4 @@
-"""URLs del panel administrativo — con pasarela de seguridad SENA-2026"""
+"""URLs del panel administrativo — con pasarela de seguridad"""
 
 from django.urls import path
 from core import admin_views

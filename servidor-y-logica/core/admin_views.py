@@ -1,4 +1,4 @@
-"""Vistas del panel administrativo con gateway SENA-2026 — MIKITECH"""
+"""Vistas del panel administrativo con gateway de seguridad — MIKITECH"""
 
 import uuid
 from django.shortcuts import render, redirect, get_object_or_404
@@ -34,72 +34,38 @@ def guardar_archivo_hibrido(nombre_unico, archivo):
     ruta_guardada = default_storage.save(nombre_unico, archivo)
     return f"{settings.MEDIA_URL}{ruta_guardada}"
 
-CODIGO_ADMIN = getattr(settings, 'ADMIN_GATEWAY_CODE', 'SENA-2026')
+CODIGO_ADMIN = getattr(settings, 'ADMIN_GATEWAY_CODE', '')
 
 
 def requerir_administrador(función_vista):
     """
-    Decorador de triple cerrojo para rutas administrativas (ISO 25010 – Seguridad).
+    Decorador para rutas administrativas.
 
     Verifica en orden:
     1. Que exista una sesión activa con usuario_id.
-    2. Que el rol de sesión sea 'admin' (ya sincronizado por RoleVerificationMiddleware).
-    3. Que se haya superado la pasarela de seguridad SENA-2026 en la sesión actual,
-       impidiendo que un admin acceda al panel sin pasar por la pasarela, incluso si
-       inició sesión a través del formulario público de clientes.
+    2. Que el rol de sesión sea 'admin'.
     """
     @wraps(función_vista)
     def envoltura(petición, *args, **kwargs):
         # Cerrojo 1: debe haber sesión activa
         if not petición.session.get('usuario_id'):
-            return redirect('/admin-panel/pasarela/')
+            return redirect('/admin-panel/login/')
 
         # Cerrojo 2: el rol de sesión (sincronizado con BD) debe ser 'admin'
         if petición.session.get('rol_usuario') != 'admin':
-            return redirect('/admin-panel/pasarela/')
-
-        # Cerrojo 3: debe haber superado la pasarela de código SENA-2026
-        if not petición.session.get('pasarela_administrador_superada'):
-            return redirect('/admin-panel/pasarela/')
+            return redirect('/admin-panel/login/')
 
         return función_vista(petición, *args, **kwargs)
     return envoltura
 
 
 def pasarela(petición):
-    """Pasarela de seguridad inicial solicitando el código SENA-2026."""
-    # 1. Si no hay sesión activa (usuario no autenticado), denegar acceso de inmediato
-    if not petición.session.get('usuario_id'):
-        return redirect('/cuenta/ingreso/?next=/admin-panel/pasarela/')
-
-    # Si ya está logueado como admin, ir directo al panel
-    if petición.session.get('rol_usuario') == 'admin':
-        return redirect('/admin-panel/')
-
-    if petición.session.get('pasarela_administrador_superada'):
-        return redirect('/admin-panel/login/')
-
-    if petición.method == 'POST':
-        codigo_enviado = petición.POST.get('codigo_secreto', '').strip()
-        if codigo_enviado == CODIGO_ADMIN:
-            petición.session['pasarela_administrador_superada'] = True
-            petición.session.modified = True
-            return redirect('/admin-panel/login/')
-        return render(petición, 'admin_panel/gateway.html', {
-            'error': 'Código de acceso incorrecto.',
-            'titulo_pagina': 'Acceso Restringido — MIKITECH',
-        })
-
-    return render(petición, 'admin_panel/gateway.html', {
-        'titulo_pagina': 'Acceso Restringido — MIKITECH',
-    })
+    """Redirecciona al login de administración al estar descontinuada la pasarela."""
+    return redirect('/admin-panel/login/')
 
 
 def login_administrador(petición):
     """Inicio de sesión exclusivo para administradores."""
-    if not petición.session.get('pasarela_administrador_superada'):
-        return redirect('/admin-panel/pasarela/')
-
     if petición.session.get('rol_usuario') == 'admin':
         return redirect('/admin-panel/')
 
@@ -180,10 +146,7 @@ def login_administrador(petición):
 
 
 def registro_administrador(petición):
-    """Registro de nuevos administradores (requiere pasar pasarela)."""
-    if not petición.session.get('pasarela_administrador_superada'):
-        return redirect('/admin-panel/pasarela/')
-
+    """Registro de nuevos administradores."""
     if petición.session.get('rol_usuario') == 'admin':
         return redirect('/admin-panel/')
 
@@ -295,9 +258,9 @@ def registro_administrador(petición):
 
 
 def cerrar_sesion_administrador(petición):
-    """Cierra la sesión y limpia el rastro de la pasarela."""
+    """Cierra la sesión del administrador."""
     petición.session.flush()
-    return redirect('/admin-panel/pasarela/')
+    return redirect('/admin-panel/login/')
 
 
 @requerir_administrador

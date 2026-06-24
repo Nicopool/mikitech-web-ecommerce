@@ -1,0 +1,362 @@
+[
+  {
+    "NOMBRE": "Audífonos Bluetooth Pro X3",
+    "CATEGORIA": "Electrónica",
+    "PRECIO": 185000,
+    "STOCK": 45,
+    "MARCA": "Sony",
+    "DESCRIPCION": "Audífonos inalámbricos con cancelación activa de ruido y 30h de batería",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Mouse Gamer RGB Lightspeed",
+    "CATEGORIA": "Periféricos",
+    "PRECIO": 125000,
+    "STOCK": 80,
+    "MARCA": "Logitech",
+    "DESCRIPCION": "Mouse gaming inalámbrico 25600 DPI con sensor HERO",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Teclado Mecánico TKL Cherry MX",
+    "CATEGORIA": "Periféricos",
+    "PRECIO": 289000,
+    "STOCK": 35,
+    "MARCA": "HyperX",
+    "DESCRIPCION": "Teclado mecánico compacto con switches Cherry MX Red y retroiluminación RGB",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Monitor Curvo 27\" 165Hz",
+    "CATEGORIA": "Monitores",
+    "PRECIO": 950000,
+    "STOCK": 15,
+    "MARCA": "Samsung",
+    "DESCRIPCION": "Monitor gaming curvo QHD 2560x1440 con panel VA y 1ms de respuesta",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Webcam Full HD 1080p AutoFocus",
+    "CATEGORIA": "Periféricos",
+    "PRECIO": 175000,
+    "STOCK": 60,
+    "MARCA": "Logitech",
+    "DESCRIPCION": "Webcam profesional con micrófono dual y corrección de luz automática",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Disco SSD NVMe 1TB Gen4",
+    "CATEGORIA": "Almacenamiento",
+    "PRECIO": 320000,
+    "STOCK": 50,
+    "MARCA": "Samsung",
+    "DESCRIPCION": "SSD M.2 NVMe con velocidad de lectura 7000 MB/s",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Memoria RAM DDR5 32GB 5600MHz",
+    "CATEGORIA": "Componentes",
+    "PRECIO": 410000,
+    "STOCK": 30,
+    "MARCA": "Corsair",
+    "DESCRIPCION": "Kit de 2x16GB DDR5 con disipador de calor y perfiles XMP 3.0",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Fuente de Poder 850W 80+ Gold",
+    "CATEGORIA": "Componentes",
+    "PRECIO": 520000,
+    "STOCK": 25,
+    "MARCA": "EVGA",
+    "DESCRIPCION": "PSU modular con certificación 80+ Gold y ventilador silencioso 135mm",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Tarjeta Gráfica RTX 4060 8GB",
+    "CATEGORIA": "Componentes",
+    "PRECIO": 1850000,
+    "STOCK": 10,
+    "MARCA": "ASUS",
+    "DESCRIPCION": "GPU con DLSS 3 y Ray Tracing para gaming en 1080p y 1440p",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Gabinete ATX Airflow RGB",
+    "CATEGORIA": "Componentes",
+    "PRECIO": 380000,
+    "STOCK": 20,
+    "MARCA": "NZXT",
+    "DESCRIPCION": "Gabinete mid-tower con panel lateral de vidrio templado y 4 ventiladores ARGB",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Tablet Android 10\" 128GB",
+    "CATEGORIA": "Tablets",
+    "PRECIO": 680000,
+    "STOCK": 40,
+    "MARCA": "Samsung",
+    "DESCRIPCION": "Tablet Galaxy Tab con pantalla AMOLED y S Pen incluido",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Smartwatch Deportivo GPS",
+    "CATEGORIA": "Wearables",
+    "PRECIO": 450000,
+    "STOCK": 55,
+    "MARCA": "Garmin",
+    "DESCRIPCION": "Reloj inteligente con GPS, pulsómetro y 14 días de batería",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Parlante Bluetooth Portátil 30W",
+    "CATEGORIA": "Audio",
+    "PRECIO": 220000,
+    "STOCK": 70,
+    "MARCA": "JBL",
+    "DESCRIPCION": "Altavoz resistente al agua IPX7 con 12h de reproducción",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Cargador Rápido USB-C 65W GaN",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 95000,
+    "STOCK": 100,
+    "MARCA": "Anker",
+    "DESCRIPCION": "Cargador compacto GaN III con 3 puertos y carga rápida PD 3.0",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Hub USB-C 7 en 1 4K HDMI",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 145000,
+    "STOCK": 65,
+    "MARCA": "Anker",
+    "DESCRIPCION": "Adaptador USB-C con HDMI 4K, USB 3.0, SD, ethernet y carga PD",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Mousepad XL RGB Gaming 90x40cm",
+    "CATEGORIA": "Periféricos",
+    "PRECIO": 85000,
+    "STOCK": 90,
+    "MARCA": "SteelSeries",
+    "DESCRIPCION": "Alfombrilla de ratón extra grande con iluminación RGB perimetral",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Auriculares Gaming 7.1 Surround",
+    "CATEGORIA": "Audio",
+    "PRECIO": 275000,
+    "STOCK": 40,
+    "MARCA": "HyperX",
+    "DESCRIPCION": "Headset gaming con sonido envolvente 7.1 virtual y micrófono desmontable",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Router WiFi 6 Mesh AX3000",
+    "CATEGORIA": "Redes",
+    "PRECIO": 490000,
+    "STOCK": 25,
+    "MARCA": "TP-Link",
+    "DESCRIPCION": "Sistema mesh WiFi 6 de 2 unidades para cobertura de hasta 370m²",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Cámara de Seguridad WiFi 2K",
+    "CATEGORIA": "Seguridad",
+    "PRECIO": 165000,
+    "STOCK": 50,
+    "MARCA": "Xiaomi",
+    "DESCRIPCION": "Cámara IP con visión nocturna, detección de movimiento y audio bidireccional",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Power Bank 20000mAh PD 65W",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 185000,
+    "STOCK": 75,
+    "MARCA": "Anker",
+    "DESCRIPCION": "Batería portátil con carga rápida para laptop y smartphone",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Cable HDMI 2.1 Ultra 8K 2m",
+    "CATEGORIA": "Cables",
+    "PRECIO": 55000,
+    "STOCK": 120,
+    "MARCA": "Ugreen",
+    "DESCRIPCION": "Cable HDMI 2.1 con soporte 8K@60Hz y 4K@120Hz trenzado premium",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Silla Gamer Ergonómica Pro",
+    "CATEGORIA": "Mobiliario",
+    "PRECIO": 890000,
+    "STOCK": 12,
+    "MARCA": "Cougar",
+    "DESCRIPCION": "Silla gaming con soporte lumbar ajustable, reposabrazos 4D y reclinable 180°",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Soporte Doble Monitor Articulado",
+    "CATEGORIA": "Mobiliario",
+    "PRECIO": 195000,
+    "STOCK": 30,
+    "MARCA": "Fleximounts",
+    "DESCRIPCION": "Brazo articulado de escritorio para 2 monitores de 13 a 32 pulgadas",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Micrófono Condensador USB Podcast",
+    "CATEGORIA": "Audio",
+    "PRECIO": 340000,
+    "STOCK": 28,
+    "MARCA": "Blue Yeti",
+    "DESCRIPCION": "Micrófono USB profesional con 4 patrones polares para streaming y podcast",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Impresora Multifuncional WiFi",
+    "CATEGORIA": "Impresoras",
+    "PRECIO": 620000,
+    "STOCK": 18,
+    "MARCA": "HP",
+    "DESCRIPCION": "Impresora a color con scanner, WiFi Direct e impresión desde celular",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Cooler para Laptop 17\" 5 Ventiladores",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 75000,
+    "STOCK": 55,
+    "MARCA": "Havit",
+    "DESCRIPCION": "Base refrigerante con 5 ventiladores silenciosos, LED azul y 2 puertos USB",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Disco Duro Externo 2TB USB 3.0",
+    "CATEGORIA": "Almacenamiento",
+    "PRECIO": 245000,
+    "STOCK": 40,
+    "MARCA": "Seagate",
+    "DESCRIPCION": "HDD portátil 2TB con conexión USB 3.0 compatible con PC y Mac",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Protector de Voltaje 6 Tomas USB",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 65000,
+    "STOCK": 85,
+    "MARCA": "APC",
+    "DESCRIPCION": "Regleta con protección contra sobretensiones, 6 tomas y 2 puertos USB",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Lápiz Óptico Universal para Tablet",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 110000,
+    "STOCK": 60,
+    "MARCA": "Wacom",
+    "DESCRIPCION": "Stylus activo con 4096 niveles de presión compatible con Android e iOS",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Switch KVM HDMI 4K 2 Puertos",
+    "CATEGORIA": "Redes",
+    "PRECIO": 135000,
+    "STOCK": 20,
+    "MARCA": "Ugreen",
+    "DESCRIPCION": "Conmutador KVM para compartir teclado, mouse y monitor entre 2 PCs",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Luz LED para Monitor ScreenBar",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 155000,
+    "STOCK": 35,
+    "MARCA": "BenQ",
+    "DESCRIPCION": "Lámpara LED para monitor con sensor de luz automático y control táctil",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Cámara Web 4K con Ring Light",
+    "CATEGORIA": "Periféricos",
+    "PRECIO": 295000,
+    "STOCK": 22,
+    "MARCA": "Razer",
+    "DESCRIPCION": "Webcam Ultra HD 4K con anillo de luz integrado para streaming",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Control Xbox Wireless Negro",
+    "CATEGORIA": "Gaming",
+    "PRECIO": 230000,
+    "STOCK": 45,
+    "MARCA": "Microsoft",
+    "DESCRIPCION": "Control inalámbrico Xbox Series con Bluetooth y conector 3.5mm",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Capturadora de Video USB 4K",
+    "CATEGORIA": "Gaming",
+    "PRECIO": 520000,
+    "STOCK": 15,
+    "MARCA": "Elgato",
+    "DESCRIPCION": "Capturadora USB-C para streaming en 4K@30fps o 1080p@60fps",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Teclado Numérico Bluetooth Slim",
+    "CATEGORIA": "Periféricos",
+    "PRECIO": 55000,
+    "STOCK": 70,
+    "MARCA": "Logitech",
+    "DESCRIPCION": "Teclado numérico compacto inalámbrico para contabilidad y hojas de cálculo",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Adaptador WiFi USB AC1300 Dual Band",
+    "CATEGORIA": "Redes",
+    "PRECIO": 68000,
+    "STOCK": 50,
+    "MARCA": "TP-Link",
+    "DESCRIPCION": "Dongle WiFi USB 3.0 con antena externa de alto alcance",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Funda para Laptop 15.6\" Impermeable",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 45000,
+    "STOCK": 95,
+    "MARCA": "Tomtoc",
+    "DESCRIPCION": "Maletín protector acolchado resistente al agua con bolsillo para accesorios",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Ventilador de Escritorio USB Silencioso",
+    "CATEGORIA": "Accesorios",
+    "PRECIO": 38000,
+    "STOCK": 110,
+    "MARCA": "Xiaomi",
+    "DESCRIPCION": "Ventilador portátil USB con 3 velocidades y giro ajustable 360°",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Procesador AMD Ryzen 5 5600X",
+    "CATEGORIA": "Componentes",
+    "PRECIO": 750000,
+    "STOCK": 18,
+    "MARCA": "AMD",
+    "DESCRIPCION": "CPU 6 núcleos 12 hilos AM4 con Wraith Stealth cooler incluido",
+    "URL_IMAGEN": ""
+  },
+  {
+    "NOMBRE": "Motherboard B550 ATX WiFi",
+    "CATEGORIA": "Componentes",
+    "PRECIO": 580000,
+    "STOCK": 14,
+    "MARCA": "MSI",
+    "DESCRIPCION": "Placa base AM4 con WiFi 6, PCIe 4.0, USB-C y audio premium",
+    "URL_IMAGEN": ""
+  }
+]
