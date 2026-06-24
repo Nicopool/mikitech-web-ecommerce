@@ -274,6 +274,7 @@ def registro_administrador(petición):
         petición.session['usuario_id'] = id_usuario
         petición.session['token_acceso'] = datos.get('access_token')
         petición.session['rol_usuario'] = 'admin'
+        petición.session['pasarela_administrador_superada'] = True  # Requerido por triple cerrojo
         petición.session['nombre_usuario'] = perfil.nombre_usuario
         petición.session['avatar_url'] = perfil.url_avatar or ''
         petición.session.modified = True
