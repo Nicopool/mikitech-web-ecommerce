@@ -1,2 +1,2 @@
 [phases.build]
-cmds = ['python servidor-y-logica/manage.py collectstatic --noinput']
+cmds = ['python manage.py collectstatic --noinput']

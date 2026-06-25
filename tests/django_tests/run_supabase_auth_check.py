@@ -3,7 +3,14 @@ import sys
 from pathlib import Path
 
 # Agregar el directorio del backend al path de python
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'servidor-y-logica'))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+
+# Reconfigurar salida para evitar errores Unicode en consolas Windows
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
 
 import django
 
@@ -21,34 +28,34 @@ password = "SecurePassword123!"
 print(f"1. Registrando usuario: {email}")
 data, error = registrar_usuario(email, password, "Test User", "testuser_12345")
 if error:
-    print(f"⚠️ Error en registro inicial: {error}")
+    print(f"[WARNING] Error en registro inicial: {error}")
     if "confirmation email" in error.lower():
         print("[!] Reintentando registro directo mediante SQL (Bypass de confirmación SMTP)...")
         data, error = registrar_usuario_sql(email, password, "Test User", "testuser_12345")
         if error:
-            print(f"❌ Falló el fallback de registro SQL: {error}")
+            print(f"[ERROR] Falló el fallback de registro SQL: {error}")
         else:
-            print("✅ Registro completado exitosamente vía SQL.")
+            print("[OK] Registro completado exitosamente vía SQL.")
     else:
-        print(f"❌ Error en registro: {error}")
+        print(f"[ERROR] Error en registro: {error}")
 else:
-    print("✅ Registro completado.")
+    print("[OK] Registro completado.")
 
 # 2. Login User
 print(f"2. Iniciando sesión de: {email}")
 data_login, error_login = iniciar_sesion_usuario(email, password)
 if error_login:
     # Si requiere confirmación de email (Supabase por defecto la tiene activada)
-    print(f"⚠️ Error en inicio de sesión (puede requerir conf de email): {error_login}")
+    print(f"[WARNING] Error en inicio de sesión (puede requerir conf de email): {error_login}")
 else:
-    print("✅ Autenticación exitosa. Token obtenido.")
+    print("[OK] Autenticación exitosa. Token obtenido.")
 
 # 3. Recuperar contraseña
 print(f"3. Probando recuperación de contraseña a: {email}")
 data_rec, error_rec = enviar_recuperacion_contraseña(email)
 if error_rec:
-    print(f"❌ Error en recuperación: {error_rec}")
+    print(f"[ERROR] Error en recuperación: {error_rec}")
 else:
-    print("✅ Envío de recuperación exitoso.")
+    print("[OK] Envío de recuperación exitoso.")
 
 print("-----------------------------------------")

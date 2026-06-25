@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 # Agregar el directorio del backend al path de python
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'servidor-y-logica'))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mickytech.settings')

@@ -1,2 +1,2 @@
 [deploy]
-preDeployCommand = "python servidor-y-logica/manage.py collectstatic --noinput"
+preDeployCommand = "python manage.py collectstatic --noinput"

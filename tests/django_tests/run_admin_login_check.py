@@ -6,7 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Cargar variables de entorno y configurar Django
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'servidor-y-logica'))
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mickytech.settings')
 django.setup()
@@ -27,19 +27,26 @@ def test_login(email, password):
     body = json.dumps(data).encode('utf-8')
     req = urllib.request.Request(url, data=body, headers=headers, method='POST')
     
+    # Reconfigurar salida para evitar errores Unicode en consolas Windows
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
     try:
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode('utf-8'))
-            print(f"✅ ¡Login exitoso para {email}!")
+            print(f"[OK] ¡Login exitoso para {email}!")
             return True, None
     except Exception as e:
-        print(f"❌ Falló el login para {email}: {e}")
+        print(f"[ERROR] Falló el login para {email}: {e}")
         print("\n--- ADMINISTRADORES REGISTRADOS EN LA BASE DE DATOS ---")
         admins = Perfil.objects.filter(rol='admin')
         if admins.exists():
             for admin in admins:
-                print(f"👤 Usuario: {admin.nombre_usuario} | Correo: {admin.email}")
-            print("\n💡 Tip: Modifica la línea final de este archivo con uno de los correos de arriba y su contraseña correcta.")
+                print(f"[ADMIN] Usuario: {admin.nombre_usuario} | Correo: {admin.email}")
+            print("\n[TIP] Tip: Modifica la línea final de este archivo con uno de los correos de arriba y su contraseña correcta.")
         else:
             print("No se encontraron usuarios administradores en la base de datos.")
         print("------------------------------------------------------")

@@ -1,1 +1,2 @@
-web: gunicorn --chdir servidor-y-logica mickytech.wsgi:application
+web: gunicorn mickytech.wsgi:application
+

@@ -8,7 +8,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
-load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env')
+load_dotenv(Path(__file__).resolve().parent.parent / '.env')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -112,8 +112,8 @@ USE_THOUSAND_SEPARATOR = True
 # Archivos estáticos
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-if os.path.exists(BASE_DIR.parent / 'interfaz-cliente' / 'dist'):
-    STATICFILES_DIRS.append(BASE_DIR.parent / 'interfaz-cliente' / 'dist')
+if os.path.exists(BASE_DIR / 'interfaz-cliente' / 'dist'):
+    STATICFILES_DIRS.append(BASE_DIR / 'interfaz-cliente' / 'dist')
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -166,7 +166,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR.parent / 'logs' / 'server.log',
+            'filename': BASE_DIR / 'logs' / 'server.log',
             'formatter': 'verbose',
         },
     },
