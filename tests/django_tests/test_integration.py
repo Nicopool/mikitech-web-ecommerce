@@ -379,6 +379,50 @@ class TestTripleLockSecurity(unittest.TestCase):
         self.assertNotIn('usuario_id', request.session)
         self.assertNotIn('rol_usuario', request.session)
 
+    def test_admin_access_admin_panel_successful(self):
+        """
+        ISO 25010: Un administrador registrado con rol correcto puede ingresar exitosamente al panel de control (200 OK).
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from core.admin_views import tablero_administrador
+        from users.models import Perfil
+
+        import uuid
+        # Crear perfil admin de prueba
+        admin_uuid = str(uuid.uuid4())
+        perfil_admin, _ = Perfil.objects.get_or_create(
+            id=admin_uuid,
+            defaults={
+                'nombre_completo': 'Admin Test',
+                'nombre_usuario': f'admin_test_{uuid.uuid4().hex[:6]}',
+                'rol': 'admin',
+                'esta_activo': True
+            }
+        )
+
+        try:
+            rf = RequestFactory()
+            request = rf.get('/admin-panel/')
+            
+            # Sesión
+            middleware = SessionMiddleware(get_response=lambda r: None)
+            middleware.process_request(request)
+            request.session['usuario_id'] = admin_uuid
+            request.session['rol_usuario'] = 'admin'
+            request.session['pasarela_administrador_superada'] = True
+            request.session.save()
+
+            # Mensajes
+            request._messages = FallbackStorage(request)
+
+            response = tablero_administrador(request)
+            self.assertEqual(response.status_code, 200)
+        finally:
+            # Limpiar
+            Perfil.objects.filter(id=admin_uuid).delete()
+
     def test_repartidor_session_flushed_on_navigating_away(self):
         """
         RBAC & Aislamiento Estricto: Si un repartidor intenta acceder a una ruta de cliente 
