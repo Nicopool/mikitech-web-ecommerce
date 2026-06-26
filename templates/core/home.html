@@ -18,19 +18,19 @@
     font-size: 1.3rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #475569;
+    color: #94A3B8;
     text-decoration: none;
     padding: 1rem 2.2rem;
-    border: 1px solid #E2E8F0;
-    background: #F8FAFC;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #111827;
     border-radius: 50px;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .cat-btn:hover {
-    color: #0F172A;
-    background: #F1F5F9;
-    border-color: #CBD5E1;
+    color: #FFFFFF;
+    background: #1E293B;
+    border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
   }
   
@@ -74,7 +74,7 @@
     {% include 'components/_carousel.html' with carousel_id='home' %}
   </div>
 
-  <div style="background-color: #FFFFFF; color: #0F172A; padding-top: 3rem; padding-bottom: 4rem; position: relative; z-index: 10; border-top: 1px solid #E2E8F0;">
+  <div style="background-color: #0A0F1E; color: #FFFFFF; padding-top: 3rem; padding-bottom: 4rem; position: relative; z-index: 10; border-top: 1px solid #1E293B;">
   <!-- CATEGORY FILTERS -->
   <nav class="cat-nav">
     <a href="{% url 'products:list' %}" class="cat-btn active">Todos los productos</a>

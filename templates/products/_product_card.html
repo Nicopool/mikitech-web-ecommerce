@@ -40,7 +40,7 @@
         {{ product.precio|currency_cop }}
       </div>
       <div style="display:flex; align-items:baseline; gap:0.8rem; flex-wrap:wrap;">
-        <span style="font-family: 'Outfit', sans-serif; font-size:2rem; font-weight:800; color:#0284C7;">
+        <span class="wix-p-price">
           {{ product.precio_con_descuento|currency_cop }}
         </span>
         <span style="font-family: 'Outfit', sans-serif; font-size:1rem; font-weight:800; color:#EF4444; text-transform: uppercase; letter-spacing: 0.5px;">Oferta</span>
@@ -48,7 +48,7 @@
     </div>
     {% else %}
     <div style="margin-bottom:0.8rem; display: flex; flex-direction: column; justify-content: flex-end; flex-grow: 1;">
-      <div class="wix-p-price" style="font-family: 'Outfit', sans-serif; font-size: 2rem; color: #0284C7; font-weight:800; margin: 0;">
+      <div class="wix-p-price">
         {{ product.precio|currency_cop }}
       </div>
     </div>

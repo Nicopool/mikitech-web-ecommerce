@@ -368,24 +368,24 @@
     .footer-social i:hover { opacity: 0.7; transform: scale(1.1); }
     
     /* ═══════════════════════════════════════════
-       PRODUCT CARD REDESIGN (PREMIUM LIGHT THEME)
+       PRODUCT CARD REDESIGN (PREMIUM DARK TECH THEME)
        ═══════════════════════════════════════════ */
     .wix-product {
-      background: #FFFFFF;
-      border: 1px solid #E2E8F0;
+      background: #1E293B;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
       position: relative;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
     
     .wix-product:hover {
       transform: translateY(-5px);
       border-color: #38BDF8;
-      box-shadow: 0 12px 30px rgba(2, 132, 199, 0.12);
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.15);
     }
     
     .wix-img-wrapper {
@@ -393,9 +393,9 @@
       position: relative;
       aspect-ratio: 1/1;
       overflow: hidden;
-      background: #F8FAFC;
+      background: #111827;
       padding: 1.5rem;
-      border-bottom: 1px solid #E2E8F0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
     .wix-img-wrapper img {
@@ -413,9 +413,9 @@
       position: absolute;
       top: 1.5rem;
       left: 1.5rem;
-      background: rgba(2, 132, 199, 0.08);
-      color: #0284C7;
-      border: 1px solid rgba(2, 132, 199, 0.2);
+      background: rgba(56, 189, 248, 0.08);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.2);
       font-size: 1.05rem;
       padding: 0.4rem 1rem;
       font-weight: 700;
@@ -429,8 +429,6 @@
       padding: 2rem;
       flex-grow: 1;
       display: flex;
-      flex-grow: 1;
-      display: flex;
       flex-direction: column;
     }
     
@@ -438,7 +436,7 @@
       font-family: 'Outfit', sans-serif;
       font-size: 1.45rem;
       font-weight: 600;
-      color: #0F172A;
+      color: #FFFFFF;
       margin-bottom: 1rem;
       text-decoration: none;
       flex-grow: 1;
@@ -448,7 +446,15 @@
       transition: color 0.2s;
     }
     .wix-p-title:hover {
-      color: #0284C7;
+      color: #38BDF8;
+    }
+
+    .wix-p-price {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #38BDF8;
+      margin: 0;
     }
     
     .p-actions {
@@ -497,14 +503,14 @@
     }
     
     .btn-view {
-      background: #F1F5F9;
-      color: #475569;
-      border: 1px solid #E2E8F0;
+      background: #111827;
+      color: #94A3B8;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .btn-view:hover {
-      background: #E2E8F0;
-      color: #0F172A;
-      border-color: #CBD5E1;
+      background: #1E293B;
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.2);
       transform: translateY(-1px);
     }
     
