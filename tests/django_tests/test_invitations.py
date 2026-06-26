@@ -118,8 +118,8 @@ class TestAdminInvitations(unittest.TestCase):
         response = self.client.get('/admin-panel/registro/')
         self.assertEqual(response.status_code, 404)
 
-    def test_create_invitation_success(self):
-        """Verifica que un superadmin pueda invitar a un nuevo admin y se guarden sus datos."""
+    def test_create_invitation_disabled(self):
+        """Verifica que la creación/invitación de administradores esté inhabilitada (retorna 404)."""
         post_data = {
             'email': self.invite_email,
             'nombre_completo': 'Pedro Perez',
@@ -134,26 +134,9 @@ class TestAdminInvitations(unittest.TestCase):
             permissions=['gestionar_usuarios']
         )
         
-        response = crear_invitacion_admin(request)
-        
-        # Debe redirigir al listado de invitaciones
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/admin-panel/invitaciones/')
-        
-        # Validar base de datos
-        inv = InvitacionAdmin.objects.filter(email=self.invite_email).first()
-        self.assertIsNotNone(inv)
-        self.assertEqual(inv.estado, 'pendiente')
-        self.assertEqual(inv.nombre_completo, 'Pedro Perez')
-        self.assertTrue(inv.usuario_generado.startswith('admin_pedrop'))
-        
-        # Validar perfil asociado
-        perfil_invitado = Perfil.objects.filter(invitacion=inv).first()
-        self.assertIsNotNone(perfil_invitado)
-        self.assertEqual(perfil_invitado.rol, 'admin')
-        self.assertEqual(perfil_invitado.rol_rbac.codigo, 'admin')
-        self.assertFalse(perfil_invitado.password_cambiada)
-        self.assertTrue(perfil_invitado.esta_activo)
+        from django.http import Http404
+        with self.assertRaises(Http404):
+            crear_invitacion_admin(request)
 
     def test_forced_password_change_middleware(self):
         """Verifica que el middleware obligue a cambiar la contraseña a un administrador invitado."""

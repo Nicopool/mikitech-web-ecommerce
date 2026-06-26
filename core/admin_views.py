@@ -1218,6 +1218,9 @@ def gestion_invitaciones_admin(petición):
 @requiere_permiso('gestionar_usuarios')
 def crear_invitacion_admin(petición):
     """Crea una nueva invitación y registra al administrador temporalmente."""
+    from django.http import Http404
+    raise Http404("La creación de administradores ha sido deshabilitada.")
+
     if petición.method == 'POST':
         email = petición.POST.get('email', '').strip()
         nombre_completo = petición.POST.get('nombre_completo', '').strip()
