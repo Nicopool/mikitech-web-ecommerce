@@ -10,7 +10,7 @@
 
   /* ═══ AUTH LAYOUT SPLIT SCREEN ═══ */
   .auth-wrap {
-    min-height: calc(100vh - 8rem);
+    min-height: 100vh;
     display: grid;
     grid-template-columns: 1fr;
     align-items: stretch;
@@ -133,7 +133,7 @@
 
   /* ═══ RESPONSIVE ═══ */
   @media (min-width: 1024px) {
-    .auth-wrap { grid-template-columns: 1fr 1fr; min-height: calc(100vh - 8rem); }
+    .auth-wrap { grid-template-columns: 1fr 1fr; min-height: 100vh; }
     .auth-left { display: block; }
     .auth-right { padding: 6rem 7rem; order: 1; }
   }

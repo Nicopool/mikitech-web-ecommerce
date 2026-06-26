@@ -81,6 +81,7 @@ def login_administrador(petición):
                 'error': 'Debes aceptar los Términos y Condiciones.',
                 'correo': correo,
                 'titulo_pagina': 'Login Administrador — MIKITECH',
+                'sin_cabecera_pie': True,
             })
 
         datos, error = iniciar_sesion_usuario(correo, clave)
@@ -90,6 +91,7 @@ def login_administrador(petición):
                 'error': f'Credenciales incorrectas: {error}',
                 'correo': correo,
                 'titulo_pagina': 'Login Administrador — MIKITECH',
+                'sin_cabecera_pie': True,
             })
 
         id_usuario = datos.get('user', {}).get('id')
@@ -100,6 +102,7 @@ def login_administrador(petición):
                     'error': 'Acceso denegado: Este usuario no tiene permisos de administrador.',
                     'correo': correo,
                     'titulo_pagina': 'Login Administrador — MIKITECH',
+                    'sin_cabecera_pie': True,
                 })
             petición.session['usuario_id'] = id_usuario
             petición.session['token_acceso'] = datos.get('access_token')
@@ -139,10 +142,12 @@ def login_administrador(petición):
                     'error': 'Acceso denegado: Tu usuario no tiene el rol de administrador asignado.',
                     'correo': correo,
                     'titulo_pagina': 'Login Administrador — MIKITECH',
+                    'sin_cabecera_pie': True,
                 })
 
     return render(petición, 'admin_panel/login.html', {
         'titulo_pagina': 'Login Administrador — MIKITECH',
+        'sin_cabecera_pie': True,
     })
 
 

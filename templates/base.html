@@ -654,6 +654,7 @@
 </head>
 <body>
 
+  {% if not sin_cabecera_pie %}
   <!-- NAVBAR -->
   <nav class="nav-wix">
     <a href="{% url 'core:home' %}" class="nav-logo" style="display: flex; align-items: center; text-decoration: none; height: auto;">
@@ -799,12 +800,14 @@
       <a href="{% url 'core:cart' %}" class="cd-btn">Ir al Pago</a>
     </div>
   </div>
+  {% endif %}
 
   <!-- CONTENT -->
   <main>
     {% block content %}{% endblock %}
   </main>
 
+  {% if not sin_cabecera_pie %}
   <!-- FOOTER -->
   <footer class="miki-footer">
     <div class="footer-grid">
@@ -812,7 +815,7 @@
         <a href="{% url 'core:home' %}" style="display:block; margin-bottom:2.5rem; font-family:'Helvetica', Arial, sans-serif; font-size:2.4rem; color:#FFF; font-weight:800; letter-spacing:2px; text-decoration:none;">
           MIKITECH
         </a>
-        <p>Expertos en hardware de alta gama. Ofrecemos lo último en tecnología de computación, optimizando el rendimiento para gamers y profesionales exigentes.</p>
+        <p>Expertos en hardware de alta gama. Ofrecemos lo último en tecnología de computación, optimizando el rendimiento para gamers and profesionales exigentes.</p>
         <div class="footer-social">
           <i data-lucide="globe"></i>
           <i data-lucide="at-sign"></i>
@@ -860,6 +863,7 @@
 
     </div>
   </footer>
+  {% endif %}
   <!-- SWEETALERT2 GLOBAL LOGIC -->
   <script>
     const Toast = Swal.mixin({
