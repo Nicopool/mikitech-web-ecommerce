@@ -9,13 +9,23 @@ from .models import Categoria, Producto
 
 def lista_productos(petición):
     """Vista principal del catálogo con búsqueda y filtros."""
+    from django.db.models import Avg
+    from django.utils import timezone
+
     consulta = petición.GET.get('q', '')
     id_categoría = petición.GET.get('categoria', '')
     precio_min = petición.GET.get('precio_min', '')
     precio_max = petición.GET.get('precio_max', '')
+    marcas_seleccionadas = petición.GET.getlist('marca')
+    calificacion_min = petición.GET.get('calificacion', '')
+    solo_stock = petición.GET.get('stock') == 'true'
+    solo_ofertas = petición.GET.get('oferta') == 'true'
     ordenar_por = petición.GET.get('orden', '-creado_el')
 
-    productos = Producto.objects.filter(esta_activo=True).select_related('categoria')
+    # Annotate with Avg rating so we can filter by it in SQL
+    productos = Producto.objects.filter(esta_activo=True).select_related('categoria').annotate(
+        calificacion_promedio_db=Avg('reseñas__calificacion')
+    )
 
     # Búsqueda por texto
     if consulta:
@@ -47,6 +57,30 @@ def lista_productos(petición):
         except ValueError:
             pass
 
+    # Filtrar por marcas
+    if marcas_seleccionadas:
+        marcas_filtradas = [m for m in marcas_seleccionadas if m]
+        if marcas_filtradas:
+            productos = productos.filter(marca__in=marcas_filtradas)
+
+    # Filtrar por calificación mínima
+    if calificacion_min:
+        try:
+            productos = productos.filter(calificacion_promedio_db__gte=float(calificacion_min))
+        except ValueError:
+            pass
+
+    # Filtrar por stock disponible
+    if solo_stock:
+        productos = productos.filter(existencias__gt=0)
+
+    # Filtrar por ofertas activas
+    if solo_ofertas:
+        productos = productos.filter(
+            Q(descuento_porcentaje__gt=0) &
+            (Q(descuento_expira_el__isnull=True) | Q(descuento_expira_el__gt=timezone.now()))
+        )
+
     # Ordenar
     mapeo_orden = {
         'precio_asc': 'precio',
@@ -74,9 +108,49 @@ def lista_productos(petición):
         categorías = list(Categoria.objects.all().order_by('nombre'))
         cache.set('nav_categorias', categorías, 300)
 
+    # Obtener marcas disponibles dinámicamente
+    marcas_disponibles = list(
+        Producto.objects.filter(esta_activo=True)
+        .exclude(marca__isnull=True)
+        .exclude(marca='')
+        .values_list('marca', flat=True)
+        .distinct()
+        .order_by('marca')
+    )
+
+    # Ofertas del día (los 3 productos activos con mayores descuentos)
+    ofertas_del_dia = list(
+        Producto.objects.filter(esta_activo=True, descuento_porcentaje__gt=0)
+        .filter(Q(descuento_expira_el__isnull=True) | Q(descuento_expira_el__gt=timezone.now()))
+        .order_by('-descuento_porcentaje')[:3]
+    )
+
+    # Más vendidos (los 5 productos con más vistas o destacados)
+    mas_vendidos = list(
+        Producto.objects.filter(esta_activo=True).order_by('-conteo_vistas')[:5]
+    )
+
+    # Categoría actual objeto (para breadcrumbs)
+    categoria_actual_obj = None
+    if id_categoría:
+        import uuid
+        try:
+            uuid.UUID(id_categoría)
+            categoria_actual_obj = Categoria.objects.filter(id=id_categoría).first()
+        except ValueError:
+            categoria_actual_obj = Categoria.objects.filter(enlace=id_categoría).first()
+
     contexto = {
         'productos': objetos_pagina,
         'categorias': categorías,
+        'marcas_disponibles': marcas_disponibles,
+        'marcas_seleccionadas': marcas_seleccionadas,
+        'calificacion_min': calificacion_min,
+        'solo_stock': solo_stock,
+        'solo_ofertas': solo_ofertas,
+        'ofertas_del_dia': ofertas_del_dia,
+        'mas_vendidos': mas_vendidos,
+        'categoria_actual_obj': categoria_actual_obj,
         'query': consulta,
         'categoria_actual': id_categoría,
         'precio_min': precio_min,

@@ -1,0 +1,56 @@
+{% load miki_filters %}
+<aside class="widgets-sidebar" aria-label="Sección de ofertas y más vendidos">
+  <!-- Ofertas Especiales -->
+  <div class="widget-card">
+    <h3>🔥 Ofertas del Día</h3>
+    {% for offer in ofertas_del_dia %}
+      <div class="offer-item">
+        {% if offer.url_imagen_principal %}
+          <img src="{{ offer.url_imagen_principal }}" class="offer-img" alt="{{ offer.nombre }}" loading="lazy">
+        {% else %}
+          <div class="offer-img" style="display:flex; align-items:center; justify-content:center; background:#F3F3F3;">
+            <i data-lucide="package" style="width:2.4rem; height:2.4rem; color:#A2A6A6; stroke-width: 1.5;"></i>
+          </div>
+        {% endif %}
+        <div class="offer-info">
+          <a href="{% url 'products:detail' offer.enlace %}" class="offer-name" title="{{ offer.nombre }}">{{ offer.nombre }}</a>
+          <div class="offer-prices">
+            <span class="offer-price">{{ offer.precio_con_descuento|currency_cop }}</span>
+            <span class="offer-old-price">{{ offer.precio|currency_cop }}</span>
+          </div>
+          <div class="offer-timer">
+            <i data-lucide="clock" style="width:1.2rem; height:1.2rem;"></i>
+            <span class="countdown-timer" data-hours="{% if forloop.first %}2{% elif forloop.counter == 2 %}4{% else %}7{% endif %}" data-mins="{% if forloop.first %}15{% elif forloop.counter == 2 %}32{% else %}0{% endif %}">Cargando...</span>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p style="font-size:1.3rem; color:#565959; text-align:center; padding: 1rem 0;">No hay ofertas disponibles hoy.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Más Vendidos -->
+  <div class="widget-card">
+    <h3>⭐ Más Vendidos</h3>
+    <div style="display:flex; flex-direction:column; gap:0.2rem;">
+      {% for top in mas_vendidos %}
+        <div class="top-item">
+          <span class="top-rank">#{{ forloop.counter }}</span>
+          <a href="{% url 'products:detail' top.enlace %}" class="top-name" title="{{ top.nombre }}">{{ top.nombre }}</a>
+        </div>
+      {% empty %}
+        <p style="font-size:1.3rem; color:#565959; text-align:center; padding: 1rem 0;">No se registran visitas aún.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Newsletter -->
+  <div class="widget-card">
+    <h3>📧 Newsletter</h3>
+    <p class="newsletter-desc">Recibe ofertas exclusivas y novedades directamente en tu correo.</p>
+    <form id="newsletter-form" onsubmit="event.preventDefault(); window.toast.exito('¡Gracias por suscribirte!'); document.getElementById('newsletter-email').value='';">
+      <input type="email" id="newsletter-email" placeholder="tu@email.com" class="newsletter-input" required>
+      <button type="submit" class="newsletter-btn">Suscribirse</button>
+    </form>
+  </div>
+</aside>

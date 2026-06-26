@@ -50,6 +50,7 @@
     max-width: 140rem;
     margin: 0 auto 4rem auto;
     padding: 0 1.6rem;
+    transition: all 0.3s ease;
   }
   @media (min-width: 480px) {
     .wix-grid {
@@ -59,11 +60,62 @@
   }
   @media (min-width: 768px) {
     .wix-grid {
-      grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
-      gap: 3rem;
-      padding: 0 4rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+      padding: 0;
       margin-bottom: 6rem;
     }
+  }
+  @media (min-width: 1367px) {
+    .wix-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  @media (min-width: 1921px) {
+    .wix-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  /* GRID TO LIST VIEW TOGGLE STYLES */
+  .wix-grid.view-list-active {
+    grid-template-columns: 1fr !important;
+  }
+  .wix-grid.view-list-active .wix-product {
+    flex-direction: row !important;
+    align-items: stretch !important;
+    height: 18rem;
+  }
+  .wix-grid.view-list-active .wix-img-wrapper {
+    width: 18rem !important;
+    height: 18rem !important;
+    border-bottom: none !important;
+    border-right: 1px solid #F0F2F2 !important;
+    flex-shrink: 0;
+  }
+  .wix-grid.view-list-active .wix-p-info {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 2rem 3rem !important;
+    gap: 2rem;
+  }
+  .wix-grid.view-list-active .product-rating {
+    margin: 0 !important;
+  }
+  .wix-grid.view-list-active .p-actions {
+    height: auto !important;
+    opacity: 1 !important;
+    flex-direction: column !important;
+    margin-top: 0 !important;
+    gap: 0.8rem;
+    width: 16rem;
+  }
+  .wix-grid.view-list-active .btn-wishlist {
+    top: 1.5rem !important;
+    right: 1.5rem !important;
   }
 
   /* PAGINATION REDESIGN */
@@ -102,10 +154,360 @@
     border-radius: 4px;
     border: 1px solid #131921;
   }
+
+  /* LAYOUT FOR DESKTOP (3 COLUMNS) */
+  .store-layout-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  
+  @media (min-width: 1024px) {
+    .store-layout-container {
+      display: grid;
+      grid-template-columns: 260px 1fr 240px;
+      padding: 3rem 4rem;
+      gap: 2.5rem;
+    }
+  }
+
+  /* SIDEBARS RESPONSIVE HIDING */
+  .filters-sidebar {
+    display: none;
+  }
+  .widgets-sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .filters-sidebar {
+      display: block;
+      width: 260px;
+      flex-shrink: 0;
+    }
+    .widgets-sidebar {
+      display: block;
+      width: 240px;
+      flex-shrink: 0;
+    }
+  }
+
+  /* Center Products Column */
+  .products-section {
+    flex: 1;
+    min-width: 0; /* Prevents overflow in flex child */
+  }
+
+  /* LEFT FILTERS SIDEBAR STYLES */
+  .filter-card {
+    background: #FFFFFF;
+    border: 1px solid #D5D9D9;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .filter-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #E7E7E7;
+  }
+  .filter-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  .filter-section h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0F1111;
+    margin-bottom: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .filter-list a {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.35rem;
+    color: #007185;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .filter-list a:hover {
+    color: #C45500;
+    text-decoration: underline;
+  }
+  .filter-list a.active {
+    font-weight: 700;
+    color: #0F1111;
+  }
+  .filter-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.35rem;
+    color: #0F1111;
+    cursor: pointer;
+    line-height: 1.2;
+  }
+  .filter-checkbox-label input[type="checkbox"] {
+    width: 1.6rem;
+    height: 1.6rem;
+    accent-color: #E77600;
+    cursor: pointer;
+  }
+  .filter-checkbox-label input[type="radio"] {
+    width: 1.6rem;
+    height: 1.6rem;
+    accent-color: #E77600;
+    cursor: pointer;
+  }
+  
+  /* Price Inputs */
+  .price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .price-inputs input {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid #D5D9D9;
+    border-radius: 4px;
+    font-size: 1.3rem;
+    font-family: 'Inter', sans-serif;
+    color: #0F1111;
+    outline: none;
+  }
+  .price-inputs input:focus {
+    border-color: #E77600;
+    box-shadow: 0 0 3px rgba(228, 121, 17, 0.5);
+  }
+
+  /* RIGHT WIDGETS SIDEBAR STYLES */
+  .widget-card {
+    background: #FFFFFF;
+    border: 1px solid #D5D9D9;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .widget-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0F1111;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #E7E7E7;
+    padding-bottom: 1rem;
+  }
+  
+  /* Offer Item */
+  .offer-item {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #F3F3F3;
+  }
+  .offer-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .offer-img {
+    width: 6rem;
+    height: 6rem;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid #E2E8F0;
+    flex-shrink: 0;
+  }
+  .offer-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .offer-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #0F1111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  .offer-prices {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.2rem;
+  }
+  .offer-price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #B12704;
+  }
+  .offer-old-price {
+    font-size: 1.15rem;
+    text-decoration: line-through;
+    color: #565959;
+  }
+  .offer-timer {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1.1rem;
+    color: #CC0C39;
+    font-weight: 700;
+    margin-top: 0.4rem;
+  }
+  
+  /* Top Rank Item */
+  .top-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #F3F3F3;
+  }
+  .top-item:last-child {
+    border-bottom: none;
+  }
+  .top-rank {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: #FF9900;
+    width: 2rem;
+    text-align: center;
+  }
+  .top-name {
+    font-size: 1.3rem;
+    color: #0F1111;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .top-name:hover {
+    color: #C45500;
+    text-decoration: underline;
+  }
+
+  /* Newsletter Box */
+  .newsletter-desc {
+    font-size: 1.3rem;
+    color: #565959;
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+  }
+  .newsletter-input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    border: 1px solid #D5D9D9;
+    border-radius: 4px;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .newsletter-input:focus {
+    border-color: #E77600;
+    box-shadow: 0 0 3px rgba(228, 121, 17, 0.5);
+  }
+  .newsletter-btn {
+    width: 100%;
+    padding: 1rem;
+    background: #FFD814;
+    color: #0F1111;
+    border: 1px solid #FCD200;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(213,217,217,.5);
+    transition: all 0.2s;
+  }
+  .newsletter-btn:hover {
+    background: #F7CA00;
+    border-color: #F2C200;
+  }
+  
+  /* Filter Submit/Clear Buttons */
+  .filter-btn-apply {
+    width: 100%;
+    padding: 1rem;
+    background: #FFD814;
+    color: #0F1111;
+    border: 1px solid #FCD200;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(213,217,217,.5);
+    transition: all 0.2s;
+    margin-top: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+  .filter-btn-apply:hover {
+    background: #F7CA00;
+    border-color: #F2C200;
+  }
+  .filter-btn-clear {
+    width: 100%;
+    padding: 0.8rem;
+    background: #FFFFFF;
+    color: #0F1111;
+    border: 1px solid #D5D9D9;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    margin-top: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .filter-btn-clear:hover {
+    background: #F7FAFA;
+    border-color: #D5D9D9;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
+
+  <!-- BREADCRUMBS -->
+  <div class="breadcrumbs">
+    <a href="{% url 'core:home' %}">Inicio</a>
+    <i data-lucide="chevron-right" style="width: 1.2rem; height: 1.2rem; color: #888;"></i>
+    <a href="{% url 'products:list' %}">Tienda</a>
+    {% if categoria_actual_obj %}
+      <i data-lucide="chevron-right" style="width: 1.2rem; height: 1.2rem; color: #888;"></i>
+      <span>{{ categoria_actual_obj.nombre }}</span>
+    {% endif %}
+  </div>
 
   <!-- STORE CAROUSEL -->
   <div style="height: 35vh; min-height: 35rem; margin-bottom: 0;">
@@ -113,40 +515,172 @@
   </div>
 
   <div style="background-color: #EAEDED; color: #0F1111; padding-top: 3rem; padding-bottom: 4rem; position: relative; z-index: 10; border-top: 1px solid #D5D9D9;">
-  <!-- CATEGORY FILTERS -->
-  <nav class="cat-nav">
-    <a href="{% url 'products:list' %}" class="cat-btn {% if not categoria_actual %}active{% endif %}">Todos los productos</a>
-    {% for cat in categorias %}
-      <a href="?categoria={{ cat.id }}" class="cat-btn {% if categoria_actual == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.nombre }}</a>
-    {% endfor %}
-  </nav>
+  
+  <div class="store-layout-container">
+    
+    <!-- LEFT COLUMN: FILTERS (DESKTOP SIDEBAR) -->
+    {% include 'products/_filters_sidebar.html' %}
 
-  <!-- PRODUCTS GRID -->
-  <div class="wix-grid">
-    {% for producto in productos %}
-      {% include 'products/_product_card.html' with product=producto %}
-    {% empty %}
-    <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
-      <i data-lucide="search-x" style="width: 5rem; height: 5rem; color: #475569; margin-bottom: 2rem;"></i>
-      <p style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; color: #64748B;">No se encontraron productos en esta categoría.</p>
+    <!-- CENTER COLUMN: PRODUCTS AND NAVIGATION -->
+    <div class="products-section">
+      <!-- CATEGORY CHIPS (RESPONSIVE CHIPS IN MOBILE) -->
+      <nav class="cat-nav">
+        <a href="{% url 'products:list' %}{% if query %}?q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="cat-btn {% if not categoria_actual %}active{% endif %}">Todos los productos</a>
+        {% for cat in categorias %}
+          <a href="?categoria={{ cat.id }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="cat-btn {% if categoria_actual == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.nombre }}</a>
+        {% endfor %}
+      </nav>
+
+      <!-- PRODUCTS TOOLBAR (SORT & GRID/LIST TOGGLE) -->
+      <div class="products-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1.2rem; background:#FFFFFF; padding:1.5rem 2rem; border-radius:8px; border:1px solid #D5D9D9;">
+        <h2 style="font-family:'Outfit', sans-serif; font-size:1.8rem; font-weight:700; color:#0F1111; margin:0;">
+          {% if categoria_actual_obj %}{{ categoria_actual_obj.nombre }}{% else %}Todos los productos{% endif %}
+        </h2>
+        <div style="display:flex; align-items:center; gap:1.6rem;">
+          <span style="font-size:1.35rem; color:#565959; font-family:'Inter', sans-serif;">{{ productos.paginator.count }} productos</span>
+          
+          <select class="sort-select" onchange="updateSort(this.value)" style="padding:0.6rem 1.2rem; border:1px solid #D5D9D9; border-radius:4px; font-size:1.35rem; font-family:'Inter', sans-serif; color:#0F1111; background:#FFFFFF; outline:none; cursor:pointer;">
+            <option value="-creado_el" {% if orden == '-creado_el' %}selected{% endif %}>Relevancia / Nuevos</option>
+            <option value="precio_asc" {% if orden == 'precio_asc' %}selected{% endif %}>Precio: de menor a mayor</option>
+            <option value="precio_desc" {% if orden == 'precio_desc' %}selected{% endif %}>Precio: de mayor a menor</option>
+            <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre: A-Z</option>
+          </select>
+          
+          <div style="display:flex; gap:0.4rem;">
+            <button onclick="toggleGridView('grid')" id="btn-view-grid" style="padding:0.6rem 1rem; background:#F0F2F2; border:1px solid #D5D9D9; border-radius:4px; cursor:pointer; font-size:1.5rem;" class="active">▦</button>
+            <button onclick="toggleGridView('list')" id="btn-view-list" style="padding:0.6rem 1rem; background:#FFFFFF; border:1px solid #D5D9D9; border-radius:4px; cursor:pointer; font-size:1.5rem;">☰</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS GRID -->
+      <div class="wix-grid">
+        {% for producto in productos %}
+          {% include 'products/_product_card.html' with product=producto %}
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
+          <i data-lucide="search-x" style="width: 5rem; height: 5rem; color: #475569; margin-bottom: 2rem;"></i>
+          <p style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; color: #64748B;">No se encontraron productos en esta categoría.</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- PAGINATION -->
+      {% if productos.paginator.num_pages > 1 %}
+      <nav class="pag-nav">
+        {% if productos.has_previous %}
+          <a href="?pagina={{ productos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if precio_min %}&precio_min={{ precio_min }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="pag-link">&laquo;</a>
+        {% endif %}
+        
+        <span class="pag-current">{{ productos.number }} / {{ productos.paginator.num_pages }}</span>
+        
+        {% if productos.has_next %}
+          <a href="?pagina={{ productos.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if precio_min %}&precio_min={{ precio_min }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="pag-link">&raquo;</a>
+        {% endif %}
+      </nav>
+      {% endif %}
     </div>
-    {% endfor %}
-  </div>
 
-  <!-- PAGINATION -->
-  {% if productos.paginator.num_pages > 1 %}
-  <nav class="pag-nav">
-    {% if productos.has_previous %}
-      <a href="?pagina={{ productos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if precio_min %}&precio_min={{ precio_min }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="pag-link">&laquo;</a>
-    {% endif %}
-    
-    <span class="pag-current">{{ productos.number }} / {{ productos.paginator.num_pages }}</span>
-    
-    {% if productos.has_next %}
-      <a href="?pagina={{ productos.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual }}{% endif %}{% if precio_min %}&precio_min={{ precio_min }}{% endif %}{% if precio_max %}&precio_max={{ precio_max }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="pag-link">&raquo;</a>
-    {% endif %}
-  </nav>
-  {% endif %}
+    <!-- RIGHT COLUMN: WIDGETS (DESKTOP SIDEBAR) -->
+    {% include 'products/_widgets_sidebar.html' %}
+
+  </div>
   </div>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+  // Dynamic Sorting
+  function updateSort(value) {
+    const form = document.getElementById('desktop-filter-form');
+    if (form) {
+      let ordenInput = form.querySelector('input[name="orden"]');
+      if (!ordenInput) {
+        ordenInput = document.createElement('input');
+        ordenInput.type = 'hidden';
+        ordenInput.name = 'orden';
+        form.appendChild(ordenInput);
+      }
+      ordenInput.value = value;
+      form.submit();
+    } else {
+      const url = new URL(window.location.href);
+      url.searchParams.set('orden', value);
+      window.location.href = url.toString();
+    }
+  }
+
+  // Grid/List Layout Toggle
+  function toggleGridView(view) {
+    const grid = document.querySelector('.wix-grid');
+    const btnGrid = document.getElementById('btn-view-grid');
+    const btnList = document.getElementById('btn-view-list');
+    
+    if (view === 'list') {
+      grid.classList.add('view-list-active');
+      btnList.style.background = '#F0F2F2';
+      btnList.classList.add('active');
+      btnGrid.style.background = '#FFFFFF';
+      btnGrid.classList.remove('active');
+    } else {
+      grid.classList.remove('view-list-active');
+      btnGrid.style.background = '#F0F2F2';
+      btnGrid.classList.add('active');
+      btnList.style.background = '#FFFFFF';
+      btnList.classList.remove('active');
+    }
+  }
+
+  // Wishlist Toggle with visual feedback
+  function toggleWishlist(productId, btn, event) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    const icon = btn.querySelector('svg');
+    if (icon) {
+      const isFilled = icon.style.fill === 'rgb(239, 68, 68)' || icon.getAttribute('fill') === '#EF4444';
+      if (isFilled) {
+        icon.setAttribute('fill', 'none');
+        icon.style.fill = 'none';
+        if (window.toast) window.toast.info("Removido de la lista de deseos");
+      } else {
+        icon.setAttribute('fill', '#EF4444');
+        icon.style.fill = '#EF4444';
+        if (window.toast) window.toast.exito("Añadido a la lista de deseos");
+      }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    // Simulated live countdown timer for offers in widget
+    const timers = document.querySelectorAll('.countdown-timer');
+    timers.forEach(timer => {
+      let hours = parseInt(timer.getAttribute('data-hours')) || 3;
+      let minutes = parseInt(timer.getAttribute('data-mins')) || 45;
+      let seconds = 0;
+
+      const interval = setInterval(() => {
+        if (seconds === 0) {
+          if (minutes === 0) {
+            if (hours === 0) {
+              clearInterval(interval);
+              timer.textContent = "Terminada";
+              return;
+            }
+            hours--;
+            minutes = 59;
+          } else {
+            minutes--;
+          }
+          seconds = 59;
+        } else {
+          seconds--;
+        }
+
+        timer.textContent = `${hours}h ${minutes}m ${seconds}s`;
+      }, 1000);
+    });
+  });
+</script>
+{% endblock %}

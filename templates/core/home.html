@@ -59,10 +59,20 @@
   }
   @media (min-width: 768px) {
     .wix-grid {
-      grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
-      gap: 3rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
       padding: 0 4rem;
       margin-bottom: 6rem;
+    }
+  }
+  @media (min-width: 1367px) {
+    .wix-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  @media (min-width: 1921px) {
+    .wix-grid {
+      grid-template-columns: repeat(5, 1fr);
     }
   }
 </style>

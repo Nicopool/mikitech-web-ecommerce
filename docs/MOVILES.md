@@ -1,457 +1,689 @@
-markdown
+🔍 ANÁLISIS DE LA VISTA ACTUAL
+Problemas identificados:
+❌ Falta de jerarquía visual - Todo parece igual, no hay distinción clara entre elementos
 
-# PROMPT PARA ANTIGRAVITY - MEJORA DE UX MÓVIL Y DISEÑO INTUITIVO PARA ECOMMERCE
+❌ Texto pequeño en móvil - Los precios y descripciones son difíciles de leer
 
-## CONTEXTO ACTUAL
+❌ Espaciado insuficiente - Los productos están muy juntos, se siente apretado
 
-Mi aplicación es un **ecommerce** que actualmente tiene problemas de usabilidad en dispositivos móviles:
+❌ Botones pequeños - "DETALLES" y "AGREGAR" son difíciles de tocar en móvil
 
-### Problemas identificados
+❌ Sin filtros visibles - No hay forma de ordenar o filtrar productos
 
-1. **Letra demasiado pequeña** en móviles (texto ilegible sin hacer zoom)
-2. **Diseño no responsive** (elementos se desbordan o se superponen)
-3. **Navegación confusa** (usuarios no encuentran lo que buscan)
-4. **Botones muy pequeños** (difíciles de tocar en pantallas táctiles)
-5. **Checkout complejo** (abandono de carrito alto en móviles)
-6. **Tiempos de carga lentos** en redes móviles
-7. **Falta de jerarquía visual** (todo parece igual de importante)
-8. **Formularios difíciles** de completar en móvil
+❌ Categorías poco claras - "Tarjetas Gráficas" se repite sin diferenciación
 
-### Datos actuales
+❌ Falta de imágenes - Solo texto, ningún producto tiene foto
 
-- **Tasa de conversión móvil:** [X]% (vs [Y]% en desktop)
-- **Tasa de abandono de carrito:** [X]%
-- **Usuarios móviles:** [X]% del total
-- **Tiempo promedio de carga:** [X] segundos en móvil
+❌ Sin precio original tachado - No se ve el descuento claramente en todos
 
-### Tecnologías
+❌ Navegación superior confusa - "Inicio Tienda Contacto" es muy básico
 
-- Frontend: [React/Vue/Angular + CSS framework]
-- UI Library: [Material-UI/Tailwind/Bootstrap/etc.]
-- Estado: [Redux/Zustand/Context/etc.]
-- Responsive actual: [Media queries / CSS Grid / Flexbox]
+❌ Sin carrito visible - No se ve el contador del carrito
 
-## OBJETIVO PRINCIPAL
+🎨 RECOMENDACIONES DE MEJORA
 
-Necesito **rediseñar la experiencia móvil** de mi ecommerce para que sea:
-
-1. **Legible** (texto claro y de tamaño adecuado)
-2. **Intuitiva** (navegación obvia y fluida)
-3. **Rápida** (optimizada para redes móviles)
-4. **Accesible** (para todos los usuarios)
-5. **Conversora** (que aumente las ventas)
-
-## REQUERIMIENTOS ESPECÍFICOS
-
-### 1. TIPOGRAFÍA Y LEGIBILIDAD
-
-#### Tamaños de fuente recomendados
-
-- **Títulos principales (h1):** 24-28px en móvil (vs 32-36px en desktop)
-- **Subtítulos (h2):** 20-22px en móvil
-- **Texto de cuerpo:** 16-18px en móvil (mínimo 16px para legibilidad)
-- **Textos pequeños (etiquetas, precios):** 14-15px
-- **Botones:** 16-18px (texto visible)
-
-#### Consejos de implementación
-
-```css
-/* Ejemplo de tipografía responsive */
-html {
-  font-size: 16px; /* Base */
-}
-
-@media (max-width: 768px) {
-  html {
-    font-size: 14px; /* Reducir base en móvil */
-  }
-  
-  h1 { font-size: 1.75rem; } /* 28px */
-  h2 { font-size: 1.375rem; } /* 22px */
-  p { font-size: 1rem; } /* 16px */
-  small { font-size: 0.875rem; } /* 14px */
-}
-Requerimientos:
-
-Usar unidades relativas (rem, em) en lugar de px
-
-Contraste mínimo 4.5:1 para texto normal
-
-Contraste mínimo 3:1 para textos grandes
-
-Espaciado entre líneas (line-height): 1.5-1.6 para texto
-
-Ancho de línea máximo: 60-75 caracteres por línea
-
-2. DISEÑO RESPONSIVE Y LAYOUT
-Estructura de grilla:
-text
-[Móvil - 1 columna]  → [Tablet - 2 columnas] → [Desktop - 3-4 columnas]
-Puntos de quiebre (breakpoints):
-Móvil pequeño: < 375px
-
-Móvil: 376px - 768px
-
-Tablet: 769px - 1024px
-
-Desktop: > 1024px
-
-Componentes clave a rediseñar:
-Header/Navbar:
-
-Logo a la izquierda
-
-Buscador expandible (icono de lupa)
-
-Carrito con contador visible
-
-Menú hamburguesa para navegación
-
-Lista de productos:
-
-Cards con imagen destacada
-
-Precio grande y visible
-
-Botón "Agregar al carrito" prominente
-
-Vista en grid (2 columnas en móvil)
-
-Detalle de producto:
-
-Carrusel de imágenes táctil
-
-Descripción colapsable
-
-Selector de cantidad con +/- grande
-
-Botón "Comprar ahora" fijo en la parte inferior
-
-Carrito de compras:
-
-Resumen siempre visible (sticky)
-
-Botones grandes para cantidad
-
-Opción "Seguir comprando" fácil
-
-Total claro y grande
-
-Checkout:
-
-Progreso de pasos visible
-
-Formularios optimizados (autocompletar, validación en tiempo real)
-
-Botón de pago prominente
-
-Opciones de pago con íconos grandes
-
-3. NAVEGACIÓN INTUITIVA
-Arquitectura de navegación:
-text
-[Home]
-  ├── [Categorías]
-  │   ├── [Subcategoría 1]
-  │   ├── [Subcategoría 2]
-  │   └── [Subcategoría 3]
-  ├── [Búsqueda]
-  ├── [Ofertas]
-  ├── [Mi Cuenta]
-  └── [Carrito]
-Elementos de navegación:
-Breadcrumbs (migas de pan) en móvil (simplificados)
-
-Filtros en slide lateral o acordeón
-
-Ordenamiento con selector desplegable
-
-Botón "Volver arriba" (flotante)
-
-Navegación inferior (bottom navigation) con 4-5 íconos
-
-Bottom Navigation (Mobile First):
-text
-[🏠 Home] [🔍 Buscar] [❤️ Favoritos] [🛒 Carrito] [👤 Cuenta]
-4. INTERACCIÓN Y FEEDBACK
-Micro-interacciones:
-Botones: Efecto de presión (scale-down al tocar)
-
-Carga: Skeletons o spinners sutiles
-
-Éxito: Animación de "añadido al carrito" (checkmark)
-
-Error: Mensajes claros y con color distintivo
-
-Desplazamiento: Scroll suave y snap scrolling para secciones
-
-Feedback visual:
+1. JERARQUÍA VISUAL Y TIPOGRAFÍA
+Tamaños de fuente recomendados:
 css
-/* Ejemplo de feedback en botones */
-.button:active {
-  transform: scale(0.95);
-  transition: transform 0.1s;
+/*Mobile First - MIKI TECH */
+:root {
+  --font-xs: 12px;    /* Etiquetas pequeñas */
+  --font-sm: 14px;    /* Detalles, fechas */
+  --font-base: 16px;  /* Texto normal (mínimo para móvil) */
+  --font-lg: 20px;    /* Subtítulos */
+  --font-xl: 24px;    /* Precios importantes */
+  --font-2xl: 28px;   /* Títulos de sección */
+  --font-3xl: 32px;   /* Título principal*/
 }
 
-.button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/*EJEMPLO DE MEJORA */
+.product-name {
+  font-size: var(--font-base); /* 16px - legible*/
+  font-weight: 600;
+  margin-bottom: 4px;
 }
-5. OPTIMIZACIÓN DE RENDIMIENTO MÓVIL
-Técnicas recomendadas:
-Lazy loading de imágenes (cargar solo visibles)
 
-Imágenes WebP con fallback a JPEG/PNG
-
-Caching de recursos estáticos
-
-Code splitting (cargar solo lo necesario)
-
-Precarga de recursos críticos
-
-Minimizar CSS/JS
-
-Usar CDN para assets
-
-Reducir número de peticiones HTTP
-
-Métricas objetivo:
-First Contentful Paint (FCP): < 1.8s
-
-Largest Contentful Paint (LCP): < 2.5s
-
-Time to Interactive (TTI): < 3.8s
-
-Total Blocking Time (TBT): < 200ms
-
-Cumulative Layout Shift (CLS): < 0.1
-
-6. ACCESIBILIDAD MÓVIL
-Checklist de accesibilidad:
-Contraste de color suficiente (4.5:1)
-
-Tamaño de toque mínimo: 44x44px (Apple HIG) o 48x48px (Material Design)
-
-Espaciado entre elementos táctiles: mínimo 8px
-
-Texto redimensionable (sin zoom bloqueado)
-
-Etiquetas ARIA en elementos interactivos
-
-Navegación por teclado (para usuarios con discapacidad)
-
-Descripciones alternativas en imágenes
-
-Formularios con labels asociados
-
-7. CHECKOUT Y CONVERSIÓN
-Optimizaciones para checkout móvil:
-Checkout en 1-2 pasos (máximo 3)
-
-Autocompletar direcciones (Google Maps API)
-
-Guardar datos de pago seguros
-
-Pago con huella digital (Face ID / Touch ID)
-
-Botón de pago prominente y en color contrastante
-
-Indicador de progreso (paso 1 de 3)
-
-Resumen del pedido siempre visible
-
-Opciones de pago con íconos grandes
-
-Reducción de fricción:
-Eliminar campos innecesarios
-
-Usar inputs con tipo específico (type="email", type="tel")
-
-Validación en tiempo real (no al enviar)
-
-Recordar información del usuario (si está autenticado)
-
-Ofrecer "Pago como invitado"
-
-8. USABILIDAD Y PRUEBAS
-Pruebas sugeridas:
-Test A/B de diferentes layouts
-
-Heatmaps para ver dónde hacen clic
-
-Grabaciones de sesiones para ver problemas reales
-
-Pruebas de usuario con 5-10 personas
-
-Análisis de funnel (dónde abandonan)
-
-Métricas a mejorar:
-Tasa de conversión móvil (actual: X%, objetivo: +20%)
-
-Tasa de abandono de carrito (actual: X%, objetivo: -15%)
-
-Tiempo en página (actual: X min, objetivo: +30%)
-
-Tasa de rebote (actual: X%, objetivo: -10%)
-
-PREGUNTAS ESPECÍFICAS QUE QUIERO RESPONDIDAS
-¿Cuál es el tamaño de fuente óptimo para mi tipo de ecommerce?
-
-¿Debo usar un diseño de 1 o 2 columnas en móvil para productos?
-
-¿Qué elementos deberían estar fijos (sticky) en móvil?
-
-¿Cómo simplificar el checkout sin perder información necesaria?
-
-¿Qué micro-interacciones mejoran más la experiencia de compra?
-
-¿Cómo manejar la navegación por categorías en móvil?
-
-¿Qué hacer cuando el usuario tiene mala conexión?
-
-¿Cómo implementar un bottom navigation efectivo?
-
-¿Cuál es la mejor posición para el botón "Agregar al carrito"?
-
-¿Cómo reducir el abandono de carrito en móvil?
-
-ENTREGABLES ESPERADOS
-Quiero que me entregues:
-
-1. Guía de Estilos Móvil
-Paleta de colores optimizada para móvil
-
-Tamaños de fuente (h1, h2, h3, body, small)
-
-Espaciados y márgenes (padding, margin)
-
-Tamaños de botones y elementos táctiles
-
-Estilos para estados (hover, active, disabled, focus)
-
-2. Wireframes / Mockups (en texto o ASCII)
-Layout de Home en móvil
-
-Layout de lista de productos
-
-Layout de detalle de producto
-
-Layout de carrito
-
-Layout de checkout (paso a paso)
-
-3. Código de Implementación
-CSS/SCSS para tipografía responsive
-
-Componentes responsivos (cards, botones, formularios)
-
-Sistema de grilla (grid/flexbox)
-
-Animaciones y transiciones
-
-Componente de bottom navigation
-
-4. Estrategia de Testing
-Cómo probar en diferentes dispositivos
-
-Herramientas recomendadas (BrowserStack, LambdaTest)
-
-Checklist de QA móvil
-
-5. Plan de Implementación
-Orden de implementación (qué cambiar primero)
-
-Estimación de tiempo
-
-Recursos necesarios
-
-Riesgos y mitigaciones
-
-EJEMPLOS DE MEJORES PRÁCTICAS
-Ejemplo 1: Card de Producto (Móvil)
+.product-price {
+  font-size: var(--font-xl); /*24px - visible*/
+  font-weight: 700;
+  color: #2D3748;
+}
+
+.product-price-old {
+  font-size: var(--font-sm); /*14px*/
+  color: #A0AEC0;
+  text-decoration: line-through;
+  margin-left: 8px;
+}
+Estructura jerárquica sugerida:
+text
+[Logo] MIKI TECH (más grande y visible)
+  ↓
+[Barra de búsqueda] (con lupa, expansible)
+  ↓
+[Categorías] (scroll horizontal con chips)
+  ↓
+[Título de sección] "Tarjetas Gráficas" (tamaño grande)
+  ↓
+[Grid de productos] (2 columnas en móvil)
+  ↓
+[Card de producto] (imagen + nombre + precio + botón)
+2. DISEÑO DE CARDS DE PRODUCTO (MOBILE-FIRST)
+Versión actual (mejorable):
+text
+┌─────────────────┐
+│ STOCK DISPONIBLE │ (muy pequeño)
+│ Curiosity3       │
+│ $3.000.000       │
+│ $2.700.000 OFERTA│
+└─────────────────┘
+Versión mejorada:
 html
-<!-- Mobile Product Card -->
+<!-- Card de Producto Rediseñada -->
 <div class="product-card">
+  <!-- Imagen (placeholder por ahora) -->
   <div class="product-image">
-    <img src="producto.jpg" alt="Nombre producto" loading="lazy">
-    <span class="product-badge">Oferta</span>
+    <img src="producto.jpg" alt="Curiosity3" loading="lazy">
+    <span class="badge-offer">-10%</span>
+    <span class="badge-stock">✅ En Stock</span>
   </div>
+  
+  <!-- Info del producto -->
   <div class="product-info">
-    <h3 class="product-name">Nombre del Producto</h3>
-    <div class="product-rating">⭐⭐⭐⭐ (120)</div>
-    <div class="product-price">
-      <span class="price-current">$99.99</span>
-      <span class="price-original">$129.99</span>
+    <h3 class="product-name">Curiosity3</h3>
+    <div class="product-rating">
+      ⭐⭐⭐⭐☆ (124 reseñas)
     </div>
-    <button class="btn-add-to-cart">Agregar al Carrito</button>
+    <div class="product-price">
+      <span class="price-current">$2.700.000</span>
+      <span class="price-old">$3.000.000</span>
+      <span class="price-discount">-10%</span>
+    </div>
+  </div>
+  
+  <!-- Botones de acción -->
+  <div class="product-actions">
+    <button class="btn-details">Detalles</button>
+    <button class="btn-add">🛒 Agregar</button>
   </div>
 </div>
-Ejemplo 2: Bottom Navigation
+CSS para la card:
+css
+.product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+  margin-bottom: 16px;
+}
+
+.product-card:active {
+  transform: scale(0.98); /*Feedback táctil*/
+}
+
+.product-image {
+  position: relative;
+  background: #F7FAFC;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.badge-offer {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #E53E3E;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-stock {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #48BB78;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.product-info {
+  padding: 12px;
+}
+
+.product-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #2D3748;
+}
+
+.product-rating {
+  font-size: 13px;
+  color: #718096;
+  margin-bottom: 6px;
+}
+
+.product-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.price-current {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2D3748;
+}
+
+.price-old {
+  font-size: 14px;
+  color: #A0AEC0;
+  text-decoration: line-through;
+}
+
+.price-discount {
+  background: #FED7D7;
+  color: #C53030;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.product-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 12px 12px 12px;
+}
+
+.btn-details {
+  padding: 10px;
+  background: #EDF2F7;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4A5568;
+  cursor: pointer;
+}
+
+.btn-add {
+  padding: 10px;
+  background: #3182CE;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.btn-add:active {
+  transform: scale(0.95);
+}
+3. ESTRUCTURA DE PÁGINA (HOME EN MÓVIL)
+Layout sugerido:
+text
+┌──────────────────────────────┐
+│ 🛒 MIKI TECH    🔍  🛍️  👤 │ ← Header con carrito visible
+├──────────────────────────────┤
+│ [Buscar hardware...]         │ ← Barra de búsqueda
+├──────────────────────────────┤
+│ [📱 Todas] [🎮 Gamer] [💼 Pro]│ ← Filtros rápidos (chips)
+├──────────────────────────────┤
+│                              │
+│ Tarjetas Gráficas           │ ← Título de sección (más grande)
+│                              │
+│ ┌─────┐  ┌─────┐          │
+│ │ Img  │  │ Img  │          │ ← Grid 2 columnas
+│ │Nombre │  │Nombre │          │
+│ │$2.7M  │  │$5.2M  │          │
+│ │[➕]   │  │[➕]   │          │
+│ └─────┘  └─────┘          │
+│                              │
+│ ┌─────┐  ┌─────┐          │
+│ │ Img  │  │ Img  │          │
+│ │Nombre │  │Nombre │          │
+│ │$2.8M  │  │$5.4M  │          │
+│ │[➕]   │  │[➕]   │          │
+│ └─────┘  └─────┘          │
+│                              │
+├──────────────────────────────┤
+│ 🏠  🔍  ❤️  🛒  👤        │ ← Bottom Navigation
+└──────────────────────────────┘
+4. NAVEGACIÓN Y FILTROS
+Filtros mejorados (para móvil):
 html
-<!-- Bottom Navigation -->
-<nav class="bottom-nav">
-  <a href="/" class="nav-item active">
-    <svg><!-- Home icon --></svg>
-    <span>Inicio</span>
-  </a>
-  <a href="/search" class="nav-item">
-    <svg><!-- Search icon --></svg>
-    <span>Buscar</span>
-  </a>
-  <a href="/cart" class="nav-item cart-nav">
-    <svg><!-- Cart icon --></svg>
-    <span>Carrito</span>
-    <span class="cart-badge">3</span>
-  </a>
-  <a href="/account" class="nav-item">
-    <svg><!-- Profile icon --></svg>
-    <span>Cuenta</span>
-  </a>
-</nav>
-Ejemplo 3: Formulario de Checkout Optimizado
+<!-- Filtros en chips (scroll horizontal) -->
+<div class="filter-chips">
+  <button class="chip active">Todos</button>
+  <button class="chip">En Stock</button>
+  <button class="chip">Ofertas</button>
+  <button class="chip">NVIDIA</button>
+  <button class="chip">AMD</button>
+  <button class="chip">Menos de $3M</button>
+</div>
+
+<!-- Ordenamiento -->
+<select class="sort-select">
+  <option>Relevancia</option>
+  <option>Precio: menor a mayor</option>
+  <option>Precio: mayor a menor</option>
+  <option>Más vendidos</option>
+</select>
+CSS para chips:
+css
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 0;
+  scrollbar-width: none; /* Ocultar scrollbar en Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+.filter-chips::-webkit-scrollbar {
+  display: none; /*Ocultar scrollbar en Chrome/Safari*/
+}
+
+.chip {
+  padding: 8px 16px;
+  background: #EDF2F7;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip.active {
+  background: #3182CE;
+  color: white;
+}
+5. HEADER MEJORADO
+Versión mejorada:
 html
-<!-- Mobile Checkout -->
-<form class="checkout-form">
-  <div class="form-step active">
-    <h2>Datos de Envío</h2>
-    <input type="text" placeholder="Nombre completo" required>
-    <input type="email" placeholder="Correo electrónico" required>
-    <input type="tel" placeholder="Teléfono" required>
-    <button type="button" class="btn-next">Siguiente →</button>
+<header class="mobile-header">
+  <div class="header-top">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">MIKI TECH</span>
+    </div>
+
+    <div class="header-actions">
+      <button class="search-toggle" aria-label="Buscar">
+        🔍
+      </button>
+      <button class="cart-toggle" aria-label="Carrito">
+        🛍️
+        <span class="cart-badge">3</span> <!-- Contador -->
+      </button>
+      <button class="menu-toggle" aria-label="Menú">
+        ☰
+      </button>
+    </div>
   </div>
   
-  <div class="form-step">
-    <h2>Método de Pago</h2>
-    <!-- Opciones de pago -->
-    <button type="submit" class="btn-pay">Pagar $99.99</button>
+  <!-- Barra de búsqueda (expandible) -->
+  <div class="search-bar">
+    <input type="text" placeholder="Buscar hardware...">
+    <button>🔍</button>
   </div>
-</form>
-NOTAS ADICIONALES
-Presupuesto: [bajo/medio/alto]
+</header>
+CSS para el header:
+css
+.mobile-header {
+  background: white;
+  padding: 12px 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-Tiempo disponible: [X] semanas para implementar
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-Equipo: [X] diseñadores, [X] desarrolladores frontend
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-Restricciones: [mantener compatibilidad con navegadores antiguos, etc.]
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2D3748;
+}
 
-Inspiración: [Apps/ecommerces que te gustan: Amazon, MercadoLibre, etc.]
+.header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
 
-RECURSOS ÚTILES
-Herramientas recomendadas:
-Prototipado: Figma, Adobe XD
+.header-actions button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  position: relative;
+  padding: 4px;
+}
 
-Testing móvil: BrowserStack, LambdaTest, Chrome DevTools
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #E53E3E;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 12px;
+  min-width: 18px;
+  text-align: center;
+}
 
-Analytics: Hotjar, CrazyEgg (heatmaps), Google Analytics
+.search-bar {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
 
-Performance: Lighthouse, PageSpeed Insights, WebPageTest
+.search-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #3182CE;
+}
+
+.search-bar button {
+  padding: 10px 16px;
+  background: #3182CE;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 18px;
+}
+6. BOTTOM NAVIGATION (Navegación inferior)
+html
+<nav class="bottom-nav">
+  <a href="/" class="nav-item active">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Inicio</span>
+  </a>
+  <a href="/search" class="nav-item">
+    <span class="nav-icon">🔍</span>
+    <span class="nav-label">Buscar</span>
+  </a>
+  <a href="/favorites" class="nav-item">
+    <span class="nav-icon">❤️</span>
+    <span class="nav-label">Favoritos</span>
+  </a>
+  <a href="/cart" class="nav-item cart-nav">
+    <span class="nav-icon">🛒</span>
+    <span class="nav-label">Carrito</span>
+    <span class="nav-badge">3</span>
+  </a>
+  <a href="/account" class="nav-item">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">Cuenta</span>
+  </a>
+</nav>
+css
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  border-top: 1px solid #E2E8F0;
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #A0AEC0;
+  font-size: 12px;
+  position: relative;
+  padding: 4px 12px;
+}
+
+.nav-item.active {
+  color: #3182CE;
+}
+
+.nav-icon {
+  font-size: 22px;
+}
+
+.nav-label {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.nav-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #E53E3E;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+}
+7. TÍTULOS Y SECCIONES MEJORADOS
+html
+<!-- Sección de productos -->
+<section class="product-section">
+  <div class="section-header">
+    <h2 class="section-title">🎮 Tarjetas Gráficas</h2>
+    <a href="/category/gpu" class="see-all">Ver todas →</a>
+  </div>
+  
+  <div class="product-grid">
+    <!-- Cards de productos aquí -->
+  </div>
+</section>
+css
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0 12px 0;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2D3748;
+}
+
+.see-all {
+  font-size: 14px;
+  color: #3182CE;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+📊 CHECKLIST DE MEJORAS PRIORIZADAS
+🚨 Prioridad Alta (Hacer ahora):
+Aumentar tamaño de fuente a mínimo 16px para texto
+
+Agrandar botones a mínimo 44px de altura
+
+Agregar imágenes a los productos
+
+Mostrar precio original tachado + descuento visible
+
+Agregar contador de carrito en el header
+
+Mejorar espaciado entre productos (padding/margin)
+
+Agregar feedback visual al tocar botones
+
+⚠️ Prioridad Media (Próximo sprint):
+Implementar grid de 2 columnas para productos
+
+Agregar filtros por categoría y precio
+
+Implementar barra de búsqueda funcional
+
+Agregar bottom navigation con 5 íconos
+
+Mostrar valoraciones de productos (estrellas)
+
+Agregar badges de "Oferta" y "En Stock"
+
+💡 Prioridad Baja (Futuro):
+Agregar carrusel de productos destacados
+
+Implementar historial de navegación
+
+Agregar modo oscuro
+
+Implementar wishlist (lista de deseos)
+
+Agregar comparador de productos
+
+🛠️ RECURSOS Y HERRAMIENTAS
+Para mejorar el diseño:
+Figma - Prototipado rápido
+
+Coolors - Paleta de colores
+
+Google Fonts - Fuentes modernas (ej: Inter, Poppins)
+
+Unsplash - Imágenes de productos placeholder
+
+Para pruebas en móvil:
+Chrome DevTools (modo dispositivo)
+
+BrowserStack - Pruebas en dispositivos reales
+
+Lighthouse - Evaluación de rendimiento
 
 Referencias de diseño:
-Material Design (Google)
+Material Design (Google) - Components
 
-Human Interface Guidelines (Apple)
+Apple HIG - Guía de iOS
 
-NNG Group (estudios de usabilidad)
+Dribbble - Inspiración visual
 
-Baymard Institute (best practices ecommerce)
+Shopify - Referencia de ecommerce
+
+🎯 RESUMEN DE CAMBIOS SUGERIDOS
+Elemento Estado Actual Estado Recomendado
+Tamaño fuente Muy pequeño (<14px) 16-24px según jerarquía
+Botones Pequeños (<40px) 44-48px de altura
+Espaciado Muy apretado Padding de 12-16px
+Imágenes Sin imágenes Con imagen + badges
+Precios Solo precio actual Actual + original + % descuento
+Navegación Solo superior Superior + bottom nav
+Carrito No visible Contador visible siempre
+Categorías Texto plano Chips scroll horizontales
+🔥 BONUS: Código completo de ejemplo
+html
+<!-- Página de ejemplo completa -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIKI TECH - Hardware</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="mobile-header">
+    <!-- ... -->
+  </header>
+  
+  <!-- Filtros -->
+  <div class="filter-chips">
+    <!-- ... -->
+  </div>
+  
+  <!-- Productos -->
+  <section class="product-section">
+    <div class="section-header">
+      <h2>🎮 Tarjetas Gráficas</h2>
+      <a href="#">Ver todas →</a>
+    </div>
+
+    <div class="product-grid">
+      <!-- Card 1 -->
+      <div class="product-card">
+        <div class="product-image">
+          <img src="gpu1.jpg" alt="Curiosity3">
+          <span class="badge-offer">-10%</span>
+          <span class="badge-stock">✅ Stock</span>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Curiosity3</h3>
+          <div class="product-price">
+            <span class="price-current">$2.700.000</span>
+            <span class="price-old">$3.000.000</span>
+          </div>
+        </div>
+        <div class="product-actions">
+          <button class="btn-details">Detalles</button>
+          <button class="btn-add">🛒 Agregar</button>
+        </div>
+      </div>
+      
+      <!-- Más cards... -->
+    </div>
+  </section>
+  
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <!-- ... -->
+  </nav>
+</body>
+</html>

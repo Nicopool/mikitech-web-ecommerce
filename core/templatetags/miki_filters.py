@@ -101,3 +101,23 @@ def fecha_relativa(value):
     except Exception:
         return value
 
+
+@register.filter(name='rango')
+def rango(value):
+    """Retorna un range para iterar en plantillas."""
+    try:
+        # Round the float to nearest integer
+        return range(int(round(float(value))))
+    except (ValueError, TypeError):
+        return range(0)
+
+
+@register.filter(name='restar')
+def restar(value, arg):
+    """Retorna arg - value."""
+    try:
+        return int(arg) - int(value)
+    except (ValueError, TypeError):
+        return 0
+
+

@@ -53,14 +53,13 @@
       align-items: center; 
       padding: 0 4rem; 
       height: 8.5rem; 
-      background-color: #131921; 
-      backdrop-filter: blur(16px); 
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid #232F3E; 
+      background-color: #FFFFFF; 
+      border-bottom: 1px solid #E2E8F0; 
       position: sticky; 
       top: 0; 
       z-index: 100; 
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
     
     .nav-logo { 
@@ -90,7 +89,7 @@
       font-family: 'Outfit', 'Inter', sans-serif; 
       font-size: 1.45rem; 
       font-weight: 600; 
-      color: #FFFFFF; 
+      color: #0F1111; 
       text-decoration: none; 
       padding: 0.8rem 1.2rem; 
       border-radius: 8px;
@@ -98,8 +97,8 @@
       transition: all 0.3s ease; 
     }
     .nav-link-desktop:hover { 
-      color: #FF9900; 
-      background: rgba(255, 255, 255, 0.05);
+      color: #C45500; 
+      background: rgba(0, 0, 0, 0.03);
     }
     .nav-link-desktop::after {
       content: '';
@@ -108,7 +107,7 @@
       left: 1.2rem;
       right: 1.2rem;
       height: 2px;
-      background: #FF9900;
+      background: #C45500;
       transform: scaleX(0);
       transform-origin: right;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -193,14 +192,14 @@
       border-radius: 12px;
       background: transparent;
       border: 1px solid transparent;
-      color: #FFFFFF; 
+      color: #0F1111; 
       cursor: pointer; 
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
     }
     .nav-action-btn:hover { 
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.15);
-      color: #FF9900;
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.05);
+      color: #C45500;
       transform: translateY(-2px); 
     }
     .nav-action-btn svg {
@@ -211,7 +210,7 @@
       transition: stroke 0.3s;
     }
     .nav-action-btn:hover svg {
-      stroke: #FF9900;
+      stroke: #C45500;
     }
     
     /* Notificaciones y avatares */
@@ -224,15 +223,15 @@
       border-radius: 12px;
       background: transparent;
       border: 1px solid transparent;
-      color: #FFFFFF; 
+      color: #0F1111; 
       position: relative; 
       cursor: pointer; 
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
     }
     .nav-notif-btn:hover { 
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.15);
-      color: #FF9900;
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.05);
+      color: #C45500;
       transform: translateY(-2px); 
     }
     .nav-notif-btn svg { 
@@ -243,7 +242,7 @@
       transition: stroke 0.3s;
     }
     .nav-notif-btn:hover svg {
-      stroke: #FF9900;
+      stroke: #C45500;
     }
 
     .notif-item { padding: 1rem; border-bottom: 1px solid #334155; border-radius: 6px; margin-bottom: 0.5rem; transition: background-color 0.2s; }
@@ -313,8 +312,8 @@
     
     /* HAMBURGER */
     .hamburger { width: 4.4rem; height: 4.4rem; display: flex; flex-direction: column; justify-content: center; gap: 0.5rem; cursor: pointer; margin-left: 1rem; padding: 1rem; align-items: center; }
-    .hamburger span { display: block; height: 0.2rem; width: 2.4rem; background: #FFFFFF; border-radius: 0.2rem; transition: all 0.3s; }
-    .hamburger:hover span { background: #FF9900; }
+    .hamburger span { display: block; height: 0.2rem; width: 2.4rem; background: #0F1111; border-radius: 0.2rem; transition: all 0.3s; }
+    .hamburger:hover span { background: #C45500; }
     
     /* DRAWER */
     .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; }
@@ -576,9 +575,8 @@
         overflow: visible;
       }
       .btn-action {
-        height: 3.6rem;
-        font-size: 1.1rem;
-        min-height: 4.4rem; /* touch target */
+        height: 4.4rem;
+        font-size: 1.3rem;
       }
 
       /* ── CARD INFO PADDING ── */
@@ -586,9 +584,10 @@
         padding: 1.4rem;
       }
       .wix-p-title {
-        font-size: 1.3rem;
-        min-height: 3.6rem;
+        font-size: 1.5rem;
+        min-height: 4.2rem;
         margin-bottom: 0.6rem;
+        font-weight: 600;
       }
       .badge-cat {
         font-size: 0.95rem;
@@ -619,13 +618,26 @@
 
       /* ── CATEGORY BUTTONS ── */
       .cat-nav {
+        display: flex;
         gap: 0.8rem;
-        padding: 0 1.6rem;
+        padding: 0 1.6rem 1rem 1.6rem;
         margin-bottom: 2.5rem;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .cat-nav::-webkit-scrollbar {
+        display: none;
       }
       .cat-btn {
-        font-size: 1.1rem;
-        padding: 0.7rem 1.4rem;
+        font-size: 1.2rem;
+        padding: 0.8rem 1.6rem;
+        flex-shrink: 0;
+        min-height: 3.6rem;
+        display: inline-flex;
+        align-items: center;
       }
 
       /* ── CAROUSEL ── */
@@ -725,6 +737,71 @@
         color: #FF9900;
       }
     }
+
+    /* DROPDOWNS & BREADCRUMBS FOR DESKTOP REDESIGN */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #FFFFFF;
+      min-width: 220px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 1rem 0;
+      z-index: 999;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .nav-dropdown:hover .dropdown-content {
+      display: block;
+      transform: translateY(0);
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 1rem 2rem;
+      color: #334155;
+      text-decoration: none;
+      font-size: 1.4rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .dropdown-content a:hover {
+      background: #F8FAFC;
+      color: #C45500;
+      padding-left: 2.4rem;
+    }
+    .breadcrumbs {
+      padding: 1.2rem 4rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      color: #565959;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .breadcrumbs a {
+      color: #007185;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .breadcrumbs a:hover {
+      color: #C45500;
+      text-decoration: underline;
+    }
+    .breadcrumbs span {
+      font-weight: 600;
+      color: #0F1111;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Inyección de Vite para React -->
@@ -743,7 +820,7 @@
   <!-- NAVBAR -->
   <nav class="nav-wix">
     <a href="{% url 'core:home' %}" class="nav-logo" style="display: flex; align-items: center; text-decoration: none; height: auto;">
-      <div style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #FFFFFF; display: flex; align-items: center; gap: 4px;">
+      <div style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #0F1111; display: flex; align-items: center; gap: 4px;">
         <span style="color: #FF9900;">MIKI</span>TECH
       </div>
     </a>
@@ -751,8 +828,48 @@
     <!-- Menu desktop visible en pantallas grandes -->
     <div class="nav-menu-desktop">
       <a href="{% url 'core:home' %}" class="nav-link-desktop">Inicio</a>
-      <a href="{% url 'products:list' %}" class="nav-link-desktop">Tienda</a>
-      <a href="{% url 'core:contact' %}" class="nav-link-desktop">Contacto</a>
+      
+      <!-- Categorías Dropdown -->
+      <div class="nav-dropdown">
+        <a href="{% url 'products:list' %}" class="nav-link-desktop" style="display: flex; align-items: center; gap: 4px;">
+          Categorías <i data-lucide="chevron-down" style="width: 1.4rem; height: 1.4rem;"></i>
+        </a>
+        <div class="dropdown-content">
+          {% for cat in nav_categorias %}
+            <a href="{% url 'products:list' %}?categoria={{ cat.id }}">{{ cat.nombre }}</a>
+          {% empty %}
+            <a href="#">No hay categorías</a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Marcas Dropdown -->
+      <div class="nav-dropdown">
+        <a href="javascript:void(0)" class="nav-link-desktop" style="display: flex; align-items: center; gap: 4px;">
+          Marcas <i data-lucide="chevron-down" style="width: 1.4rem; height: 1.4rem;"></i>
+        </a>
+        <div class="dropdown-content">
+          <a href="{% url 'products:list' %}?marca=NVIDIA">NVIDIA</a>
+          <a href="{% url 'products:list' %}?marca=AMD">AMD</a>
+          <a href="{% url 'products:list' %}?marca=Intel">Intel</a>
+          <a href="{% url 'products:list' %}?marca=MSI">MSI</a>
+          <a href="{% url 'products:list' %}?marca=ASUS">ASUS</a>
+          <a href="{% url 'products:list' %}?marca=Gigabyte">Gigabyte</a>
+        </div>
+      </div>
+
+      <!-- Soporte Dropdown -->
+      <div class="nav-dropdown">
+        <a href="{% url 'core:contact' %}" class="nav-link-desktop" style="display: flex; align-items: center; gap: 4px;">
+          Soporte <i data-lucide="chevron-down" style="width: 1.4rem; height: 1.4rem;"></i>
+        </a>
+        <div class="dropdown-content">
+          <a href="{% url 'core:contact' %}">Contáctanos</a>
+          <a href="#">Preguntas Frecuentes</a>
+          <a href="#">Centro de Ayuda</a>
+          <a href="#">Garantías Miki</a>
+        </div>
+      </div>
     </div>
     
     <div class="nav-right">

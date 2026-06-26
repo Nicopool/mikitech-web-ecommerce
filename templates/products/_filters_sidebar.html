@@ -1,0 +1,94 @@
+<aside class="filters-sidebar" aria-label="Filtros de catálogo">
+  <form method="GET" action="{% url 'products:list' %}" id="desktop-filter-form">
+    {% if query %}
+      <input type="hidden" name="q" value="{{ query }}">
+    {% endif %}
+    {% if orden %}
+      <input type="hidden" name="orden" value="{{ orden }}">
+    {% endif %}
+    {% if categoria_actual %}
+      <input type="hidden" name="categoria" value="{{ categoria_actual }}">
+    {% endif %}
+    
+    <div class="filter-card">
+      <!-- Categorías -->
+      <div class="filter-section">
+        <h3>Categorías</h3>
+        <ul class="filter-list">
+          <li>
+            <a href="{% url 'products:list' %}{% if query %}?q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="{% if not categoria_actual %}active{% endif %}">Todos los productos</a>
+          </li>
+          {% for cat in categorias %}
+            <li>
+              <a href="?categoria={{ cat.id }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}" class="{% if categoria_actual == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.nombre }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Rango de Precio -->
+      <div class="filter-section">
+        <h3>Precio (COP)</h3>
+        <div class="price-inputs">
+          <input type="number" name="precio_min" placeholder="Mín" value="{{ precio_min|default:'' }}" min="0">
+          <span style="color:#565959; font-size:1.4rem;">-</span>
+          <input type="number" name="precio_max" placeholder="Máx" value="{{ precio_max|default:'' }}" min="0">
+        </div>
+      </div>
+
+      <!-- Marcas -->
+      <div class="filter-section">
+        <h3>Marcas</h3>
+        <div style="display:flex; flex-direction:column; gap:0.8rem;">
+          {% for marca_disp in marcas_disponibles %}
+            <label class="filter-checkbox-label">
+              <input type="checkbox" name="marca" value="{{ marca_disp }}" {% if marca_disp in marcas_seleccionadas %}checked{% endif %}>
+              {{ marca_disp }}
+            </label>
+          {% empty %}
+            <p style="font-size:1.2rem; color:#888;">No hay marcas disponibles.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Calificación -->
+      <div class="filter-section">
+        <h3>Calificación</h3>
+        <div style="display:flex; flex-direction:column; gap:0.8rem;">
+          <label class="filter-checkbox-label">
+            <input type="radio" name="calificacion" value="4" {% if calificacion_min == '4' %}checked{% endif %} style="accent-color:#E77600;">
+            ⭐⭐⭐⭐☆ y más (4.0+)
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="radio" name="calificacion" value="3" {% if calificacion_min == '3' %}checked{% endif %} style="accent-color:#E77600;">
+            ⭐⭐⭐☆☆ y más (3.0+)
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="radio" name="calificacion" value="" {% if not calificacion_min %}checked{% endif %} style="accent-color:#E77600;">
+            Cualquier calificación
+          </label>
+        </div>
+      </div>
+
+      <!-- Disponibilidad -->
+      <div class="filter-section">
+        <h3>Disponibilidad</h3>
+        <div style="display:flex; flex-direction:column; gap:0.8rem;">
+          <label class="filter-checkbox-label">
+            <input type="checkbox" name="stock" value="true" {% if solo_stock %}checked{% endif %}>
+            En Stock
+          </label>
+          <label class="filter-checkbox-label">
+            <input type="checkbox" name="oferta" value="true" {% if solo_ofertas %}checked{% endif %}>
+            En Oferta
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="filter-btn-apply">
+        <i data-lucide="filter" style="width:1.6rem; height:1.6rem; stroke-width: 2.5;"></i> Aplicar Filtros
+      </button>
+      <a href="{% url 'products:list' %}" class="filter-btn-clear">Limpiar Todo</a>
+    </div>
+  </form>
+</aside>
