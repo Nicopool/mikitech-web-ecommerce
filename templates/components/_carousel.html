@@ -45,8 +45,14 @@
     top: 0; left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.7) 50%, rgba(15, 23, 42, 0.4) 100%);
+    background: linear-gradient(90deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.8) 50%, rgba(15, 23, 42, 0.6) 100%);
     z-index: 2;
+  }
+  
+  @media (max-width: 768px) {
+    .miki-carousel .carousel-overlay {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.85) 100%);
+    }
   }
   
   .miki-carousel .carousel-content {
@@ -92,10 +98,10 @@
   
   .miki-carousel .carousel-desc {
     font-family: 'Inter', sans-serif;
-    font-size: 1.6rem;
+    font-size: clamp(1.4rem, 2vw, 1.6rem);
     color: #94A3B8;
-    margin-bottom: 3rem;
-    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    line-height: 1.5;
   }
   
   .miki-carousel .carousel-btn {
@@ -171,7 +177,7 @@
     
     <!-- Slide 1 (GPUs) -->
     <div class="carousel-item active">
-      <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Tarjetas Gráficas MIKITECH">
+      <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Tarjetas Gráficas MIKITECH">
       <div class="carousel-overlay"></div>
       <div class="carousel-content">
         <span class="carousel-eyebrow">Rendimiento Extremo</span>
@@ -185,7 +191,7 @@
     
     <!-- Slide 2 (CPUs) -->
     <div class="carousel-item">
-      <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Procesadores MIKITECH">
+      <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Procesadores MIKITECH">
       <div class="carousel-overlay"></div>
       <div class="carousel-content">
         <span class="carousel-eyebrow">Cómputo Avanzado</span>
@@ -199,7 +205,7 @@
 
     <!-- Slide 3 (Almacenamiento) -->
     <div class="carousel-item">
-      <img src="https://images.unsplash.com/photo-1555617766-c94804975da3?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="SSD Almacenamiento MIKITECH">
+      <img src="https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="SSD Almacenamiento MIKITECH">
       <div class="carousel-overlay"></div>
       <div class="carousel-content">
         <span class="carousel-eyebrow">Velocidad Pura</span>
@@ -213,7 +219,7 @@
 
     <!-- Slide 4 (Gabinetes) -->
     <div class="carousel-item">
-      <img src="https://images.unsplash.com/photo-1542393545-10f5cde2c810?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Chasis y Gabinetes MIKITECH">
+      <img src="https://images.unsplash.com/photo-1587202372634-32705e3bf49c?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Chasis y Gabinetes MIKITECH">
       <div class="carousel-overlay"></div>
       <div class="carousel-content">
         <span class="carousel-eyebrow">Flujo de Aire Optimizado</span>
@@ -227,7 +233,7 @@
 
     <!-- Slide 5 (Periféricos) -->
     <div class="carousel-item">
-      <img src="https://images.unsplash.com/photo-1550537687-c91072c4792d?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Setup Gamer y Periféricos MIKITECH">
+      <img src="https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Setup Gamer y Periféricos MIKITECH">
       <div class="carousel-overlay"></div>
       <div class="carousel-content">
         <span class="carousel-eyebrow">Setup Profesional</span>
