@@ -399,58 +399,107 @@ def editar_producto(petición, id_producto):
     producto = get_object_or_404(Producto, id=id_producto)
     categorías = Categoria.objects.all().order_by('nombre')
     if petición.method == 'POST':
-        producto.nombre = petición.POST.get('nombre', producto.nombre).strip()
-        producto.precio = float(petición.POST.get('precio', producto.precio))
-        producto.existencias = int(petición.POST.get('existencias', producto.existencias))
-        producto.marca = petición.POST.get('marca', producto.marca)
-        producto.descripcion = petición.POST.get('descripcion', producto.descripcion)
-        producto.descripcion_corta = petición.POST.get('descripcion_corta', producto.descripcion_corta)
-        
-        # Imagen Principal Local
-        if 'archivo_imagen' in petición.FILES:
-            archivo = petición.FILES['archivo_imagen']
-            nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-            producto.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
-            
-        # Galería: Nuevas Imágenes
-        if 'archivos_galeria' in petición.FILES:
-            for f in petición.FILES.getlist('archivos_galeria'):
-                nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
-                url_extra = guardar_archivo_hibrido(nombre_extra, f)
-                ImagenProducto.objects.create(
-                    producto=producto,
-                    url_imagen=url_extra
-                )
+        try:
+            nombre = petición.POST.get('nombre', '').strip()
+            if not nombre:
+                raise ValueError('El nombre del producto es obligatorio.')
 
-        # Galería: Eliminaciones
-        ids_eliminar = petición.POST.getlist('eliminar_imagenes')
-        if ids_eliminar:
-            ImagenProducto.objects.filter(id__in=ids_eliminar, producto=producto).delete()
-
-        producto.es_destacado = petición.POST.get('es_destacado') == 'on'
-        # Al editar producto, el estado activo viene explícito
-        producto.esta_activo = petición.POST.get('esta_activo') == 'on'
-        # Descuento
-        producto.descuento_porcentaje = int(petición.POST.get('descuento_porcentaje', '0') or '0')
-        desc_exp_str = petición.POST.get('descuento_expira_el', '').strip()
-        if desc_exp_str:
-            from django.utils import timezone
-            from datetime import datetime
+            precio_str = petición.POST.get('precio', '').strip()
+            if not precio_str:
+                raise ValueError('El precio es obligatorio.')
             try:
-                producto.descuento_expira_el = datetime.fromisoformat(desc_exp_str).astimezone(timezone.utc)
+                precio_val = float(precio_str)
             except ValueError:
-                producto.descuento_expira_el = None
-        else:
-            producto.descuento_expira_el = None
-        id_cat = petición.POST.get('id_categoria')
-        if id_cat:
+                raise ValueError('El precio debe ser un número válido.')
+
+            existencias_str = petición.POST.get('existencias', '').strip()
+            if not existencias_str:
+                raise ValueError('Las existencias son obligatorias.')
             try:
-                producto.categoria = Categoria.objects.get(id=id_cat)
-            except Categoria.DoesNotExist:
-                pass
-        producto.save()
-        messages.success(petición, f'Cambios en "{producto.nombre}" guardados.')
-        return redirect('/admin-panel/productos/')
+                existencias_val = int(existencias_str)
+            except ValueError:
+                raise ValueError('Las existencias deben ser un número entero válido.')
+
+            producto.nombre = nombre
+            producto.precio = precio_val
+            producto.existencias = existencias_val
+            producto.marca = petición.POST.get('marca', producto.marca)
+            producto.descripcion = petición.POST.get('descripcion', producto.descripcion)
+            producto.descripcion_corta = petición.POST.get('descripcion_corta', producto.descripcion_corta)
+
+            from django.utils.text import slugify
+            nuevo_enlace = slugify(nombre)
+            if nuevo_enlace != producto.enlace:
+                base_enlace = nuevo_enlace
+                contador = 1
+                while Producto.objects.filter(enlace=nuevo_enlace).exclude(id=producto.id).exists():
+                    nuevo_enlace = f"{base_enlace}-{contador}"
+                    contador += 1
+                producto.enlace = nuevo_enlace
+
+            # Imagen Principal Local
+            if 'archivo_imagen' in petición.FILES:
+                archivo = petición.FILES['archivo_imagen']
+                nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
+                producto.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
+
+            # Galería: Nuevas Imágenes
+            if 'archivos_galeria' in petición.FILES:
+                for f in petición.FILES.getlist('archivos_galeria'):
+                    nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
+                    url_extra = guardar_archivo_hibrido(nombre_extra, f)
+                    ImagenProducto.objects.create(
+                        producto=producto,
+                        url_imagen=url_extra
+                    )
+
+            # Galería: Eliminaciones
+            ids_eliminar = petición.POST.getlist('eliminar_imagenes')
+            if ids_eliminar:
+                ImagenProducto.objects.filter(id__in=ids_eliminar, producto=producto).delete()
+
+            producto.es_destacado = petición.POST.get('es_destacado') == 'on'
+            # Al editar producto, el estado activo viene explícito
+            producto.esta_activo = petición.POST.get('esta_activo') == 'on'
+            # Descuento
+            desc_pct_str = petición.POST.get('descuento_porcentaje', '0') or '0'
+            try:
+                producto.descuento_porcentaje = int(desc_pct_str)
+            except ValueError:
+                producto.descuento_porcentaje = 0
+            desc_exp_str = petición.POST.get('descuento_expira_el', '').strip()
+            if desc_exp_str:
+                from django.utils import timezone
+                from datetime import datetime
+                try:
+                    producto.descuento_expira_el = datetime.fromisoformat(desc_exp_str).astimezone(timezone.utc)
+                except ValueError:
+                    producto.descuento_expira_el = None
+            else:
+                producto.descuento_expira_el = None
+            id_cat = petición.POST.get('id_categoria')
+            if id_cat:
+                try:
+                    producto.categoria = Categoria.objects.get(id=id_cat)
+                except Categoria.DoesNotExist:
+                    pass
+            producto.save()
+            messages.success(petición, f'Cambios en "{producto.nombre}" guardados.')
+            return redirect('/admin-panel/productos/')
+        except ValueError as e:
+            return render(petición, 'admin_panel/product_form.html', {
+                'producto': producto,
+                'categorias': categorías,
+                'error': str(e),
+                'titulo_pagina': f'Editar: {producto.nombre} — MIKITECH',
+            })
+        except Exception as e:
+            return render(petición, 'admin_panel/product_form.html', {
+                'producto': producto,
+                'categorias': categorías,
+                'error': f'Error al guardar el producto: {str(e)}',
+                'titulo_pagina': f'Editar: {producto.nombre} — MIKITECH',
+            })
 
     return render(petición, 'admin_panel/product_form.html', {
         'producto': producto,
