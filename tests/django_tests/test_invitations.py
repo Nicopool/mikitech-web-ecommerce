@@ -25,8 +25,7 @@ from core.admin_views import (
     revocar_invitacion_admin, 
     reenviar_invitacion_admin,
     desactivar_usuario_admin,
-    cambiar_contrasena_forzado,
-    registro_administrador
+    cambiar_contrasena_forzado
 )
 from core.middleware import RoleVerificationMiddleware
 
@@ -115,12 +114,9 @@ class TestAdminInvitations(unittest.TestCase):
         return request
 
     def test_public_registration_redirects(self):
-        """Verifica que el registro público de administradores redirija directamente al login."""
-        request = self.get_mock_request('/admin-panel/registro/')
-        response = registro_administrador(request)
-        
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/admin-panel/login/')
+        """Verifica que el registro público de administradores esté inhabilitado y retorne 404."""
+        response = self.client.get('/admin-panel/registro/')
+        self.assertEqual(response.status_code, 404)
 
     def test_create_invitation_success(self):
         """Verifica que un superadmin pueda invitar a un nuevo admin y se guarden sus datos."""

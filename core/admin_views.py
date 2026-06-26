@@ -146,15 +146,6 @@ def login_administrador(petición):
     })
 
 
-def registro_administrador(petición):
-    """El registro público de administradores ha sido inhabilitado. Redirige al login."""
-    try:
-        messages.warning(petición, 'El registro público de administradores ha sido inhabilitado por políticas de seguridad. El acceso es exclusivamente por invitación.')
-    except Exception:
-        pass
-    return redirect('/admin-panel/login/')
-
-
 def cerrar_sesion_administrador(petición):
     """Cierra la sesión del administrador."""
     petición.session.flush()
