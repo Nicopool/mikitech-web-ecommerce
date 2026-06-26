@@ -202,7 +202,7 @@
           <label class="mpro-label" for="prod-price">Precio de Venta (COP) *</label>
           <div class="mpro-input-wrapper">
             <input type="number" id="prod-price" name="precio" class="mpro-input mpro-input-with-icon" required min="0" step="1"
-              value="{{ producto.precio|default:'0'|floatformat:0 }}"
+              value="{{ producto.precio|default:'0'|stringformat:".0f" }}"
               style="font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:800; color:var(--ds-primary);">
             <i data-lucide="dollar-sign" class="mpro-icon" style="color: var(--ds-primary);"></i>
           </div>
@@ -211,7 +211,7 @@
           <label class="mpro-label" for="prod-stock">Unidades en Stock *</label>
           <div class="mpro-input-wrapper">
             <input type="number" id="prod-stock" name="existencias" class="mpro-input mpro-input-with-icon" required min="0"
-              value="{{ producto.existencias|default:'0' }}" placeholder="Ej: 50">
+              value="{{ producto.existencias|default:'0'|stringformat:"d" }}" placeholder="Ej: 50">
             <i data-lucide="box" class="mpro-icon"></i>
           </div>
         </div>
@@ -245,7 +245,7 @@
           <label style="display:block; font-size:1.3rem; font-weight:700; color:#047857; margin-bottom:0.8rem;">% Descuento</label>
           <div style="position:relative; display: flex; align-items: center;">
             <input type="number" id="desc-porcentaje" name="descuento_porcentaje" min="0" max="90" step="1"
-              value="{{ producto.descuento_porcentaje|default:'0' }}"
+              value="{{ producto.descuento_porcentaje|default:'0'|stringformat:"d" }}"
               class="mpro-input"
               style="border-color:#A7F3D0; font-family: 'Inter', sans-serif; font-size:2.2rem; font-weight:800; color:#047857; text-align:center; padding-right:3.5rem;"
               oninput="actualizarPrevistaDescuento()">
