@@ -156,6 +156,9 @@ CACHES = {
     }
 }
 
+# Asegurar que el directorio de logs exista dinámicamente en el arranque
+(BASE_DIR / 'logs').mkdir(parents=True, exist_ok=True)
+
 # Logging básico
 LOGGING = {
     'version': 1,
