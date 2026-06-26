@@ -96,7 +96,7 @@
     <div class="p-actions">
       <a href="{% url 'products:detail' product.enlace %}" class="btn-action btn-view" title="Ver Detalles">Detalles</a>
       {% if product.existencias > 0 %}
-        <a href="javascript:void(0)" onclick="openAddToCartModal('{{ product.id }}', '{{ product.nombre|escapejs }}', {% if product.descuento_activo %}{{ product.precio_con_descuento }}{% else %}{{ product.precio }}{% endif %}, '{{ product.url_imagen_principal|default:'' }}', {{ product.existencias }})" class="btn-action btn-buy" title="Añadir al Carrito">Agregar</a>
+        <a href="javascript:void(0)" onclick="openAddToCartModal('{{ product.id }}', '{{ product.nombre|escapejs }}', {% if product.descuento_activo %}{{ product.precio_con_descuento|stringformat:".0f" }}{% else %}{{ product.precio|stringformat:".0f" }}{% endif %}, '{{ product.url_imagen_principal|default:'' }}', {{ product.existencias|stringformat:"d" }})" class="btn-action btn-buy" title="Añadir al Carrito">Agregar</a>
       {% else %}
         <a href="javascript:void(0)" class="btn-action btn-buy disabled" style="background:#E2E8F0; color:#94A3B8; cursor:not-allowed; border-color:#E2E8F0;" title="Agotado">Agotado</a>
       {% endif %}

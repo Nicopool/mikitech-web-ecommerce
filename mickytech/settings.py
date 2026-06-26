@@ -72,7 +72,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mickytech.wsgi.application'
 
 # Base de datos: Selección dinámica Supabase (PostgreSQL) o SQLite Local
-USE_SQLITE = os.environ.get('USE_SQLITE', 'False') == 'True'
+import sys
+USE_SQLITE = os.environ.get('USE_SQLITE', 'False') == 'True' or 'test' in sys.argv or any('pytest' in arg for arg in sys.argv)
 
 if USE_SQLITE:
     DATABASES = {
