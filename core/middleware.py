@@ -70,12 +70,45 @@ class RoleVerificationMiddleware:
     def __call__(self, request):
         self._verificar_y_sincronizar_rol(request)
         
+        # Enforce forced password change for invited admins
+        response_pw = self._enforce_forced_password_change(request)
+        if response_pw:
+            return response_pw
+            
         # Enforce strict segregation of duties (RBAC)
         response = self._enforce_strict_panel_isolation(request)
         if response:
             return response
             
         return self.get_response(request)
+
+    def _enforce_forced_password_change(self, request):
+        """
+        If a user has not changed their temporary password, redirect them immediately
+        to the forced password change view for any request under /admin-panel/
+        (except logout and the change password page itself).
+        """
+        perfil = getattr(request, 'perfil_usuario', None)
+        if not perfil or perfil.password_cambiada:
+            return None
+
+        path = request.path
+        if path.startswith('/admin-panel/'):
+            # Allow logout and the forced change password page
+            if path in ('/admin-panel/logout/', '/admin-panel/cambiar-contrasena/'):
+                return None
+            
+            if path.startswith('/admin-panel/static/') or path.startswith('/admin-panel/media/'):
+                return None
+
+            from django.contrib import messages
+            try:
+                messages.warning(request, 'Debes cambiar tu contraseña temporal antes de poder acceder al panel.')
+            except Exception:
+                pass
+            return redirect('/admin-panel/cambiar-contrasena/')
+        
+        return None
 
     def _verificar_y_sincronizar_rol(self, request):
         """Autentica al usuario por token JWT o Sesión, y precarga su Perfil, Rol y Permisos."""

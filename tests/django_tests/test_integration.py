@@ -222,13 +222,14 @@ class TestWebRoutesIntegration(unittest.TestCase):
         request.session['pasarela_administrador_superada'] = True
         request.session.save()
         
+        # Inicializar mensajes
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        request._messages = FallbackStorage(request)
+        
         try:
             response = registro_administrador(request)
-            self.assertEqual(response.status_code, 200)
-            
-            # Reemplazar tildes para evitar problemas de codificación en assertions
-            contenido_sin_tildes = response.content.replace(b'\xc3\xa1', b'a').replace(b'\xc3\xa9', b'e').replace(b'\xc3\xad', b'i').replace(b'\xc3\xb3', b'o').replace(b'\xc3\xba', b'u')
-            self.assertIn(b'Este correo electronico ya esta registrado', contenido_sin_tildes)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn('/admin-panel/login/', response.url)
         finally:
             # 4. Limpieza final
             with connection.cursor() as cursor:

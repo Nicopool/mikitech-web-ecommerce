@@ -40,6 +40,36 @@ class Rol(models.Model):
         return self.nombre
 
 
+class InvitacionAdmin(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.CharField(max_length=150, unique=True, db_column='email')
+    nombre_completo = models.CharField(max_length=200, blank=True, null=True, db_column='full_name')
+    usuario_generado = models.CharField(max_length=100, unique=True, db_column='generated_username')
+    password_temporal_hash = models.CharField(max_length=255, db_column='temp_password_hash')
+    fecha_envio = models.DateTimeField(auto_now_add=True, db_column='sent_at')
+    fecha_expiracion = models.DateTimeField(db_column='expires_at')
+    estado = models.CharField(
+        max_length=20, 
+        default='pendiente', 
+        choices=[('pendiente', 'Pendiente'), ('aceptada', 'Aceptada'), ('expirada', 'Expirada'), ('revocada', 'Revocada')],
+        db_column='status'
+    )
+    notas_internas = models.TextField(blank=True, null=True, db_column='internal_notes')
+    creado_por = models.ForeignKey('Perfil', on_delete=models.SET_NULL, null=True, blank=True, related_name='invitaciones_creadas', db_column='created_by')
+    fecha_aceptacion = models.DateTimeField(blank=True, null=True, db_column='accepted_at')
+    ip_origen = models.GenericIPAddressField(blank=True, null=True, db_column='source_ip')
+
+    class Meta:
+        db_table = 'admin_invitations'
+        managed = getattr(settings, 'USE_SQLITE', False)
+        verbose_name = 'Invitación Administrador'
+        verbose_name_plural = 'Invitaciones Administrador'
+        ordering = ['-fecha_envio']
+
+    def __str__(self):
+        return f"Invitación para {self.email} ({self.estado})"
+
+
 class Perfil(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     nombre_completo = models.CharField(max_length=200, blank=True, null=True, db_column='full_name')
@@ -53,6 +83,9 @@ class Perfil(models.Model):
     rol_rbac = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, blank=True, related_name='usuarios', db_column='role_id')
     rol = models.CharField(max_length=20, default='client', choices=[('admin', 'Administrador'), ('client', 'Cliente'), ('repartidor', 'Repartidor')], db_column='role')
     esta_activo = models.BooleanField(default=True, db_column='is_active')
+    fecha_primer_login = models.DateTimeField(blank=True, null=True, db_column='first_login_at')
+    invitacion = models.ForeignKey(InvitacionAdmin, on_delete=models.SET_NULL, null=True, blank=True, related_name='usuarios', db_column='invitation_id')
+    password_cambiada = models.BooleanField(default=True, db_column='password_changed')
     creado_el = models.DateTimeField(auto_now_add=True, db_column='created_at')
     actualizado_el = models.DateTimeField(auto_now=True, db_column='updated_at')
 

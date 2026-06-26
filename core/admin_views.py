@@ -8,7 +8,7 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.contrib import messages
 from products.models import Producto, Categoria, ImagenProducto
 from interactions.models import Reseña, Pedido
-from users.models import Perfil, Notificacion
+from users.models import Perfil, Notificacion, InvitacionAdmin, Rol
 from users.decorators import requiere_permiso
 import os
 from django.core.files.storage import default_storage
@@ -147,115 +147,12 @@ def login_administrador(petición):
 
 
 def registro_administrador(petición):
-    """Registro de nuevos administradores."""
-    if petición.session.get('rol_usuario') == 'admin':
-        return redirect('/admin-panel/')
-
-    if petición.method == 'POST':
-        from users.supabase_auth import registrar_usuario
-        nombre_completo = petición.POST.get('nombre_completo', '').strip()
-        nombre_usuario = petición.POST.get('nombre_usuario', '').strip()
-        correo = petición.POST.get('correo', '').strip()
-        clave = petición.POST.get('clave', '')
-        confirmar_clave = petición.POST.get('confirmar_clave', '')
-        terminos = petición.POST.get('terminos')
-
-        contexo = {
-            'nombre_completo': nombre_completo,
-            'nombre_usuario': nombre_usuario,
-            'correo': correo,
-            'titulo_pagina': 'Registro Administrador — MIKITECH',
-        }
-
-        if not all([nombre_completo, nombre_usuario, correo, clave, confirmar_clave]):
-            contexo['error'] = 'Por favor completa todos los campos del formulario.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        if clave != confirmar_clave:
-            contexo['error'] = 'Las contraseñas no coinciden.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        if not terminos:
-            contexo['error'] = 'Debes aceptar los Términos y Condiciones.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        import re
-        # Requerir contraseña segura: mín 8 chars, 1 mayúscula, 1 número, 1 carácter especial
-        patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}$"
-        if not re.match(patron, clave):
-            contexo['error'] = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial (@$!%*?&).'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        if Perfil.objects.filter(nombre_usuario=nombre_usuario).exists():
-            contexo['error'] = 'Ese nombre de usuario ya está registrado.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        # Verificar que el correo sea de un proveedor permitido (Gmail o Hotmail/Outlook)
-        DOMINIOS_PERMITIDOS = {
-            'gmail.com', 'hotmail.com', 'hotmail.es',
-            'outlook.com', 'outlook.es', 'live.com', 'live.com.mx'
-        }
-        dominio_correo = correo.split('@')[-1].lower() if '@' in correo else ''
-        if dominio_correo not in DOMINIOS_PERMITIDOS:
-            contexo['error'] = 'Solo se aceptan correos de Gmail (@gmail.com) o Hotmail/Outlook (@hotmail.com, @outlook.com).'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        # Verificar si el correo electrónico ya existe en auth.users
-        from django.db import connection
-        from django.conf import settings
-        table_name = '"auth.users"' if getattr(settings, 'USE_SQLITE', False) else 'auth.users'
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(f"SELECT id FROM {table_name} WHERE email = %s", [correo])
-                if cursor.fetchone():
-                    contexo['error'] = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.'
-                    return render(petición, 'admin_panel/register.html', contexo)
-        except Exception as e:
-            print(f"[registro_administrador] Error verificando duplicidad de correo: {e}")
-
-        datos, error = registrar_usuario(correo, clave, nombre_completo, nombre_usuario, rol='admin')
-
-        if error:
-            contexo['error'] = f'Error en el registro: {error}'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        # Bypass the Supabase Email Confirmation locally for admin signups
-        try:
-            from django.db import connection
-            table_name = '"auth.users"' if connection.vendor == 'sqlite' else "auth.users"
-            now_func = "datetime('now')" if connection.vendor == 'sqlite' else "NOW()"
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    f"UPDATE {table_name} SET email_confirmed_at = {now_func} WHERE email = %s", 
-                    [correo]
-                )
-        except Exception as e:
-            print("No se pudo saltar la confirmación de correo:", e)
-
-        # Iniciar sesión directamente tras registro exitoso
-        id_usuario = datos.get('user', {}).get('id')
-        perfil, _ = Perfil.objects.get_or_create(
-            id=id_usuario,
-            defaults={
-                'nombre_usuario': nombre_usuario,
-                'nombre_completo': nombre_completo,
-                'rol': 'admin',
-                'esta_activo': True
-            }
-        )
-        petición.session['usuario_id'] = id_usuario
-        petición.session['token_acceso'] = datos.get('access_token')
-        petición.session['rol_usuario'] = 'admin'
-        petición.session['pasarela_administrador_superada'] = True  # Requerido por triple cerrojo
-        petición.session['nombre_usuario'] = perfil.nombre_usuario
-        petición.session['avatar_url'] = perfil.url_avatar or ''
-        petición.session.modified = True
-        messages.success(petición, f'✅ ¡Registro exitoso! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
-        return redirect('/admin-panel/')
-
-    return render(petición, 'admin_panel/register.html', {
-        'titulo_pagina': 'Registro Administrador — MIKITECH',
-    })
+    """El registro público de administradores ha sido inhabilitado. Redirige al login."""
+    try:
+        messages.warning(petición, 'El registro público de administradores ha sido inhabilitado por políticas de seguridad. El acceso es exclusivamente por invitación.')
+    except Exception:
+        pass
+    return redirect('/admin-panel/login/')
 
 
 def cerrar_sesion_administrador(petición):
@@ -1298,3 +1195,367 @@ def leer_notificacion_admin(petición, id_notificacion):
         return redirect(url_destino)
         
     return redirect('/admin-panel/')
+
+
+# -------------------------------------------------------------
+# SISTEMA DE INVITACIONES PARA ADMINISTRADORES & SEGURIDAD RBAC
+# -------------------------------------------------------------
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+def gestion_invitaciones_admin(petición):
+    """Muestra todas las invitaciones y los administradores activos."""
+    invitaciones = InvitacionAdmin.objects.all().order_by('-fecha_envio')
+    
+    # Actualizar estado de expiración de invitaciones pendientes si ya pasó su fecha
+    from django.utils import timezone
+    ahora = timezone.now()
+    for inv in invitaciones.filter(estado='pendiente', fecha_expiracion__lt=ahora):
+        inv.estado = 'expirada'
+        inv.save()
+        
+    usuarios = Perfil.objects.filter(rol='admin').order_by('nombre_usuario')
+    
+    return render(petición, 'admin_panel/invitations.html', {
+        'titulo_pagina': 'Gestionar Administradores — MIKITECH',
+        'invitaciones': invitaciones,
+        'usuarios_admin': usuarios,
+    })
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+def crear_invitacion_admin(petición):
+    """Crea una nueva invitación y registra al administrador temporalmente."""
+    if petición.method == 'POST':
+        email = petición.POST.get('email', '').strip()
+        nombre_completo = petición.POST.get('nombre_completo', '').strip()
+        notas = petición.POST.get('notas_internas', '').strip()
+
+        if not email:
+            messages.error(petición, 'El correo electrónico es obligatorio.')
+            return redirect('/admin-panel/invitaciones/')
+
+        import re
+        if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+            messages.error(petición, 'Formato de correo electrónico inválido.')
+            return redirect('/admin-panel/invitaciones/')
+
+        # Verificar si el email ya existe en perfiles o invitaciones activas
+        from django.db import connection
+        table_name = '"auth.users"' if connection.vendor == 'sqlite' else 'auth.users'
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT id FROM {table_name} WHERE email = %s", [email])
+                if cursor.fetchone():
+                    messages.error(petición, 'Este correo electrónico ya está registrado en el sistema.')
+                    return redirect('/admin-panel/invitaciones/')
+        except Exception as e:
+            print(f"[crear_invitacion_admin] Error verificando duplicidad: {e}")
+
+        if InvitacionAdmin.objects.filter(email=email, estado='pendiente').exists():
+            messages.error(petición, 'Ya existe una invitación pendiente para este correo electrónico.')
+            return redirect('/admin-panel/invitaciones/')
+
+        # Generar nombre de usuario único y limpio
+        import random
+        cleaned_name = re.sub(r'[^a-zA-Z]', '', nombre_completo.lower().split()[0]) if nombre_completo else 'admin'
+        cleaned_last = re.sub(r'[^a-zA-Z]', '', nombre_completo.lower().split()[1][0]) if nombre_completo and len(nombre_completo.split()) > 1 else ''
+        username_prefix = f"admin_{cleaned_name}{cleaned_last}"
+        
+        while True:
+            rand_num = random.randint(1000, 9999)
+            usuario_generado = f"{username_prefix}_{rand_num}"
+            if not Perfil.objects.filter(nombre_usuario=usuario_generado).exists() and not InvitacionAdmin.objects.filter(usuario_generado=usuario_generado).exists():
+                break
+
+        # Generar contraseña temporal segura
+        import secrets
+        import string
+        alphabet = string.ascii_letters + string.digits + "@$!%*?&"
+        while True:
+            password_temporal = ''.join(secrets.choice(alphabet) for _ in range(12))
+            if (any(c.isupper() for c in password_temporal) and
+                any(c.islower() for c in password_temporal) and
+                any(c.isdigit() for c in password_temporal) and
+                any(c in "@$!%*?&" for c in password_temporal)):
+                break
+
+        # Registrar en Supabase Auth / SQLite
+        from users.supabase_auth import registrar_usuario, registrar_usuario_sql
+        datos, error = registrar_usuario(email, password_temporal, nombre_completo, usuario_generado, rol='admin')
+        if error and "confirmation email" in error.lower():
+            datos, error = registrar_usuario_sql(email, password_temporal, nombre_completo, usuario_generado, rol='admin')
+
+        if error:
+            messages.error(petición, f'Error al registrar el usuario en autenticación: {error}')
+            return redirect('/admin-panel/invitaciones/')
+
+        id_usuario = datos.get('user', {}).get('id')
+
+        # Crear invitación
+        from django.utils import timezone
+        from django.contrib.auth.hashers import make_password
+        expires_at = timezone.now() + timezone.timedelta(days=7)
+        
+        invitacion = InvitacionAdmin.objects.create(
+            email=email,
+            nombre_completo=nombre_completo,
+            usuario_generado=usuario_generado,
+            password_temporal_hash=make_password(password_temporal),
+            fecha_expiracion=expires_at,
+            estado='pendiente',
+            notas_internas=notas,
+            creado_por=petición.perfil_usuario
+        )
+
+        # Configurar perfil
+        perfil, _ = Perfil.objects.update_or_create(
+            id=id_usuario,
+            defaults={
+                'nombre_completo': nombre_completo,
+                'nombre_usuario': usuario_generado,
+                'rol_rbac': Rol.objects.get(codigo='admin'),
+                'rol': 'admin',
+                'invitacion': invitacion,
+                'password_cambiada': False,
+                'esta_activo': True
+            }
+        )
+
+        # Enviar correo de invitación
+        from django.core.mail import send_mail
+        subject = "[MIKITECH] Has sido invitado como Administrador"
+        url_login = petición.build_absolute_uri('/admin-panel/login/')
+        message = f"""Hola {nombre_completo or 'Administrador'},
+
+Has sido invitado para ser administrador en el Panel de Control de MIKITECH.
+
+Tus credenciales de acceso temporal son:
+- Usuario / Correo: {email}
+- Nombre de usuario: {usuario_generado}
+- Contraseña temporal: {password_temporal}
+
+⚠️ Por motivos de seguridad, esta contraseña es temporal y caducará en 7 días ({expires_at.strftime('%Y-%m-%d')}). Deberás cambiarla obligatoriamente en tu primer inicio de sesión.
+
+Puedes iniciar sesión aquí: {url_login}
+
+Si tienes problemas, contacta al superadministrador de MIKITECH.
+"""
+        try:
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL or 'noreply@mikitech.com', [email])
+            messages.success(petición, f'✅ Invitación enviada exitosamente a {email} con usuario {usuario_generado}.')
+        except Exception as e:
+            messages.warning(petición, f'⚠️ Invitación creada pero el correo no pudo enviarse: {e}. Credenciales: {usuario_generado} / {password_temporal}')
+
+    return redirect('/admin-panel/invitaciones/')
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+@require_POST
+def revocar_invitacion_admin(petición, id_invitacion):
+    """Revoca una invitación pendiente y desactiva el perfil del usuario."""
+    invitacion = get_object_or_404(InvitacionAdmin, id=id_invitacion)
+    if invitacion.estado == 'pendiente':
+        invitacion.estado = 'revocada'
+        invitacion.save()
+        
+        # Desactivar perfil de usuario asociado
+        Perfil.objects.filter(invitacion=invitacion).update(esta_activo=False)
+        messages.success(petición, f'Invitación para {invitacion.email} revocada exitosamente.')
+    else:
+        messages.error(petición, 'Solo se pueden revocar invitaciones pendientes.')
+        
+    return redirect('/admin-panel/invitaciones/')
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+@require_POST
+def reenviar_invitacion_admin(petición, id_invitacion):
+    """Reenvía la invitación restableciendo la contraseña del usuario y fecha de expiración."""
+    invitacion = get_object_or_404(InvitacionAdmin, id=id_invitacion)
+    
+    # 1. Generar contraseña temporal segura
+    import secrets
+    import string
+    alphabet = string.ascii_letters + string.digits + "@$!%*?&"
+    while True:
+        password_temporal = ''.join(secrets.choice(alphabet) for _ in range(12))
+        if (any(c.isupper() for c in password_temporal) and
+            any(c.islower() for c in password_temporal) and
+            any(c.isdigit() for c in password_temporal) and
+            any(c in "@$!%*?&" for c in password_temporal)):
+            break
+
+    # 2. Buscar perfil existente para eliminarlo y recrearlo en autenticación (método seguro y libre de permisos)
+    perfil_invitado = Perfil.objects.filter(invitacion=invitacion).first()
+    if not perfil_invitado:
+        messages.error(petición, 'No se encontró un perfil asociado a esta invitación.')
+        return redirect('/admin-panel/invitaciones/')
+
+    from django.db import connection
+    table_name = '"auth.users"' if connection.vendor == 'sqlite' else 'auth.users'
+    user_id = str(perfil_invitado.id)
+    
+    try:
+        # Borrar registros para recrearlos
+        perfil_invitado.delete()
+        with connection.cursor() as cursor:
+            cursor.execute(f"DELETE FROM {table_name} WHERE id = %s", [user_id])
+    except Exception as e:
+        print(f"[reenviar_invitacion_admin] Error al limpiar registros previos: {e}")
+
+    # 3. Registrar de nuevo en Auth
+    from users.supabase_auth import registrar_usuario, registrar_usuario_sql
+    datos, error = registrar_usuario(invitacion.email, password_temporal, invitacion.nombre_completo, invitacion.usuario_generado, rol='admin')
+    if error and "confirmation email" in error.lower():
+        datos, error = registrar_usuario_sql(invitacion.email, password_temporal, invitacion.nombre_completo, invitacion.usuario_generado, rol='admin')
+
+    if error:
+        messages.error(petición, f'Error al registrar el usuario en autenticación al reenviar: {error}')
+        return redirect('/admin-panel/invitaciones/')
+
+    nuevo_id_usuario = datos.get('user', {}).get('id')
+
+    # 4. Actualizar invitación
+    from django.utils import timezone
+    from django.contrib.auth.hashers import make_password
+    expires_at = timezone.now() + timezone.timedelta(days=7)
+    
+    invitacion.password_temporal_hash = make_password(password_temporal)
+    invitacion.fecha_expiracion = expires_at
+    invitacion.estado = 'pendiente'
+    invitacion.save()
+
+    # 5. Volver a configurar perfil
+    perfil, _ = Perfil.objects.update_or_create(
+        id=nuevo_id_usuario,
+        defaults={
+            'nombre_completo': invitacion.nombre_completo,
+            'nombre_usuario': invitacion.usuario_generado,
+            'rol_rbac': Rol.objects.get(codigo='admin'),
+            'rol': 'admin',
+            'invitacion': invitacion,
+            'password_cambiada': False,
+            'esta_activo': True
+        }
+    )
+
+    # 6. Enviar correo de invitación
+    from django.core.mail import send_mail
+    subject = "[MIKITECH] Reenvío de Invitación de Administrador"
+    url_login = petición.build_absolute_uri('/admin-panel/login/')
+    message = f"""Hola {invitacion.nombre_completo or 'Administrador'},
+
+Se ha reenviado tu invitación para ser administrador en el Panel de Control de MIKITECH.
+
+Tus nuevas credenciales de acceso temporal son:
+- Usuario / Correo: {invitacion.email}
+- Nombre de usuario: {invitacion.usuario_generado}
+- Contraseña temporal: {password_temporal}
+
+⚠️ Esta contraseña es temporal y caducará en 7 días ({expires_at.strftime('%Y-%m-%d')}). Deberás cambiarla obligatoriamente en tu primer inicio de sesión.
+
+Puedes iniciar sesión aquí: {url_login}
+"""
+    try:
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL or 'noreply@mikitech.com', [invitacion.email])
+        messages.success(petición, f'✅ Invitación reenviada exitosamente a {invitacion.email}.')
+    except Exception as e:
+        messages.warning(petición, f'⚠️ Invitación actualizada pero el correo no pudo enviarse: {e}. Credenciales: {invitacion.usuario_generado} / {password_temporal}')
+
+    return redirect('/admin-panel/invitaciones/')
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+@require_POST
+def desactivar_usuario_admin(petición, id_usuario):
+    """Desactiva a un administrador activo para impedir su inicio de sesión."""
+    usuario = get_object_or_404(Perfil, id=id_usuario)
+    if usuario.rol == 'admin':
+        if str(usuario.id) == str(petición.session.get('usuario_id')):
+            messages.error(petición, 'No puedes desactivar tu propio usuario.')
+        else:
+            usuario.esta_activo = False
+            usuario.save()
+            messages.success(petición, f'Administrador {usuario.nombre_usuario} desactivado exitosamente.')
+    else:
+        messages.error(petición, 'El usuario seleccionado no es un administrador.')
+        
+    return redirect('/admin-panel/invitaciones/')
+
+
+def cambiar_contrasena_forzado(petición):
+    """Obliga al administrador invitado a cambiar su contraseña temporal."""
+    # Verificar que el usuario esté logueado
+    usuario_id = petición.session.get('usuario_id')
+    if not usuario_id:
+        return redirect('/admin-panel/login/')
+        
+    # Obtener el perfil
+    perfil = get_object_or_404(Perfil, id=usuario_id)
+    
+    # Solo permitir acceso si no ha cambiado la contraseña temporal
+    if perfil.password_cambiada:
+        return redirect('/admin-panel/')
+        
+    contexto = {
+        'titulo_pagina': 'Cambiar Contraseña Obligatorio — MIKITECH',
+        'perfil': perfil,
+    }
+    
+    if petición.method == 'POST':
+        nueva_clave = petición.POST.get('nueva_clave', '')
+        confirmar_clave = petición.POST.get('confirmar_clave', '')
+        
+        if not nueva_clave or not confirmar_clave:
+            contexto['error'] = 'Por favor completa todos los campos del formulario.'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        if nueva_clave != confirmar_clave:
+            contexto['error'] = 'Las contraseñas no coinciden.'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        import re
+        patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}$"
+        if not re.match(patron, nueva_clave):
+            contexto['error'] = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial (@$!%*?&).'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        # Actualizar contraseña en autenticación (Supabase / SQLite)
+        from users.supabase_auth import actualizar_contraseña
+        token = petición.session.get('token_acceso') or 'mock-local-token'
+        
+        datos, error = actualizar_contraseña(token, nueva_clave, user_id=perfil.id)
+        if error:
+            contexto['error'] = f'Error al cambiar la contraseña en el servidor: {error}'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        # Actualizar perfil local
+        from django.utils import timezone
+        perfil.password_cambiada = True
+        perfil.fecha_primer_login = timezone.now()
+        perfil.save()
+        
+        # Actualizar estado de invitación
+        if perfil.invitacion:
+            inv = perfil.invitacion
+            inv.estado = 'aceptada'
+            inv.fecha_aceptacion = timezone.now()
+            
+            # Obtener IP de origen
+            x_forwarded_for = petición.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip = x_forwarded_for.split(',')[0].strip()
+            else:
+                ip = petición.META.get('REMOTE_ADDR')
+            inv.ip_origen = ip
+            inv.save()
+            
+        messages.success(petición, '✅ Contraseña cambiada con éxito. Ya tienes acceso al Dashboard.')
+        return redirect('/admin-panel/')
+        
+    return render(petición, 'admin_panel/change_password_forced.html', contexto)

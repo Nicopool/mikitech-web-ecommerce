@@ -172,8 +172,21 @@ def registrar_usuario_sql(correo, clave, nombre_completo, nombre_usuario, rol='c
         return None, str(e)
 
 
-def actualizar_contraseña(token, nueva_clave):
-    """Actualizar la contraseña del usuario en Supabase."""
+def actualizar_contraseña(token, nueva_clave, user_id=None):
+    """Actualizar la contraseña del usuario en Supabase o SQLite Local."""
+    from django.conf import settings
+    if getattr(settings, 'USE_SQLITE', False) and user_id:
+        from django.db import connection
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'UPDATE "auth.users" SET encrypted_password = %s WHERE id = %s',
+                    [nueva_clave, str(user_id)]
+                )
+            return {'user': {'id': user_id}}, None
+        except Exception as e:
+            return None, f"Error actualizando contraseña local: {e}"
+
     url = f"{NUCLEO_URL_SUPABASE}/auth/v1/user"
     datos, error = _hacer_peticion(url, {'password': nueva_clave}, token)
     return datos, error

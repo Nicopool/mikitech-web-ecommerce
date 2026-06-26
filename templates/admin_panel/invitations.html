@@ -1,0 +1,210 @@
+{% extends "admin_panel/base_admin.html" %}
+{% block page_title %}Invitación de Administradores — MIKITECH{% endblock %}
+
+{% block admin_content %}
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
+  <div>
+    <h2 style="font-size:2.2rem; font-weight:800; color:var(--ds-text); display:flex; align-items:center; gap:8px;">
+      <i data-lucide="mail-plus" style="width:2.4rem; height:2.4rem; color:var(--ds-primary);"></i> Invitación de Administradores
+    </h2>
+    <p style="font-size:1.3rem; color:var(--ds-text-soft); margin-top:0.4rem;">Registra nuevos administradores mediante invitaciones seguras con credenciales temporales.</p>
+  </div>
+  <div>
+    <button onclick="document.getElementById('modalInvitacion').style.display='flex';" class="btn btn-primary" style="display:flex; align-items:center; gap:6px; cursor:pointer; padding: 10px 18px; border-radius: 8px; border:none; background:var(--ds-primary); color:white; font-weight:600; font-size:1.3rem;">
+      <i data-lucide="plus-circle" style="width:1.8rem; height:1.8rem;"></i> Nueva Invitación
+    </button>
+  </div>
+</div>
+
+<!-- MENSAJES DE ALERTA -->
+{% if messages %}
+<div class="u-mb-4" style="margin-bottom: 20px;">
+  {% for message in messages %}
+    <div style="padding: 12px 18px; border-radius: 8px; font-size:1.3rem; font-weight:500; margin-bottom:10px; display:flex; align-items:center; gap:8px;
+      {% if message.tags == 'success' %}
+        background: #DCFCE7; color: #15803D; border-left: 4px solid #16A34A;
+      {% elif message.tags == 'error' %}
+        background: #FEE2E2; color: #B91C1C; border-left: 4px solid #DC2626;
+      {% else %}
+        background: #FEF9C3; color: #A16207; border-left: 4px solid #CA8A04;
+      {% endif %}">
+      <i data-lucide="info" style="width:1.8rem; height:1.8rem;"></i> {{ message }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- TABS / SECCIONES -->
+<div class="g-row" style="margin-bottom: 30px;">
+  <!-- TABLA DE INVITACIONES -->
+  <div class="g-col-12 u-mb-4">
+    <div class="mpro-card" style="padding: 24px; border-radius: 12px; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+      <h3 style="font-size:1.6rem; font-weight:700; color:var(--ds-text); margin-bottom: 20px; display:flex; align-items:center; gap:6px;">
+        <i data-lucide="mail" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Historial de Invitaciones
+      </h3>
+      
+      <div style="overflow-x:auto;">
+        <table class="table" style="width:100%; border-collapse:collapse; text-align:left; font-size:1.3rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid #F1F5F9; color:#64748B; font-weight:600; padding:10px;">
+              <th style="padding:12px;">Email / Invitado</th>
+              <th style="padding:12px;">Usuario Generado</th>
+              <th style="padding:12px;">Fecha Envío</th>
+              <th style="padding:12px;">Fecha Expiración</th>
+              <th style="padding:12px;">Estado</th>
+              <th style="padding:12px; text-align:right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in invitaciones %}
+            <tr style="border-bottom: 1px solid #F1F5F9; padding:10px;">
+              <td style="padding:14px 12px;">
+                <div style="font-weight:600; color:var(--ds-text);">{{ inv.nombre_completo|default:"(Sin Nombre)" }}</div>
+                <div style="color:var(--ds-text-soft); font-size:1.2rem;">{{ inv.email }}</div>
+              </td>
+              <td style="padding:14px 12px; font-family:monospace; font-weight:bold; color:#0F172A;">{{ inv.usuario_generado }}</td>
+              <td style="padding:14px 12px; color:var(--ds-text-soft);">{{ inv.fecha_envio|date:"Y-m-d H:i" }}</td>
+              <td style="padding:14px 12px; color:var(--ds-text-soft);">{{ inv.fecha_expiracion|date:"Y-m-d" }}</td>
+              <td style="padding:14px 12px;">
+                {% if inv.estado == 'pendiente' %}
+                  <span style="background:#FEF9C3; color:#713F12; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Pendiente</span>
+                {% elif inv.estado == 'aceptada' %}
+                  <span style="background:#DCFCE7; color:#14532D; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Aceptada</span>
+                {% elif inv.estado == 'expirada' %}
+                  <span style="background:#FEE2E2; color:#7F1D1D; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Expirada</span>
+                {% else %}
+                  <span style="background:#F1F5F9; color:#334155; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Revocada</span>
+                {% endif %}
+              </td>
+              <td style="padding:14px 12px; text-align:right;">
+                {% if inv.estado == 'pendiente' %}
+                  <div style="display:inline-flex; gap:6px; justify-content:flex-end;">
+                    <form action="{% url 'admin_invitation_resend' inv.id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" title="Reenviar invitación (Resetea contraseña)" style="background:#EFF6FF; border:none; color:#1D4ED8; padding:6px 10px; border-radius:6px; font-weight:500; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                        <i data-lucide="rotate-ccw" style="width:1.4rem; height:1.4rem;"></i> Reenviar
+                      </button>
+                    </form>
+                    <form action="{% url 'admin_invitation_revoke' inv.id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" onclick="return confirm('¿Seguro de revocar esta invitación? Se inhabilitará la contraseña temporal.');" style="background:#FEE2E2; border:none; color:#B91C1C; padding:6px 10px; border-radius:6px; font-weight:500; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                        <i data-lucide="x" style="width:1.4rem; height:1.4rem;"></i> Revocar
+                      </button>
+                    </form>
+                  </div>
+                {% else %}
+                  <span style="color:var(--ds-text-soft); font-size:1.2rem;">-</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" style="padding:40px; text-align:center; color:var(--ds-text-soft);">
+                <i data-lucide="mail-warning" style="width:3.6rem; height:3.6rem; color:#94A3B8; margin-bottom:10px;"></i>
+                <p>No se encontraron invitaciones creadas en el sistema.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TABLA DE ADMINISTRADORES ACTIVOS -->
+  <div class="g-col-12">
+    <div class="mpro-card" style="padding: 24px; border-radius: 12px; background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+      <h3 style="font-size:1.6rem; font-weight:700; color:var(--ds-text); margin-bottom: 20px; display:flex; align-items:center; gap:6px;">
+        <i data-lucide="shield-check" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Administradores del Sistema
+      </h3>
+      
+      <div style="overflow-x:auto;">
+        <table class="table" style="width:100%; border-collapse:collapse; text-align:left; font-size:1.3rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid #F1F5F9; color:#64748B; font-weight:600; padding:10px;">
+              <th style="padding:12px;">Nombre Completo</th>
+              <th style="padding:12px;">Nombre de Usuario</th>
+              <th style="padding:12px;">Email</th>
+              <th style="padding:12px;">Estado de Contraseña</th>
+              <th style="padding:12px;">Acceso</th>
+              <th style="padding:12px; text-align:right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for usr in usuarios_admin %}
+            <tr style="border-bottom: 1px solid #F1F5F9; padding:10px;">
+              <td style="padding:14px 12px; font-weight:600; color:var(--ds-text);">{{ usr.nombre_completo|default:"(Sin Nombre)" }}</td>
+              <td style="padding:14px 12px; font-family:monospace; color:#334155;">{{ usr.nombre_usuario }}</td>
+              <td style="padding:14px 12px; color:var(--ds-text-soft);">{{ usr.email }}</td>
+              <td style="padding:14px 12px;">
+                {% if usr.password_cambiada %}
+                  <span style="background:#E0F2FE; color:#0369A1; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Establecida</span>
+                {% else %}
+                  <span style="background:#FEF3C7; color:#B45309; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Pendiente Cambio</span>
+                {% endif %}
+              </td>
+              <td style="padding:14px 12px;">
+                {% if usr.esta_activo %}
+                  <span style="background:#DCFCE7; color:#14532D; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Activo</span>
+                {% else %}
+                  <span style="background:#F1F5F9; color:#334155; padding:4px 8px; border-radius:12px; font-size:1.1rem; font-weight:600;">Desactivado</span>
+                {% endif %}
+              </td>
+              <td style="padding:14px 12px; text-align:right;">
+                {% if usr.esta_activo and usr.id|stringformat:"s" != request.session.usuario_id %}
+                  <form action="{% url 'admin_user_deactivate' usr.id %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('¿Seguro de desactivar esta cuenta de administrador? Se le cerrará la sesión de forma inmediata.');" style="background:#FFF1F2; border:none; color:#E11D48; padding:6px 10px; border-radius:6px; font-weight:500; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; gap:4px; margin-left:auto;">
+                      <i data-lucide="user-minus" style="width:1.4rem; height:1.4rem;"></i> Desactivar
+                    </button>
+                  </form>
+                {% elif usr.id|stringformat:"s" == request.session.usuario_id %}
+                  <span style="color:var(--ds-text-soft); font-size:1.2rem; font-style:italic;">Tú</span>
+                {% else %}
+                  <span style="color:#64748B; font-weight:500;">Inactivo</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREACIÓN INVITACIÓN -->
+<div id="modalInvitacion" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); align-items:center; justify-content:center; z-index:9999; backdrop-filter: blur(4px);">
+  <div style="background:white; border-radius:12px; padding:30px; width:100%; max-width:500px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1); border: 1px solid #E2E8F0; position:relative;">
+    <button onclick="document.getElementById('modalInvitacion').style.display='none';" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:1.8rem; cursor:pointer; color:#94A3B8;"><i data-lucide="x"></i></button>
+    
+    <h3 style="font-size:1.8rem; font-weight:700; color:var(--ds-text); margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="send" style="width:2.2rem; height:2.2rem; color:var(--ds-primary);"></i> Nueva Invitación Admin
+    </h3>
+    <p style="font-size:1.2rem; color:var(--ds-text-soft); margin-bottom:20px;">El sistema creará al usuario y le enviará un correo con contraseña temporal.</p>
+    
+    <form action="{% url 'admin_invitation_create' %}" method="POST">
+      {% csrf_token %}
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:1.2rem; font-weight:600; color:#334155; margin-bottom:6px;">Correo Electrónico *</label>
+        <input type="email" name="email" required placeholder="ej. correo@mikitech.com" style="width:100%; padding:10px 14px; border:1px solid #CBD5E1; border-radius:8px; font-size:1.3rem; outline:none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--ds-primary)'" onblur="this.style.borderColor='#CBD5E1'">
+      </div>
+      
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:1.2rem; font-weight:600; color:#334155; margin-bottom:6px;">Nombre Completo (Opcional)</label>
+        <input type="text" name="nombre_completo" placeholder="ej. Carlos Mendoza" style="width:100%; padding:10px 14px; border:1px solid #CBD5E1; border-radius:8px; font-size:1.3rem; outline:none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--ds-primary)'" onblur="this.style.borderColor='#CBD5E1'">
+      </div>
+      
+      <div style="margin-bottom:24px;">
+        <label style="display:block; font-size:1.2rem; font-weight:600; color:#334155; margin-bottom:6px;">Notas Internas (Opcional)</label>
+        <textarea name="notas_internas" placeholder="Notas sobre el departamento, auditoría, etc." rows="3" style="width:100%; padding:10px 14px; border:1px solid #CBD5E1; border-radius:8px; font-size:1.3rem; outline:none; resize:none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--ds-primary)'" onblur="this.style.borderColor='#CBD5E1'"></textarea>
+      </div>
+      
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button type="button" onclick="document.getElementById('modalInvitacion').style.display='none';" class="btn" style="background:#F1F5F9; border:none; color:#475569; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer; font-size:1.3rem;">Cancelar</button>
+        <button type="submit" class="btn btn-primary" style="background:var(--ds-primary); border:none; color:white; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer; font-size:1.3rem;">Enviar Invitación</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

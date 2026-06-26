@@ -6,7 +6,6 @@ from core import admin_views
 urlpatterns = [
     path('pasarela/', admin_views.pasarela, name='admin_gateway'),
     path('login/', admin_views.login_administrador, name='admin_login'),
-    path('registro/', admin_views.registro_administrador, name='admin_register'),
     path('logout/', admin_views.cerrar_sesion_administrador, name='admin_logout'),
     path('', admin_views.tablero_administrador, name='admin_dashboard'),
     
@@ -27,6 +26,16 @@ urlpatterns = [
     # Gestión de usuarios
     path('usuarios/', admin_views.gestion_usuarios, name='admin_users'),
     path('usuarios/editar/<str:id_usuario>/', admin_views.editar_usuario, name='admin_user_edit'),
+    path('usuarios/desactivar/<uuid:id_usuario>/', admin_views.desactivar_usuario_admin, name='admin_user_deactivate'),
+    
+    # Invitaciones Admin
+    path('invitaciones/', admin_views.gestion_invitaciones_admin, name='admin_invitations'),
+    path('invitaciones/crear/', admin_views.crear_invitacion_admin, name='admin_invitation_create'),
+    path('invitaciones/revocar/<uuid:id_invitacion>/', admin_views.revocar_invitacion_admin, name='admin_invitation_revoke'),
+    path('invitaciones/reenviar/<uuid:id_invitacion>/', admin_views.reenviar_invitacion_admin, name='admin_invitation_resend'),
+    
+    # Cambio forzado de contraseña
+    path('cambiar-contrasena/', admin_views.cambiar_contrasena_forzado, name='admin_forced_change_password'),
     
     # Moderación de interacciones
     path('resenas/', admin_views.moderacion_resenas, name='admin_reviews'),
