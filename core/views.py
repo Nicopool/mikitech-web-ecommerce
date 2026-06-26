@@ -179,8 +179,19 @@ def agregar_al_carrito(petición, id_producto):
         messages.error(petición, "Producto no encontrado.")
         return redirect('products:catalog')
 
+    # Obtener la cantidad (por defecto 1)
+    cantidad = 1
+    cantidad_str = petición.POST.get('cantidad') or petición.GET.get('cantidad')
+    if cantidad_str:
+        try:
+            cantidad = int(cantidad_str)
+            if cantidad < 1:
+                cantidad = 1
+        except ValueError:
+            pass
+
     id_str = str(producto_final.id)
-    carrito[id_str] = carrito.get(id_str, 0) + 1
+    carrito[id_str] = carrito.get(id_str, 0) + cantidad
     petición.session['cart'] = carrito
     petición.session.modified = True
     
@@ -189,7 +200,7 @@ def agregar_al_carrito(petición, id_producto):
         total_items = sum(carrito.values())
         return JsonResponse({'ok': True, 'total_items': total_items})
     
-    messages.success(petición, f"Agregado: {producto_final.nombre}")
+    messages.success(petición, f"Agregado: {producto_final.nombre} ({cantidad} uds)")
     return redirect('core:cart')
 
 

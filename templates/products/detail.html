@@ -200,10 +200,17 @@
         </div>
 
         <div class="actions-row">
-          <button class="btn-premium btn-add-cart" onclick="addToCartAjax('{{ producto.id }}')">
+          {% if producto.existencias > 0 %}
+          <button class="btn-premium btn-add-cart" onclick="openAddToCartModal('{{ producto.id }}', '{{ producto.nombre|escapejs }}', {% if producto.descuento_activo %}{{ producto.precio_con_descuento }}{% else %}{{ producto.precio }}{% endif %}, '{{ producto.url_imagen_principal|default:'' }}', {{ producto.existencias }})">
             <i data-lucide="shopping-cart"></i>
             Añadir al Carrito
           </button>
+          {% else %}
+          <button class="btn-premium btn-add-cart disabled" style="background:#E2E8F0; color:#94A3B8; cursor:not-allowed; border:none; box-shadow:none;" disabled>
+            <i data-lucide="shopping-cart"></i>
+            Agotado Temporalmente
+          </button>
+          {% endif %}
         </div>
 
         {% if producto.especificaciones %}
