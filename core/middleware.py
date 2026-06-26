@@ -58,7 +58,6 @@ class RoleVerificationMiddleware:
         '/cuenta/recuperar/',
         '/admin-panel/pasarela/',
         '/admin-panel/login/',
-        '/admin-panel/registro/',
         '/repartidor/pasarela/',
         '/repartidor/login/',
         '/repartidor/registro/',
