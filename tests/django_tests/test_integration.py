@@ -1,0 +1,465 @@
+import os
+import sys
+from pathlib import Path
+
+# Agregar el directorio del backend al path de python
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mickytech.settings')
+django.setup()
+
+from django.conf import settings
+if 'testserver' not in settings.ALLOWED_HOSTS:
+    settings.ALLOWED_HOSTS = list(settings.ALLOWED_HOSTS) + ['testserver']
+
+import unittest
+from django.test import Client
+
+class TestWebRoutesIntegration(unittest.TestCase):
+    def setUp(self):
+        # Inicializar el cliente de pruebas de Django
+        self.client = Client()
+        # Crear tablas de Supabase simuladas en SQLite si no existen
+        from django.db import connection
+        from django.conf import settings
+        if getattr(settings, 'USE_SQLITE', False):
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS "auth.users" (
+                        id TEXT PRIMARY KEY,
+                        email TEXT UNIQUE,
+                        encrypted_password TEXT,
+                        role TEXT,
+                        email_confirmed_at TIMESTAMP
+                    )
+                """)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS profiles (
+                        id TEXT PRIMARY KEY,
+                        full_name TEXT,
+                        username TEXT UNIQUE,
+                        bio TEXT,
+                        avatar_url TEXT,
+                        phone TEXT,
+                        address TEXT,
+                        city TEXT,
+                        country TEXT DEFAULT 'Colombia',
+                        role_id TEXT,
+                        role TEXT DEFAULT 'client',
+                        is_active INTEGER DEFAULT 1,
+                        created_at TIMESTAMP,
+                        updated_at TIMESTAMP
+                    )
+                """)
+
+    def test_ping_endpoint(self):
+        """Verifica que el endpoint de ping esté activo y responda con JSON."""
+        response = self.client.get('/ping/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        
+        # Verificar el contenido del JSON
+        data = response.json()
+        self.assertEqual(data.get('status'), 'ok')
+        self.assertEqual(data.get('msg'), 'pong')
+
+    def test_home_page(self):
+        """Verifica que la página principal cargue correctamente."""
+        response = self.client.get('/')
+        # Acepta tanto 200 (con datos Supabase) como 302 (redirige a tienda sin datos)
+        self.assertIn(response.status_code, [200, 302])
+        # Si responde 200, debe contener MIKITECH
+        if response.status_code == 200:
+            self.assertIn(b'MIKITECH', response.content)
+
+    def test_client_denied_admin_panel(self):
+        """Verifica que un usuario sin rol de administrador sea rechazado y redirigido del panel admin."""
+        # Intentar acceder al dashboard de administración sin sesión activa
+        response = self.client.get('/admin-panel/')
+        # Debe redirigir (302 Redirect) al login de administración
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/admin-panel/login/', response.url)
+
+    def test_client_denied_repartidor_panel(self):
+        """Verifica que un usuario sin rol de repartidor sea rechazado y redirigido del panel de repartidor."""
+        # Intentar acceder al panel del repartidor sin sesión activa
+        response = self.client.get('/repartidor/')
+        # Debe redirigir (302 Redirect) a la pasarela del repartidor
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/repartidor/pasarela/', response.url)
+
+    def test_signup_duplicate_email_blocked(self):
+        """Verifica que no se permita registrar un usuario con un correo que ya existe."""
+        import uuid
+        from django.db import connection
+        from django.conf import settings
+        
+        table_name = '"auth.users"' if getattr(settings, 'USE_SQLITE', False) else 'auth.users'
+        email_dup = f"duplicate_email_{uuid.uuid4().hex[:8]}@gmail.com"
+        unique_username = f"user_{uuid.uuid4().hex[:10]}"
+        
+        # 1. Limpieza inicial
+        with connection.cursor() as cursor:
+            if getattr(settings, 'USE_SQLITE', False):
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS "auth.users" (
+                        id TEXT PRIMARY KEY,
+                        email TEXT UNIQUE,
+                        encrypted_password TEXT,
+                        role TEXT,
+                        email_confirmed_at TIMESTAMP
+                    )
+                    """
+                )
+            try:
+                cursor.execute(f"SELECT id FROM {table_name} WHERE email = %s", [email_dup])
+                row = cursor.fetchone()
+                if row:
+                    cursor.execute("DELETE FROM profiles WHERE id = %s", [row[0]])
+                cursor.execute(f"DELETE FROM {table_name} WHERE email = %s", [email_dup])
+            except Exception:
+                pass
+
+        # 2. Insertar un correo simulado directamente en la tabla auth.users
+        simulated_uuid = str(uuid.uuid4())
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"INSERT INTO {table_name} (id, email) VALUES (%s, %s)",
+                [simulated_uuid, email_dup]
+            )
+                
+        # 3. Simular petición de registro POST con el mismo correo y un nombre de usuario nuevo
+        datos_registro = {
+            'nombre_completo': 'Test Duplicado',
+            'nombre_usuario': unique_username,
+            'correo': email_dup,
+            'clave': 'PasswordSafe123!',
+            'clave2': 'PasswordSafe123!',
+            'terminos': 'on'
+        }
+        
+        try:
+            response = self.client.post('/cuenta/registro/', datos_registro)
+            self.assertEqual(response.status_code, 200)
+            
+            # Reemplazar tildes para evitar problemas de codificación en assertions
+            contenido_sin_tildes = response.content.replace(b'\xc3\xa1', b'a').replace(b'\xc3\xa9', b'e').replace(b'\xc3\xad', b'i').replace(b'\xc3\xb3', b'o').replace(b'\xc3\xba', b'u')
+            self.assertIn(b'Este correo electronico ya esta registrado', contenido_sin_tildes)
+        finally:
+            # 4. Limpieza final
+            with connection.cursor() as cursor:
+                try:
+                    cursor.execute("DELETE FROM profiles WHERE id = %s", [simulated_uuid])
+                    cursor.execute(f"DELETE FROM {table_name} WHERE id = %s", [simulated_uuid])
+                except Exception:
+                    pass
+
+    def test_admin_signup_duplicate_email_blocked(self):
+        """Verifica que no se permita registrar un administrador con un correo que ya existe."""
+        import uuid
+        from django.db import connection
+        from django.conf import settings
+        
+        table_name = '"auth.users"' if getattr(settings, 'USE_SQLITE', False) else 'auth.users'
+        email_dup = f"duplicate_email_admin_{uuid.uuid4().hex[:8]}@gmail.com"
+        unique_username = f"admin_{uuid.uuid4().hex[:10]}"
+        
+        # 1. Limpieza inicial
+        with connection.cursor() as cursor:
+            if getattr(settings, 'USE_SQLITE', False):
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS "auth.users" (
+                        id TEXT PRIMARY KEY,
+                        email TEXT UNIQUE,
+                        encrypted_password TEXT,
+                        role TEXT,
+                        email_confirmed_at TIMESTAMP
+                    )
+                    """
+                )
+            try:
+                cursor.execute(f"SELECT id FROM {table_name} WHERE email = %s", [email_dup])
+                row = cursor.fetchone()
+                if row:
+                    cursor.execute("DELETE FROM profiles WHERE id = %s", [row[0]])
+                cursor.execute(f"DELETE FROM {table_name} WHERE email = %s", [email_dup])
+            except Exception:
+                pass
+
+        # 2. Insertar un correo simulado directamente en la tabla auth.users
+        simulated_uuid = str(uuid.uuid4())
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"INSERT INTO {table_name} (id, email) VALUES (%s, %s)",
+                [simulated_uuid, email_dup]
+            )
+                
+        # 3. Simular petición de registro POST de administrador usando RequestFactory para evitar limitaciones de cookies firmadas en entorno de test
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.admin_views import registro_administrador
+        
+        rf = RequestFactory()
+        datos_registro = {
+            'nombre_completo': 'Admin Duplicado',
+            'nombre_usuario': unique_username,
+            'correo': email_dup,
+            'clave': 'PasswordSafe123!',
+            'confirmar_clave': 'PasswordSafe123!',
+            'terminos': 'on'
+        }
+        
+        request = rf.post('/admin-panel/registro/', datos_registro)
+        
+        # Aplicar SessionMiddleware para inicializar request.session
+        middleware = SessionMiddleware(get_response=lambda r: None)
+        middleware.process_request(request)
+        
+        # Superar pasarela
+        request.session['pasarela_administrador_superada'] = True
+        request.session.save()
+        
+        # Inicializar mensajes
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        request._messages = FallbackStorage(request)
+        
+        try:
+            response = registro_administrador(request)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn('/admin-panel/login/', response.url)
+        finally:
+            # 4. Limpieza final
+            with connection.cursor() as cursor:
+                try:
+                    cursor.execute("DELETE FROM profiles WHERE id = %s", [simulated_uuid])
+                    cursor.execute(f"DELETE FROM {table_name} WHERE id = %s", [simulated_uuid])
+                except Exception:
+                    pass
+
+
+
+    def test_anonymous_redirected_from_admin_pasarela(self):
+        """Verifica que un usuario anónimo sea redirigido de la pasarela de administrador al login de administración."""
+        response = self.client.get('/admin-panel/pasarela/')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/admin-panel/login/', response.url)
+
+    def test_anonymous_redirected_from_repartidor_pasarela(self):
+        """Verifica que un usuario anónimo sea redirigido de la pasarela de repartidor al login público."""
+        response = self.client.get('/repartidor/pasarela/')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/cuenta/ingreso/', response.url)
+        self.assertIn('next=/repartidor/pasarela/', response.url)
+
+
+class TestTripleLockSecurity(unittest.TestCase):
+    """
+    ISO 25010 – Pruebas del sistema de triple cerrojo (RBAC en tiempo real).
+
+    Verifica que los decoradores @requerir_administrador y @requiere_repartidor
+    rechacen correctamente el acceso cuando cualquiera de los tres cerrojos falla.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_admin_panel_blocked_without_gateway_flag(self):
+        """
+        Un usuario sin sesión activa debe ser redirigido al login.
+        """
+        response = self.client.get('/admin-panel/')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/admin-panel/login/', response.url)
+
+    def test_admin_panel_blocked_with_client_role_and_gateway(self):
+        """
+        Cerrojo 2: Un usuario con rol 'client' debe ser rechazado porque su rol no es 'admin'.
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.admin_views import tablero_administrador
+
+        rf = RequestFactory()
+        request = rf.get('/admin-panel/')
+        middleware = SessionMiddleware(get_response=lambda r: None)
+        middleware.process_request(request)
+
+        # Simular un usuario con rol 'client'
+        request.session['usuario_id'] = 'fake-user-id'
+        request.session['rol_usuario'] = 'client'  # Rol incorrecto
+        request.session.save()
+
+        response = tablero_administrador(request)
+        # El cerrojo 2 debe rechazarlo y redirigir a /admin-panel/login/
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/admin-panel/login/', response.url)
+
+    def test_repartidor_panel_blocked_without_gateway_flag(self):
+        """
+        Cerrojo 3: Un repartidor con rol correcto pero sin flag de pasarela
+        debe ser redirigido a la pasarela, no al panel.
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.repartidor_views import panel_repartidor
+
+        rf = RequestFactory()
+        request = rf.get('/repartidor/')
+        middleware = SessionMiddleware(get_response=lambda r: None)
+        middleware.process_request(request)
+
+        # Simular repartidor SIN flag de pasarela
+        request.session['usuario_id'] = 'fake-repartidor-id'
+        request.session['rol_usuario'] = 'repartidor'  # Rol correcto
+        # Deliberadamente NO se establece 'pasarela_repartidor_superada'
+        request.session.save()
+
+        response = panel_repartidor(request)
+        # El cerrojo 3 debe rechazarlo
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/repartidor/pasarela/', response.url)
+
+    def test_repartidor_panel_blocked_with_admin_role(self):
+        """
+        Cerrojo 2: Un admin que intenta acceder al panel de repartidor debe ser bloqueado
+        porque su rol no es 'repartidor'.
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.repartidor_views import panel_repartidor
+
+        rf = RequestFactory()
+        request = rf.get('/repartidor/')
+        middleware = SessionMiddleware(get_response=lambda r: None)
+        middleware.process_request(request)
+
+        # Simular admin intentando acceder a panel de repartidor
+        request.session['usuario_id'] = 'fake-admin-id'
+        request.session['rol_usuario'] = 'admin'  # Rol de admin, no repartidor
+        request.session['pasarela_repartidor_superada'] = True
+        request.session.save()
+
+        response = panel_repartidor(request)
+        # El cerrojo 2 debe rechazarlo — un admin NO es un repartidor
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/repartidor/pasarela/', response.url)
+
+    def test_admin_session_flushed_on_navigating_away(self):
+        """
+        RBAC & Aislamiento Estricto: Si un admin intenta acceder a una ruta de cliente 
+        (ej: /cuenta/perfil/), su sesión debe cerrarse (flush) y ser redirigido a '/'.
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.middleware import RoleVerificationMiddleware
+        
+        # Simular petición a /cuenta/perfil/
+        rf = RequestFactory()
+        request = rf.get('/cuenta/perfil/')
+        
+        # Aplicar middleware de sesión
+        session_middleware = SessionMiddleware(get_response=lambda r: None)
+        session_middleware.process_request(request)
+        
+        # Configurar rol de admin en la sesión
+        request.session['usuario_id'] = 'fake-admin-id'
+        request.session['rol_usuario'] = 'admin'
+        request.session.save()
+        
+        # Ejecutar middleware de verificación de rol
+        role_middleware = RoleVerificationMiddleware(get_response=lambda r: None)
+        response = role_middleware(request)
+        
+        # Debe redirigir a '/'
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+        
+        # La sesión debe haberse limpiado (usuario_id y rol_usuario borrados)
+        self.assertNotIn('usuario_id', request.session)
+        self.assertNotIn('rol_usuario', request.session)
+
+    def test_admin_access_admin_panel_successful(self):
+        """
+        ISO 25010: Un administrador registrado con rol correcto puede ingresar exitosamente al panel de control (200 OK).
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from core.admin_views import tablero_administrador
+        from users.models import Perfil
+
+        import uuid
+        # Crear perfil admin de prueba
+        admin_uuid = str(uuid.uuid4())
+        perfil_admin, _ = Perfil.objects.get_or_create(
+            id=admin_uuid,
+            defaults={
+                'nombre_completo': 'Admin Test',
+                'nombre_usuario': f'admin_test_{uuid.uuid4().hex[:6]}',
+                'rol': 'admin',
+                'esta_activo': True
+            }
+        )
+
+        try:
+            rf = RequestFactory()
+            request = rf.get('/admin-panel/')
+            
+            # Sesión
+            middleware = SessionMiddleware(get_response=lambda r: None)
+            middleware.process_request(request)
+            request.session['usuario_id'] = admin_uuid
+            request.session['rol_usuario'] = 'admin'
+            request.session['pasarela_administrador_superada'] = True
+            request.session.save()
+
+            # Mensajes
+            request._messages = FallbackStorage(request)
+
+            response = tablero_administrador(request)
+            self.assertEqual(response.status_code, 200)
+        finally:
+            # Limpiar
+            Perfil.objects.filter(id=admin_uuid).delete()
+
+    def test_repartidor_session_flushed_on_navigating_away(self):
+        """
+        RBAC & Aislamiento Estricto: Si un repartidor intenta acceder a una ruta de cliente 
+        (ej: /cuenta/perfil/), su sesión debe cerrarse (flush) y ser redirigido a '/'.
+        """
+        from django.test import RequestFactory
+        from django.contrib.sessions.middleware import SessionMiddleware
+        from core.middleware import RoleVerificationMiddleware
+        
+        # Simular petición a /cuenta/perfil/
+        rf = RequestFactory()
+        request = rf.get('/cuenta/perfil/')
+        
+        # Aplicar middleware de sesión
+        session_middleware = SessionMiddleware(get_response=lambda r: None)
+        session_middleware.process_request(request)
+        
+        # Configurar rol de repartidor en la sesión
+        request.session['usuario_id'] = 'fake-repartidor-id'
+        request.session['rol_usuario'] = 'repartidor'
+        request.session.save()
+        
+        # Ejecutar middleware de verificación de rol
+        role_middleware = RoleVerificationMiddleware(get_response=lambda r: None)
+        response = role_middleware(request)
+        
+        # Debe redirigir a '/'
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/')
+        
+        # La sesión debe haberse limpiado
+        self.assertNotIn('usuario_id', request.session)
+        self.assertNotIn('rol_usuario', request.session)
+
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

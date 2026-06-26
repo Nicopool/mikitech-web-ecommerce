@@ -1,82 +1,93 @@
-"""Vistas del panel administrativo con gateway SENA-2026 — MIKITECH"""
+"""Vistas del panel administrativo con gateway de seguridad — MIKITECH"""
 
 import uuid
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.views.decorators.http import require_POST
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.contrib import messages
 from products.models import Producto, Categoria, ImagenProducto
 from interactions.models import Reseña, Pedido
-from users.models import Perfil, Notificacion
+from users.models import Perfil, Notificacion, InvitacionAdmin, Rol
+from users.decorators import requiere_permiso
 import os
 from django.core.files.storage import default_storage
 
 
 from functools import wraps
 
-CODIGO_ADMIN = getattr(settings, 'ADMIN_GATEWAY_CODE', 'SENA-2026')
+def guardar_archivo_hibrido(nombre_unico, archivo):
+    """
+    Sube el archivo a Supabase Storage. Si falla, lo guarda localmente en el FileSystemStorage.
+    """
+    from users.supabase_auth import subir_a_supabase_storage
+    try:
+        datos = archivo.read()
+        archivo.seek(0)
+        url_publica, error = subir_a_supabase_storage(nombre_unico, datos, archivo.content_type)
+        if url_publica:
+            return url_publica
+        else:
+            print(f"[!] Error Supabase Storage: {error}, usando fallback local...")
+    except Exception as ex:
+        print(f"[!] Excepción Supabase Storage: {ex}, usando fallback local...")
+        
+    ruta_guardada = default_storage.save(nombre_unico, archivo)
+    return f"{settings.MEDIA_URL}{ruta_guardada}"
+
+CODIGO_ADMIN = getattr(settings, 'ADMIN_GATEWAY_CODE', '')
 
 
 def requerir_administrador(función_vista):
-    """Decorador que requiere rol admin (administrador)."""
+    """
+    Decorador para rutas administrativas.
+
+    Verifica en orden:
+    1. Que exista una sesión activa con usuario_id.
+    2. Que el rol de sesión sea 'admin'.
+    """
     @wraps(función_vista)
     def envoltura(petición, *args, **kwargs):
-        if not petición.session.get('usuario_id') or petición.session.get('rol_usuario') != 'admin':
-            return redirect('core:admin_gateway') if 'core' in petición.resolver_match.namespaces else redirect('/admin-panel/pasarela/')
+        # Cerrojo 1: debe haber sesión activa
+        if not petición.session.get('usuario_id'):
+            return redirect('/admin-panel/login/')
+
+        # Cerrojo 2: el rol de sesión (sincronizado con BD) debe ser 'admin'
+        if petición.session.get('rol_usuario') != 'admin':
+            return redirect('/admin-panel/login/')
+
         return función_vista(petición, *args, **kwargs)
     return envoltura
 
 
 def pasarela(petición):
-    """Pasarela de seguridad inicial solicitando el código SENA-2026."""
-    # Si ya está logueado como admin, ir directo al panel
-    if petición.session.get('rol_usuario') == 'admin':
-        return redirect('/admin-panel/')
-
-    # Si NO hay sesión de admin activa, limpiar la pasarela para forzar el código siempre
-    if not petición.session.get('usuario_id'):
-        if 'pasarela_administrador_superada' in petición.session:
-            del petición.session['pasarela_administrador_superada']
-            petición.session.modified = True
-
-    if petición.session.get('pasarela_administrador_superada'):
-        return redirect('/admin-panel/login/')
-
-    if petición.method == 'POST':
-        codigo_enviado = petición.POST.get('codigo_secreto', '').strip()
-        if codigo_enviado == CODIGO_ADMIN:
-            petición.session['pasarela_administrador_superada'] = True
-            petición.session.modified = True
-            return redirect('/admin-panel/login/')
-        return render(petición, 'admin_panel/gateway.html', {
-            'error': 'Código de acceso incorrecto.',
-            'titulo_pagina': 'Acceso Restringido — MIKITECH',
-        })
-
-    return render(petición, 'admin_panel/gateway.html', {
-        'titulo_pagina': 'Acceso Restringido — MIKITECH',
-    })
-
+    """Redirecciona al login de administración al estar descontinuada la pasarela."""
+    return redirect('/admin-panel/login/')
 
 
 def login_administrador(petición):
     """Inicio de sesión exclusivo para administradores."""
-    if not petición.session.get('pasarela_administrador_superada'):
-        return redirect('/admin-panel/pasarela/')
-
     if petición.session.get('rol_usuario') == 'admin':
         return redirect('/admin-panel/')
 
     if petición.method == 'POST':
-        from users.supabase_auth import iniciar_sesion_usuario # Asumiendo traducción en users/supabase_auth.py
+        from users.supabase_auth import iniciar_sesion_usuario
         correo = petición.POST.get('correo', '').strip()
         clave = petición.POST.get('clave', '')
+        terminos = petición.POST.get('terminos')
+
+        if not terminos:
+            return render(petición, 'admin_panel/login.html', {
+                'error': 'Debes aceptar los Términos y Condiciones.',
+                'correo': correo,
+                'titulo_pagina': 'Login Administrador — MIKITECH',
+            })
 
         datos, error = iniciar_sesion_usuario(correo, clave)
 
         if error:
             return render(petición, 'admin_panel/login.html', {
-                'error': 'Credenciales incorrectas o acceso denegado.',
+                'error': f'Credenciales incorrectas: {error}',
                 'correo': correo,
                 'titulo_pagina': 'Login Administrador — MIKITECH',
             })
@@ -84,23 +95,51 @@ def login_administrador(petición):
         id_usuario = datos.get('user', {}).get('id')
         try:
             perfil = Perfil.objects.get(id=id_usuario)
-            if not perfil.es_administrador:
+            if perfil.rol != 'admin':
                 return render(petición, 'admin_panel/login.html', {
-                    'error': 'No posees permisos de administrador.',
+                    'error': 'Acceso denegado: Este usuario no tiene permisos de administrador.',
+                    'correo': correo,
                     'titulo_pagina': 'Login Administrador — MIKITECH',
                 })
             petición.session['usuario_id'] = id_usuario
             petición.session['token_acceso'] = datos.get('access_token')
             petición.session['rol_usuario'] = 'admin'
+            petición.session['pasarela_administrador_superada'] = True  # Confirmar autorización completa
             petición.session['nombre_usuario'] = perfil.nombre_usuario
             petición.session['avatar_url'] = perfil.url_avatar or ''
             petición.session.modified = True
+            messages.success(petición, f'✅ ¡Haz ingresado exitosamente! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
             return redirect('/admin-panel/')
         except Perfil.DoesNotExist:
-            return render(petición, 'admin_panel/login.html', {
-                'error': 'Perfil de administrador no encontrado en la base de datos.',
-                'titulo_pagina': 'Login Administrador — MIKITECH',
-            })
+            user_data = datos.get('user', {})
+            metadata = user_data.get('user_metadata', {})
+            role = metadata.get('role')
+            
+            if role == 'admin':
+                nombre_completo = metadata.get('full_name', 'Administrador')
+                nombre_usuario = metadata.get('username', correo.split('@')[0])
+                perfil = Perfil.objects.create(
+                    id=id_usuario,
+                    nombre_completo=nombre_completo,
+                    nombre_usuario=nombre_usuario,
+                    rol='admin',
+                    esta_activo=True
+                )
+                petición.session['usuario_id'] = id_usuario
+                petición.session['token_acceso'] = datos.get('access_token')
+                petición.session['rol_usuario'] = 'admin'
+                petición.session['pasarela_administrador_superada'] = True  # Confirmar autorización completa
+                petición.session['nombre_usuario'] = perfil.nombre_usuario
+                petición.session['avatar_url'] = perfil.url_avatar or ''
+                petición.session.modified = True
+                messages.success(petición, f'✅ ¡Haz ingresado exitosamente! Bienvenido al Panel de Administración, {perfil.nombre_usuario}.')
+                return redirect('/admin-panel/')
+            else:
+                return render(petición, 'admin_panel/login.html', {
+                    'error': 'Acceso denegado: Tu usuario no tiene el rol de administrador asignado.',
+                    'correo': correo,
+                    'titulo_pagina': 'Login Administrador — MIKITECH',
+                })
 
     return render(petición, 'admin_panel/login.html', {
         'titulo_pagina': 'Login Administrador — MIKITECH',
@@ -108,83 +147,130 @@ def login_administrador(petición):
 
 
 def registro_administrador(petición):
-    """Registro de nuevos administradores (requiere pasar pasarela)."""
-    if not petición.session.get('pasarela_administrador_superada'):
-        return redirect('/admin-panel/pasarela/')
-
-    if petición.session.get('rol_usuario') == 'admin':
-        return redirect('/admin-panel/')
-
-    if petición.method == 'POST':
-        from users.supabase_auth import registrar_usuario
-        nombre_completo = petición.POST.get('nombre_completo', '').strip()
-        nombre_usuario = petición.POST.get('nombre_usuario', '').strip()
-        correo = petición.POST.get('correo', '').strip()
-        clave = petición.POST.get('clave', '')
-        confirmar_clave = petición.POST.get('confirmar_clave', '')
-
-        contexo = {
-            'nombre_completo': nombre_completo,
-            'nombre_usuario': nombre_usuario,
-            'correo': correo,
-            'titulo_pagina': 'Registro Administrador — MIKITECH',
-        }
-
-        if not all([nombre_completo, nombre_usuario, correo, clave]):
-            contexo['error'] = 'Por favor completa todos los campos del formulario.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        if clave != confirmar_clave:
-            contexo['error'] = 'Las contraseñas no coinciden.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        if len(clave) < 6:
-            contexo['error'] = 'La contraseña debe tener al menos 6 caracteres.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        if Perfil.objects.filter(nombre_usuario=nombre_usuario).exists():
-            contexo['error'] = 'Ese nombre de usuario ya está registrado.'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        datos, error = registrar_usuario(correo, clave, nombre_completo, nombre_usuario, rol='admin')
-
-        if error:
-            contexo['error'] = f'Error en el registro: {error}'
-            return render(petición, 'admin_panel/register.html', contexo)
-
-        # Bypass the Supabase Email Confirmation locally for admin signups
-        try:
-            from django.db import connection
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "UPDATE auth.users SET email_confirmed_at = NOW() WHERE email = %s", 
-                    [correo]
-                )
-        except Exception as e:
-            print("No se pudo saltar la confirmación de correo:", e)
-
-        return render(petición, 'admin_panel/login.html', {
-            'success': 'Cuenta de administrador creada y verificada automáticamente. Ya puedes iniciar sesión.',
-            'titulo_pagina': 'Login Administrador — MIKITECH'
-        })
-
-    return render(petición, 'admin_panel/register.html', {
-        'titulo_pagina': 'Registro Administrador — MIKITECH',
-    })
+    """El registro público de administradores ha sido inhabilitado. Redirige al login."""
+    try:
+        messages.warning(petición, 'El registro público de administradores ha sido inhabilitado por políticas de seguridad. El acceso es exclusivamente por invitación.')
+    except Exception:
+        pass
+    return redirect('/admin-panel/login/')
 
 
 def cerrar_sesion_administrador(petición):
-    """Cierra la sesión y limpia el rastro de la pasarela."""
+    """Cierra la sesión del administrador."""
     petición.session.flush()
-    return redirect('/admin-panel/pasarela/')
+    return redirect('/admin-panel/login/')
 
 
 @requerir_administrador
+@requiere_permiso('ver_reportes')
 def tablero_administrador(petición):
-    """Estadísticas principales del panel."""
+    """Estadísticas principales del panel con filtro de tiempo (Semana, Mes, Año, Todo)."""
     from django.db.models import Sum, F
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    filtro_tiempo = petición.GET.get('filtro_tiempo', 'mes')
+    if filtro_tiempo not in ['semana', 'mes', 'anio', 'todo']:
+        filtro_tiempo = 'mes'
+        
+    ahora = timezone.now()
+    fecha_inicio = None
+    
+    if filtro_tiempo == 'semana':
+        fecha_inicio = ahora - timedelta(days=7)
+    elif filtro_tiempo == 'mes':
+        fecha_inicio = ahora - timedelta(days=30)
+    elif filtro_tiempo == 'anio':
+        fecha_inicio = ahora - timedelta(days=365)
+        
+    # Calcular ingresos estimados del periodo seleccionado
+    pedido_qs = Pedido.objects.filter(estado__in=['delivered', 'shipped'])
+    if fecha_inicio:
+        pedido_qs = pedido_qs.filter(creado_el__gte=fecha_inicio)
+        
+    ingresos_estimados = pedido_qs.aggregate(total=Sum('monto_total'))['total'] or 0
+    
+    # Calcular ingresos del periodo anterior para porcentaje de cambio
+    porcentaje_cambio = 0
+    comparacion_texto = "vs periodo anterior"
+    
+    if fecha_inicio:
+        duracion = ahora - fecha_inicio
+        fecha_inicio_anterior = fecha_inicio - duracion
+        
+        ingresos_periodo_anterior = Pedido.objects.filter(
+            estado__in=['delivered', 'shipped'],
+            creado_el__range=[fecha_inicio_anterior, fecha_inicio]
+        ).aggregate(total=Sum('monto_total'))['total'] or 0
+        
+        if ingresos_periodo_anterior > 0:
+            porcentaje_cambio = ((ingresos_estimados - ingresos_periodo_anterior) / ingresos_periodo_anterior) * 100
+        else:
+            porcentaje_cambio = 100 if ingresos_estimados > 0 else 0
+            
+        if filtro_tiempo == 'semana':
+            comparacion_texto = "vs semana anterior"
+        elif filtro_tiempo == 'mes':
+            comparacion_texto = "vs mes anterior"
+        elif filtro_tiempo == 'anio':
+            comparacion_texto = "vs año anterior"
+    else:
+        comparacion_texto = "en total histórico"
+        porcentaje_cambio = 100
+        
+    # Calcular datos del gráfico
+    chart_labels = []
+    chart_data = []
+    
+    if filtro_tiempo == 'semana':
+        for i in range(6, -1, -1):
+            dia = ahora.date() - timedelta(days=i)
+            label = dia.strftime('%d %b')
+            chart_labels.append(label)
+            
+            ingresos_dia = Pedido.objects.filter(
+                estado__in=['delivered', 'shipped'],
+                creado_el__date=dia
+            ).aggregate(total=Sum('monto_total'))['total'] or 0
+            chart_data.append(float(ingresos_dia))
+            
+    elif filtro_tiempo == 'mes':
+        for i in range(3, -1, -1):
+            fin_periodo = ahora - timedelta(days=i*7)
+            inicio_periodo = fin_periodo - timedelta(days=6)
+            label = f"Semana {4-i}"
+            chart_labels.append(label)
+            
+            ingresos_periodo = Pedido.objects.filter(
+                estado__in=['delivered', 'shipped'],
+                creado_el__range=[inicio_periodo, fin_periodo]
+            ).aggregate(total=Sum('monto_total'))['total'] or 0
+            chart_data.append(float(ingresos_periodo))
+            
+    else:  # 'anio' o 'todo'
+        for i in range(11, -1, -1):
+            año_ref = ahora.year
+            mes_ref = ahora.month - i
+            while mes_ref <= 0:
+                mes_ref += 12
+                año_ref -= 1
+            
+            import calendar
+            _, ultimo_dia = calendar.monthrange(año_ref, mes_ref)
+            
+            inicio_mes = timezone.make_aware(timezone.datetime(año_ref, mes_ref, 1, 0, 0, 0))
+            fin_mes = timezone.make_aware(timezone.datetime(año_ref, mes_ref, ultimo_dia, 23, 59, 59))
+            
+            nombre_mes = inicio_mes.strftime('%b %y')
+            chart_labels.append(nombre_mes)
+            
+            ingresos_mes = Pedido.objects.filter(
+                estado__in=['delivered', 'shipped'],
+                creado_el__range=[inicio_mes, fin_mes]
+            ).aggregate(total=Sum('monto_total'))['total'] or 0
+            chart_data.append(float(ingresos_mes))
+            
     valor_total_inv = Producto.objects.aggregate(total=Sum(F('precio') * F('existencias')))['total'] or 0
-    ingresos_estimados = Pedido.objects.filter(estado__in=['delivered', 'shipped']).aggregate(total=Sum('monto_total'))['total'] or 0
     
     estadísticas = {
         'total_productos': Producto.objects.count(),
@@ -203,6 +289,11 @@ def tablero_administrador(petición):
         'estadisticas': estadísticas,
         'productos_recientes': productos_recientes,
         'resenas_recientes': reseñas_recientes,
+        'porcentaje_cambio': porcentaje_cambio,
+        'comparacion_texto': comparacion_texto,
+        'filtro_tiempo': filtro_tiempo,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
         'titulo_pagina': 'Tablero de Control — MIKITECH',
     })
 
@@ -277,18 +368,17 @@ def crear_producto(petición):
                 if 'archivo_imagen' in petición.FILES:
                     archivo = petición.FILES['archivo_imagen']
                     nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-                    ruta_guardada = default_storage.save(nombre_unico, archivo)
-                    nuevo_prod.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
+                    nuevo_prod.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
                     nuevo_prod.save()
 
                 # Galería de Imágenes
                 if 'archivos_galeria' in petición.FILES:
                     for f in petición.FILES.getlist('archivos_galeria'):
                         nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
-                        ruta_extra = default_storage.save(nombre_extra, f)
+                        url_extra = guardar_archivo_hibrido(nombre_extra, f)
                         ImagenProducto.objects.create(
                             producto=nuevo_prod,
-                            url_imagen=f"{settings.MEDIA_URL}{ruta_extra}"
+                            url_imagen=url_extra
                         )
                 
                 messages.success(petición, f'Producto "{nombre}" creado con éxito.')
@@ -324,17 +414,16 @@ def editar_producto(petición, id_producto):
         if 'archivo_imagen' in petición.FILES:
             archivo = petición.FILES['archivo_imagen']
             nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-            ruta_guardada = default_storage.save(nombre_unico, archivo)
-            producto.url_imagen_principal = f"{settings.MEDIA_URL}{ruta_guardada}"
+            producto.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
             
         # Galería: Nuevas Imágenes
         if 'archivos_galeria' in petición.FILES:
             for f in petición.FILES.getlist('archivos_galeria'):
                 nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
-                ruta_extra = default_storage.save(nombre_extra, f)
+                url_extra = guardar_archivo_hibrido(nombre_extra, f)
                 ImagenProducto.objects.create(
                     producto=producto,
-                    url_imagen=f"{settings.MEDIA_URL}{ruta_extra}"
+                    url_imagen=url_extra
                 )
 
         # Galería: Eliminaciones
@@ -409,8 +498,7 @@ def crear_categoria(petición):
         if 'archivo_imagen' in petición.FILES:
             archivo = petición.FILES['archivo_imagen']
             nombre_unico = f"categories/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-            ruta_guardada = default_storage.save(nombre_unico, archivo)
-            url_imagen = f"{settings.MEDIA_URL}{ruta_guardada}"
+            url_imagen = guardar_archivo_hibrido(nombre_unico, archivo)
         
         if not nombre:
             return render(petición, 'admin_panel/category_form.html', {
@@ -457,8 +545,7 @@ def editar_categoria(petición, id_cat):
         if 'archivo_imagen' in petición.FILES:
             archivo = petición.FILES['archivo_imagen']
             nombre_unico = f"categories/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-            ruta_guardada = default_storage.save(nombre_unico, archivo)
-            categoría.url_imagen = f"{settings.MEDIA_URL}{ruta_guardada}"
+            categoría.url_imagen = guardar_archivo_hibrido(nombre_unico, archivo)
         else:
             categoría.url_imagen = petición.POST.get('url_imagen', categoría.url_imagen).strip()
         categoría.save()
@@ -499,6 +586,70 @@ def gestion_usuarios(petición):
         'conteo_admin': conteo_admin,
         'conteo_cliente': conteo_cliente,
         'titulo_pagina': 'Gestión de Usuarios — MIKITECH',
+    })
+
+
+@requerir_administrador
+def editar_usuario(petición, id_usuario):
+    """Permite al administrador editar cualquier usuario (datos de texto y foto)."""
+    usuario = get_object_or_404(Perfil, id=id_usuario)
+    
+    if petición.method == 'POST':
+        from users.photo_manager import UserPhotoManager
+        
+        nombre_completo = petición.POST.get('nombre_completo', '').strip()
+        nombre_usuario = petición.POST.get('nombre_usuario', '').strip()
+        email = petición.POST.get('email', '').strip()
+        rol = petición.POST.get('rol', '').strip()
+        esta_activo = petición.POST.get('esta_activo') == 'on'
+        telefono = petición.POST.get('telefono', '').strip()
+        biografia = petición.POST.get('biografia', '').strip()
+        ciudad = petición.POST.get('ciudad', '').strip()
+        pais = petición.POST.get('pais', '').strip()
+        
+        # Validar campos requeridos
+        if not nombre_usuario:
+            messages.error(petición, "El nombre de usuario es obligatorio.")
+            return render(petición, 'admin_panel/edit_user.html', {
+                'usuario': usuario,
+                'titulo_pagina': f'Editar Usuario: {usuario.nombre_mostrado} — MIKITECH',
+            })
+            
+        # Comprobar si el nombre de usuario ya existe en otro perfil
+        if Perfil.objects.filter(nombre_usuario=nombre_usuario).exclude(id=usuario.id).exists():
+            messages.error(petición, "El nombre de usuario ya está en uso.")
+            return render(petición, 'admin_panel/edit_user.html', {
+                'usuario': usuario,
+                'titulo_pagina': f'Editar Usuario: {usuario.nombre_mostrado} — MIKITECH',
+            })
+            
+        data = {
+            'nombre_completo': nombre_completo,
+            'nombre_usuario': nombre_usuario,
+            'rol': rol,
+            'esta_activo': esta_activo,
+            'telefono': telefono,
+            'biografia': biografia,
+            'ciudad': ciudad,
+            'pais': pais,
+        }
+        
+        if email:
+            data['email'] = email
+            
+        photo_file = petición.FILES.get('avatar')
+        
+        updated_profile, error = UserPhotoManager.update_user(id_usuario, data, photo_file)
+        
+        if error:
+            messages.error(petición, f"Error actualizando el usuario: {error}")
+        else:
+            messages.success(petición, f"Usuario '{updated_profile.nombre_mostrado}' actualizado correctamente.")
+            return redirect('/admin-panel/usuarios/')
+            
+    return render(petición, 'admin_panel/edit_user.html', {
+        'usuario': usuario,
+        'titulo_pagina': f'Editar Usuario: {usuario.nombre_mostrado} — MIKITECH',
     })
 
 
@@ -691,6 +842,9 @@ def asignar_repartidor_admin(petición, id_pedido):
     else:
         messages.warning(petición, 'No se seleccionó ningún repartidor.')
         
+    referer = petición.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
     return redirect('admin_logistics')
 
 
@@ -713,8 +867,20 @@ def cambiar_estado_pedido(petición, id_pedido):
         status_to_save = mapping.get(nuevo_estado_es)
         
         if status_to_save:
+            if status_to_save == 'delivered':
+                cedula_cliente = petición.POST.get('cedula_cliente', '').strip()
+                if not cedula_cliente or cedula_cliente != pedido.cedula:
+                    messages.error(petición, f"Validación de Cédula Fallida: La cédula ingresada no coincide.")
+                    referer = petición.META.get('HTTP_REFERER')
+                    if referer:
+                        return redirect(referer)
+                    return redirect('admin_orders')
+                    
             estado_anterior = pedido.estado
             pedido.estado = status_to_save
+            if status_to_save == 'delivered':
+                from django.utils import timezone
+                pedido.entregado_el = timezone.now()
             pedido.save()
             
             # Notificaciones Automáticas según el estado
@@ -738,14 +904,43 @@ def cambiar_estado_pedido(petición, id_pedido):
             else:
                 messages.success(petición, f"Estado del pedido #{str(pedido.id)[:8]} actualizado a {nuevo_estado_es}.")
             
+    referer = petición.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
     return redirect('admin_logistics')
 
 
 @requerir_administrador
+@xframe_options_sameorigin
 def ver_factura_pedido(petición, id_pedido):
-    """Vista detallada de factura para impresión administrativa."""
+    """Vista detallada de factura para impresión administrativa o datos JSON."""
     pedido = get_object_or_404(Pedido.objects.prefetch_related('detalles__producto'), id=id_pedido)
     perfil = pedido.usuario
+
+    if petición.GET.get('format') == 'json':
+        from django.http import JsonResponse
+        detalles_list = []
+        for det in pedido.detalles.all():
+            detalles_list.append({
+                'nombre': det.producto.nombre if det.producto else "Producto descatalogado",
+                'cantidad': det.cantidad,
+                'precio': float(det.precio_unitario)
+            })
+        
+        # Localized/formatted date
+        fecha_str = pedido.creado_el.strftime('%d/%m/%Y') if pedido.creado_el else ''
+        
+        return JsonResponse({
+            'order_id': str(pedido.id),
+            'creado_el': fecha_str,
+            'monto_total': float(pedido.monto_total),
+            'cliente_nombre': perfil.nombre_mostrado if perfil else "Cliente Genérico",
+            'cliente_username': perfil.nombre_usuario if perfil else "cliente",
+            'cliente_telefono': pedido.telefono or (perfil.telefono if perfil and perfil.telefono else '') or '+57 300 000 0000',
+            'direccion_envio': pedido.direccion_envio or 'Retiro en tienda',
+            'cedula': pedido.cedula or 'N/A',
+            'detalles': detalles_list
+        })
     
     # Cálculos de impuestos para la factura legal
     import decimal
@@ -761,3 +956,606 @@ def ver_factura_pedido(petición, id_pedido):
         'iva_monto': iva_monto,
         'titulo_pagina': f'Factura #{str(pedido.id)[:8].upper()} — MIKITECH',
     })
+
+
+@requerir_administrador
+def descargar_plantilla_excel(petición):
+    import openpyxl
+    from django.http import HttpResponse
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Plantilla Productos"
+    columnas = ["NOMBRE", "CATEGORIA", "PRECIO", "STOCK", "MARCA", "DESCRIPCION", "URL_IMAGEN"]
+    ws.append(columnas)
+    ws.append(["Audífonos Bluetooth Pro", "Electrónica", 150000, 50, "Sony", "Audífonos con cancelación de ruido", "https://ejemplo.com/imagen.jpg"])
+    
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_productos_mikitech.xlsx"'
+    wb.save(response)
+    return response
+
+
+@requerir_administrador
+def carga_masiva_productos(petición):
+    import openpyxl
+    import json as json_lib
+    campos_referencia = [
+        {'nombre': 'NOMBRE', 'requerido': True, 'descripcion': 'Nombre del producto.'},
+        {'nombre': 'CATEGORIA', 'requerido': True, 'descripcion': 'Nombre de la categoría (se crea si no existe).'},
+        {'nombre': 'PRECIO', 'requerido': True, 'descripcion': 'Precio de venta al público sin puntos ni comas.'},
+        {'nombre': 'STOCK', 'requerido': True, 'descripcion': 'Cantidad disponible en bodega.'},
+        {'nombre': 'MARCA', 'requerido': False, 'descripcion': 'Marca del fabricante.'},
+        {'nombre': 'DESCRIPCION', 'requerido': False, 'descripcion': 'Detalle completo del producto.'},
+        {'nombre': 'URL_IMAGEN', 'requerido': False, 'descripcion': 'Enlace directo a la imagen principal.'},
+    ]
+
+    reporte = None
+    
+    if petición.method == 'POST':
+        archivo = petición.FILES.get('archivo_excel')
+        omitir_errores = petición.POST.get('omitir_errores') == 'on'
+        omitir_duplicados = petición.POST.get('omitir_duplicados') == 'on'
+        
+        if not archivo:
+            messages.error(petición, 'Por favor sube un archivo válido (.xlsx o .json).')
+        elif not (archivo.name.endswith('.xlsx') or archivo.name.endswith('.json')):
+            messages.error(petición, 'Formato no soportado. Usa archivos .xlsx o .json.')
+        else:
+            try:
+                from django.utils.text import slugify
+                
+                creados = 0
+                errores = 0
+                omitidos = 0
+                detalles = []
+                
+                # ── Construir lista unificada de filas ──────────────────────
+                filas = []  # lista de dicts con claves normalizadas
+                
+                if archivo.name.endswith('.json'):
+                    # ── Lectura JSON ────────────────────────────────────────
+                    contenido = archivo.read().decode('utf-8')
+                    datos_json = json_lib.loads(contenido)
+                    if not isinstance(datos_json, list):
+                        raise Exception("El JSON debe ser un arreglo de objetos. Ej: [{...}, {...}]")
+                    for i, obj in enumerate(datos_json):
+                        if not isinstance(obj, dict):
+                            raise Exception(f"Elemento #{i+1} no es un objeto válido.")
+                        # Normalizar claves a MAYÚSCULAS
+                        norm = {k.strip().upper(): v for k, v in obj.items()}
+                        filas.append((i + 1, norm))
+                else:
+                    # ── Lectura Excel ───────────────────────────────────────
+                    wb = openpyxl.load_workbook(archivo)
+                    ws = wb.active
+                    headers = [str(cell.value).strip().upper() if cell.value else "" for cell in ws[1]]
+                    col_map = {name: i for i, name in enumerate(headers)}
+                    
+                    for fila_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                        if not any(row):
+                            continue
+                        norm = {}
+                        for col_name, col_i in col_map.items():
+                            if col_i < len(row):
+                                norm[col_name] = row[col_i]
+                        filas.append((fila_idx, norm))
+                
+                # ── Verificar columnas requeridas ──────────────────────────
+                if filas:
+                    req_cols = ["NOMBRE", "CATEGORIA", "PRECIO", "STOCK"]
+                    primera_fila_keys = set(filas[0][1].keys())
+                    faltantes = [c for c in req_cols if c not in primera_fila_keys]
+                    if faltantes:
+                        raise Exception(f"El archivo debe contener los campos: {', '.join(faltantes)}")
+                
+                # ── Procesar cada fila ─────────────────────────────────────
+                for fila_idx, datos in filas:
+                    nombre = datos.get("NOMBRE")
+                    cat_nombre = datos.get("CATEGORIA")
+                    precio = datos.get("PRECIO")
+                    stock = datos.get("STOCK")
+                    marca = datos.get("MARCA", "")
+                    desc = datos.get("DESCRIPCION", "")
+                    url_img = datos.get("URL_IMAGEN", "")
+                    
+                    if not nombre or not cat_nombre or precio is None or stock is None:
+                        errores += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "error", "mensaje": "Faltan datos obligatorios"})
+                        if not omitir_errores: break
+                        continue
+                        
+                    if omitir_duplicados and Producto.objects.filter(nombre=nombre).exists():
+                        omitidos += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "omitido", "mensaje": "Producto duplicado"})
+                        continue
+                        
+                    try:
+                        cat_slug = slugify(cat_nombre)
+                        categoria, _ = Categoria.objects.get_or_create(
+                            enlace=cat_slug, 
+                            defaults={"nombre": cat_nombre, "id": uuid.uuid4()}
+                        )
+                        
+                        prod_slug = slugify(nombre)
+                        base_enlace = prod_slug
+                        contador = 1
+                        while Producto.objects.filter(enlace=prod_slug).exists():
+                            prod_slug = f"{base_enlace}-{contador}"
+                            contador += 1
+                            
+                        Producto.objects.create(
+                            id=uuid.uuid4(),
+                            categoria=categoria,
+                            nombre=nombre,
+                            enlace=prod_slug,
+                            precio=float(precio),
+                            existencias=int(stock),
+                            marca=marca or "",
+                            descripcion=desc or "",
+                            url_imagen_principal=url_img or "",
+                            esta_activo=True
+                        )
+                        creados += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "ok", "mensaje": "Producto creado con éxito"})
+                    except Exception as e:
+                        errores += 1
+                        detalles.append({"fila": fila_idx, "nombre": nombre, "categoria": cat_nombre, "estado": "error", "mensaje": str(e)[:50]})
+                        if not omitir_errores: break
+                
+                reporte = {
+                    "creados": creados,
+                    "errores": errores,
+                    "omitidos": omitidos,
+                    "detalles": detalles
+                }
+                messages.success(petición, 'Proceso de importación finalizado.')
+            except json_lib.JSONDecodeError as e:
+                messages.error(petición, f'Error de sintaxis en el JSON: {str(e)[:80]}')
+            except Exception as e:
+                messages.error(petición, f'Error al procesar el archivo: {str(e)}')
+            
+    return render(petición, 'admin_panel/bulk_upload.html', {
+        'campos_referencia': campos_referencia,
+        'reporte': reporte,
+        'titulo_pagina': 'Carga Masiva — MIKITECH'
+    })
+
+
+@requerir_administrador
+def gestion_pedidos(petición):
+    """Gestión interactiva de pedidos (pedidos en proceso e historial)."""
+    pedidos = Pedido.objects.select_related('usuario', 'repartidor').prefetch_related('detalles__producto').order_by('-creado_el')
+    repartidores = Perfil.objects.filter(rol='repartidor', esta_activo=True).order_by('nombre_usuario')
+    
+    return render(petición, 'admin_panel/orders.html', {
+        'pedidos': pedidos,
+        'repartidores': repartidores,
+        'titulo_pagina': 'Gestión de Pedidos — MIKITECH',
+    })
+
+
+def asegurar_notificaciones_admin(usuario_id):
+    """
+    Genera dinámicamente notificaciones para el administrador si existen:
+    - Productos con bajo stock (<= 5).
+    - Reseñas pendientes de aprobación.
+    - Pedidos pendientes.
+    """
+    from products.models import Producto
+    from interactions.models import Reseña, Pedido
+    from users.models import Notificacion
+    
+    # 1. Bajo stock
+    productos_bajo_stock = Producto.objects.filter(existencias__lte=5, esta_activo=True)
+    for p in productos_bajo_stock:
+        mensaje = f"⚠️ Bajo stock en {p.nombre} ({p.existencias} unidades). Reabastece aquí.|/admin-panel/productos/editar/{p.id}/"
+        if not Notificacion.objects.filter(usuario_id=usuario_id, mensaje__startswith=f"⚠️ Bajo stock en {p.nombre}", esta_leida=False).exists():
+            Notificacion.objects.create(
+                usuario_id=usuario_id,
+                mensaje=mensaje,
+                esta_leida=False
+            )
+            
+    # 2. Reseñas pendientes
+    resenas_pendientes = Reseña.objects.filter(esta_aprobada=False)
+    for r in resenas_pendientes:
+        mensaje = f"💬 Nueva reseña pendiente de moderación para {r.producto.nombre}.|/admin-panel/resenas/"
+        if not Notificacion.objects.filter(usuario_id=usuario_id, mensaje__startswith="💬 Nueva reseña pendiente de moderación", esta_leida=False).exists():
+            Notificacion.objects.create(
+                usuario_id=usuario_id,
+                mensaje=mensaje,
+                esta_leida=False
+            )
+            
+    # 3. Pedidos pendientes
+    pedidos_pendientes = Pedido.objects.filter(estado__in=['pending', 'processing', 'Pendiente'])
+    for ped in pedidos_pendientes:
+        id_corto = str(ped.id)[:8]
+        mensaje = f"📦 Pedido pendiente #{id_corto} esperando asignación de logística.|/admin-panel/logistica/"
+        if not Notificacion.objects.filter(usuario_id=usuario_id, mensaje__startswith=f"📦 Pedido pendiente #{id_corto}", esta_leida=False).exists():
+            Notificacion.objects.create(
+                usuario_id=usuario_id,
+                mensaje=mensaje,
+                esta_leida=False
+            )
+
+
+@requerir_administrador
+def leer_notificacion_admin(petición, id_notificacion):
+    """Marca una notificación específica como leída y redirige al destino."""
+    notificacion = get_object_or_404(Notificacion, id=id_notificacion)
+    notificacion.esta_leida = True
+    notificacion.save()
+    
+    mensaje = notificacion.mensaje
+    if '|' in mensaje:
+        partes = mensaje.split('|')
+        url_destino = partes[1].strip()
+        return redirect(url_destino)
+        
+    return redirect('/admin-panel/')
+
+
+# -------------------------------------------------------------
+# SISTEMA DE INVITACIONES PARA ADMINISTRADORES & SEGURIDAD RBAC
+# -------------------------------------------------------------
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+def gestion_invitaciones_admin(petición):
+    """Muestra todas las invitaciones y los administradores activos."""
+    invitaciones = InvitacionAdmin.objects.all().order_by('-fecha_envio')
+    
+    # Actualizar estado de expiración de invitaciones pendientes si ya pasó su fecha
+    from django.utils import timezone
+    ahora = timezone.now()
+    for inv in invitaciones.filter(estado='pendiente', fecha_expiracion__lt=ahora):
+        inv.estado = 'expirada'
+        inv.save()
+        
+    usuarios = Perfil.objects.filter(rol='admin').order_by('nombre_usuario')
+    
+    return render(petición, 'admin_panel/invitations.html', {
+        'titulo_pagina': 'Gestionar Administradores — MIKITECH',
+        'invitaciones': invitaciones,
+        'usuarios_admin': usuarios,
+    })
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+def crear_invitacion_admin(petición):
+    """Crea una nueva invitación y registra al administrador temporalmente."""
+    if petición.method == 'POST':
+        email = petición.POST.get('email', '').strip()
+        nombre_completo = petición.POST.get('nombre_completo', '').strip()
+        notas = petición.POST.get('notas_internas', '').strip()
+
+        if not email:
+            messages.error(petición, 'El correo electrónico es obligatorio.')
+            return redirect('/admin-panel/invitaciones/')
+
+        import re
+        if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+            messages.error(petición, 'Formato de correo electrónico inválido.')
+            return redirect('/admin-panel/invitaciones/')
+
+        # Verificar si el email ya existe en perfiles o invitaciones activas
+        from django.db import connection
+        table_name = '"auth.users"' if connection.vendor == 'sqlite' else 'auth.users'
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT id FROM {table_name} WHERE email = %s", [email])
+                if cursor.fetchone():
+                    messages.error(petición, 'Este correo electrónico ya está registrado en el sistema.')
+                    return redirect('/admin-panel/invitaciones/')
+        except Exception as e:
+            print(f"[crear_invitacion_admin] Error verificando duplicidad: {e}")
+
+        if InvitacionAdmin.objects.filter(email=email, estado='pendiente').exists():
+            messages.error(petición, 'Ya existe una invitación pendiente para este correo electrónico.')
+            return redirect('/admin-panel/invitaciones/')
+
+        # Generar nombre de usuario único y limpio
+        import random
+        cleaned_name = re.sub(r'[^a-zA-Z]', '', nombre_completo.lower().split()[0]) if nombre_completo else 'admin'
+        cleaned_last = re.sub(r'[^a-zA-Z]', '', nombre_completo.lower().split()[1][0]) if nombre_completo and len(nombre_completo.split()) > 1 else ''
+        username_prefix = f"admin_{cleaned_name}{cleaned_last}"
+        
+        while True:
+            rand_num = random.randint(1000, 9999)
+            usuario_generado = f"{username_prefix}_{rand_num}"
+            if not Perfil.objects.filter(nombre_usuario=usuario_generado).exists() and not InvitacionAdmin.objects.filter(usuario_generado=usuario_generado).exists():
+                break
+
+        # Generar contraseña temporal segura
+        import secrets
+        import string
+        alphabet = string.ascii_letters + string.digits + "@$!%*?&"
+        while True:
+            password_temporal = ''.join(secrets.choice(alphabet) for _ in range(12))
+            if (any(c.isupper() for c in password_temporal) and
+                any(c.islower() for c in password_temporal) and
+                any(c.isdigit() for c in password_temporal) and
+                any(c in "@$!%*?&" for c in password_temporal)):
+                break
+
+        # Registrar en Supabase Auth / SQLite
+        from users.supabase_auth import registrar_usuario, registrar_usuario_sql
+        datos, error = registrar_usuario(email, password_temporal, nombre_completo, usuario_generado, rol='admin')
+        if error and "confirmation email" in error.lower():
+            datos, error = registrar_usuario_sql(email, password_temporal, nombre_completo, usuario_generado, rol='admin')
+
+        if error:
+            messages.error(petición, f'Error al registrar el usuario en autenticación: {error}')
+            return redirect('/admin-panel/invitaciones/')
+
+        id_usuario = datos.get('user', {}).get('id')
+
+        # Crear invitación
+        from django.utils import timezone
+        from django.contrib.auth.hashers import make_password
+        expires_at = timezone.now() + timezone.timedelta(days=7)
+        
+        invitacion = InvitacionAdmin.objects.create(
+            email=email,
+            nombre_completo=nombre_completo,
+            usuario_generado=usuario_generado,
+            password_temporal_hash=make_password(password_temporal),
+            fecha_expiracion=expires_at,
+            estado='pendiente',
+            notas_internas=notas,
+            creado_por=petición.perfil_usuario
+        )
+
+        # Configurar perfil
+        perfil, _ = Perfil.objects.update_or_create(
+            id=id_usuario,
+            defaults={
+                'nombre_completo': nombre_completo,
+                'nombre_usuario': usuario_generado,
+                'rol_rbac': Rol.objects.get(codigo='admin'),
+                'rol': 'admin',
+                'invitacion': invitacion,
+                'password_cambiada': False,
+                'esta_activo': True
+            }
+        )
+
+        # Enviar correo de invitación
+        from django.core.mail import send_mail
+        subject = "[MIKITECH] Has sido invitado como Administrador"
+        url_login = petición.build_absolute_uri('/admin-panel/login/')
+        message = f"""Hola {nombre_completo or 'Administrador'},
+
+Has sido invitado para ser administrador en el Panel de Control de MIKITECH.
+
+Tus credenciales de acceso temporal son:
+- Usuario / Correo: {email}
+- Nombre de usuario: {usuario_generado}
+- Contraseña temporal: {password_temporal}
+
+⚠️ Por motivos de seguridad, esta contraseña es temporal y caducará en 7 días ({expires_at.strftime('%Y-%m-%d')}). Deberás cambiarla obligatoriamente en tu primer inicio de sesión.
+
+Puedes iniciar sesión aquí: {url_login}
+
+Si tienes problemas, contacta al superadministrador de MIKITECH.
+"""
+        try:
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL or 'noreply@mikitech.com', [email])
+            messages.success(petición, f'✅ Invitación enviada exitosamente a {email} con usuario {usuario_generado}.')
+        except Exception as e:
+            messages.warning(petición, f'⚠️ Invitación creada pero el correo no pudo enviarse: {e}. Credenciales: {usuario_generado} / {password_temporal}')
+
+    return redirect('/admin-panel/invitaciones/')
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+@require_POST
+def revocar_invitacion_admin(petición, id_invitacion):
+    """Revoca una invitación pendiente y desactiva el perfil del usuario."""
+    invitacion = get_object_or_404(InvitacionAdmin, id=id_invitacion)
+    if invitacion.estado == 'pendiente':
+        invitacion.estado = 'revocada'
+        invitacion.save()
+        
+        # Desactivar perfil de usuario asociado
+        Perfil.objects.filter(invitacion=invitacion).update(esta_activo=False)
+        messages.success(petición, f'Invitación para {invitacion.email} revocada exitosamente.')
+    else:
+        messages.error(petición, 'Solo se pueden revocar invitaciones pendientes.')
+        
+    return redirect('/admin-panel/invitaciones/')
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+@require_POST
+def reenviar_invitacion_admin(petición, id_invitacion):
+    """Reenvía la invitación restableciendo la contraseña del usuario y fecha de expiración."""
+    invitacion = get_object_or_404(InvitacionAdmin, id=id_invitacion)
+    
+    # 1. Generar contraseña temporal segura
+    import secrets
+    import string
+    alphabet = string.ascii_letters + string.digits + "@$!%*?&"
+    while True:
+        password_temporal = ''.join(secrets.choice(alphabet) for _ in range(12))
+        if (any(c.isupper() for c in password_temporal) and
+            any(c.islower() for c in password_temporal) and
+            any(c.isdigit() for c in password_temporal) and
+            any(c in "@$!%*?&" for c in password_temporal)):
+            break
+
+    # 2. Buscar perfil existente para eliminarlo y recrearlo en autenticación (método seguro y libre de permisos)
+    perfil_invitado = Perfil.objects.filter(invitacion=invitacion).first()
+    if not perfil_invitado:
+        messages.error(petición, 'No se encontró un perfil asociado a esta invitación.')
+        return redirect('/admin-panel/invitaciones/')
+
+    from django.db import connection
+    table_name = '"auth.users"' if connection.vendor == 'sqlite' else 'auth.users'
+    user_id = str(perfil_invitado.id)
+    
+    try:
+        # Borrar registros para recrearlos
+        perfil_invitado.delete()
+        with connection.cursor() as cursor:
+            cursor.execute(f"DELETE FROM {table_name} WHERE id = %s", [user_id])
+    except Exception as e:
+        print(f"[reenviar_invitacion_admin] Error al limpiar registros previos: {e}")
+
+    # 3. Registrar de nuevo en Auth
+    from users.supabase_auth import registrar_usuario, registrar_usuario_sql
+    datos, error = registrar_usuario(invitacion.email, password_temporal, invitacion.nombre_completo, invitacion.usuario_generado, rol='admin')
+    if error and "confirmation email" in error.lower():
+        datos, error = registrar_usuario_sql(invitacion.email, password_temporal, invitacion.nombre_completo, invitacion.usuario_generado, rol='admin')
+
+    if error:
+        messages.error(petición, f'Error al registrar el usuario en autenticación al reenviar: {error}')
+        return redirect('/admin-panel/invitaciones/')
+
+    nuevo_id_usuario = datos.get('user', {}).get('id')
+
+    # 4. Actualizar invitación
+    from django.utils import timezone
+    from django.contrib.auth.hashers import make_password
+    expires_at = timezone.now() + timezone.timedelta(days=7)
+    
+    invitacion.password_temporal_hash = make_password(password_temporal)
+    invitacion.fecha_expiracion = expires_at
+    invitacion.estado = 'pendiente'
+    invitacion.save()
+
+    # 5. Volver a configurar perfil
+    perfil, _ = Perfil.objects.update_or_create(
+        id=nuevo_id_usuario,
+        defaults={
+            'nombre_completo': invitacion.nombre_completo,
+            'nombre_usuario': invitacion.usuario_generado,
+            'rol_rbac': Rol.objects.get(codigo='admin'),
+            'rol': 'admin',
+            'invitacion': invitacion,
+            'password_cambiada': False,
+            'esta_activo': True
+        }
+    )
+
+    # 6. Enviar correo de invitación
+    from django.core.mail import send_mail
+    subject = "[MIKITECH] Reenvío de Invitación de Administrador"
+    url_login = petición.build_absolute_uri('/admin-panel/login/')
+    message = f"""Hola {invitacion.nombre_completo or 'Administrador'},
+
+Se ha reenviado tu invitación para ser administrador en el Panel de Control de MIKITECH.
+
+Tus nuevas credenciales de acceso temporal son:
+- Usuario / Correo: {invitacion.email}
+- Nombre de usuario: {invitacion.usuario_generado}
+- Contraseña temporal: {password_temporal}
+
+⚠️ Esta contraseña es temporal y caducará en 7 días ({expires_at.strftime('%Y-%m-%d')}). Deberás cambiarla obligatoriamente en tu primer inicio de sesión.
+
+Puedes iniciar sesión aquí: {url_login}
+"""
+    try:
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL or 'noreply@mikitech.com', [invitacion.email])
+        messages.success(petición, f'✅ Invitación reenviada exitosamente a {invitacion.email}.')
+    except Exception as e:
+        messages.warning(petición, f'⚠️ Invitación actualizada pero el correo no pudo enviarse: {e}. Credenciales: {invitacion.usuario_generado} / {password_temporal}')
+
+    return redirect('/admin-panel/invitaciones/')
+
+
+@requerir_administrador
+@requiere_permiso('gestionar_usuarios')
+@require_POST
+def desactivar_usuario_admin(petición, id_usuario):
+    """Desactiva a un administrador activo para impedir su inicio de sesión."""
+    usuario = get_object_or_404(Perfil, id=id_usuario)
+    if usuario.rol == 'admin':
+        if str(usuario.id) == str(petición.session.get('usuario_id')):
+            messages.error(petición, 'No puedes desactivar tu propio usuario.')
+        else:
+            usuario.esta_activo = False
+            usuario.save()
+            messages.success(petición, f'Administrador {usuario.nombre_usuario} desactivado exitosamente.')
+    else:
+        messages.error(petición, 'El usuario seleccionado no es un administrador.')
+        
+    return redirect('/admin-panel/invitaciones/')
+
+
+def cambiar_contrasena_forzado(petición):
+    """Obliga al administrador invitado a cambiar su contraseña temporal."""
+    # Verificar que el usuario esté logueado
+    usuario_id = petición.session.get('usuario_id')
+    if not usuario_id:
+        return redirect('/admin-panel/login/')
+        
+    # Obtener el perfil
+    perfil = get_object_or_404(Perfil, id=usuario_id)
+    
+    # Solo permitir acceso si no ha cambiado la contraseña temporal
+    if perfil.password_cambiada:
+        return redirect('/admin-panel/')
+        
+    contexto = {
+        'titulo_pagina': 'Cambiar Contraseña Obligatorio — MIKITECH',
+        'perfil': perfil,
+    }
+    
+    if petición.method == 'POST':
+        nueva_clave = petición.POST.get('nueva_clave', '')
+        confirmar_clave = petición.POST.get('confirmar_clave', '')
+        
+        if not nueva_clave or not confirmar_clave:
+            contexto['error'] = 'Por favor completa todos los campos del formulario.'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        if nueva_clave != confirmar_clave:
+            contexto['error'] = 'Las contraseñas no coinciden.'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        import re
+        patron = r"^(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}$"
+        if not re.match(patron, nueva_clave):
+            contexto['error'] = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial (@$!%*?&).'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        # Actualizar contraseña en autenticación (Supabase / SQLite)
+        from users.supabase_auth import actualizar_contraseña
+        token = petición.session.get('token_acceso') or 'mock-local-token'
+        
+        datos, error = actualizar_contraseña(token, nueva_clave, user_id=perfil.id)
+        if error:
+            contexto['error'] = f'Error al cambiar la contraseña en el servidor: {error}'
+            return render(petición, 'admin_panel/change_password_forced.html', contexto)
+            
+        # Actualizar perfil local
+        from django.utils import timezone
+        perfil.password_cambiada = True
+        perfil.fecha_primer_login = timezone.now()
+        perfil.save()
+        
+        # Actualizar estado de invitación
+        if perfil.invitacion:
+            inv = perfil.invitacion
+            inv.estado = 'aceptada'
+            inv.fecha_aceptacion = timezone.now()
+            
+            # Obtener IP de origen
+            x_forwarded_for = petición.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip = x_forwarded_for.split(',')[0].strip()
+            else:
+                ip = petición.META.get('REMOTE_ADDR')
+            inv.ip_origen = ip
+            inv.save()
+            
+        messages.success(petición, '✅ Contraseña cambiada con éxito. Ya tienes acceso al Dashboard.')
+        return redirect('/admin-panel/')
+        
+    return render(petición, 'admin_panel/change_password_forced.html', contexto)

@@ -3,6 +3,7 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 
 
 class Categoria(models.Model):
@@ -17,7 +18,7 @@ class Categoria(models.Model):
 
     class Meta:
         db_table = 'categories'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         verbose_name = 'Categoría'
         verbose_name_plural = 'Categorías'
         ordering = ['nombre']
@@ -50,7 +51,7 @@ class Producto(models.Model):
 
     class Meta:
         db_table = 'products'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         verbose_name = 'Producto'
         verbose_name_plural = 'Productos'
         ordering = ['-creado_el']
@@ -107,7 +108,7 @@ class ImagenProducto(models.Model):
 
     class Meta:
         db_table = 'product_images'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         ordering = ['orden']
 
     def __str__(self):

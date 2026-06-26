@@ -1,73 +1,402 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page_title }}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Jost', sans-serif; background: #FFFFFF; color:#111; }
-    
-    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; }
-    .auth-box { width: 100%; max-width: 480px; text-align: center; padding: 30px; }
-    .auth-brand { font-family: 'Oswald', sans-serif; font-size: 44px; font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; }
-    .auth-subtitle { font-family: 'Jost', sans-serif; font-size: 15px; color: #666; margin-bottom: 40px; text-transform: uppercase; }
-    
-    .wix-input-group { margin-bottom: 30px; text-align: left; }
-    .wix-label { display: block; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-    .wix-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #111; background: transparent; font-family: 'Jost', sans-serif; font-size: 16px; outline: none; transition: border-width 0.3s; color:#111; }
-    .wix-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; } 
-    
-    .wix-btn-solid { width: 100%; background: #111; color: white; border: none; padding: 18px; font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; margin-top: 10px; text-transform:uppercase;}
-    .wix-btn-solid:hover { background: #444; }
-    
-    .wix-links { margin-top: 30px; font-family: 'Jost', sans-serif; font-size: 14px; text-align: center; display: flex; flex-direction: column; gap: 15px;}
-    .wix-links a { color: #111; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; font-weight:600;}
-    .wix-links a:hover { border-bottom: 1px solid #111; }
-    
-    .alert-wix { padding: 15px; margin-bottom: 25px; border: 1px solid; font-family: 'Jost', sans-serif; font-size: 14px; text-align:left;}
-    .alert-wix.error { border-color: #EF4444; color: #EF4444; }
-    .alert-wix.success { border-color: #10B981; color: #10B981; }
-    
-  </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-<div class="auth-wrapper">
-  <div class="auth-box">
-    <h1 class="auth-brand">PANEL ADMIN</h1>
-    <p class="auth-subtitle">INGRESA TUS CREDENCIALES DE ADMINISTRADOR.</p>
-    
-    {% if error %}
-    <div class="alert-wix error">⚠️ {{ error }}</div>
-    {% endif %}
-    {% if success %}
-    <div class="alert-wix success">✅ {{ success }}</div>
-    {% endif %}
-    
-    <form method="POST" action="/admin-panel/login/" id="admin-login-form">
-      {% csrf_token %}
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CORREO DE ADMINISTRADOR</label>
-        <input type="email" name="correo" class="wix-input" required placeholder="admin@mikitech.co" autocomplete="off" autofocus>
+{% block title %}Iniciar Sesión Admin | MIKITECH{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ═══ RESET FOR AUTH PAGE ═══ */
+  body { background: #0A0F1E; overflow: auto; }
+
+  /* ═══ AUTH LAYOUT SPLIT SCREEN ═══ */
+  .auth-wrap {
+    min-height: calc(100vh - 8rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  /* ═══ LEFT PANEL (decorative carousel) ═══ */
+  .auth-left {
+    display: none;
+    position: relative;
+    overflow: hidden;
+    order: 2;
+  }
+
+  /* ═══ RIGHT PANEL (form) ═══ */
+  .auth-right {
+    background: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    padding: 5rem 3rem;
+  }
+  .auth-form-wrap { width: 100%; max-width: 46rem; }
+
+  .auth-logo-wrap {
+    display: flex; align-items: center; margin-bottom: 4rem;
+  }
+  .auth-logo-wrap img { height: 4.2rem; object-fit: contain; }
+
+  .auth-heading { margin-bottom: 3.5rem; }
+  .auth-heading h1 {
+    font-size: 3rem; font-weight: 800; color: #0F172A;
+    letter-spacing: -0.03em; margin-bottom: 0.8rem;
+  }
+  .auth-heading p { font-size: 1.5rem; color: #64748B; }
+
+  /* ═══ INPUTS ═══ */
+  .inp-group { margin-bottom: 2.2rem; }
+  .inp-label {
+    display: block; font-size: 1.2rem; font-weight: 700;
+    color: #374151; margin-bottom: 0.8rem;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .inp-wrap { position: relative; display: flex; align-items: center; }
+  .inp-icon {
+    position: absolute; left: 1.6rem;
+    color: #9CA3AF; width: 1.8rem; height: 1.8rem; pointer-events: none;
+  }
+  .inp-field {
+    width: 100%; padding: 1.5rem 4.5rem 1.5rem 4.8rem;
+    font-family: 'Inter', sans-serif; font-size: 1.5rem;
+    border: 1.5px solid #E2E8F0; border-radius: 1rem;
+    background: #F8FAFC; color: #0F172A;
+    transition: all 0.2s; outline: none;
+  }
+  .inp-field:focus {
+    border-color: #2563EB;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+  }
+  .inp-field::placeholder { color: #9CA3AF; }
+
+  /* ═══ BUTTON ═══ */
+  .btn-login {
+    width: 100%; padding: 1.7rem;
+    background: linear-gradient(135deg, #1D4ED8, #2563EB);
+    color: white; border: none; border-radius: 1rem;
+    font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 700;
+    cursor: pointer; transition: all 0.3s;
+    display: flex; justify-content: center; align-items: center; gap: 1rem;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+  }
+  .btn-login:hover {
+    background: linear-gradient(135deg, #1E40AF, #1D4ED8);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37,99,235,0.4);
+  }
+  .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+  .auth-links {
+    margin-top: 2.5rem; text-align: center;
+    font-size: 1.4rem; color: #64748B;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .auth-links a { color: #2563EB; font-weight: 600; text-decoration: none; }
+  .auth-links a:hover { text-decoration: underline; }
+
+  .alert-wix {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .alert-wix.error {
+    background: #FEE2E2;
+    border: 1px solid #FCA5A5;
+    color: #DC2626;
+  }
+  .alert-wix.success {
+    background: #DCFCE7;
+    border: 1px solid #86EFAC;
+    color: #16A34A;
+  }
+
+  /* ═══ TRUST BADGES ═══ */
+  .trust-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 2rem; margin-top: 3rem; flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 1.2rem; color: #94A3B8;
+  }
+  .trust-item .material-symbols-outlined { font-size: 1.5rem; color: #10B981; }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (min-width: 1024px) {
+    .auth-wrap { grid-template-columns: 1fr 1fr; min-height: calc(100vh - 8rem); }
+    .auth-left { display: block; }
+    .auth-right { padding: 6rem 7rem; order: 1; }
+  }
+  .inp-field.is-invalid {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+  }
+  .inp-field.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+
+  <!-- LEFT DECORATIVE PANEL with Carousel -->
+  <div class="auth-left">
+    {% include 'components/_carousel.html' with carousel_id='login' %}
+  </div>
+
+  <!-- RIGHT FORM PANEL -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+
+      <div class="auth-logo-wrap">
+        <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+          <span style="color: #38BDF8;">MIKI</span>TECH
+        </div>
       </div>
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CONTRASEÑA</label>
-        <input type="password" name="clave" class="wix-input" required placeholder="••••••••••" autocomplete="new-password">
+
+      <div class="auth-heading">
+        <h1>Panel Administrativo</h1>
+        <p>Ingresa tus credenciales de administrador</p>
       </div>
-      
-      <button type="submit" class="wix-btn-solid" onclick="this.textContent='VERIFICANDO...'">ACCEDER AL PANEL</button>
-    </form>
-    
-    <div class="wix-links">
-      <a href="/admin-panel/registro/">¿No tienes cuenta de admin? Crear una</a>
-      <a href="/">← Volver a la tienda pública</a>
+
+      {% if error %}
+      <div class="alert-wix error">
+        <i data-lucide="alert-circle" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
+        <span>{{ error }}</span>
+      </div>
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          if (window.Swal) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error de Acceso',
+              text: "{{ error|escapejs }}",
+              confirmButtonColor: '#2563EB',
+              background: '#FFFFFF',
+              color: '#0F172A'
+            });
+          }
+        });
+      </script>
+      {% endif %}
+      {% if success %}
+      <div class="alert-wix success">
+        <i data-lucide="check-circle" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
+        <span>{{ success }}</span>
+      </div>
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          if (window.Swal) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Operación Exitosa!',
+              text: "{{ success|escapejs }}",
+              confirmButtonColor: '#2563EB',
+              background: '#FFFFFF',
+              color: '#0F172A'
+            });
+          }
+        });
+      </script>
+      {% endif %}
+      {% if messages %}
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          if (window.Swal) {
+            {% for message in messages %}
+            Swal.fire({
+              icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}",
+              title: 'Aviso',
+              text: "{{ message|escapejs }}",
+              confirmButtonColor: '#2563EB',
+              background: '#FFFFFF',
+              color: '#0F172A'
+            });
+            {% endfor %}
+          }
+        });
+      </script>
+      {% endif %}
+
+      <form method="POST" action="/admin-panel/login/" id="admin-login-form" novalidate>
+        {% csrf_token %}
+
+        <!-- Correo -->
+        <div class="inp-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_correo" style="margin-bottom: 0;">Correo de Administrador</label>
+            <span id="error_correo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
+          <div class="inp-wrap">
+            <i data-lucide="mail" class="inp-icon"></i>
+            <input type="email" name="correo" id="id_correo" class="inp-field"
+                   required placeholder="" autocomplete="off" autofocus>
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="inp-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_clave" style="margin-bottom: 0;">Contraseña</label>
+            <span id="error_clave" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
+          <div class="inp-wrap">
+            <i data-lucide="lock" class="inp-icon"></i>
+            <input type="password" name="clave" id="id_clave" class="inp-field"
+                   required placeholder="" autocomplete="current-password">
+            <button type="button" class="toggle-pass" id="toggleClave"
+                    aria-label="Mostrar/ocultar contraseña"
+                    onclick="togglePassword('id_clave','toggleClave','iconClave')"
+                    style="position: absolute; right: 1.4rem; background: none; border: none; cursor: pointer; color: #9CA3AF; display: flex; align-items: center; padding: 0.5rem;">
+              <i data-lucide="eye" id="iconClave" style="width:1.8rem;height:1.8rem;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Términos y condiciones -->
+        <div class="checkbox-group" style="display: flex; align-items: flex-start; gap: 1.2rem; margin-bottom: 2.4rem; font-size: 1.3rem; color: #4B5563;">
+          <input type="checkbox" name="terminos" id="terminos" required>
+          <label for="terminos" style="position: relative; cursor: pointer;">
+            He leído y acepto los
+            <a href="#" style="color:#2563EB;text-decoration:none;font-weight:600;">Términos y Condiciones</a>
+            y la <a href="#" style="color:#2563EB;text-decoration:none;font-weight:600;">Política de Privacidad</a>.
+            <span id="error_terminos" style="color: #EF4444; font-size: 1.1rem; font-weight: 600; display: block; margin-top: 0.4rem; display: none;"></span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-login" id="submit-btn">
+          <i data-lucide="log-in" style="width:2rem;height:2rem;"></i>
+          <span id="btn-text">Acceder al Panel</span>
+        </button>
+      </form>
+
+      <div class="auth-links">
+        <a href="/admin-panel/registro/">¿No tienes cuenta de admin? Regístrate gratis →</a>
+        <a href="/" style="color: #64748B;">← Volver a la tienda pública</a>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item">
+          <i data-lucide="lock" style="width:1.6rem; height:1.6rem; color:#10B981;"></i>
+          Conexión segura
+        </div>
+        <div class="trust-item">
+          <i data-lucide="shield-check" style="width:1.6rem; height:1.6rem; color:#10B981;"></i>
+          Datos encriptados
+        </div>
+        <div class="trust-item">
+          <i data-lucide="headphones" style="width:1.6rem; height:1.6rem; color:#10B981;"></i>
+          Soporte 24/7
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
-</body>
-</html>
+<script>
+  function togglePassword(inputId, btnId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.setAttribute('data-lucide', 'eye-off');
+    } else {
+      input.type = 'password';
+      icon.setAttribute('data-lucide', 'eye');
+    }
+    lucide.createIcons();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+    
+    const form = document.getElementById('admin-login-form');
+    const correoInput = document.getElementById('id_correo');
+    const claveInput = document.getElementById('id_clave');
+    const terminosInput = document.getElementById('terminos');
+    
+    form.addEventListener('submit', (e) => {
+      // Clear previous errors
+      document.getElementById('error_correo').style.display = 'none';
+      document.getElementById('error_clave').style.display = 'none';
+      document.getElementById('error_terminos').style.display = 'none';
+      correoInput.classList.remove('is-invalid');
+      claveInput.classList.remove('is-invalid');
+
+      const correo = correoInput.value.trim();
+      const clave = claveInput.value.trim();
+      const terminos = terminosInput.checked;
+      const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      let hasError = false;
+
+      if (!correo) {
+        const errEl = document.getElementById('error_correo');
+        errEl.textContent = 'El correo es requerido';
+        errEl.style.display = 'block';
+        correoInput.classList.add('is-invalid');
+        hasError = true;
+      } else if (!emailRe.test(correo)) {
+        const errEl = document.getElementById('error_correo');
+        errEl.textContent = 'Formato no válido';
+        errEl.style.display = 'block';
+        correoInput.classList.add('is-invalid');
+        hasError = true;
+      }
+
+      if (!clave) {
+        const errEl = document.getElementById('error_clave');
+        errEl.textContent = 'La contraseña es requerida';
+        errEl.style.display = 'block';
+        claveInput.classList.add('is-invalid');
+        hasError = true;
+      }
+
+      if (!terminos) {
+        const errEl = document.getElementById('error_terminos');
+        errEl.textContent = 'Debes aceptar los términos y condiciones';
+        errEl.style.display = 'block';
+        hasError = true;
+      }
+
+      if (hasError) {
+        e.preventDefault();
+        if (!correo || !emailRe.test(correo)) {
+          correoInput.focus();
+        } else if (!clave) {
+          claveInput.focus();
+        }
+        return;
+      }
+
+      document.getElementById('btn-text').textContent = 'Verificando...';
+    });
+
+    // Clear error states on input
+    correoInput.addEventListener('input', () => {
+      correoInput.classList.remove('is-invalid');
+      document.getElementById('error_correo').style.display = 'none';
+    });
+    claveInput.addEventListener('input', () => {
+      claveInput.classList.remove('is-invalid');
+      document.getElementById('error_clave').style.display = 'none';
+    });
+    terminosInput.addEventListener('change', () => {
+      document.getElementById('error_terminos').style.display = 'none';
+    });
+  });
+</script>
+{% endblock %}

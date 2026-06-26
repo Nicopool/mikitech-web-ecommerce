@@ -11,26 +11,42 @@ from functools import wraps
 CODIGO_REPARTIDOR = getattr(settings, 'DELIVERY_GATEWAY_CODE', 'MOTO-2026')
 
 def requiere_repartidor(función_vista):
+    """
+    Decorador de triple cerrojo para rutas de repartidores (ISO 25010 – Seguridad).
+
+    Verifica en orden:
+    1. Que exista una sesión activa con usuario_id.
+    2. Que el rol de sesión sea 'repartidor' (sincronizado con BD por RoleVerificationMiddleware).
+    3. Que se haya superado la pasarela logística MOTO-2026 en la sesión actual,
+       impidiendo acceso directo sin pasar por la pasarela de seguridad.
+    """
     @wraps(función_vista)
     def envoltura(petición, *args, **kwargs):
-        # Permitimos el acceso SOLO si es repartidor
-        rol = petición.session.get('rol_usuario')
-        if not petición.session.get('usuario_id') or rol != 'repartidor':
+        # Cerrojo 1: debe haber sesión activa
+        if not petición.session.get('usuario_id'):
             return redirect('/repartidor/pasarela/')
+
+        # Cerrojo 2: el rol de sesión (sincronizado con BD) debe ser 'repartidor'
+        if petición.session.get('rol_usuario') != 'repartidor':
+            return redirect('/repartidor/pasarela/')
+
+        # Cerrojo 3: debe haber superado la pasarela de código MOTO-2026
+        if not petición.session.get('pasarela_repartidor_superada'):
+            return redirect('/repartidor/pasarela/')
+
         return función_vista(petición, *args, **kwargs)
     return envoltura
 
 
 def pasarela_repartidor(petición):
     """Pasarela de seguridad inicial solicitando código para repartidores."""
+    # 1. Si no hay sesión activa (usuario no autenticado), denegar acceso de inmediato
+    if not petición.session.get('usuario_id'):
+        return redirect('/cuenta/ingreso/?next=/repartidor/pasarela/')
+
     rol = petición.session.get('rol_usuario')
     if rol == 'repartidor':
         return redirect('/repartidor/')
-
-    if not petición.session.get('usuario_id'):
-        if 'pasarela_repartidor_superada' in petición.session:
-            del petición.session['pasarela_repartidor_superada']
-            petición.session.modified = True
 
     if petición.session.get('pasarela_repartidor_superada'):
         return redirect('/repartidor/login/')
@@ -83,6 +99,7 @@ def login_repartidor(petición):
             petición.session['usuario_id'] = id_usuario
             petición.session['token_acceso'] = datos.get('access_token')
             petición.session['rol_usuario'] = 'repartidor'
+            petición.session['pasarela_repartidor_superada'] = True  # Confirmar autorización completa
             petición.session['nombre_usuario'] = perfil.nombre_usuario
             petición.session.modified = True
             return redirect('/repartidor/')
@@ -131,9 +148,11 @@ def registro_repartidor(petición):
         # Bypass email confirmation
         try:
             from django.db import connection
+            table_name = '"auth.users"' if connection.vendor == 'sqlite' else "auth.users"
+            now_func = "datetime('now')" if connection.vendor == 'sqlite' else "NOW()"
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "UPDATE auth.users SET email_confirmed_at = NOW() WHERE email = %s", 
+                    f"UPDATE {table_name} SET email_confirmed_at = {now_func} WHERE email = %s", 
                     [correo]
                 )
         except Exception:

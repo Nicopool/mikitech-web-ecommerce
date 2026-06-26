@@ -1,0 +1,285 @@
+<!-- ═══ CARRUSEL PREMIUM REUTILIZABLE ═══ -->
+<style>
+  .miki-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 35rem;
+    overflow: hidden;
+  }
+  
+  .miki-carousel .carousel-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  
+  .miki-carousel .carousel-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+  }
+  
+  .miki-carousel .carousel-item.active {
+    opacity: 1;
+    z-index: 2;
+  }
+  
+  .miki-carousel .carousel-img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+  
+  .miki-carousel .carousel-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.7) 50%, rgba(15, 23, 42, 0.4) 100%);
+    z-index: 2;
+  }
+  
+  .miki-carousel .carousel-content {
+    position: relative;
+    z-index: 3;
+    color: #FFFFFF;
+    padding: 0 4rem;
+    max-width: 70rem;
+    margin-left: 8%;
+    font-family: 'Outfit', sans-serif;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s, opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+  }
+  
+  .miki-carousel .carousel-item.active .carousel-content {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .miki-carousel .carousel-eyebrow {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #38BDF8;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    display: block;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  }
+  
+  .miki-carousel .carousel-title {
+    font-size: clamp(2.6rem, 4.5vw, 4.4rem);
+    font-weight: 900;
+    line-height: 1.15;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .miki-carousel .carousel-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.6rem;
+    color: #94A3B8;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+  }
+  
+  .miki-carousel .carousel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.4rem 3rem;
+    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+    color: #FFFFFF;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+  }
+  
+  .miki-carousel .carousel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+    background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
+    border-color: rgba(56, 189, 248, 0.4);
+  }
+
+  .miki-carousel .carousel-btn svg {
+    transition: transform 0.3s;
+  }
+  .miki-carousel .carousel-btn:hover svg {
+    transform: translateX(4px);
+  }
+  
+  .miki-carousel .carousel-dots {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1.2rem;
+    z-index: 10;
+  }
+  
+  .miki-carousel .dot {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .miki-carousel .dot.active {
+    background: #38BDF8;
+    width: 3.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  }
+
+  @media (max-width: 768px) {
+    .miki-carousel .carousel-content {
+      margin-left: 5%;
+      padding: 0 2rem;
+    }
+    .miki-carousel .carousel-btn {
+      padding: 1.2rem 2.2rem;
+    }
+  }
+</style>
+
+<section class="miki-carousel" id="miki-carousel-{{ carousel_id|default:'main' }}">
+  <div class="carousel-inner">
+    
+    <!-- Slide 1 (GPUs) -->
+    <div class="carousel-item active">
+      <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Tarjetas Gráficas MIKITECH">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <span class="carousel-eyebrow">Rendimiento Extremo</span>
+        <h2 class="carousel-title">Tarjetas Gráficas de Última Generación</h2>
+        <p class="carousel-desc">Experimenta trazado de rayos en tiempo real y aceleración por IA con las nuevas GPUs de arquitectura avanzada.</p>
+        <a href="{% url 'products:list' %}?categoria=tarjetas-graficas" class="carousel-btn">
+          Explorar GPUs <i data-lucide="arrow-right" style="width: 1.6rem; height: 1.6rem; stroke-width: 2.5;"></i>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Slide 2 (CPUs) -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Procesadores MIKITECH">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <span class="carousel-eyebrow">Cómputo Avanzado</span>
+        <h2 class="carousel-title">Procesadores Extremos</h2>
+        <p class="carousel-desc">Poder multinúcleo para streaming, gaming pesado y creación de contenido 3D sin límites.</p>
+        <a href="{% url 'products:list' %}?categoria=procesadores" class="carousel-btn">
+          Ver Procesadores <i data-lucide="arrow-right" style="width: 1.6rem; height: 1.6rem; stroke-width: 2.5;"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Slide 3 (Almacenamiento) -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1555617766-c94804975da3?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="SSD Almacenamiento MIKITECH">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <span class="carousel-eyebrow">Velocidad Pura</span>
+        <h2 class="carousel-title">Almacenamiento SSD NVMe Ultra-Rápido</h2>
+        <p class="carousel-desc">Velocidades de transferencia brutales de lectura y escritura para eliminar las pantallas de carga por completo.</p>
+        <a href="{% url 'products:list' %}?categoria=almacenamiento" class="carousel-btn">
+          Ver Almacenamiento <i data-lucide="arrow-right" style="width: 1.6rem; height: 1.6rem; stroke-width: 2.5;"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Slide 4 (Gabinetes) -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1542393545-10f5cde2c810?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Chasis y Gabinetes MIKITECH">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <span class="carousel-eyebrow">Flujo de Aire Optimizado</span>
+        <h2 class="carousel-title">Gabinetes y Refrigeración Premium</h2>
+        <p class="carousel-desc">Mantén tus temperaturas bajo control con sistemas de flujo de aire optimizado y refrigeración líquida inteligente.</p>
+        <a href="{% url 'products:list' %}?categoria=gabinetes" class="carousel-btn">
+          Explorar Gabinetes <i data-lucide="arrow-right" style="width: 1.6rem; height: 1.6rem; stroke-width: 2.5;"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Slide 5 (Periféricos) -->
+    <div class="carousel-item">
+      <img src="https://images.unsplash.com/photo-1550537687-c91072c4792d?auto=format&fit=crop&q=80&w=2000" class="carousel-img" alt="Setup Gamer y Periféricos MIKITECH">
+      <div class="carousel-overlay"></div>
+      <div class="carousel-content">
+        <span class="carousel-eyebrow">Setup Profesional</span>
+        <h2 class="carousel-title">Periféricos de Alto Rendimiento</h2>
+        <p class="carousel-desc">Teclados mecánicos ópticos, ratones ultra ligeros y pantallas con altas tasas de refresco.</p>
+        <a href="{% url 'products:list' %}?categoria=perifericos" class="carousel-btn">
+          Ver Periféricos <i data-lucide="arrow-right" style="width: 1.6rem; height: 1.6rem; stroke-width: 2.5;"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+  
+  <div class="carousel-dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</section>
+
+<script>
+(function() {
+  const carouselEl = document.getElementById('miki-carousel-{{ carousel_id|default:"main" }}');
+  if (!carouselEl) return;
+  const slides = carouselEl.querySelectorAll('.carousel-item');
+  const dots = carouselEl.querySelectorAll('.dot');
+  let idx = 0, timer;
+
+  function goTo(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    idx = (n + slides.length) % slides.length;
+    slides[idx].classList.add('active');
+    dots[idx].classList.add('active');
+    resetTimer();
+  }
+  function resetTimer() { 
+    clearInterval(timer); 
+    timer = setInterval(() => goTo(idx + 1), 6000); 
+  }
+
+  dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+  carouselEl.addEventListener('mouseenter', () => clearInterval(timer));
+  carouselEl.addEventListener('mouseleave', resetTimer);
+  resetTimer();
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  });
+})();
+</script>

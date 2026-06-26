@@ -1,66 +1,377 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page_title }}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Jost', sans-serif; background: #FFFFFF; color:#111; }
-    
-    .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; }
-    .auth-box { width: 100%; max-width: 480px; text-align: center; padding: 30px; }
-    .auth-brand { font-family: 'Oswald', sans-serif; font-size: 44px; font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; }
-    .auth-subtitle { font-family: 'Jost', sans-serif; font-size: 15px; color: #666; margin-bottom: 40px; text-transform: uppercase; }
-    
-    .wix-input-group { margin-bottom: 30px; text-align: left; }
-    .wix-label { display: block; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-    .wix-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #111; background: transparent; font-family: 'Jost', sans-serif; font-size: 16px; outline: none; transition: border-width 0.3s; color:#111; }
-    .wix-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; } 
-    
-    .wix-btn-solid { width: 100%; background: #111; color: white; border: none; padding: 18px; font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; margin-top: 10px; text-transform:uppercase;}
-    .wix-btn-solid:hover { background: #444; }
-    
-    .wix-links { margin-top: 30px; font-family: 'Jost', sans-serif; font-size: 14px; text-align: center;}
-    .wix-links a { color: #111; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; font-weight:600;}
-    .wix-links a:hover { border-bottom: 1px solid #111; }
-    
-    .alert-wix { padding: 15px; margin-bottom: 25px; border: 1px solid; font-family: 'Jost', sans-serif; font-size: 14px; text-align:left;}
-    .alert-wix.error { border-color: #EF4444; color: #EF4444; }
-    .alert-wix.info { border-color: #3B82F6; color: #3B82F6; }
-    
-  </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-<div class="auth-wrapper">
-  <div class="auth-box">
-    <h1 class="auth-brand">ÁREA RESTRINGIDA</h1>
-    <p class="auth-subtitle">INGRESA EL CÓDIGO DE SEGURIDAD PARA ACCEDER.</p>
-    
-    {% if error %}
-    <div class="alert-wix error">⚠️ {{ error }}</div>
-    {% else %}
-    <div class="alert-wix info">ℹ️ Esta área está protegida. Solo personal autorizado de MIKITECH puede continuar.</div>
-    {% endif %}
-    
-    <form method="POST" action="/admin-panel/pasarela/" id="gateway-form">
-      {% csrf_token %}
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CÓDIGO DE ACCESO</label>
-        <input type="password" name="codigo_secreto" class="wix-input" required placeholder="•••••••••" autofocus>
+{% block title %}Área Restringida | MIKITECH{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ═══ RESET FOR AUTH PAGE ═══ */
+  body {
+    background: #0A0F1E;
+    overflow: auto;
+  }
+
+  /* ═══ AUTH LAYOUT SPLIT SCREEN ═══ */
+  .auth-wrap {
+    min-height: calc(100vh - 8rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  /* ═══ LEFT PANEL (decorative carousel) ═══ */
+  .auth-left {
+    display: none;
+    position: relative;
+    overflow: hidden;
+    order: 2;
+  }
+
+  /* ═══ RIGHT PANEL (form) ═══ */
+  .auth-right {
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 3rem;
+  }
+
+  .auth-form-wrap {
+    width: 100%;
+    max-width: 46rem;
+  }
+
+  .auth-logo-wrap {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4rem;
+  }
+
+  .auth-logo-wrap img {
+    height: 4.2rem;
+    object-fit: contain;
+  }
+
+  .auth-heading {
+    margin-bottom: 3.5rem;
+  }
+
+  .auth-heading h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.8rem;
+  }
+
+  .auth-heading p {
+    font-size: 1.5rem;
+    color: #64748B;
+  }
+
+  /* ═══ INPUTS ═══ */
+  .inp-group {
+    margin-bottom: 2.5rem;
+  }
+
+  .inp-label {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .inp-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .inp-icon {
+    position: absolute;
+    left: 1.6rem;
+    color: #9CA3AF;
+    width: 1.8rem;
+    height: 1.8rem;
+    pointer-events: none;
+  }
+
+  .inp-field {
+    width: 100%;
+    padding: 1.5rem 1.6rem 1.5rem 4.8rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 1rem;
+    background: #F8FAFC;
+    color: #0F172A;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  .inp-field:focus {
+    border-color: #2563EB;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  .inp-field::placeholder {
+    color: #9CA3AF;
+  }
+
+  /* ═══ BUTTON ═══ */
+  .btn-login {
+    width: 100%;
+    padding: 1.7rem;
+    background: linear-gradient(135deg, #1D4ED8, #2563EB);
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+  }
+
+  .btn-login:hover {
+    background: linear-gradient(135deg, #1E40AF, #1D4ED8);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+  }
+
+  .btn-login:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .auth-links {
+    margin-top: 2.5rem;
+    text-align: center;
+    font-size: 1.4rem;
+    color: #64748B;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .auth-links a {
+    color: #2563EB;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .auth-links a:hover {
+    text-decoration: underline;
+  }
+
+  .alert-wix {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .alert-wix.error {
+    background: #FEE2E2;
+    border: 1px solid #FCA5A5;
+    color: #DC2626;
+  }
+
+  .alert-wix.info {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: #1D4ED8;
+  }
+
+  /* ═══ TRUST BADGES ═══ */
+  .trust-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+    color: #94A3B8;
+  }
+
+  .trust-item .material-symbols-outlined {
+    font-size: 1.5rem;
+    color: #10B981;
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (min-width: 1024px) {
+    .auth-wrap {
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 8rem);
+    }
+
+    .auth-left {
+      display: block;
+    }
+
+    .auth-right {
+      padding: 6rem 7rem;
+      order: 1;
+    }
+  }
+
+  .inp-field.is-invalid {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+  }
+
+  .inp-field.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+
+  <!-- LEFT DECORATIVE PANEL with Carousel -->
+  <div class="auth-left">
+    {% include 'components/_carousel.html' with carousel_id='login' %}
+  </div>
+
+  <!-- RIGHT FORM PANEL -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+
+      <div class="auth-logo-wrap">
+        <div
+          style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+          <span style="color: #38BDF8;">MIKI</span>TECH
+        </div>
       </div>
-      
-      <button type="submit" class="wix-btn-solid" onclick="this.textContent='VERIFICANDO...'">VERIFICAR ACCESO</button>
-    </form>
-    
-    <div class="wix-links">
-      <a href="/">← Volver a la tienda pública</a>
+
+      <div class="auth-heading">
+        <h1>Área Restringida</h1>
+        <p>Esta zona requiere verificación de seguridad institucional</p>
+      </div>
+
+      {% if error %}
+      <div class="alert-wix error">
+        <i data-lucide="alert-circle" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
+        <span>{{ error }}</span>
+      </div>
+      {% else %}
+      <div class="alert-wix info">
+        <i data-lucide="shield" style="width:1.8rem; height:1.8rem; flex-shrink:0;"></i>
+        <span>Por favor, introduce el código de seguridad autorizado.</span>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="/admin-panel/pasarela/" id="gateway-form" novalidate>
+        {% csrf_token %}
+
+        <!-- Código Secreto -->
+        <div class="inp-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_codigo_secreto_admin_acceso" style="margin-bottom: 0;">Código de
+              Acceso</label>
+            <span id="error_codigo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
+          <div class="inp-wrap">
+            <i data-lucide="shield-check" class="inp-icon"></i>
+            <input type="text" name="codigo_secreto_admin_acceso" id="id_codigo_secreto_admin_acceso" class="inp-field"
+              required placeholder="" autofocus readonly onfocus="this.removeAttribute('readonly');"
+              style="-webkit-text-security: disc; text-security: disc;">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="submit-btn">
+          <i data-lucide="shield" style="width:2rem;height:2rem;"></i>
+          <span id="btn-text">Verificar Acceso</span>
+        </button>
+      </form>
+
+      <div class="auth-links">
+        <a href="/" style="color: #64748B;">← Volver a la tienda pública</a>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item">
+          <i data-lucide="lock" style="width:1.6rem; height:1.6rem; color:#10B981;"></i>
+          Conexión segura
+        </div>
+        <div class="trust-item">
+          <i data-lucide="shield-check" style="width:1.6rem; height:1.6rem; color:#10B981;"></i>
+          Datos encriptados
+        </div>
+        <div class="trust-item">
+          <i data-lucide="headphones" style="width:1.6rem; height:1.6rem; color:#10B981;"></i>
+          Soporte 24/7
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
-</body>
-</html>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+
+    const form = document.getElementById('gateway-form');
+    const codigoInput = document.getElementById('id_codigo_secreto_admin_acceso');
+
+    form.addEventListener('submit', (e) => {
+      // Clear previous errors
+      document.getElementById('error_codigo').style.display = 'none';
+      codigoInput.classList.remove('is-invalid');
+
+      const code = codigoInput.value.trim();
+      let hasError = false;
+
+      if (!code) {
+        const errEl = document.getElementById('error_codigo');
+        errEl.textContent = 'El código es requerido';
+        errEl.style.display = 'block';
+        codigoInput.classList.add('is-invalid');
+        hasError = true;
+      }
+
+      if (hasError) {
+        e.preventDefault();
+        codigoInput.focus();
+        return;
+      }
+
+      document.getElementById('btn-text').textContent = 'Verificando...';
+    });
+
+    // Clear error states on input
+    codigoInput.addEventListener('input', () => {
+      codigoInput.classList.remove('is-invalid');
+      document.getElementById('error_codigo').style.display = 'none';
+    });
+  });
+</script>
+{% endblock %}

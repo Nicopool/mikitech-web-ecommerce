@@ -2,6 +2,7 @@
 
 import uuid
 from django.db import models
+from django.conf import settings
 
 
 class Voto(models.Model):
@@ -12,7 +13,7 @@ class Voto(models.Model):
 
     class Meta:
         db_table = 'votes'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         unique_together = ('usuario', 'producto')
         verbose_name = 'Voto'
         verbose_name_plural = 'Votos'
@@ -32,7 +33,7 @@ class Reseña(models.Model):
 
     class Meta:
         db_table = 'reviews'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         verbose_name = 'Reseña'
         verbose_name_plural = 'Reseñas'
 
@@ -49,7 +50,7 @@ class Respuesta(models.Model):
 
     class Meta:
         db_table = 'review_replies'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         verbose_name = 'Respuesta'
         verbose_name_plural = 'Respuestas'
 
@@ -65,7 +66,7 @@ class Favorito(models.Model):
 
     class Meta:
         db_table = 'favorites'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         unique_together = ('usuario', 'producto')
         verbose_name = 'Favorito'
         verbose_name_plural = 'Favoritos'
@@ -90,7 +91,7 @@ class Pedido(models.Model):
 
     class Meta:
         db_table = 'orders'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         verbose_name = 'Pedido'
         verbose_name_plural = 'Pedidos'
 
@@ -108,7 +109,7 @@ class DetallePedido(models.Model):
 
     class Meta:
         db_table = 'order_items'
-        managed = False
+        managed = getattr(settings, 'USE_SQLITE', False)
         verbose_name = 'Detalle de Pedido'
         verbose_name_plural = 'Detalles de Pedido'
 

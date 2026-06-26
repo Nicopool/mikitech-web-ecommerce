@@ -1,0 +1,61 @@
+name: "\U0001F50D Lighthouse Performance Audit"
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    name: "Auditoría Lighthouse CI"
+
+    steps:
+      - name: "📥 Checkout código"
+        uses: actions/checkout@v4
+
+      - name: "🟢 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: "🔦 Instalar Lighthouse CI"
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: "📦 Instalar dependencias Django"
+        run: pip install -r requirements.txt
+
+      - name: "⚙️ Configurar variables de entorno"
+        run: |
+          echo "DEBUG=False" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_PORT=6543" >> .env
+
+      - name: "🚀 Iniciar servidor Django en background"
+        run: |
+          python manage.py runserver 8000 --noreload &
+          sleep 8
+        env:
+          DJANGO_SETTINGS_MODULE: mickytech.settings
+
+      - name: "🔍 Ejecutar Lighthouse CI"
+        run: lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: "📊 Guardar reporte como artefacto"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report-${{ github.sha }}
+          path: .lighthouseci/
+          retention-days: 30

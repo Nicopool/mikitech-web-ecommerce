@@ -16,6 +16,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# Configuración de Orígenes de Confianza para CSRF (requerido para Django >= 4.0 en producción)
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://*.railway.app,https://*.up.railway.app,http://localhost:3000,http://localhost:8000'
+).split(',')
+
 # Aplicaciones instaladas
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -32,12 +38,16 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # ISO 25010 – Verificación de rol en tiempo real (sincroniza sesión con BD)
+    'core.middleware.RoleVerificationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.NoCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'mickytech.urls'
@@ -61,13 +71,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mickytech.wsgi.application'
 
-# Base de datos local SQLite
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Base de datos: Selección dinámica Supabase (PostgreSQL) o SQLite Local
+USE_SQLITE = os.environ.get('USE_SQLITE', 'False') == 'True'
+
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'postgres'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'aws-0-us-west-2.pooler.supabase.com'),
+            'PORT': os.environ.get('DB_PORT', '6543'),  # PgBouncer port
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+            # Reutiliza la conexión durante 60s en vez de abrir/cerrar por request
+            'CONN_MAX_AGE': 60,
+            'CONN_HEALTH_CHECKS': True,
+        }
+    }
 
 # Autenticación personalizada (Supabase-based via sesiones Django)
 AUTH_PASSWORD_VALIDATORS = []
@@ -82,7 +112,20 @@ USE_THOUSAND_SEPARATOR = True
 # Archivos estáticos
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+if os.path.exists(BASE_DIR / 'interfaz-cliente' / 'dist'):
+    STATICFILES_DIRS.append(BASE_DIR / 'interfaz-cliente' / 'dist')
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Almacenamiento de archivos estáticos comprimidos para producción con WhiteNoise
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Archivos de media (avatares, imágenes)
 MEDIA_URL = '/media/'
@@ -100,7 +143,7 @@ SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://abhnnxuqmbjkqiakebmv.supa
 SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '')
 
 # Admin gateway code
-ADMIN_GATEWAY_CODE = os.environ.get('ADMIN_GATEWAY_CODE', 'SENA-2026')
+ADMIN_GATEWAY_CODE = os.environ.get('ADMIN_GATEWAY_CODE', '')
 
 # Paginación
 PRODUCTS_PER_PAGE = 12
@@ -121,6 +164,17 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'server.log',
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} [{levelname}] {name}: {message}',
+            'style': '{',
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -130,6 +184,12 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        # Loguear queries que tarden más de 300ms
+        'django.db.backends': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
             'propagate': False,
         },
     },

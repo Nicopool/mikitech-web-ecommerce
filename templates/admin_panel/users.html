@@ -8,39 +8,47 @@
   .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 </style>
 
-<div class="u-flex u-justify-between u-align-center u-mb-4">
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
   <div>
-    <h2 style="font-size:2.2rem; font-weight:800;">👥 Administración de Usuarios</h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">{{ usuarios|length }} usuario{% if usuarios|length != 1 %}s{% endif %} en la base de datos</p>
+    <h2 style="font-size:2.2rem; font-weight:800; color:var(--ds-text); display:flex; align-items:center; gap:8px;">
+      <i data-lucide="users" style="width:2.4rem; height:2.4rem; color:var(--ds-primary);"></i> Administración de Usuarios
+    </h2>
+    <p style="font-size:1.3rem; color:var(--ds-text-soft); margin-top:0.4rem;">{{ usuarios|length }} usuario{% if usuarios|length != 1 %}s{% endif %} en la base de datos</p>
   </div>
 </div>
 
 <!-- RESUMEN DE ROLES -->
-<div class="g-row u-mb-4">
+<div class="g-row u-mb-4" style="margin-bottom: 30px;">
   <div class="g-col-4">
-    <div class="mpro-card" style="display:flex; align-items:center; gap:20px; border-left: 4px solid var(--ds-primary);">
-      <div style="font-size:3.5rem;">👥</div>
+    <div class="mpro-card mpro-card-interactive" style="display:flex; justify-content:space-between; align-items:center; border-left: 4px solid var(--ds-primary); padding: 20px;">
       <div>
-        <div style="font-size:1.2rem; color:#64748B;">Población Total</div>
-        <div style="font-size:3rem; font-weight:800;">{{ usuarios|length }}</div>
+        <div style="font-size:1.2rem; color:#64748B; font-weight: 600; margin-bottom: 4px;">Población Total</div>
+        <div style="font-size:3rem; font-weight:800; color:var(--ds-text);">{{ usuarios|length }}</div>
+      </div>
+      <div style="width:4.8rem; height:4.8rem; border-radius:12px; background:var(--ds-primary-light); display:flex; align-items:center; justify-content:center;">
+        <i data-lucide="users" style="color:var(--ds-primary); width:2.4rem; height:2.4rem;"></i>
       </div>
     </div>
   </div>
   <div class="g-col-4">
-    <div class="mpro-card" style="display:flex; align-items:center; gap:20px; border-left: 4px solid #7C3AED;">
-      <div style="font-size:3.5rem;">🛡️</div>
+    <div class="mpro-card mpro-card-interactive" style="display:flex; justify-content:space-between; align-items:center; border-left: 4px solid #7C3AED; padding: 20px;">
       <div>
-        <div style="font-size:1.2rem; color:#64748B;">Staff Administrativo</div>
+        <div style="font-size:1.2rem; color:#64748B; font-weight: 600; margin-bottom: 4px;">Staff Administrativo</div>
         <div style="font-size:3rem; font-weight:800; color:#7C3AED;">{{ conteo_admin|default:"0" }}</div>
       </div>
+      <div style="width:4.8rem; height:4.8rem; border-radius:12px; background:#EDE9FE; display:flex; align-items:center; justify-content:center;">
+        <i data-lucide="shield" style="color:#7C3AED; width:2.4rem; height:2.4rem;"></i>
+      </div>
     </div>
   </div>
   <div class="g-col-4">
-    <div class="mpro-card" style="display:flex; align-items:center; gap:20px; border-left: 4px solid #2563EB;">
-      <div style="font-size:3.5rem;">🛍️</div>
+    <div class="mpro-card mpro-card-interactive" style="display:flex; justify-content:space-between; align-items:center; border-left: 4px solid #10B981; padding: 20px;">
       <div>
-        <div style="font-size:1.2rem; color:#64748B;">Clientes Registrados</div>
-        <div style="font-size:3rem; font-weight:800; color:#2563EB;">{{ conteo_cliente|default:"0" }}</div>
+        <div style="font-size:1.2rem; color:#64748B; font-weight: 600; margin-bottom: 4px;">Clientes Registrados</div>
+        <div style="font-size:3rem; font-weight:800; color:#16A34A;">{{ conteo_cliente|default:"0" }}</div>
+      </div>
+      <div style="width:4.8rem; height:4.8rem; border-radius:12px; background:#DCFCE7; display:flex; align-items:center; justify-content:center;">
+        <i data-lucide="shopping-bag" style="color:#16A34A; width:2.4rem; height:2.4rem;"></i>
       </div>
     </div>
   </div>
@@ -48,11 +56,13 @@
 
 <div class="mpro-card" style="padding:0; overflow:visible;">
   <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-    <span style="font-weight: 700; color: var(--ds-text);">📋 Listado Maestro de Perfiles</span>
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text); margin:0; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="list" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Listado Maestro de Perfiles
+    </h3>
     <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-      <div class="g-search-wrapper">
-        <span><span class="material-symbols-outlined">search</span></span>
-        <input type="text" id="buscadorUsuarios" class="g-search" placeholder="Buscar por nombre, correo, ID...">
+      <div class="g-search-wrapper" style="display:flex; align-items:center; position:relative;">
+        <span style="position:absolute; left:12px; display:flex; align-items:center;"><i data-lucide="search" style="width:1.6rem; height:1.6rem; color:var(--ds-text-soft);"></i></span>
+        <input type="text" id="buscadorUsuarios" class="g-search" placeholder="Buscar por nombre, correo, ID..." style="padding-left:40px; width:250px;">
       </div>
       <select id="filtroRol" style="padding: 10px 15px; border-radius: 8px; border: 1px solid var(--ds-border); outline: none; font-size: 13px; background: var(--ds-bg); color: var(--ds-text);">
         <option value="">Cualquier Rol</option>
@@ -99,9 +109,13 @@
           </td>
           <td>
             {% if usuario.rol == 'admin' %}
-            <span class="mpro-badge" style="background:#EDE9FE; color:#7C3AED; font-weight: 700;">🛡️ Admin</span>
+            <span class="mpro-badge" style="background:#EDE9FE; color:#7C3AED; font-weight: 700; display:inline-flex; align-items:center; gap:4px;">
+              <i data-lucide="shield" style="width:1.2rem; height:1.2rem;"></i> Admin
+            </span>
             {% else %}
-            <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; font-weight: 700;">👤 Cliente</span>
+            <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; font-weight: 700; display:inline-flex; align-items:center; gap:4px;">
+              <i data-lucide="user" style="width:1.2rem; height:1.2rem;"></i> Cliente
+            </span>
             {% endif %}
           </td>
           <td>
@@ -113,9 +127,14 @@
           </td>
           <td style="color:#64748B; font-size:1.2rem;">{{ usuario.creado_el|date:"d M, Y" }}</td>
           <td class="u-text-center">
-            <button class="g-action-btn" onclick="verDetalleHTML('user-data-{{ usuario.id }}')">
-              👁️
-            </button>
+            <div style="display:flex; justify-content:center; gap:8px; align-items:center;">
+              <button class="g-action-btn" onclick="verDetalleHTML('user-data-{{ usuario.id }}')" style="background:#EFF6FF; color:#1D4ED8; border: 1px solid #DBEAFE; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px; cursor:pointer;" title="Ver Detalle">
+                <i data-lucide="eye" style="width:1.6rem; height:1.6rem;"></i>
+              </button>
+              <a href="{% url 'admin_user_edit' usuario.id %}" class="g-action-btn" style="background:#FEF3C7; color:#D97706; border: 1px solid #FDE68A; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border-radius:8px; cursor:pointer; text-decoration:none;" title="Editar Perfil">
+                <i data-lucide="edit-3" style="width:1.6rem; height:1.6rem;"></i>
+              </a>
+            </div>
             <div id="user-data-{{ usuario.id }}" style="display:none;">
               <div style="font-size:1.4rem; font-weight:800; margin-bottom:10px; color:var(--ds-text);">Perfil Principal</div>
               <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--ds-border);">
@@ -135,9 +154,9 @@
               </div>
 
               <!-- HISTORIAL DE COMPRAS -->
-              <div style="font-size:1.4rem; font-weight:800; margin:25px 0 10px; color:var(--ds-text); display:flex; justify-content:space-between;">
-                <span>🛍️ Historial de Compras</span>
-                <span style="font-size:1.2rem; background:var(--ds-primary-light); color:var(--ds-primary); padding:2px 8px; border-radius:12px;">{{ usuario.pedidos.count }} Pedidos</span>
+              <div style="font-size:1.4rem; font-weight:800; margin:25px 0 10px; color:var(--ds-text); display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:6px;"><i data-lucide="shopping-bag" style="width:1.8rem; height:1.8rem; color:var(--ds-primary);"></i> Historial de Compras</span>
+                <span style="font-size:1.2rem; background:var(--ds-primary-light); color:var(--ds-primary); padding:2px 10px; border-radius:12px; font-weight:700;">{{ usuario.pedidos.count }} Pedidos</span>
               </div>
               {% if usuario.pedidos.count > 0 %}
                 <div style="max-height:150px; overflow-y:auto; border:1px solid var(--ds-border); border-radius:8px; background:#F8FAFC; padding:10px;">
@@ -152,11 +171,16 @@
                       <span class="badge {% if pedido.estado == 'delivered' %}bg-success{% elif pedido.estado == 'shipped' %}bg-info{% elif pedido.estado == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %}" style="font-size:0.9rem;">
                         {% if pedido.estado == 'delivered' %}Entregado{% elif pedido.estado == 'shipped' %}Enviado{% elif pedido.estado == 'pending' or pedido.estado == 'processing' %}Pendiente{% else %}Cancelado{% endif %}
                       </span></span>
-                      <a href="/admin-panel/logistica/factura/{{ pedido.id }}/" target="_blank" style="text-decoration:none; color:var(--ds-primary); font-weight:700; border:1px solid var(--ds-primary); padding:2px 6px; border-radius:4px; font-size:0.9rem;">📄 Factura</a>
+                      <a href="/admin-panel/logistica/factura/{{ pedido.id }}/" target="_blank" style="text-decoration:none; color:var(--ds-primary); font-weight:700; border:1px solid var(--ds-primary); padding:2px 8px; border-radius:6px; font-size:0.9rem; display:inline-flex; align-items:center; gap:3px;">
+                        <i data-lucide="file-text" style="width:1.2rem; height:1.2rem;"></i> Factura
+                      </a>
                     </div>
                     <div style="font-size:1rem; margin-top:4px;">
                       {% for detalle in pedido.detalles.all %}
-                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">⚙️ {{ detalle.cantidad }}x {{ detalle.producto.nombre }}</div>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display:flex; align-items:center; gap:4px; color:var(--ds-text-soft);">
+                          <i data-lucide="cpu" style="width:1.2rem; height:1.2rem; flex-shrink:0;"></i>
+                          {{ detalle.cantidad }}x {{ detalle.producto.nombre }}
+                        </div>
                       {% endfor %}
                     </div>
                   </div>
@@ -167,9 +191,9 @@
               {% endif %}
 
               <!-- HISTORIAL DE RESEÑAS -->
-              <div style="font-size:1.4rem; font-weight:800; margin:25px 0 10px; color:var(--ds-text); display:flex; justify-content:space-between;">
-                <span>💬 Reseñas Publicadas</span>
-                <span style="font-size:1.2rem; background:#FEF3C7; color:#D97706; padding:2px 8px; border-radius:12px;">{{ usuario.reseñas.count }} Reseñas</span>
+              <div style="font-size:1.4rem; font-weight:800; margin:25px 0 10px; color:var(--ds-text); display:flex; justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:6px;"><i data-lucide="message-circle" style="width:1.8rem; height:1.8rem; color:var(--ds-warning);"></i> Reseñas Publicadas</span>
+                <span style="font-size:1.2rem; background:#FEF3C7; color:#D97706; padding:2px 10px; border-radius:12px; font-weight:700;">{{ usuario.reseñas.count }} Reseñas</span>
               </div>
               {% if usuario.reseñas.count > 0 %}
                 <div style="max-height:150px; overflow-y:auto; border:1px solid var(--ds-border); border-radius:8px; padding:10px;">
@@ -177,7 +201,9 @@
                   <div style="padding:10px; border-bottom:1px solid var(--ds-border); background:#FBFDFF; border-radius:6px; margin-bottom:5px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                       <span style="font-size:1.1rem; font-weight:700; color:var(--ds-text);">{{ resena.producto.nombre|truncatechars:30 }}</span>
-                      <span style="color:#F59E0B; font-size:1.2rem;">{{ resena.calificacion }}★</span>
+                      <span style="color:#F59E0B; font-size:1.2rem; display:flex; align-items:center; gap:3px;">
+                        <i data-lucide="star" style="width:1.4rem; height:1.4rem; fill:#F59E0B; stroke:none;"></i> {{ resena.calificacion }}
+                      </span>
                     </div>
                     <div style="font-size:1.1rem; color:#64748B; font-style:italic;">"{{ resena.comentario|truncatechars:60 }}"</div>
                   </div>
@@ -202,11 +228,13 @@
 </div>
 
 <!-- Modal Detalle de Usuario -->
-<div id="modalDetalleUsuario" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+<div id="modalDetalleUsuario" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
   <div class="mpro-card" style="width:500px; max-width:90%; animation: slideUp 0.3s ease;">
-    <div style="background:var(--grad-tech); color:white; padding:20px 25px; margin:-25px -25px 25px -25px; border-radius:16px 16px 0 0; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-      <span>👤 Información de Perfil</span>
-      <button onclick="document.getElementById('modalDetalleUsuario').style.display='none'" style="background:transparent; border:none; color:white; font-size:2.4rem; cursor:pointer; line-height: 1;">&times;</button>
+    <div style="background:var(--ds-primary-dark); color:white; padding:20px 25px; margin:-30px -30px 25px -30px; border-radius:16px 16px 0 0; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+      <span style="display:flex; align-items:center; gap:8px;"><i data-lucide="user" style="width:2rem; height:2rem;"></i> Información de Perfil</span>
+      <button onclick="document.getElementById('modalDetalleUsuario').style.display='none'" style="background:rgba(255,255,255,0.1); border:none; color:white; width:32px; height:32px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+        <i data-lucide="x" style="width:1.6rem; height:1.6rem;"></i>
+      </button>
     </div>
     <div id="cuerpo-detalle-usuario" style="padding:15px 0; max-height:450px; overflow-y:auto;"></div>
     <div style="margin-top:25px; display:flex; justify-content:flex-end;">
@@ -227,7 +255,7 @@ function filtrarUsuarios() {
     var coincideBusqueda = texto.includes(q);
     var coincideRol = !rol || textoRol.includes(rol);
     
-    row.style.display = (coincideBusqueda && coincideRol) ? '' : 'none';
+    row.style.display = (coincideBusqueda & coincideRol) ? '' : 'none';
   });
 }
 
@@ -240,6 +268,9 @@ function verDetalleHTML(dataId) {
   var sourceData = document.getElementById(dataId);
   cuerpo.innerHTML = sourceData.innerHTML;
   modal.style.display = 'flex';
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
 }
 </script>
 {% endblock %}

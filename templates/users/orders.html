@@ -5,7 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page_title }}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -18,32 +20,66 @@
       --ds-shadow: 0 4px 20px rgba(0,0,0,0.04);
     }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Jost', sans-serif; font-size:1.4rem; background:var(--ds-bg); color:var(--ds-text); display:flex; height:100vh; overflow:hidden; }
+    body { font-family: 'Inter', sans-serif; font-size:1.4rem; background:var(--ds-bg); color:var(--ds-text); display:flex; height:100vh; overflow:hidden; }
+ 
+    /* SIDEBAR DARK THEME */
+    .sidebar { width: 27rem; background: #1E3A8A; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: -27rem; z-index: 1000; height: 100vh; transition: left 0.3s cubic-bezier(0.4,0,0.2,1); }
+    body.sidebar-open .sidebar { left: 0; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 999; backdrop-filter: blur(2px); }
+    body.sidebar-open .sidebar-overlay { display: block; }
 
-    .sidebar { width:26rem; background:var(--ds-surface); border-right:1px solid var(--ds-border); display:flex; flex-direction:column; flex-shrink:0; }
-    .sb-logo { padding:3rem; display:flex; align-items:center; gap:1rem; border-bottom:1px solid var(--ds-border); font-family:'Inter', sans-serif; font-weight:800; font-size:2.4rem; letter-spacing:-0.5px; }
-    .sb-logo-icon { width:3.4rem; height:3.4rem; background:var(--ds-primary); color:white; border-radius:1rem; display:flex; align-items:center; justify-content:center; font-size:1.8rem; }
-    .sb-user { padding:2rem 3rem; display:flex; align-items:center; gap:1.2rem; border-bottom:1px solid var(--ds-border); }
-    .sb-avatar { width:4.4rem; height:4.4rem; border-radius:50%; object-fit:cover; background:var(--ds-primary-light); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.8rem; color:var(--ds-primary); flex-shrink:0; }
-    .sb-user-name { font-weight:700; font-size:1.4rem; }
-    .sb-user-role { font-size:1.1rem; color:var(--ds-primary); background:var(--ds-primary-light); padding:0.2rem 0.8rem; border-radius:2rem; font-weight:600; display:inline-block; margin-top:0.3rem; }
+    .sb-logo { padding: 2rem 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sb-logo a { display:block; height:4.5rem; }
+    .sb-logo img { height:100%; width:auto; object-fit:contain; filter:brightness(0) invert(1); }
+    .sb-user { padding:2rem 2.5rem; display:flex; align-items:center; gap:1.4rem; border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); }
+    .sb-avatar { width:4.4rem; height:4.4rem; border-radius:50%; object-fit:cover; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.8rem; color:white; flex-shrink:0; border:2px solid rgba(255,255,255,0.25); }
+    .sb-user-name { font-weight:600; font-size:1.4rem; color:#fff; }
+    .sb-user-role { font-size:1.1rem; color:rgba(255,255,255,0.55); margin-top:0.2rem; display:flex; align-items:center; gap:0.5rem; }
+    .sb-user-role::before { content:''; width:0.6rem; height:0.6rem; border-radius:50%; background:#34D399; display:inline-block; }
     .sb-nav { padding:1.5rem 0; flex:1; overflow-y:auto; }
-    .sb-section { padding:1rem 3rem 0.5rem; font-size:1.1rem; font-weight:700; color:var(--ds-text-soft); letter-spacing:0.1em; text-transform:uppercase; }
-    .sb-link { display:flex; align-items:center; gap:1.2rem; padding:1.1rem 3rem; color:var(--ds-text-soft); text-decoration:none; font-weight:500; font-size:1.4rem; position:relative; transition:all 0.2s; }
-    .sb-link:hover { color:var(--ds-primary); background:var(--ds-primary-light); }
-    .sb-link.active { background:var(--ds-primary-light); color:var(--ds-primary); font-weight:600; }
-    .sb-link.active::before { content:""; position:absolute; left:0; top:0; bottom:0; width:0.4rem; background:var(--ds-primary); border-radius:0 0.4rem 0.4rem 0; }
-    .sb-icon { font-size:1.8rem; width:2rem; text-align:center; }
-    .sb-logout { padding:2rem 3rem; border-top:1px solid var(--ds-border); }
-    .sb-logout a { display:flex; align-items:center; gap:1rem; color:#DC2626; text-decoration:none; font-size:1.4rem; font-weight:600; padding:1rem 1.5rem; border-radius:1rem; transition:background 0.2s; }
-    .sb-logout a:hover { background:#FEE2E2; }
+    .sb-section { padding:1.5rem 2.5rem 0.5rem; font-size:1rem; font-weight:700; color:rgba(255,255,255,0.35); letter-spacing:0.12em; text-transform:uppercase; }
+    .sb-link { display:flex; align-items:center; gap:1.2rem; padding:1.2rem 2.5rem; color:rgba(255,255,255,0.6); text-decoration:none; font-weight:500; font-size:1.4rem; position:relative; transition:all 0.2s; }
+    .sb-link:hover { color:#fff; background:rgba(255,255,255,0.07); }
+    .sb-link.active { color:#fff; background:rgba(255,255,255,0.12); font-weight:600; }
+    .sb-link.active::before { content:''; position:absolute; left:0; top:20%; bottom:20%; width:0.3rem; background:#60A5FA; border-radius:0 0.4rem 0.4rem 0; }
+    .sb-icon { width:2.2rem; height:2.2rem; display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; }
+    .sb-logout { padding:2rem 2.5rem; border-top:1px solid rgba(255,255,255,0.08); }
+    .sb-logout a { display:flex; align-items:center; gap:1rem; color:rgba(255,255,255,0.5); text-decoration:none; font-size:1.4rem; font-weight:500; padding:1rem 1.5rem; border-radius:1rem; transition:all 0.2s; }
+    .sb-logout a:hover { color:#FCA5A5; background:rgba(220,38,38,0.15); }
 
-    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-    .topbar { height:7rem; background:var(--ds-surface); border-bottom:1px solid var(--ds-border); display:flex; align-items:center; justify-content:space-between; padding:0 4rem; flex-shrink:0; }
-    .topbar h1 { font-size:2rem; font-weight:800; }
-    .topbar p { font-size:1.2rem; color:var(--ds-text-soft); margin-top:0.3rem; }
+    @media (min-width: 1024px) {
+      .sidebar { position: static; left: 0; z-index: auto; }
+      .sidebar-overlay { display: none !important; }
+      .sb-toggle-btn { display: none !important; }
+    }
 
-    .content-area { flex:1; overflow-y:auto; padding:3rem 4rem; }
+    /* MAIN AREA */
+    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; width: 100%; }
+    
+    /* TOPBAR */
+    .topbar { height:7rem; background:var(--ds-surface); border-bottom:1px solid var(--ds-border); display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; flex-shrink:0; }
+    .topbar h1 { font-size:1.6rem; font-weight:800; display:flex; align-items:center; gap:0.5rem; }
+    .topbar p { display:none; }
+    .tb-greeting { display: flex; flex-direction: column; }
+    .tb-right { display: flex; align-items: center; gap: 1rem; }
+    .tb-btn { width: 4.4rem; height: 4.4rem; border-radius: 50%; border: 1px solid var(--ds-border); background: var(--ds-surface); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ds-text-soft); font-size: 1.6rem; transition: background 0.2s; }
+    .tb-btn:hover { background: var(--ds-bg); }
+
+    /* SCROLL AREA */
+    .content-area { flex:1; overflow-y:auto; padding:1.5rem; }
+
+    @media (min-width: 768px) {
+      .topbar { padding: 0 4rem; }
+      .topbar h1 { font-size: 2rem; }
+      .topbar p { display: block; font-size: 1.2rem; color: var(--ds-text-soft); margin-top: 0.3rem; }
+      .content-area { padding:3rem 40px; }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar { position: static; left: 0; z-index: auto; }
+      .sidebar-overlay { display: none !important; }
+      .sb-toggle-btn { display: none !important; }
+    }
 
     /* OVERRIDE Bootstrap para escala 10px */
     .table { font-size: 1.4rem; }
@@ -56,23 +92,40 @@
     .card { border-radius: 1.6rem; border: 1px solid var(--ds-border); box-shadow: var(--ds-shadow); }
     .card-header { background: var(--ds-surface); border-bottom: 1px solid var(--ds-border); padding: 2rem 2.5rem; font-size: 1.6rem; font-weight: 700; }
 
-    /* STATS PEQUEÑOS */
-    .mini-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-bottom:2.5rem; }
+    /* STATS PEQUEÑOS - Mobile First */
+    .mini-stats { display:grid; grid-template-columns:1fr; gap:1.5rem; margin-bottom:2.5rem; }
+    @media (min-width: 768px) {
+      .mini-stats { grid-template-columns:repeat(3,1fr); }
+    }
     .mini-stat { background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:1.4rem; padding:2rem; display:flex; align-items:center; gap:1.4rem; }
     .ms-icon { width:4.4rem; height:4.4rem; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; font-size:2rem; }
     .ms-label { font-size:1.2rem; color:var(--ds-text-soft); }
     .ms-val { font-size:2.2rem; font-weight:800; }
-
+ 
     /* ── CARD DE PEDIDOS ── */
     .orders-card { background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:2rem; box-shadow:var(--ds-shadow); overflow:hidden; }
     .orders-card-header { padding:2.5rem 3rem; border-bottom:1px solid var(--ds-border); display:flex; justify-content:space-between; align-items:center; gap:2rem; flex-wrap:wrap; }
     .orders-card-title { font-size:1.7rem; font-weight:800; color:var(--ds-text); display:flex; align-items:center; gap:1rem; margin:0; }
     .orders-search { display:flex; align-items:center; background:#F8FAFC; border:1.5px solid var(--ds-border); border-radius:1.2rem; padding:0 1.5rem; gap:1rem; transition:all 0.2s; }
     .orders-search:focus-within { border-color:var(--ds-primary); box-shadow:0 0 0 4px var(--ds-primary-light); background:white; }
-    .orders-search input { border:none; background:transparent; outline:none; font-size:1.4rem; padding:1rem 0; width:24rem; font-family:'Jost',sans-serif; color:var(--ds-text); }
-
+    .orders-search input { border:none; background:transparent; outline:none; font-size:1.4rem; padding:1rem 0; width:24rem; font-family: 'Inter', sans-serif; color:var(--ds-text); }
+ 
     /* ── TABLA ── */
-    .miki-table-wrap { overflow-x:auto; }
+    .miki-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+    /* Responsive queries */
+    @media (min-width: 768px) {
+      .topbar { padding: 0 4rem; }
+      .topbar h1 { font-size: 2rem; }
+      .topbar p { display: block; font-size: 1.2rem; color: var(--ds-text-soft); margin-top: 0.3rem; }
+      .content-area { padding: 3rem 4rem; }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar { position: static; left: 0; z-index: auto; }
+      .sidebar-overlay { display: none !important; }
+      .sb-toggle-btn { display: none !important; }
+    }
     .miki-table { width:100%; border-collapse:collapse; font-size:1.4rem; }
     .miki-table thead tr { background:#F8FAFC; }
     .miki-table th { padding:1.5rem 2rem; font-size:1.1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--ds-text-soft); border-bottom:2px solid var(--ds-border); white-space:nowrap; }
@@ -83,7 +136,7 @@
     .order-id { font-family:'Oswald',monospace; font-weight:700; font-size:1.4rem; color:var(--ds-primary); letter-spacing:0.5px; }
 
     /* ── BADGES ── */
-    .badge-status { display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1.2rem; border-radius:2rem; font-size:1.15rem; font-weight:700; }
+    .badge-status { display:inline-flex; align-items:center; gap:0.6rem; padding:0.5rem 1.2rem; border-radius:2rem; font-size:1.15rem; font-weight:600; font-family:'Inter', sans-serif; text-transform: capitalize; }
     .status-completed { background:#DCFCE7; color:#16A34A; }
     .status-shipped { background:#DBEAFE; color:#1D4ED8; }
     .status-pending { background:#FEF3C7; color:#D97706; }
@@ -101,14 +154,91 @@
     .empty-state .emoji { font-size:5rem; display:block; margin-bottom:1.5rem; }
     .empty-state h3 { font-size:1.8rem; font-weight:700; color:var(--ds-text); margin-bottom:1rem; }
     .empty-state p { font-size:1.4rem; }
+
+    /* ── CUSTOM DROPDOWN FILTERS ── */
+    .filter-dropdown { position: relative; display: inline-block; }
+    .filter-btn { background: #FFFFFF; border: 1.5px solid var(--ds-border); border-radius: 1.2rem; padding: 0.9rem 1.6rem; font-size: 1.3rem; font-weight: 600; color: var(--ds-text-soft); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.2s; min-width: 17rem; justify-content: space-between; font-family: 'Inter', sans-serif; }
+    .filter-btn:hover { border-color: var(--ds-primary); color: var(--ds-primary); background: #F8FAFC; }
+    .filter-menu { display: none; position: absolute; top: 100%; left: 0; margin-top: 0.5rem; background: #FFFFFF; border: 1px solid var(--ds-border); border-radius: 1.2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.08); z-index: 50; min-width: 19rem; overflow: hidden; animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    .filter-menu.show { display: block; }
+    @keyframes dropdownFade { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    .filter-item { padding: 1rem 1.6rem; font-size: 1.3rem; font-weight: 500; color: var(--ds-text-soft); cursor: pointer; display: flex; align-items: center; gap: 1rem; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+    .filter-item:hover { background: var(--ds-primary-light); color: var(--ds-primary); }
+    .filter-item.active { background: var(--ds-primary-light); color: var(--ds-primary); font-weight: 700; }
+    .filter-dot { width: 0.8rem; height: 0.8rem; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .text-techaccent { color: var(--ds-primary) !important; }
+
+    /* ── CUSTOM PREMIUM MODALS ── */
+    .custom-modal .modal-content {
+      border: none;
+      border-radius: 2.4rem;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      padding: 3.5rem;
+      position: relative;
+      background: var(--ds-surface);
+    }
+    .custom-modal .btn-close-custom {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: none;
+      border: none;
+      color: var(--ds-text-soft);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+    .custom-modal .btn-close-custom:hover {
+      color: var(--ds-text);
+    }
+    .modal-icon-circle {
+      width: 6.4rem;
+      height: 6.4rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2.5rem;
+    }
+    .modal-icon-circle.bg-blue {
+      background: #EFF6FF;
+      color: #1D4ED8;
+    }
+    .modal-icon-circle.bg-green {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+    .modal-icon-circle.bg-amber {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+    .custom-modal-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--ds-text);
+      text-align: center;
+      margin-bottom: 3rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .map-container-wrap {
+      border-radius: 1.6rem;
+      overflow: hidden;
+      border: 1px solid var(--ds-border);
+      margin-bottom: 2rem;
+    }
   </style>
 </head>
 <body>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <aside class="sidebar">
-  <div class="sb-logo" style="font-family: 'Oswald', sans-serif; color: var(--ds-text); border-bottom: 1px solid var(--ds-border);">
-    <a href="/" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
-      <span class="material-symbols-outlined" style="color:var(--ds-primary); font-size:2.8rem;">bolt</span> MIKITECH
+  <div class="sb-logo" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <a href="/" style="display: flex; align-items: center; text-decoration: none; height: 4.5rem;">
+      <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #FFFFFF; display: flex; align-items: center; gap: 4px;">
+        <span style="color: #38BDF8;">MIKI</span>TECH
+      </div>
     </a>
   </div>
   <div class="sb-user">
@@ -129,7 +259,6 @@
     <div class="sb-section" style="margin-top:1.5rem;">Mi Cuenta</div>
 
     <a href="/cuenta/pedidos/" class="sb-link active"><span class="sb-icon"><span class="material-symbols-outlined">receipt_long</span></span> Mis Pedidos</a>
-    <a href="/cuenta/historial/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">inventory_2</span></span> Historial</a>
     <a href="/cuenta/reportes/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">bar_chart</span></span> Reportes</a>
     <a href="/cuenta/perfil/editar/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">settings</span></span> Editar Perfil</a>
   </nav>
@@ -138,6 +267,9 @@
 
 <main class="main-area">
   <header class="topbar">
+    <button class="sb-toggle-btn" onclick="toggleSidebar()" title="Menú">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
     <div>
       <h1><span class="material-symbols-outlined" style="font-size:inherit;">receipt_long</span> Mis Pedidos</h1>
       <p>Historial y seguimiento de tus compras</p>
@@ -162,17 +294,51 @@
       </div>
     </div>
 
-
     <!-- ── TABLA DE PEDIDOS PREMIUM ── -->
     <div class="orders-card">
-      <div class="orders-card-header">
-        <h3 class="orders-card-title">
-          <span class="material-symbols-outlined" style="color:var(--ds-primary); font-size:2.2rem;">receipt_long</span>
+      <div class="orders-card-header flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 px-6 border-b border-slate-200">
+        <h3 class="orders-card-title flex items-center gap-2 m-0 text-slate-900 font-extrabold text-lg">
+          <span class="material-symbols-outlined text-techaccent" style="font-size:2.2rem;">receipt_long</span>
           Listado de Pedidos
         </h3>
-        <div class="orders-search">
-          <span class="material-symbols-outlined" style="color:#94A3B8; font-size:2rem;">search</span>
-          <input type="text" id="search-orders" placeholder="Buscar por ID, estado...">
+        
+        <!-- Filters Wrapper (Sticky-ready / Mobile collapsable) -->
+        <div class="flex items-center gap-3 flex-wrap md:flex-nowrap w-full md:w-auto">
+          <!-- Status Dropdown -->
+          <div class="filter-dropdown">
+            <button type="button" id="statusFilterBtn" class="filter-btn">
+              <span id="selectedStatusLabel">Filtrar por Estado</span>
+              <span class="material-symbols-outlined" style="font-size: 1.6rem;">expand_more</span>
+            </button>
+            <div id="statusFilterMenu" class="filter-menu">
+              <div class="filter-item active" data-value="all">Todos</div>
+              <div class="filter-item" data-value="PENDIENTE"><span class="filter-dot bg-amber-500"></span> Pendiente</div>
+              <div class="filter-item" data-value="EN CAMINO"><span class="filter-dot bg-blue-500"></span> En camino</div>
+              <div class="filter-item" data-value="ENTREGADO"><span class="filter-dot bg-emerald-500"></span> Entregado</div>
+              <div class="filter-item" data-value="CANCELADO"><span class="filter-dot bg-red-500"></span> Cancelado</div>
+            </div>
+          </div>
+
+          <!-- Date/Period Dropdown -->
+          <div class="filter-dropdown">
+            <button type="button" id="dateFilterBtn" class="filter-btn">
+              <span id="selectedDateLabel">Filtrar por Fecha</span>
+              <span class="material-symbols-outlined" style="font-size: 1.6rem;">expand_more</span>
+            </button>
+            <div id="dateFilterMenu" class="filter-menu">
+              <div class="filter-item active" data-value="all">Histórico</div>
+              <div class="filter-item" data-value="today">Hoy</div>
+              <div class="filter-item" data-value="yesterday">Ayer</div>
+              <div class="filter-item" data-value="last7">Últimos 7 días</div>
+              <div class="filter-item" data-value="last30">Últimos 30 días</div>
+            </div>
+          </div>
+
+          <!-- Search Input -->
+          <div class="orders-search flex-grow md:flex-grow-0">
+            <span class="material-symbols-outlined" style="color:#94A3B8; font-size:2rem;">search</span>
+            <input type="text" id="search-orders" placeholder="Buscar por ID, estado..." style="font-size:1.3rem;">
+          </div>
         </div>
       </div>
 
@@ -180,57 +346,107 @@
         {% if orders %}
         <table class="miki-table" id="orders-table">
           <thead>
-            <tr>
-              <th>ID PEDIDO</th>
-              <th>ESTADO</th>
-              <th>ARTÍCULOS</th>
-              <th>TOTAL</th>
-              <th>FECHA</th>
-              <th style="text-align:center;">ACCIONES</th>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th onclick="sortTable(0)" class="cursor-pointer hover:bg-blue-50/50 select-none py-4 px-5">
+                <div class="flex items-center gap-1.5 justify-start text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  ID PEDIDO <span id="sort-icon-0" class="material-symbols-outlined" style="font-size:1.4rem; opacity:0.6;">unfold_more</span>
+                </div>
+              </th>
+              <th class="py-4 px-5">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  ESTADO
+                </div>
+              </th>
+              <th class="py-4 px-5">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  ARTÍCULOS
+                </div>
+              </th>
+              <th onclick="sortTable(3)" class="cursor-pointer hover:bg-blue-50/50 select-none py-4 px-5">
+                <div class="flex items-center gap-1.5 justify-start text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  TOTAL <span id="sort-icon-3" class="material-symbols-outlined" style="font-size:1.4rem; opacity:0.6;">unfold_more</span>
+                </div>
+              </th>
+              <th onclick="sortTable(4)" class="cursor-pointer hover:bg-blue-50/50 select-none py-4 px-5">
+                <div class="flex items-center gap-1.5 justify-start text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  FECHA <span id="sort-icon-4" class="material-symbols-outlined" style="font-size:1.4rem; opacity:0.6;">unfold_more</span>
+                </div>
+              </th>
+              <th style="text-align:center;" class="py-4 px-5">
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
+                  ACCIONES
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
             {% for order in orders %}
-            <tr>
-              <td>
-                <span class="order-id">#{{ order.id|stringformat:"s"|upper|truncatechars:10 }}</span>
+            <tr class="order-row border-b border-slate-200"
+                data-status="{% if order.estado == 'delivered' %}ENTREGADO{% elif order.estado == 'shipped' %}EN CAMINO{% elif order.estado == 'cancelled' %}CANCELADO{% else %}PENDIENTE{% endif %}"
+                data-date="{{ order.creado_el|date:'Y-m-d' }}"
+                data-total="{{ order.monto_total }}"
+                data-search="{{ order.id|stringformat:'s'|lower }} {% if order.estado == 'delivered' %}entregado{% elif order.estado == 'shipped' %}en camino{% elif order.estado == 'cancelled' %}cancelado{% else %}pendiente{% endif %}">
+              
+              <!-- ID PEDIDO -->
+              <td class="py-4 px-5">
+                <span class="order-id text-techaccent font-extrabold cursor-pointer" onclick="showDetail('{{ order.id }}','{{ order.estado }}','{{ order.monto_total }}','{{ order.creado_el|date:'d/m/Y H:i' }}', '{{ order.direccion_envio|escapejs }}', '{{ order.repartidor.nombre_usuario|default:'Asignando...'|escapejs }}', '{{ order.notas|default:'Sin notas'|escapejs }}', '{{ order.notas_repartidor|default:''|escapejs }}')">
+                  #{{ order.id|stringformat:"s"|upper|slice:":8" }}...
+                </span>
+                <!-- Mobile metadata details inline -->
+                <div class="md:hidden text-[11px] text-slate-400 mt-1 font-semibold flex items-center gap-1.5">
+                  <span>{{ order.creado_el|date:"d/m/Y" }}</span>
+                  <span>&middot;</span>
+                  <span>{% if order.estado == 'delivered' %}Completado{% elif order.estado == 'cancelled' %}Cancelado{% else %}Est. 2-5 días{% endif %}</span>
+                </div>
               </td>
-              <td>
+
+              <!-- ESTADO -->
+              <td class="py-4 px-5">
                 {% if order.estado == 'delivered' %}
-                <span class="badge-status status-completed">
-                  <span class="material-symbols-outlined" style="font-size:1.4rem;">check_circle</span> Entregado
+                <span class="badge-status status-completed font-semibold">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Entregado
                 </span>
                 {% elif order.estado == 'shipped' %}
-                <span class="badge-status status-shipped">
-                  <span class="material-symbols-outlined" style="font-size:1.4rem;">local_shipping</span> En Camino
+                <span class="badge-status status-shipped font-semibold">
+                  <span class="w-2 h-2 rounded-full bg-blue-500"></span> En Camino
                 </span>
                 {% elif order.estado == 'pending' or order.estado == 'processing' %}
-                <span class="badge-status status-pending">
-                  <span class="material-symbols-outlined" style="font-size:1.4rem;">schedule</span> Pendiente
+                <span class="badge-status status-pending font-semibold">
+                  <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Pendiente
                 </span>
                 {% elif order.estado == 'cancelled' %}
-                <span class="badge-status status-cancelled">
-                  <span class="material-symbols-outlined" style="font-size:1.4rem;">cancel</span> Cancelado
+                <span class="badge-status status-cancelled font-semibold">
+                  <span class="w-2 h-2 rounded-full bg-red-500"></span> Cancelado
                 </span>
                 {% else %}
-                <span class="badge-status status-pending">{{ order.estado|title }}</span>
+                <span class="badge-status status-pending font-semibold">
+                  <span class="w-2 h-2 rounded-full bg-amber-500"></span> {{ order.estado|title }}
+                </span>
                 {% endif %}
               </td>
-              <td style="color:var(--ds-text-soft);">
+
+              <!-- ARTÍCULOS -->
+              <td class="py-4 px-5 text-slate-500 font-medium text-xs">
                 {{ order.detalles.count }} producto{% if order.detalles.count != 1 %}s{% endif %}
               </td>
-              <td>
-                <span style="font-family:'Oswald',sans-serif; font-size:1.6rem; font-weight:800; color:#16A34A;">{{ order.monto_total|currency_cop }}</span>
+
+              <!-- TOTAL -->
+              <td class="py-4 px-5 font-bold">
+                <span style="font-family: 'Inter', sans-serif; font-size:1.5rem; font-weight:800; color:#16A34A;">{{ order.monto_total|currency_cop }}</span>
               </td>
-              <td>
-                <div style="font-weight:600; color:var(--ds-text);">{{ order.creado_el|date:"d/m/Y" }}</div>
+
+              <!-- FECHA (Oculta en móviles) -->
+              <td class="py-4 px-5 hidden md:table-cell align-middle">
+                <div style="font-weight:600; color:var(--ds-text); font-size:1.3rem;">{{ order.creado_el|date:"d/m/Y" }}</div>
                 <div style="font-size:1.1rem; margin-top:0.2rem; color:var(--ds-text-soft);">
                   {% if order.estado == 'delivered' %}Completado
                   {% elif order.estado == 'cancelled' %}Cancelado
                   {% else %}Est. 2-5 días{% endif %}
                 </div>
               </td>
-              <td>
+
+              <!-- ACCIONES -->
+              <td class="py-4 px-5 align-middle">
                 <div style="display:flex; gap:0.8rem; justify-content:center;">
                   <button class="order-btn order-btn-detail"
                     onclick="showDetail('{{ order.id }}','{{ order.estado }}','{{ order.monto_total }}','{{ order.creado_el|date:'d/m/Y H:i' }}', '{{ order.direccion_envio|escapejs }}', '{{ order.repartidor.nombre_usuario|default:'Asignando...'|escapejs }}', '{{ order.notas|default:'Sin notas'|escapejs }}', '{{ order.notas_repartidor|default:''|escapejs }}')">
@@ -262,44 +478,52 @@
 </main>
 
 <!-- MODAL DETALLE PEDIDO -->
-<div class="modal fade" id="orderModal" tabindex="-1">
+<div class="modal fade custom-modal" id="orderModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:1.6rem; overflow:hidden;">
-      <div class="modal-header" style="background:var(--ds-primary); color:white;">
-        <h5 class="modal-title" style="font-size:1.6rem; font-weight:700;">📋 Detalle del Pedido</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="modal-content">
+      <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">
+        <span class="material-symbols-outlined" style="font-size: 2.4rem;">close</span>
+      </button>
+      <div class="modal-icon-circle bg-blue">
+        <span class="material-symbols-outlined" style="font-size: 3.2rem;">receipt_long</span>
       </div>
-      <div class="modal-body" style="padding:3rem; font-size:1.4rem;">
-        <div id="modal-body-content"></div>
-      </div>
+      <h3 class="custom-modal-title" id="orderModalTitle">Detalle del Pedido</h3>
+      <div id="modal-body-content"></div>
     </div>
   </div>
 </div>
 
 <!-- MODAL RASTREO DE MAPA -->
-<div class="modal fade" id="trackingModal" tabindex="-1">
+<div class="modal fade custom-modal" id="trackingModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content" style="border-radius:1.6rem; overflow:hidden;">
-      <div class="modal-header" style="background:#111; color:white;">
-        <h5 class="modal-title" style="font-size:1.6rem; font-weight:800; display:flex; align-items:center; gap:10px;">
-          <span style="font-size:2rem;">🛰️</span> RASTREO SATELITAL: MI PEDIDO
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="modal-content">
+      <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">
+        <span class="material-symbols-outlined" style="font-size: 2.4rem;">close</span>
+      </button>
+      <div class="modal-icon-circle bg-green">
+        <span class="material-symbols-outlined" style="font-size: 3.2rem;">local_shipping</span>
       </div>
-      <div class="modal-body p-0">
-        <div id="tracking-map" style="height:450px; width:100%; background:#F1F5F9;"></div>
-        <div style="padding:2.5rem; background:#FFF; border-top:1px solid #EEE;">
-           <div id="tracking-status-info" style="display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <p style="margin:0; font-size:1.1rem; text-transform:uppercase; font-weight:700; color:#64748B;">Estado Actual</p>
-                <h4 id="tracking-status-text" style="font-weight:800; color:#1D4ED8; margin:0;">En Tránsito</h4>
-              </div>
-              <div style="text-align:right;">
-                <p style="margin:0; font-size:1.1rem; text-transform:uppercase; font-weight:700; color:#64748B;">Llegada Estimada</p>
-                <h4 style="font-weight:800; color:#111; margin:0;">24 - 48 Horas</h4>
-              </div>
-           </div>
-        </div>
+      <h3 class="custom-modal-title" id="trackingModalTitle">Rastreo de Pedido</h3>
+      
+      <div class="map-container-wrap">
+        <div id="tracking-map" style="height:400px; width:100%; background:#F1F5F9;"></div>
+      </div>
+      
+      <div style="padding: 2.5rem; background: var(--ds-bg); border: 1px solid var(--ds-border); border-radius: 1.6rem;">
+         <div id="tracking-status-info" style="display:flex; justify-content:space-between; align-items:center; gap: 1.5rem; flex-wrap: wrap;">
+            <div>
+              <p style="margin:0; font-size:1.1rem; text-transform:uppercase; font-weight:700; color:var(--ds-text-soft);">Estado Actual</p>
+              <h4 id="tracking-status-text" style="font-weight:800; color:#1D4ED8; margin:0.3rem 0 0;">En Tránsito</h4>
+            </div>
+            <div id="tracking-driver-info">
+              <p style="margin:0; font-size:1.1rem; text-transform:uppercase; font-weight:700; color:var(--ds-text-soft);">Repartidor</p>
+              <h4 id="tracking-driver-text" style="font-weight:800; color:var(--ds-text); margin:0.3rem 0 0;">Asignando...</h4>
+            </div>
+            <div style="text-align:right;">
+              <p style="margin:0; font-size:1.1rem; text-transform:uppercase; font-weight:700; color:var(--ds-text-soft);">Llegada Estimada</p>
+              <h4 style="font-weight:800; color:#16A34A; margin:0.3rem 0 0;">24 - 48 Horas</h4>
+            </div>
+         </div>
       </div>
     </div>
   </div>
@@ -310,24 +534,37 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+function toggleSidebar() {
+  document.body.classList.toggle('sidebar-open');
+}
+
 function confirmarSalida(e, url) {
   e.preventDefault();
   Swal.fire({
     title: '¿Deseas cerrar sesión?',
-    text: "Tendrás que volver a ingresar tus credenciales la próxima vez.",
-    icon: 'warning',
+    html: `
+      <div class="d-flex flex-column align-items-center text-center gap-3">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; display: flex; align-items: center; justify-content: center; color: #EF4444; margin-bottom: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        </div>
+        <p style="margin: 0; font-size: 1.4rem; color: #64748B; font-weight: 500; line-height: 1.5; font-family: 'Inter', sans-serif;">
+          Tendrás que volver a ingresar tus credenciales para acceder a tu cuenta.
+        </p>
+      </div>
+    `,
     showCancelButton: true,
-    confirmButtonColor: '#1D4ED8',
-    cancelButtonColor: '#E2E8F0',
     confirmButtonText: 'Sí, cerrar sesión',
-    cancelButtonText: '<span style="color:#0F172A">Cancelar</span>',
+    cancelButtonText: 'Cancelar',
     background: '#FFFFFF',
-    backdrop: 'rgba(15, 23, 42, 0.6)',
+    color: '#0F172A',
+    backdrop: 'rgba(15, 23, 42, 0.4)',
+    buttonsStyling: false,
     customClass: {
-      popup: 'border-0 rounded-4 shadow-lg',
-      title: 'fs-3 fw-bold text-dark',
-      confirmButton: 'fw-bold rounded-3 px-4',
-      cancelButton: 'fw-bold rounded-3 px-4 shadow-none'
+      popup: 'border-0 rounded-4 shadow-lg p-4',
+      title: 'fs-3 fw-bold text-dark mt-2 mb-1',
+      actions: 'mt-4 d-flex justify-content-center gap-2 w-100',
+      confirmButton: 'btn btn-danger fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1',
+      cancelButton: 'btn btn-light fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1 border border-200'
     }
   }).then((result) => {
     if (result.isConfirmed) {
@@ -337,114 +574,413 @@ function confirmarSalida(e, url) {
 }
 </script>
 <script>
-// Búsqueda en tabla
-document.getElementById('search-orders').addEventListener('input', function() {
-  var query = this.value.toLowerCase();
-  var rows = document.querySelectorAll('#orders-table tbody tr');
-  rows.forEach(function(row) {
-    var text = row.textContent.toLowerCase();
-    row.style.display = text.includes(query) ? '' : 'none';
+// Dropdown menus toggling
+const statusFilterBtn = document.getElementById('statusFilterBtn');
+const statusFilterMenu = document.getElementById('statusFilterMenu');
+const dateFilterBtn = document.getElementById('dateFilterBtn');
+const dateFilterMenu = document.getElementById('dateFilterMenu');
+
+if (statusFilterBtn && statusFilterMenu) {
+  statusFilterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    statusFilterMenu.classList.toggle('show');
+    if (dateFilterMenu) dateFilterMenu.classList.remove('show');
+  });
+}
+
+if (dateFilterBtn && dateFilterMenu) {
+  dateFilterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dateFilterMenu.classList.toggle('show');
+    if (statusFilterMenu) statusFilterMenu.classList.remove('show');
+  });
+}
+
+document.addEventListener('click', () => {
+  if (statusFilterMenu) statusFilterMenu.classList.remove('show');
+  if (dateFilterMenu) dateFilterMenu.classList.remove('show');
+});
+
+// Filtering variables
+let currentStatus = 'all';
+let currentPeriod = 'all';
+let currentSearch = '';
+
+// Add event listener to search input
+const searchInput = document.getElementById('search-orders');
+if (searchInput) {
+  searchInput.addEventListener('input', function() {
+    currentSearch = this.value.trim().toLowerCase();
+    applyFilters();
+  });
+}
+
+// Add event listeners to status items
+document.querySelectorAll('#statusFilterMenu .filter-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.querySelectorAll('#statusFilterMenu .filter-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    currentStatus = this.getAttribute('data-value');
+    
+    const label = document.getElementById('selectedStatusLabel');
+    if (label) {
+      if (currentStatus === 'all') {
+        label.textContent = 'Filtrar por Estado';
+      } else {
+        label.textContent = 'Estado: ' + this.textContent.trim();
+      }
+    }
+    
+    statusFilterMenu.classList.remove('show');
+    applyFilters();
   });
 });
 
-// Modal detalle
-function showDetail(id, status, total, date, address, driver, notes, deliveryNotes) {
-  var modal = new bootstrap.Modal(document.getElementById('orderModal'));
-  var container = document.getElementById('modal-body-content');
+// Add event listeners to date items
+document.querySelectorAll('#dateFilterMenu .filter-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.querySelectorAll('#dateFilterMenu .filter-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    currentPeriod = this.getAttribute('data-value');
+    
+    const label = document.getElementById('selectedDateLabel');
+    if (label) {
+      if (currentPeriod === 'all') {
+        label.textContent = 'Filtrar por Fecha';
+      } else {
+        label.textContent = 'Fecha: ' + this.textContent.trim();
+      }
+    }
+    
+    dateFilterMenu.classList.remove('show');
+    applyFilters();
+  });
+});
+
+// Date period validation helper
+function checkDatePeriod(dateStr, period) {
+  if (period === 'all') return true;
+  if (!dateStr) return false;
+  
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return false;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  
+  const orderDate = new Date(year, month, day);
+  orderDate.setHours(0, 0, 0, 0);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  if (period === 'today') {
+    return orderDate.getTime() === today.getTime();
+  }
+  
+  if (period === 'yesterday') {
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    return orderDate.getTime() === yesterday.getTime();
+  }
+  
+  if (period === 'last7') {
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    return orderDate.getTime() >= sevenDaysAgo.getTime() && orderDate.getTime() <= today.getTime();
+  }
+  
+  if (period === 'last30') {
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+    return orderDate.getTime() >= thirtyDaysAgo.getTime() && orderDate.getTime() <= today.getTime();
+  }
+  
+  return false;
+}
+
+// Combined filtering execution
+function applyFilters() {
+  const rows = document.querySelectorAll('#orders-table tbody tr.order-row');
+  let visibleCount = 0;
+  
+  rows.forEach(row => {
+    const status = row.getAttribute('data-status');
+    const dateStr = row.getAttribute('data-date');
+    const searchData = row.getAttribute('data-search').toLowerCase();
+    
+    const matchSearch = currentSearch === '' || searchData.includes(currentSearch);
+    const matchStatus = currentStatus === 'all' || status === currentStatus;
+    const matchDate = checkDatePeriod(dateStr, currentPeriod);
+    
+    if (matchSearch && matchStatus && matchDate) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+
+  const emptyStateEl = document.getElementById('dynamic-empty-state');
+  const tableEl = document.getElementById('orders-table');
+  const tableWrap = document.querySelector('.miki-table-wrap');
+  
+  if (visibleCount === 0) {
+    if (tableEl) tableEl.style.display = 'none';
+    if (!emptyStateEl && tableWrap) {
+      const emptyHtml = `
+        <div id="dynamic-empty-state" class="empty-state py-5" style="text-align:center; padding:6rem; color:var(--ds-text-soft);">
+          <div style="width:64px; height:64px; border-radius:50%; background:#F1F5F9; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; color:var(--ds-text-soft);">
+            <span class="material-symbols-outlined" style="font-size:32px;">search_off</span>
+          </div>
+          <h3 style="font-size:1.8rem; font-weight:700; color:var(--ds-text); margin-bottom:1rem;">No se encontraron pedidos</h3>
+          <p style="font-size:1.4rem; margin-bottom: 2rem; color:var(--ds-text-soft);">Intenta cambiar los filtros o el término de búsqueda.</p>
+          <button onclick="clearAllFilters()" class="btn btn-primary fw-bold px-4 py-2 fs-5" style="border-radius:1rem; background:var(--ds-primary); border:none; padding:1.2rem 2.5rem;">Restablecer Filtros</button>
+        </div>
+      `;
+      tableWrap.insertAdjacentHTML('beforeend', emptyHtml);
+    } else if (emptyStateEl) {
+      emptyStateEl.style.display = '';
+    }
+  } else {
+    if (tableEl) tableEl.style.display = '';
+    if (emptyStateEl) emptyStateEl.style.display = 'none';
+  }
+}
+
+// Clear all active filters
+window.clearAllFilters = function() {
+  const search = document.getElementById('search-orders');
+  if (search) search.value = '';
+  currentSearch = '';
+  
+  document.querySelectorAll('#statusFilterMenu .filter-item').forEach(i => i.classList.remove('active'));
+  const allStatus = document.querySelector('#statusFilterMenu .filter-item[data-value="all"]');
+  if (allStatus) allStatus.classList.add('active');
+  currentStatus = 'all';
+  const statusLabel = document.getElementById('selectedStatusLabel');
+  if (statusLabel) statusLabel.textContent = 'Filtrar por Estado';
+  
+  document.querySelectorAll('#dateFilterMenu .filter-item').forEach(i => i.classList.remove('active'));
+  const allDates = document.querySelector('#dateFilterMenu .filter-item[data-value="all"]');
+  if (allDates) allDates.classList.add('active');
+  currentPeriod = 'all';
+  const dateLabel = document.getElementById('selectedDateLabel');
+  if (dateLabel) dateLabel.textContent = 'Filtrar por Fecha';
+  
+  applyFilters();
+};
+
+// Column header sorting
+let sortDirections = {};
+window.sortTable = function(colIdx) {
+  const table = document.getElementById('orders-table');
+  if (!table) return;
+  
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr.order-row'));
+  
+  const currentDir = sortDirections[colIdx] || 'desc';
+  const newDir = currentDir === 'asc' ? 'desc' : 'asc';
+  sortDirections[colIdx] = newDir;
+  
+  [0, 3, 4].forEach(idx => {
+    const icon = document.getElementById('sort-icon-' + idx);
+    if (icon) {
+      icon.textContent = 'unfold_more';
+      icon.style.opacity = '0.6';
+    }
+  });
+  
+  const sortedIcon = document.getElementById('sort-icon-' + colIdx);
+  if (sortedIcon) {
+    sortedIcon.textContent = newDir === 'asc' ? 'arrow_upward' : 'arrow_downward';
+    sortedIcon.style.opacity = '1';
+  }
+  
+  rows.sort((rowA, rowB) => {
+    let valA = '';
+    let valB = '';
+    
+    if (colIdx === 0) {
+      valA = rowA.querySelector('.order-id').textContent.trim();
+      valB = rowB.querySelector('.order-id').textContent.trim();
+    } else if (colIdx === 3) {
+      valA = parseFloat(rowA.getAttribute('data-total')) || 0;
+      valB = parseFloat(rowB.getAttribute('data-total')) || 0;
+    } else if (colIdx === 4) {
+      valA = new Date(rowA.getAttribute('data-date')).getTime() || 0;
+      valB = new Date(rowB.getAttribute('data-date')).getTime() || 0;
+    }
+    
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return newDir === 'asc' ? valA - valB : valB - valA;
+    } else {
+      return newDir === 'asc' 
+        ? valA.localeCompare(valB, undefined, {numeric: true, sensitivity: 'base'})
+        : valB.localeCompare(valA, undefined, {numeric: true, sensitivity: 'base'});
+    }
+  });
+  
+  rows.forEach(row => tbody.appendChild(row));
+};
+
+// Modal details presentation
+window.showDetail = function(id, status, total, date, address, driver, notes, deliveryNotes) {
+  const container = document.getElementById('modal-body-content');
+  if (!container) return;
   container.replaceChildren();
 
-  // Mapeo UI
   const statusLabels = {
     'pending': 'Pendiente',
     'processing': 'Procesando',
-    'shipped': 'Enviado (En camino)',
+    'shipped': 'En camino',
     'delivered': 'Entregado',
     'cancelled': 'Cancelado'
   };
 
-  var rows = [
-    ['ID Pedido', '#' + id.substring(0, 12).toUpperCase()],
-    ['Estado Actual', statusLabels[status] || status],
-    ['Total', '$' + parseFloat(total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' COP'],
-    ['Fecha Compra', date],
-    ['Dirección Envío', address || 'No especificada'],
-    ['Repartidor MIKI', driver],
-    ['Notas Cliente', notes],
-    ['Nota de Entrega', deliveryNotes || 'Pendiente por el repartidor']
-  ];
+  const titleEl = document.getElementById('orderModalTitle');
+  if (titleEl) {
+    titleEl.textContent = 'Detalle del Pedido #' + id.substring(0, 8).toUpperCase();
+  }
 
-  // Barra de progreso visual
-  const steps = ['pending', 'processing', 'shipped', 'delivered'];
-  const currentIndex = steps.indexOf(status);
-  
-  let progressHtml = `
-    <div style="margin-bottom:3rem; padding:2rem 0;">
-      <div style="display:flex; justify-content:space-between; position:relative;">
-        <div style="position:absolute; top:2.5rem; left:0; right:0; height:4px; background:#E2E8F0; z-index:1;"></div>
-        <div style="position:absolute; top:2.5rem; left:0; width:${(currentIndex / 3) * 100}%; height:4px; background:#1D4ED8; z-index:2; transition:width 0.5s ease;"></div>
-        
-        ${steps.map((s, idx) => `
-          <div style="z-index:3; text-align:center; width:25%;">
-            <div style="width:5rem; height:5rem; border-radius:50%; background:${idx <= currentIndex ? '#1D4ED8' : '#F1F5F9'}; color:${idx <= currentIndex ? 'white' : '#64748B'}; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; border:4px solid white; box-shadow:0 0 10px rgba(0,0,0,0.1);">
-              <span class="material-symbols-outlined" style="font-size:2rem;">${
-                s === 'pending' ? 'shopping_bag' : s === 'processing' ? 'package_2' : s === 'shipped' ? 'local_shipping' : 'verified'
-              }</span>
-            </div>
-            <div style="font-size:1rem; font-weight:700; text-transform:uppercase; color:${idx <= currentIndex ? '#1D4ED8' : '#64748B'}">${statusLabels[s]}</div>
-          </div>
-        `).join('')}
+  // Visual Progress Steps
+  let progressHtml = '';
+  if (status === 'cancelled') {
+    progressHtml = `
+      <div style="margin-bottom:3rem; padding:2rem; background:#FEE2E2; border-radius:1.6rem; display:flex; align-items:center; gap:1.5rem; color:#DC2626;">
+        <span class="material-symbols-outlined" style="font-size:2.8rem;">cancel</span>
+        <div style="text-align:left;">
+          <div style="font-weight:700; font-size:1.4rem;">Pedido Cancelado</div>
+          <div style="font-size:1.2rem; opacity:0.9;">Este pedido ha sido cancelado y no puede ser procesado.</div>
+        </div>
       </div>
+    `;
+  } else {
+    const steps = ['pending', 'processing', 'shipped', 'delivered'];
+    const currentIndex = steps.indexOf(status);
+    progressHtml = `
+      <div style="margin-bottom:3.5rem; padding:1.5rem 0;">
+        <div style="display:flex; justify-content:space-between; position:relative;">
+          <div style="position:absolute; top:2.5rem; left:0; right:0; height:4px; background:#E2E8F0; z-index:1;"></div>
+          <div style="position:absolute; top:2.5rem; left:0; width:${(currentIndex / 3) * 100}%; height:4px; background:#1D4ED8; z-index:2; transition:width 0.5s ease;"></div>
+          
+          ${steps.map((s, idx) => `
+            <div style="z-index:3; text-align:center; width:25%;">
+              <div style="width:5rem; height:5rem; border-radius:50%; background:${idx <= currentIndex ? '#1D4ED8' : '#F1F5F9'}; color:${idx <= currentIndex ? 'white' : '#64748B'}; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; border:4px solid white; box-shadow:0 0 10px rgba(0,0,0,0.06);">
+                <span class="material-symbols-outlined" style="font-size:2rem;">${
+                  s === 'pending' ? 'shopping_bag' : s === 'processing' ? 'package_2' : s === 'shipped' ? 'local_shipping' : 'verified'
+                }</span>
+              </div>
+              <div style="font-size:1rem; font-weight:700; text-transform:uppercase; color:${idx <= currentIndex ? '#1D4ED8' : '#64748B'}">${statusLabels[s]}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  const gridHtml = `
+    <div class="row g-3 text-start">
+      <div class="col-md-6">
+        <div style="padding:1.5rem; background:var(--ds-bg); border-radius:1.2rem; border:1px solid var(--ds-border);">
+          <div style="font-size: 1.1rem; color: var(--ds-text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">ID Pedido</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--ds-text); margin-top: 0.3rem;">#${id.toUpperCase()}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="padding:1.5rem; background:var(--ds-bg); border-radius:1.2rem; border:1px solid var(--ds-border);">
+          <div style="font-size: 1.1rem; color: var(--ds-text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Estado Actual</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--ds-primary); margin-top: 0.3rem;">${statusLabels[status] || status}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="padding:1.5rem; background:var(--ds-bg); border-radius:1.2rem; border:1px solid var(--ds-border);">
+          <div style="font-size: 1.1rem; color: var(--ds-text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Total de Compra</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: #16A34A; margin-top: 0.3rem;">$${parseFloat(total).toLocaleString('es-CO', {minimumFractionDigits: 0, maximumFractionDigits: 0})} COP</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="padding:1.5rem; background:var(--ds-bg); border-radius:1.2rem; border:1px solid var(--ds-border);">
+          <div style="font-size: 1.1rem; color: var(--ds-text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Fecha Compra</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--ds-text); margin-top: 0.3rem;">${date}</div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div style="padding:1.5rem; background:var(--ds-bg); border-radius:1.2rem; border:1px solid var(--ds-border);">
+          <div style="font-size: 1.1rem; color: var(--ds-text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Dirección Envío</div>
+          <div style="font-size: 1.4rem; font-weight: 600; color: var(--ds-text); margin-top: 0.3rem;">${address || 'No especificada'}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="padding:1.5rem; background:var(--ds-bg); border-radius:1.2rem; border:1px solid var(--ds-border);">
+          <div style="font-size: 1.1rem; color: var(--ds-text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Repartidor Asignado</div>
+          <div style="font-size: 1.4rem; font-weight: 700; color: var(--ds-text); margin-top: 0.3rem;">${driver || 'Asignando repartidor...'}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="padding:1.5rem; background:var(--ds-bg); border-radius:1.2rem; border:1px solid var(--ds-border);">
+          <div style="font-size: 1.1rem; color: var(--ds-text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Notas Cliente</div>
+          <div style="font-size: 1.4rem; font-style: italic; color: var(--ds-text-soft); margin-top: 0.3rem;">${notes || 'Sin notas'}</div>
+        </div>
+      </div>
+      ${deliveryNotes ? `
+      <div class="col-12">
+        <div style="padding:1.5rem; background:#EFF6FF; border-radius:1.2rem; border:1px solid #DBEAFE;">
+          <div style="font-size: 1.1rem; color: var(--ds-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Nota de Entrega (Repartidor)</div>
+          <div style="font-size: 1.4rem; font-weight: 600; color: var(--ds-primary); margin-top: 0.3rem;">${deliveryNotes}</div>
+        </div>
+      </div>
+      ` : ''}
     </div>
   `;
 
-  var table = document.createElement('table');
-  table.className = 'table table-bordered';
-  rows.forEach(function(row) {
-    var tr = document.createElement('tr');
-    var thEl = document.createElement('th');
-    thEl.textContent = row[0];
-    thEl.style.width = '40%';
-    thEl.style.background = 'var(--ds-bg)';
-    var td = document.createElement('td');
-    td.textContent = row[1];
-    tr.appendChild(thEl);
-    tr.appendChild(td);
-    table.appendChild(tr);
-  });
-  
-  container.innerHTML = progressHtml;
-  container.appendChild(table);
+  container.innerHTML = progressHtml + gridHtml;
+  var modal = new bootstrap.Modal(document.getElementById('orderModal'));
   modal.show();
-}
+};
 
-// RASTREO CON MAPA REAL
+// RASTREO CON MAPA REAL Y LEAFLET INITIALIZATION AFTER MODAL SHOWN
 let trackingMap, trackingMarker;
-function trackOrder(id, status) {
-  var modal = new bootstrap.Modal(document.getElementById('trackingModal'));
-  document.getElementById('tracking-status-text').textContent = (status === 'delivered') ? 'Entregado ✅' : 'En Tránsito 🚚';
+window.trackOrder = function(id, status, driverName) {
+  var modalEl = document.getElementById('trackingModal');
+  if (!modalEl) return;
+  var modal = new bootstrap.Modal(modalEl);
   
-  modal.show();
-
-  // Esperar a que el modal se muestre para renderizar el mapa correctamente
-  setTimeout(() => {
+  // Set details text
+  const titleEl = document.getElementById('trackingModalTitle');
+  if (titleEl) titleEl.textContent = 'Rastreo de Pedido #' + id.substring(0, 8).toUpperCase();
+  
+  const statusText = document.getElementById('tracking-status-text');
+  if (statusText) statusText.textContent = (status === 'delivered') ? 'Entregado ✅' : 'En Tránsito 🚚';
+  
+  const driverText = document.getElementById('tracking-driver-text');
+  if (driverText) driverText.textContent = driverName || 'Asignando repartidor...';
+  
+  // Wait until modal is fully open before initializing or rendering leaflet
+  const shownHandler = function () {
     if (!trackingMap) {
       trackingMap = L.map('tracking-map').setView([4.6097, -74.0817], 13); // Bogotá centro
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
       }).addTo(trackingMap);
+    } else {
+      trackingMap.invalidateSize();
     }
 
-    // Limpiar marcadores previos
-    if(trackingMarker) trackingMap.removeLayer(trackingMarker);
+    if (trackingMarker) trackingMap.removeLayer(trackingMarker);
 
-    // Simular ubicación aleatoria dentro de la zona de entrega
     const offsets = [ [0.01, 0.02], [-0.015, -0.01], [0.005, -0.025], [0.02, 0.01] ];
     const off = offsets[Math.floor(Math.random()*offsets.length)];
     const shipPos = [4.6097 + off[0], -74.0817 + off[1]];
 
-    // Icono de camión simulado
     var truckIcon = L.divIcon({
-      html: '<div style="font-size:4rem;">🚚</div>',
+      html: '<div style="font-size:3.5rem; filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.15));">🚚</div>',
       className: 'truck-icon',
       iconSize: [40, 40],
       iconAnchor: [20, 20]
@@ -453,18 +989,22 @@ function trackOrder(id, status) {
     trackingMarker = L.marker(shipPos, {icon: truckIcon}).addTo(trackingMap);
     trackingMap.setView(shipPos, 14);
 
-    // Agregar línea de ruta simulada
-    var polyline = L.polyline([
+    if (window.trackingPolyline) trackingMap.removeLayer(window.trackingPolyline);
+    
+    window.trackingPolyline = L.polyline([
       [4.7110, -74.0721], // Almacén Central Suba
       [4.6591, -74.0620], // Punto Intermedio
       shipPos           // Ubicación Actual
-    ], {color: '#1D4ED8', weight: 5, opacity: 0.5, dashArray: '10, 10'}).addTo(trackingMap);
+    ], {color: '#1D4ED8', weight: 5, opacity: 0.6, dashArray: '10, 10'}).addTo(trackingMap);
     
-    // Zoom para ver toda la ruta
-    trackingMap.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-
-  }, 500);
-}
+    trackingMap.fitBounds(window.trackingPolyline.getBounds(), {padding: [50, 50]});
+    
+    modalEl.removeEventListener('shown.bs.modal', shownHandler);
+  };
+  
+  modalEl.addEventListener('shown.bs.modal', shownHandler);
+  modal.show();
+};
 </script>
 </body>
 </html>

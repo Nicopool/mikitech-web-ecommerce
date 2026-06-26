@@ -1,0 +1,985 @@
+{% extends "admin_panel/base_admin.html" %}
+{% load static %}
+{% load miki_filters %}
+{% block page_title %}Gestión de Pedidos — MIKITECH{% endblock %}
+
+{% block admin_content %}
+<!-- Tailwind CSS CDN (Scoped for this view) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          techbg: '#F0F2F5',
+          techsurface: '#FFFFFF',
+          techborder: '#E2E8F0',
+          techaccent: '#1D4ED8',
+          techgreen: '#059669',
+          techamber: '#D97706',
+          techred: '#DC2626',
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body.g-admin-layout { background-color: #F0F2F5 !important; }
+  .g-main-wrapper { background: #F0F2F5 !important; }
+
+  /* Table styling */
+  #ordersTableActive, #ordersTableCompleted {
+    font-size: 15px !important;
+  }
+  #ordersTableActive th, #ordersTableCompleted th {
+    font-size: 12px !important;
+    padding: 18px 24px !important;
+  }
+  #ordersTableActive td, #ordersTableCompleted td {
+    font-size: 15px !important;
+    padding: 20px 24px !important;
+  }
+  #ordersTableActive tbody tr, #ordersTableCompleted tbody tr {
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+  }
+  #ordersTableActive tbody tr:hover, #ordersTableCompleted tbody tr:hover {
+    background-color: #F0F7FF !important;
+    box-shadow: inset 3px 0 0 #1D4ED8;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<div class="flex flex-col gap-6 w-full max-w-full min-w-0 box-border">
+
+  <!-- Header & Brief Stats -->
+  <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 rounded-2xl p-8 relative overflow-hidden shadow-2xl w-full box-border">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-10 -right-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none"></div>
+    <div class="absolute -bottom-15 right-48 w-72 h-72 rounded-full bg-white/3 pointer-events-none"></div>
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-xl bg-white/12 flex items-center justify-center backdrop-blur-md">
+            <i data-lucide="shopping-bag" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h2 class="text-3xl font-extrabold text-white m-0 tracking-tight">Gestión de Pedidos</h2>
+            <p class="text-sm text-white/60 mt-1 font-medium">Panel de despacho, asignación de pilotos y facturación.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN WRAPPER FOR ORDERS TABLE -->
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 w-full flex flex-col gap-5 box-border">
+
+    <!-- TABS: Pedidos en Proceso / Historial Completado -->
+    <div class="flex gap-2 border-b border-slate-200 pb-0">
+      <button id="tabActive" class="relative bg-none border-none text-[15px] font-bold text-techaccent px-5 py-3 cursor-pointer transition-all duration-200 flex items-center">
+        Pedidos en Proceso
+        <span id="indicatorActive" class="absolute bottom-[-1px] left-0 right-0 h-[2.5px] bg-techaccent rounded-t"></span>
+      </button>
+      <button id="tabCompleted" class="relative bg-none border-none text-[15px] font-medium text-slate-500 px-5 py-3 cursor-pointer transition-all duration-200 flex items-center">
+        Historial Completado
+        <span id="indicatorCompleted" class="absolute bottom-[-1px] left-0 right-0 h-[2.5px] bg-transparent rounded-t"></span>
+      </button>
+    </div>
+
+    <!-- Sticky Interactive Filters Bar -->
+    <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-md py-4 border-b border-slate-200 -mx-6 px-6 flex flex-col md:flex-row md:items-center justify-between gap-4 w-auto box-border transition-all duration-200">
+      <!-- Left side: Status chips -->
+      <div class="flex items-center gap-3 flex-wrap" id="statusChipsContainer">
+        <span class="text-sm font-bold text-slate-500 uppercase tracking-wider mr-2">Estado:</span>
+        <button type="button" data-value="all" class="status-chip active py-2.5 px-5 rounded-full text-sm font-bold transition duration-200 bg-techaccent text-white border-none cursor-pointer">
+          Todos
+        </button>
+        <button type="button" data-value="PENDIENTE" class="status-chip py-2.5 px-5 rounded-full text-sm font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Pendiente
+        </button>
+        <button type="button" data-value="EN CAMINO" class="status-chip py-2.5 px-5 rounded-full text-sm font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> En Camino
+        </button>
+        <button type="button" data-value="ENTREGADO" class="status-chip py-2.5 px-5 rounded-full text-sm font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Entregado
+        </button>
+        <button type="button" data-value="CANCELADO" class="status-chip py-2.5 px-5 rounded-full text-sm font-bold transition duration-200 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none cursor-pointer flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Cancelado
+        </button>
+      </div>
+
+      <!-- Right side: Search & Period Dropdown -->
+      <div class="flex items-center gap-3 flex-wrap md:flex-nowrap">
+        <!-- Period Dropdown -->
+        <div class="relative min-w-[140px]">
+          <select id="periodFilter" class="w-full py-2.5 pl-4 pr-9 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-slate-800 outline-none cursor-pointer appearance-none transition-all duration-200 hover:bg-slate-100">
+            <option value="all">🕒 Histórico</option>
+            <option value="today">☀️ Hoy</option>
+            <option value="yesterday">⛅ Ayer</option>
+          </select>
+          <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+        </div>
+
+        <!-- Search Input -->
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 w-64 transition-all duration-200 focus-within:border-techaccent focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i>
+          <input type="text" id="orderSearch" placeholder="Buscar..." class="border-none outline-none text-xs font-semibold text-slate-900 w-full py-2 bg-transparent">
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE 1: ACTIVE ORDERS -->
+    <div id="activeTableContainer" class="flex flex-col gap-5 w-full">
+      <div class="overflow-x-auto w-full rounded-xl border border-slate-200 box-border">
+        <table class="w-full border-collapse text-left" id="ordersTableActive">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th onclick="sortTable(0, 'ordersTableActive')" class="w-[35%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
+                <div class="flex items-center gap-1.5">ID / Cliente <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
+              </th>
+              <th class="w-[25%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">ESTADO</th>
+              <th class="w-[25%] hidden md:table-cell uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">FECHA</th>
+              <th class="w-[15%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido in pedidos %}
+            {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' or pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+            <tr class="table-row-data active-row-data border-b border-slate-200"
+                data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
+                data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
+                data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
+                data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
+              
+              <!-- ID / CLIENTE -->
+              <td class="py-4 px-5">
+                <div class="flex flex-col">
+                  <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-mono font-extrabold text-[11px] text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
+                    <span class="md:hidden text-[11px] text-slate-400 font-medium">&middot; {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}</span>
+                  </div>
+                  <span class="block text-[11px] text-slate-500 mt-1 font-semibold">{{ pedido.monto_total|currency_cop }}</span>
+                </div>
+              </td>
+
+              <!-- ESTADO -->
+              <td class="py-4 px-5 align-middle">
+                {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-amber-50 text-amber-800 border border-amber-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    Pendiente
+                  </span>
+                {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-blue-50 text-blue-800 border border-blue-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                    En camino
+                  </span>
+                {% endif %}
+              </td>
+
+              <!-- FECHA (Oculta en celular) -->
+              <td class="py-4 px-5 hidden md:table-cell text-slate-600 font-semibold text-xs align-middle">
+                {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}
+              </td>
+
+              <!-- ACCIONES -->
+              <td class="py-4 px-5 align-middle">
+                <div class="flex justify-center items-center gap-2">
+                  <!-- Cambiar estado a Enviado (En camino) -->
+                  {% if pedido.estado == 'pending' or pedido.estado == 'processing' %}
+                    <button onclick="updateStatus('{{ pedido.id }}', 'Enviado')"
+                            title="Despachar pedido (En Camino)"
+                            class="inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-lg text-xs font-bold text-white bg-techaccent hover:bg-blue-800 transition shadow-sm border-none cursor-pointer">
+                      <i data-lucide="truck" class="w-3.5 h-3.5"></i> Despachar
+                    </button>
+                  {% endif %}
+                  <!-- Confirmar Entrega -->
+                  {% if pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+                    <button onclick="openConfirmDeliveryModal('{{ pedido.id }}')"
+                            title="Confirmar Entrega con Cédula"
+                            class="inline-flex items-center justify-center gap-1.5 py-2 px-3.5 rounded-lg text-xs font-bold text-white bg-techgreen hover:bg-emerald-800 transition shadow-sm border-none cursor-pointer">
+                      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Entregar
+                    </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr class="empty-row-active"><td colspan="4" class="py-12 text-center text-slate-400">Ningún pedido en proceso en el sistema.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACIÓN ACTIVOS -->
+      <div class="border-t border-slate-200 pt-4 flex items-center justify-between flex-wrap gap-3 w-full box-border">
+        <div class="text-sm text-slate-500 font-medium">
+          Mostrando <strong class="text-slate-800" id="visibleActiveCount">0</strong> de
+          <strong class="text-slate-800" id="totalActiveCount">0</strong> pedidos en proceso
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="prevActiveBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            ← Anterior
+          </button>
+          <span id="pageActiveLabel" class="text-xs font-bold text-slate-850 px-2">Pág. 1 / 1</span>
+          <button id="nextActiveBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- TABLE 2: COMPLETED HISTORICAL ORDERS -->
+    <div id="completedTableContainer" class="hidden flex flex-col gap-5 w-full">
+      <div class="overflow-x-auto w-full rounded-xl border border-slate-200 box-border">
+        <table class="w-full border-collapse text-left" id="ordersTableCompleted">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th onclick="sortTable(0, 'ordersTableCompleted')" class="w-[35%] cursor-pointer hover:bg-blue-50 select-none uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">
+                <div class="flex items-center gap-1.5">ID / Cliente <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 opacity-50"></i></div>
+              </th>
+              <th class="w-[25%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">ESTADO</th>
+              <th class="w-[25%] hidden md:table-cell uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap py-4 px-5">FECHA</th>
+              <th class="w-[15%] uppercase tracking-wider text-xs font-bold text-slate-500 whitespace-nowrap text-center py-4 px-5">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido in pedidos %}
+            {% if pedido.estado != 'pending' and pedido.estado != 'Pendiente' and pedido.estado != 'processing' and pedido.estado != 'shipped' and pedido.estado != 'Enviado' %}
+            <tr class="table-row-data completed-row-data border-b border-slate-200"
+                data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
+                data-payment="{% if 'tarjeta' in pedido.notes|lower %}TARJETA{% elif 'efectivo' in pedido.notes|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
+                data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
+                data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
+
+              <!-- ID / CLIENTE -->
+              <td class="py-4 px-5">
+                <div class="flex flex-col">
+                  <span class="block font-extrabold text-slate-800">{{ pedido.usuario.nombre_mostrado }}</span>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-mono font-extrabold text-[11px] text-techaccent">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</span>
+                    <span class="md:hidden text-[11px] text-slate-400 font-medium">&middot; {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}</span>
+                  </div>
+                  <span class="block text-[11px] text-slate-500 mt-1 font-semibold">{{ pedido.monto_total|currency_cop }}</span>
+                </div>
+              </td>
+
+              <!-- ESTADO -->
+              <td class="py-4 px-5 align-middle">
+                {% if pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    Entregado
+                  </span>
+                {% else %}
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold tracking-wider rounded-full bg-red-50 text-red-800 border border-red-200/50">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                    Cancelado
+                  </span>
+                {% endif %}
+              </td>
+
+              <!-- FECHA (Oculta en celular) -->
+              <td class="py-4 px-5 hidden md:table-cell text-slate-600 font-semibold text-xs align-middle">
+                {{ pedido.creado_el|fecha_relativa }}, {{ pedido.creado_el|date:"h:i A" }}
+              </td>
+
+              <!-- ACCIONES -->
+              <td class="py-4 px-5 align-middle text-center">
+                <div class="flex justify-center items-center gap-1.5">
+                  <!-- Ver Factura -->
+                  <a href="{% url 'admin_order_invoice' pedido.id %}" target="_blank"
+                     title="Ver factura completa"
+                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-techaccent hover:bg-blue-50 transition-colors border-none cursor-pointer">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr class="empty-row-completed"><td colspan="4" class="py-12 text-center text-slate-400">Ningún pedido completado registrado.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACIÓN COMPLETADOS -->
+      <div class="border-t border-slate-200 pt-4 flex items-center justify-between flex-wrap gap-3 w-full box-border">
+        <div class="text-sm text-slate-500 font-medium">
+          Mostrando <strong class="text-slate-800" id="visibleCompletedCount">0</strong> de
+          <strong class="text-slate-800" id="totalCompletedCount">0</strong> transacciones históricas
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="prevCompletedBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            ← Anterior
+          </button>
+          <span id="pageCompletedLabel" class="text-xs font-bold text-slate-850 px-2">Pág. 1 / 1</span>
+          <button id="nextCompletedBtn" disabled
+            class="py-2 px-4 border.5 border-slate-200 rounded-lg text-xs font-semibold text-slate-500 bg-white cursor-pointer transition hover:border-techaccent hover:text-techaccent disabled:opacity-50 disabled:pointer-events-none">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELIVERY MODAL -->
+<div id="confirmDeliveryModal" class="hidden fixed inset-0 w-full h-full bg-slate-900/60 z-[999] backdrop-blur-sm items-center justify-center" style="display: none;">
+  <div class="bg-white rounded-3xl w-full max-w-[400px] p-8 shadow-2xl animate-slide-up border-0" style="animation: slideUp 0.3s ease;">
+    <!-- Circular check icon to match premium style -->
+    <div style="width: 56px; height: 56px; border-radius: 50%; background: #D1FAE5; display: flex; align-items: center; justify-content: center; color: #059669; margin: 0 auto 16px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg>
+    </div>
+    
+    <h3 class="text-xl font-extrabold text-slate-900 text-center mb-2">
+      Confirmar Entrega
+    </h3>
+    <p class="text-slate-500 text-center text-xs mb-6 font-medium">Por seguridad, solicita el número de cédula del cliente para entregar el pedido <span id="deliveryOrderIdLabel" class="font-mono font-bold text-techaccent"></span></p>
+
+    <form id="confirmDeliveryForm" method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="nuevo_estado" value="Entregado">
+      <div class="mb-6">
+        <label class="block text-center text-xs font-bold mb-2 text-slate-500 uppercase tracking-wider">Cédula del Cliente</label>
+        <input type="text" name="cedula_cliente" required placeholder="Ingresa la cédula sin puntos" class="w-full p-3 rounded-xl border border-slate-200 outline-none text-sm bg-slate-50 text-slate-900 text-center transition-colors focus:border-techaccent focus:bg-white focus:ring-4 focus:ring-blue-100 font-sans font-bold">
+      </div>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeConfirmDeliveryModal()" class="flex-grow w-1/2 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition border-none cursor-pointer">Cancelar</button>
+        <button type="submit" class="flex-grow w-1/2 py-2.5 px-4 bg-techgreen hover:bg-emerald-800 text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-1 border-none cursor-pointer">Confirmar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let selectedStatusVal = 'all';
+  let activeFilteredRows = [];
+  let completedFilteredRows = [];
+  let activeCurrentPage = 1;
+  let completedCurrentPage = 1;
+  const itemsPerPage = 10;
+
+  document.addEventListener("DOMContentLoaded", function() {
+    // 1. DYNAMIC CLIENT-SIDE FILTERING SYSTEM
+    const searchInput = document.getElementById('orderSearch');
+    const periodSelect = document.getElementById('periodFilter');
+    const statusChips = document.querySelectorAll('.status-chip');
+
+    // Tabs elements
+    const tabActive = document.getElementById('tabActive');
+    const tabCompleted = document.getElementById('tabCompleted');
+    const indicatorActive = document.getElementById('indicatorActive');
+    const indicatorCompleted = document.getElementById('indicatorCompleted');
+    let activeTab = 'active'; // 'active' or 'completed'
+
+    const activeRows = document.querySelectorAll('.active-row-data');
+    const completedRows = document.querySelectorAll('.completed-row-data');
+
+    activeFilteredRows = Array.from(activeRows);
+    completedFilteredRows = Array.from(completedRows);
+
+    // Date strings for comparison
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+    function updateChipsUI() {
+      statusChips.forEach(chip => {
+        const chipVal = chip.getAttribute('data-value');
+        if (chipVal === selectedStatusVal) {
+          chip.classList.add('active', 'bg-techaccent', 'text-white');
+          chip.classList.remove('bg-slate-100', 'text-slate-650', 'hover:bg-slate-200');
+        } else {
+          chip.classList.remove('active', 'bg-techaccent', 'text-white');
+          chip.classList.add('bg-slate-100', 'text-slate-650', 'hover:bg-slate-200');
+        }
+      });
+    }
+
+    function checkRowMatch(row, rowStatus) {
+      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+      const rowDate = row.getAttribute('data-date');
+      const query = searchInput.value.toLowerCase().trim();
+      const period = periodSelect.value;
+
+      const matchesSearch = textContent.includes(query);
+      const matchesStatus = selectedStatusVal === 'all' || rowStatus === selectedStatusVal;
+
+      let matchesPeriod = true;
+      if (period === 'today') {
+        matchesPeriod = (rowDate === todayStr);
+      } else if (period === 'yesterday') {
+        matchesPeriod = (rowDate === yesterdayStr);
+      }
+
+      return matchesSearch && matchesStatus && matchesPeriod;
+    }
+
+    function updateTabsCounts() {
+      const activeMatchCount = Array.from(activeRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
+      const completedMatchCount = Array.from(completedRows).filter(r => checkRowMatch(r, r.getAttribute('data-status'))).length;
+
+      tabActive.innerHTML = `Pedidos en Proceso <span style="background: ${activeTab === 'active' ? '#1D4ED8' : '#64748B'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; font-weight: 800; transition: all 0.2s;">${activeMatchCount}</span>`;
+      tabCompleted.innerHTML = `Historial Completado <span style="background: ${activeTab === 'completed' ? '#1D4ED8' : '#64748B'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; font-weight: 800; transition: all 0.2s;">${completedMatchCount}</span>`;
+    }
+
+    window.updateTableUI = function() {
+      // Toggle table visibility based on tab
+      const activeContainer = document.getElementById('activeTableContainer');
+      const completedContainer = document.getElementById('completedTableContainer');
+
+      if (activeTab === 'active') {
+        activeContainer.style.display = 'flex';
+        completedContainer.style.display = 'none';
+      } else {
+        activeContainer.style.display = 'none';
+        completedContainer.style.display = 'flex';
+      }
+
+      updateTabsCounts();
+
+      // Paginate active rows
+      const activeStart = (activeCurrentPage - 1) * itemsPerPage;
+      const activeEnd = activeStart + itemsPerPage;
+      activeRows.forEach(r => r.style.display = 'none');
+      activeFilteredRows.slice(activeStart, activeEnd).forEach(r => r.style.display = '');
+
+      // Paginate completed rows
+      const completedStart = (completedCurrentPage - 1) * itemsPerPage;
+      const completedEnd = completedStart + itemsPerPage;
+      completedRows.forEach(r => r.style.display = 'none');
+      completedFilteredRows.slice(completedStart, completedEnd).forEach(r => r.style.display = '');
+
+      // Remove or show empty states
+      const emptyActive = document.querySelector('.empty-row-active');
+      if (emptyActive) {
+        emptyActive.style.display = activeFilteredRows.length === 0 ? '' : 'none';
+      }
+      const emptyCompleted = document.querySelector('.empty-row-completed');
+      if (emptyCompleted) {
+        emptyCompleted.style.display = completedFilteredRows.length === 0 ? '' : 'none';
+      }
+
+      // Update paginator labels and buttons
+      document.getElementById('visibleActiveCount').textContent = activeFilteredRows.length;
+      document.getElementById('totalActiveCount').textContent = activeRows.length;
+      const activeTotalPages = Math.ceil(activeFilteredRows.length / itemsPerPage) || 1;
+      document.getElementById('pageActiveLabel').textContent = `Pág. ${activeCurrentPage} / ${activeTotalPages}`;
+      document.getElementById('prevActiveBtn').disabled = activeCurrentPage === 1;
+      document.getElementById('nextActiveBtn').disabled = activeCurrentPage === activeTotalPages;
+
+      document.getElementById('visibleCompletedCount').textContent = completedFilteredRows.length;
+      document.getElementById('totalCompletedCount').textContent = completedRows.length;
+      const completedTotalPages = Math.ceil(completedFilteredRows.length / itemsPerPage) || 1;
+      document.getElementById('pageCompletedLabel').textContent = `Pág. ${completedCurrentPage} / ${completedTotalPages}`;
+      document.getElementById('prevCompletedBtn').disabled = completedCurrentPage === 1;
+      document.getElementById('nextCompletedBtn').disabled = completedCurrentPage === completedTotalPages;
+    }
+
+    function applyFilters() {
+      activeFilteredRows = Array.from(activeRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
+      completedFilteredRows = Array.from(completedRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
+
+      activeCurrentPage = 1;
+      completedCurrentPage = 1;
+
+      window.updateTableUI();
+    }
+
+    // Tabs Event Listeners
+    tabActive.addEventListener('click', () => {
+      activeTab = 'active';
+      tabActive.style.color = '#1D4ED8';
+      tabActive.style.fontWeight = '700';
+      indicatorActive.style.background = '#1D4ED8';
+
+      tabCompleted.style.color = '#64748B';
+      tabCompleted.style.fontWeight = '500';
+      indicatorCompleted.style.background = 'transparent';
+
+      if (selectedStatusVal === 'ENTREGADO' || selectedStatusVal === 'CANCELADO') {
+        selectedStatusVal = 'all';
+        updateChipsUI();
+      }
+
+      applyFilters();
+    });
+
+    tabCompleted.addEventListener('click', () => {
+      activeTab = 'completed';
+      tabCompleted.style.color = '#1D4ED8';
+      tabCompleted.style.fontWeight = '700';
+      indicatorCompleted.style.background = '#1D4ED8';
+
+      tabActive.style.color = '#64748B';
+      tabActive.style.fontWeight = '500';
+      indicatorActive.style.background = 'transparent';
+
+      if (selectedStatusVal === 'PENDIENTE' || selectedStatusVal === 'EN CAMINO') {
+        selectedStatusVal = 'all';
+        updateChipsUI();
+      }
+
+      applyFilters();
+    });
+
+    // Chips Event Listeners
+    statusChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const val = chip.getAttribute('data-value');
+        selectedStatusVal = val;
+        updateChipsUI();
+
+        if (val === 'PENDIENTE' || val === 'EN CAMINO') {
+          if (activeTab !== 'active') {
+            activeTab = 'active';
+            tabActive.style.color = '#1D4ED8';
+            tabActive.style.fontWeight = '700';
+            indicatorActive.style.background = '#1D4ED8';
+
+            tabCompleted.style.color = '#64748B';
+            tabCompleted.style.fontWeight = '500';
+            indicatorCompleted.style.background = 'transparent';
+          }
+        } else if (val === 'ENTREGADO' || val === 'CANCELADO') {
+          if (activeTab !== 'completed') {
+            activeTab = 'completed';
+            tabCompleted.style.color = '#1D4ED8';
+            tabCompleted.style.fontWeight = '700';
+            indicatorCompleted.style.background = '#1D4ED8';
+
+            tabActive.style.color = '#64748B';
+            tabActive.style.fontWeight = '500';
+            indicatorActive.style.background = 'transparent';
+          }
+        }
+
+        applyFilters();
+      });
+    });
+
+    // Filter Events
+    searchInput.addEventListener('input', applyFilters);
+    periodSelect.addEventListener('change', applyFilters);
+
+    // Pagination Click Events
+    document.getElementById('prevActiveBtn').addEventListener('click', () => {
+      if (activeCurrentPage > 1) {
+        activeCurrentPage--;
+        window.updateTableUI();
+      }
+    });
+
+    document.getElementById('nextActiveBtn').addEventListener('click', () => {
+      const totalPages = Math.ceil(activeFilteredRows.length / itemsPerPage);
+      if (activeCurrentPage < totalPages) {
+        activeCurrentPage++;
+        window.updateTableUI();
+      }
+    });
+
+    document.getElementById('prevCompletedBtn').addEventListener('click', () => {
+      if (completedCurrentPage > 1) {
+        completedCurrentPage--;
+        window.updateTableUI();
+      }
+    });
+
+    document.getElementById('nextCompletedBtn').addEventListener('click', () => {
+      const totalPages = Math.ceil(completedFilteredRows.length / itemsPerPage);
+      if (completedCurrentPage < totalPages) {
+        completedCurrentPage++;
+        window.updateTableUI();
+      }
+    });
+
+    // Initial Load
+    applyFilters();
+  });
+
+  // 2. TABLE SORTING FUNCTIONALITY
+  let sortDirections = {
+    'ordersTableActive': [true, true, true, true],
+    'ordersTableCompleted': [true, true, true, true]
+  };
+
+  function sortTable(colIdx, tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector("tbody");
+    const isactive = tableId === 'ordersTableActive';
+    const rowClass = isactive ? ".active-row-data" : ".completed-row-data";
+    const rows = Array.from(tbody.querySelectorAll("tr" + rowClass));
+    const ascending = sortDirections[tableId][colIdx];
+
+    rows.sort((rowA, rowB) => {
+      let cellA = rowA.cells[colIdx].textContent.trim();
+      let cellB = rowB.cells[colIdx].textContent.trim();
+
+      if (cellA < cellB) return ascending ? -1 : 1;
+      if (cellA > cellB) return ascending ? 1 : -1;
+      return 0;
+    });
+
+    sortDirections[tableId][colIdx] = !ascending;
+    rows.forEach(row => tbody.appendChild(row));
+
+    const searchInput = document.getElementById('orderSearch');
+    const periodSelect = document.getElementById('periodFilter');
+    const activeRows = document.querySelectorAll('.active-row-data');
+    const completedRows = document.querySelectorAll('.completed-row-data');
+    
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+    function checkRowMatch(row, rowStatus) {
+      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+      const rowDate = row.getAttribute('data-date');
+      const query = searchInput.value.toLowerCase().trim();
+      const period = periodSelect.value;
+
+      const matchesSearch = textContent.includes(query);
+      const matchesStatus = selectedStatusVal === 'all' || rowStatus === selectedStatusVal;
+
+      let matchesPeriod = true;
+      if (period === 'today') {
+        matchesPeriod = (rowDate === todayStr);
+      } else if (period === 'yesterday') {
+        matchesPeriod = (rowDate === yesterdayStr);
+      }
+
+      return matchesSearch && matchesStatus && matchesPeriod;
+    }
+
+    if (tableId === 'ordersTableActive') {
+      activeFilteredRows = Array.from(activeRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
+    } else {
+      completedFilteredRows = Array.from(completedRows).filter(row => checkRowMatch(row, row.getAttribute('data-status')));
+    }
+    
+    if (window.updateTableUI) window.updateTableUI();
+  }
+
+  // 3. DELIVERY VALIDATION MODAL
+  function openConfirmDeliveryModal(orderId) {
+    document.getElementById('deliveryOrderIdLabel').textContent = '#' + orderId.substring(0,8).toUpperCase();
+    document.getElementById('confirmDeliveryModal').style.display = 'flex';
+    document.getElementById('confirmDeliveryModal').classList.remove('hidden');
+    document.getElementById('confirmDeliveryForm').action = "/admin-panel/logistica/actualizar/" + orderId + "/";
+  }
+
+  function closeConfirmDeliveryModal() {
+    document.getElementById('confirmDeliveryModal').style.display = 'none';
+    document.getElementById('confirmDeliveryModal').classList.add('hidden');
+  }
+
+  function updateStatus(orderId, nextStatus) {
+    const isCancel = nextStatus === 'Cancelado';
+    const accentColor = isCancel ? '#EF4444' : '#1D4ED8';
+    const bgLightColor = isCancel ? '#FEE2E2' : '#DBEAFE';
+    
+    // Choose Lucide icon based on next status
+    const iconSvg = isCancel 
+      ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>`
+      : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-truck"><path d="M5 18H3c-1 0-2-1-2-2V5c0-1 1-2 2-2h4c1 0 2 1 2 2v11H5Z"/><path d="M14 9h4l4 4v5c0 1-1 2-2 2h-2"/><circle cx="6.5" cy="18.5" r="2.5"/><circle cx="16.5" cy="18.5" r="2.5"/></svg>`;
+
+    Swal.fire({
+      title: '¿Confirmar actualización?',
+      html: `
+        <div class="d-flex flex-column align-items-center text-center gap-3">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: ${bgLightColor}; display: flex; align-items: center; justify-content: center; color: ${accentColor}; margin-bottom: 8px;">
+            ${iconSvg}
+          </div>
+          <p style="margin: 0; font-size: 1.4rem; color: #64748B; font-weight: 500; line-height: 1.5; font-family: 'Inter', sans-serif;">
+            ¿Deseas cambiar el estado del pedido a: <strong>${nextStatus}</strong>?
+          </p>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'No, esperar',
+      background: '#FFFFFF',
+      color: '#0F172A',
+      backdrop: 'rgba(15, 23, 42, 0.4)',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'border-0 rounded-4 shadow-lg p-4',
+        title: 'fs-3 fw-bold text-dark mt-2 mb-1',
+        actions: 'mt-4 d-flex justify-content-center gap-2 w-100',
+        confirmButton: `btn ${isCancel ? 'btn-danger' : 'btn-primary'} fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1`,
+        cancelButton: 'btn btn-light fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1 border border-200'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "/admin-panel/logistica/actualizar/" + orderId + "/";
+
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'nuevo_estado';
+        statusInput.value = nextStatus;
+
+        form.appendChild(csrfInput);
+        form.appendChild(statusInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  }
+</script>
+
+<!-- jsPDF + html2canvas for PDF Download -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/**
+ * descargarFacturaPDF(pedidoId, btn)
+ * Loads invoice in a hidden iframe, captures with html2canvas and generates PDF.
+ */
+async function descargarFacturaPDF(pedidoId, btn) {
+  const icon = btn.querySelector('i');
+  btn.disabled = true;
+  const originalStyle = btn.className;
+  btn.className = "inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 bg-amber-50 cursor-not-allowed";
+  
+  if (icon) icon.setAttribute('data-lucide', 'loader');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  let spinInterval = null;
+  let rotation = 0;
+  if (icon) {
+    spinInterval = setInterval(() => {
+      rotation = (rotation + 30) % 360;
+      icon.style.transform = `rotate(${rotation}deg)`;
+    }, 50);
+  }
+
+  try {
+    const response = await fetch(`/admin-panel/logistica/factura/${pedidoId}/?format=json`);
+    if (!response.ok) throw new Error('Error al obtener los datos de la factura');
+    const orderData = await response.json();
+
+    const amount   = orderData.monto_total;
+    const tax      = amount * 0.19;
+    const subtotal = amount - tax;
+    const fmt      = new Intl.NumberFormat('es-CO');
+
+    let itemsHtml = '';
+    orderData.detalles.forEach(function(item, index) {
+      const itemTotal = item.cantidad * item.precio;
+      itemsHtml += `
+        <tr style="border-bottom:1px solid #E2E8F0; background:${index % 2 === 0 ? '#FFFFFF' : '#F8FAFC'};">
+          <td style="padding:14px 12px; font-size:12px; color:#64748B; font-weight:600;">${(index + 1).toString().padStart(2, '0')}</td>
+          <td style="padding:14px 12px; font-size:13px; color:#0F172A; font-weight:600;">${item.nombre}</td>
+          <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center;">${fmt.format(item.precio)}</td>
+          <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center; font-weight:700;">${item.cantidad}</td>
+          <td style="padding:14px 12px; font-size:13px; color:#0F172A; text-align:right; font-weight:700;">${fmt.format(itemTotal)}</td>
+        </tr>`;
+    });
+
+    if (orderData.detalles.length === 0) {
+      itemsHtml = `<tr><td colspan="5" style="padding:24px; text-align:center; color:#94A3B8; font-size:13px;">Sin productos registrados.</td></tr>`;
+    }
+
+    const invoiceHtml = `
+      <div style="font-family:Arial,Helvetica,sans-serif; background:#FFFFFF; color:#0F172A; width:794px; padding:48px 56px; box-sizing:border-box;">
+
+        <!-- ── HEADER ── -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:28px; border-bottom:3px solid #1D4ED8; margin-bottom:36px;">
+          <div>
+            <div style="font-size:32px; font-weight:900; letter-spacing:2px; color:#0F172A; line-height:1;">
+              <span style="color:#1D4ED8;">⚡ MIKI</span>TECH
+            </div>
+            <div style="font-size:12px; color:#64748B; margin-top:6px; font-weight:500;">Componentes y Hardware de Alto Rendimiento</div>
+            <div style="font-size:11px; color:#94A3B8; margin-top:3px;">mikitech.com &nbsp;|&nbsp; soporte@mikitech.com</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:36px; font-weight:900; color:#1D4ED8; letter-spacing:-1px; line-height:1;">FACTURA</div>
+            <div style="margin-top:14px;">
+              <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">N.° de Referencia</div>
+              <div style="font-size:16px; font-weight:800; color:#1D4ED8; margin-top:2px;">#${orderData.order_id.substring(0, 8).toUpperCase()}</div>
+            </div>
+            <div style="margin-top:10px;">
+              <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Fecha de Emisión</div>
+              <div style="font-size:14px; font-weight:700; color:#0F172A; margin-top:2px;">${orderData.creado_el}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── BILLING INFO ── -->
+        <div style="display:flex; justify-content:space-between; margin-bottom:36px; gap:24px;">
+          <div style="flex:1; background:#EFF6FF; border-radius:12px; padding:20px 24px; border-left:4px solid #1D4ED8;">
+            <div style="font-size:11px; font-weight:800; color:#1D4ED8; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Facturar a</div>
+            <div style="font-size:17px; font-weight:800; color:#0F172A; margin-bottom:6px;">${orderData.cliente_nombre}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Usuario: @${orderData.cliente_username}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Identificación: ${orderData.cedula}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500;">Tel: ${orderData.cliente_telefono}</div>
+          </div>
+          <div style="flex:1; background:#F8FAFC; border-radius:12px; padding:20px 24px; border-left:4px solid #E2E8F0;">
+            <div style="font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Información del Pedido</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Dirección:</span>
+              <span style="margin-left:6px; color:#0F172A; font-weight:600;">${orderData.direccion_envio}</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Envío:</span>
+              <span style="color:#16A34A; font-weight:700; margin-left:6px;">GRATIS</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Puntos ganados:</span>
+              <span style="color:#7C3AED; font-weight:700; margin-left:6px;">${Math.floor(amount / 100000)} pts</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500;">
+              <span style="font-weight:700; color:#0F172A;">Garantía:</span>
+              <span style="margin-left:6px;">1 año en componentes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LINE ITEMS TABLE ── -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:32px; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
+          <thead>
+            <tr style="background:linear-gradient(135deg,#1D4ED8,#7C3AED); color:#FFFFFF;">
+              <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:48px;">#</th>
+              <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;">Descripción del Producto</th>
+              <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:110px;">Precio Unit.</th>
+              <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:70px;">Cant.</th>
+              <th style="padding:14px 12px; text-align:right; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:120px;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <!-- ── TOTALS ── -->
+        <div style="display:flex; justify-content:flex-end; margin-bottom:48px;">
+          <div style="width:300px; background:#F8FAFC; border-radius:14px; border:1px solid #E2E8F0; overflow:hidden;">
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
+              <span>Subtotal (sin IVA):</span>
+              <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(subtotal))} COP</span>
+            </div>
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
+              <span>IVA (19%):</span>
+              <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(tax))} COP</span>
+            </div>
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#16A34A; font-weight:600;">
+              <span>Envío:</span>
+              <span style="font-weight:700;">GRATIS</span>
+            </div>
+            <div style="padding:20px; background:linear-gradient(135deg,#1D4ED8,#7C3AED); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:15px; font-weight:800; color:#FFFFFF;">TOTAL A PAGAR:</span>
+              <span style="font-size:20px; font-weight:900; color:#FFFFFF;">${fmt.format(amount)} COP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── FOOTER ── -->
+        <div style="border-top:1px solid #E2E8F0; padding-top:20px; text-align:center;">
+          <div style="font-size:11px; color:#94A3B8; font-weight:500; line-height:1.7;">
+            Gracias por tu compra en MIKITECH. Esta es una representación electrónica válida de tu pedido.<br>
+            Garantía de 1 año en todos los componentes. Para soporte: soporte@mikitech.com
+          </div>
+          <div style="margin-top:10px; font-size:12px; font-weight:800; color:#1D4ED8; letter-spacing:1px;">
+            <span style="color:#38BDF8;">MIKI</span>TECH &nbsp;·&nbsp; mikitech.com
+          </div>
+        </div>
+      </div>`;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:absolute; top:0; left:-9999px; width:794px; background:#FFFFFF; z-index:-1; pointer-events:none;';
+    wrapper.innerHTML = invoiceHtml;
+    document.body.appendChild(wrapper);
+
+    await new Promise(r => requestAnimationFrame(r));
+
+    const canvas = await html2canvas(wrapper, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: 794,
+    });
+
+    document.body.removeChild(wrapper);
+
+    let jsPDFClass;
+    if (window.jspdf && window.jspdf.jsPDF) {
+      jsPDFClass = window.jspdf.jsPDF;
+    } else if (window.jsPDF) {
+      jsPDFClass = window.jsPDF;
+    } else {
+      throw new Error('La librería jsPDF no está cargada.');
+    }
+
+    const pdf = new jsPDFClass({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    let heightLeft = pdfHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - pdfHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`Factura-${pedidoId.slice(0, 8).toUpperCase()}-MIKITECH.pdf`);
+
+    if (window.adminToast) window.adminToast.success('PDF descargado correctamente');
+
+  } catch (err) {
+    console.error('Error generando PDF:', err);
+    if (window.adminToast) window.adminToast.error('Error al generar el PDF: ' + err.message);
+    else alert('Error al generar el PDF: ' + err.message);
+  } finally {
+    clearInterval(spinInterval);
+    if (icon) {
+      icon.style.transform = '';
+      icon.setAttribute('data-lucide', 'download');
+    }
+    btn.disabled = false;
+    btn.className = originalStyle;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+</script>
+{% endblock %}

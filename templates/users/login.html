@@ -1,77 +1,554 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login | MIKITECH{% endblock %}
+{% block title %}Iniciar Sesión | MIKITECH{% endblock %}
 
 {% block extra_head %}
 <style>
-  .auth-wrapper { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; padding: 60px 20px; background: #FFFFFF; }
-  .auth-box { width: 100%; max-width: 480px; text-align: center; padding: 30px; }
-  .auth-brand { font-family: 'Oswald', sans-serif; font-size: 44px; font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; }
-  .auth-subtitle { font-family: 'Jost', sans-serif; font-size: 15px; color: #666; margin-bottom: 40px; text-transform: uppercase; }
-  
-  .wix-input-group { margin-bottom: 30px; text-align: left; }
-  .wix-label { display: block; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-  .wix-input { width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #111; background: transparent; font-family: 'Jost', sans-serif; font-size: 16px; outline: none; transition: border-width 0.3s; }
-  .wix-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; } 
-  
-  .wix-btn-solid { width: 100%; background: #111; color: white; border: none; padding: 18px; font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: background 0.3s; margin-top: 10px; text-transform:uppercase;}
-  .wix-btn-solid:hover { background: #444; }
-  
-  .wix-links { margin-top: 30px; display: flex; justify-content: space-between; font-family: 'Jost', sans-serif; font-size: 14px; }
-  .wix-links a { color: #111; text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; }
-  .wix-links a:hover { border-bottom: 1px solid #111; }
-  
-  .alert-wix { padding: 15px; margin-bottom: 25px; border: 1px solid; font-family: 'Jost', sans-serif; font-size: 14px; text-align:left;}
-  .alert-wix.error { border-color: #EF4444; color: #EF4444; }
-  .alert-wix.success { border-color: #10B981; color: #10B981; }
+  /* ═══ RESET FOR AUTH PAGE ═══ */
+  body { background: #0A0F1E; overflow: auto; }
+
+  /* ═══ AUTH LAYOUT SPLIT SCREEN ═══ */
+  .auth-wrap {
+    min-height: calc(100vh - 8rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  /* ═══ LEFT PANEL (decorative carousel) ═══ */
+  .auth-left {
+    display: none;
+    position: relative;
+    overflow: hidden;
+    order: 2;
+  }
+  .auth-left-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 5rem 5rem;
+  }
+  .auth-left-glow {
+    position: absolute;
+    width: 50rem; height: 50rem;
+    background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 65%);
+    top: -10rem; right: -10rem; border-radius: 50%;
+  }
+  .auth-left-glow-2 {
+    position: absolute;
+    width: 30rem; height: 30rem;
+    background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 65%);
+    bottom: 5rem; left: -5rem; border-radius: 50%;
+  }
+  .auth-left-content { position: relative; z-index: 2; }
+  .auth-left-badge {
+    display: inline-flex; align-items: center; gap: 0.8rem;
+    background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.3);
+    color: #60A5FA; padding: 0.6rem 1.4rem; border-radius: 10rem;
+    font-size: 1.2rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 3rem;
+  }
+  .auth-left-title {
+    font-size: 4.4rem; font-weight: 900; color: #fff;
+    line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 2rem;
+  }
+  .auth-left-title .grad {
+    background: linear-gradient(135deg, #60A5FA, #A78BFA);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .auth-left-desc { font-size: 1.6rem; color: rgba(255,255,255,0.55); line-height: 1.7; max-width: 42rem; }
+
+  .auth-left-features { display: flex; flex-direction: column; gap: 1.6rem; position: relative; z-index: 2; }
+  .auth-left-feat {
+    display: flex; align-items: center; gap: 1.4rem;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    padding: 1.4rem 2rem; border-radius: 1.2rem; backdrop-filter: blur(10px);
+  }
+  .alf-icon {
+    width: 4rem; height: 4rem; border-radius: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; flex-shrink: 0;
+  }
+  .alf-icon.blue { background: rgba(37,99,235,0.3); color: #60A5FA; }
+  .alf-icon.purple { background: rgba(124,58,237,0.3); color: #A78BFA; }
+  .alf-icon.green { background: rgba(16,185,129,0.3); color: #34D399; }
+  .alf-text strong { display: block; font-size: 1.3rem; color: #fff; font-weight: 600; }
+  .alf-text span { font-size: 1.2rem; color: rgba(255,255,255,0.45); }
+
+  /* ═══ RIGHT PANEL (form) ═══ */
+  .auth-right {
+    background: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    padding: 5rem 3rem;
+  }
+  .auth-form-wrap { width: 100%; max-width: 46rem; }
+
+  .auth-logo-wrap {
+    display: flex; align-items: center; margin-bottom: 4rem;
+  }
+  .auth-logo-wrap img { height: 4.2rem; object-fit: contain; }
+
+  .auth-heading { margin-bottom: 3.5rem; }
+  .auth-heading h1 {
+    font-size: 3rem; font-weight: 800; color: #0F172A;
+    letter-spacing: -0.03em; margin-bottom: 0.8rem;
+  }
+  .auth-heading p { font-size: 1.5rem; color: #64748B; }
+
+  /* ═══ INPUTS ═══ */
+  .inp-group { margin-bottom: 2.2rem; }
+  .inp-label {
+    display: block; font-size: 1.2rem; font-weight: 700;
+    color: #374151; margin-bottom: 0.8rem;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .inp-wrap { position: relative; display: flex; align-items: center; }
+  .inp-icon {
+    position: absolute; left: 1.6rem;
+    color: #9CA3AF; width: 1.8rem; height: 1.8rem; pointer-events: none;
+  }
+  .inp-field {
+    width: 100%; padding: 1.5rem 4.5rem 1.5rem 4.8rem;
+    font-family: 'Inter', sans-serif; font-size: 1.5rem;
+    border: 1.5px solid #E2E8F0; border-radius: 1rem;
+    background: #F8FAFC; color: #0F172A;
+    transition: all 0.2s; outline: none;
+  }
+  .inp-field:focus {
+    border-color: #2563EB;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+  }
+  .inp-field::placeholder { color: #9CA3AF; }
+
+  .toggle-pass {
+    position: absolute; right: 1.4rem; background: none; border: none;
+    cursor: pointer; color: #9CA3AF; display: flex; align-items: center;
+    padding: 0.5rem; transition: color 0.2s;
+  }
+  .toggle-pass:hover { color: #2563EB; }
+
+  /* ═══ OPTIONS ROW ═══ */
+  .opts-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 2.8rem;
+  }
+  .opts-row label {
+    display: flex; align-items: center; gap: 0.8rem;
+    font-size: 1.3rem; color: #4B5563; cursor: pointer;
+  }
+  .opts-row input[type="checkbox"] { width: 1.6rem; height: 1.6rem; accent-color: #2563EB; }
+  .forgot-link { font-size: 1.3rem; color: #2563EB; font-weight: 600; text-decoration: none; }
+  .forgot-link:hover { text-decoration: underline; }
+
+  /* ═══ BUTTON ═══ */
+  .btn-login {
+    width: 100%; padding: 1.7rem;
+    background: linear-gradient(135deg, #1D4ED8, #2563EB);
+    color: white; border: none; border-radius: 1rem;
+    font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 700;
+    cursor: pointer; transition: all 0.3s;
+    display: flex; justify-content: center; align-items: center; gap: 1rem;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+  }
+  .btn-login:hover {
+    background: linear-gradient(135deg, #1E40AF, #1D4ED8);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37,99,235,0.4);
+  }
+  .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+  /* ═══ DIVIDER ═══ */
+  .auth-divider {
+    display: flex; align-items: center; gap: 1.5rem;
+    margin: 2.5rem 0; color: #CBD5E1; font-size: 1.2rem;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: ''; flex: 1; height: 1px; background: #E2E8F0;
+  }
+
+  /* ═══ FOOTER ═══ */
+  .auth-form-footer {
+    margin-top: 2.5rem; text-align: center;
+    font-size: 1.4rem; color: #64748B;
+  }
+  .auth-form-footer a { color: #2563EB; font-weight: 600; text-decoration: none; }
+  .auth-form-footer a:hover { text-decoration: underline; }
+
+  /* ═══ TRUST BADGES ═══ */
+  .trust-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 2rem; margin-top: 3rem; flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 1.2rem; color: #94A3B8;
+  }
+  .trust-item .material-symbols-outlined { font-size: 1.5rem; color: #10B981; }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (min-width: 1024px) {
+    .auth-wrap { grid-template-columns: 1fr 1fr; min-height: calc(100vh - 8rem); }
+    .auth-left { display: block; }
+    .auth-right { padding: 6rem 7rem; order: 1; }
+  }
+  .inp-field.is-invalid {
+    border-color: #EF4444 !important;
+    background: #FEF2F2 !important;
+  }
+  .inp-field.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-wrapper">
-  <div class="auth-box">
-    <div style="text-align: center; margin-bottom: 3rem;">
-        <img src="{% static 'img/logo.png' %}" alt="MIKITECH" style="height: 8rem; margin-bottom: 2rem; filter: drop-shadow(0 0 10px rgba(29, 78, 216, 0.2));">
-        <h1 class="auth-brand">INICIAR SESIÓN</h1>
-        <p class="auth-subtitle">ACCEDE A TU ENTORNO DE COMPRA MIKITECH.</p>
-    </div>
-    
-    {% if error %}
-    <div class="alert-wix error">⚠️ {{ error }}</div>
-    {% endif %}
-    {% if messages %}
-      {% for message in messages %}
-      <div class="alert-wix success">✅ {{ message }}</div>
-      {% endfor %}
-    {% endif %}
-    {% if success %}
-    <div class="alert-wix success">✅ {{ success }}</div>
-    {% endif %}
-    
-    <form method="POST" action="{% url 'users:login' %}">
-      {% csrf_token %}
-      {% if next %}
-      <input type="hidden" name="next" value="{{ next }}">
+<div class="auth-wrap">
+
+  <!-- LEFT DECORATIVE PANEL with Carousel -->
+  <div class="auth-left">
+    {% include 'components/_carousel.html' with carousel_id='login' %}
+  </div>
+
+  <!-- RIGHT FORM PANEL -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+
+      <div class="auth-logo-wrap">
+        <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.6rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
+          <span style="color: #38BDF8;">MIKI</span>TECH
+        </div>
+      </div>
+
+      <div class="auth-heading">
+        <h1>Bienvenido de vuelta</h1>
+        <p>Ingresa tus datos para acceder a tu cuenta</p>
+      </div>
+
+      {# ═══ ALERTAS DE ERROR DEL SERVIDOR ═══ #}
+      {% if error %}
+      <div id="server-error-banner" style="background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
+        {% if error_tipo == 'credenciales' %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.</span>
+        {% elif error_tipo == 'no_confirmado' %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style="color: #92400E; font-size: 1.35rem; font-weight: 600;">Correo no verificado. Revisa tu bandeja de Gmail y haz clic en el enlace de confirmación.</span>
+        {% elif error_tipo == 'google' %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style="color: #1E40AF; font-size: 1.35rem; font-weight: 600;">Esta cuenta usa Google. Inicia sesión con Google o <a href="{% url 'users:forgot_password' %}" style="color:#1D4ED8;">recupera tu contraseña</a>.</span>
+        {% elif error_tipo == 'rate_limit' %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span style="color: #92400E; font-size: 1.35rem; font-weight: 600;">Demasiados intentos fallidos. Espera unos minutos antes de intentar de nuevo.</span>
+        {% elif error_tipo == 'red' %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">Sin conexión con el servidor. Verifica tu internet e intenta de nuevo.</span>
+        {% else %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">{{ error }}</span>
+        {% endif %}
+      </div>
+
+      {# Lanzar SweetAlert específico según el tipo de error #}
+      <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        {% if error_tipo == 'credenciales' %}
+          showAlert('credenciales');
+        {% elif error_tipo == 'no_confirmado' %}
+          showAlert('no_confirmado');
+        {% elif error_tipo == 'google' %}
+          showAlert('google');
+        {% elif error_tipo == 'rate_limit' %}
+          showAlert('rate_limit');
+        {% elif error_tipo == 'red' %}
+          showAlert('red');
+        {% else %}
+          showAlert('generico', "{{ error|escapejs }}");
+        {% endif %}
+      });
+      </script>
       {% endif %}
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CORREO ELECTRÓNICO</label>
-        <input type="email" name="correo" class="wix-input" required placeholder="tu@email.com" autocomplete="off" autofocus>
+
+      {% if messages %}
+      {% for message in messages %}
+      <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span style="color: #166534; font-size: 1.35rem; font-weight: 600;">{{ message }}</span>
       </div>
-      
-      <div class="wix-input-group">
-        <label class="wix-label">CONTRASEÑA</label>
-        <input type="password" name="clave" class="wix-input" required placeholder="••••••••" autocomplete="new-password">
+      {% endfor %}
+      <script>
+        document.addEventListener("DOMContentLoaded",function(){
+          {% for message in messages %}showAlert('success',"{{ message|escapejs }}");{% endfor %}
+        });
+      </script>
+      {% endif %}
+      {% if success %}
+      <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span style="color: #166534; font-size: 1.35rem; font-weight: 600;">{{ success }}</span>
       </div>
-      
-      <button type="submit" class="wix-btn-solid" onclick="this.textContent='INICIANDO SESIÓN...'">ENTRAR</button>
-    </form>
-    
-    <div class="wix-links">
-      <a href="{% url 'users:forgot_password' %}">¿Olvidaste tu contraseña?</a>
-      <a href="{% url 'users:register' %}">Crear una cuenta nueva</a>
+      <script>document.addEventListener("DOMContentLoaded",function(){showAlert('success',"{{ success|escapejs }}")});</script>
+      {% endif %}
+      <style>@keyframes bannerSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}</style>
+
+      <form id="loginForm" method="POST" action="{% url 'users:login' %}" novalidate>
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+        <!-- Correo -->
+        <div class="inp-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_correo" style="margin-bottom: 0;">Correo Electrónico</label>
+            <span id="error_correo" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
+          <div class="inp-wrap">
+            <i data-lucide="mail" class="inp-icon"></i>
+            <input type="email" name="correo" id="id_correo" class="inp-field"
+                   required placeholder="tu@email.com"
+                   pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
+                   autocomplete="email" autofocus>
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="inp-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <label class="inp-label" for="id_clave" style="margin-bottom: 0;">Contraseña</label>
+            <span id="error_clave" style="color: #EF4444; font-size: 1.2rem; font-weight: 600; display: none;"></span>
+          </div>
+          <div class="inp-wrap">
+            <i data-lucide="lock" class="inp-icon"></i>
+            <input type="password" name="clave" id="id_clave" class="inp-field"
+                   required placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-pass" id="toggleClave"
+                    aria-label="Mostrar/ocultar contraseña"
+                    onclick="togglePassword('id_clave','toggleClave','iconClave')">
+              <i data-lucide="eye" id="iconClave" style="width:1.8rem;height:1.8rem;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Opciones -->
+        <div class="opts-row">
+          <label>
+            <input type="checkbox" name="recordarme" id="recordarme">
+            Recordarme
+          </label>
+          <a class="forgot-link" href="{% url 'users:forgot_password' %}">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="button" id="btn-submit" class="btn-login" onclick="handleLoginSubmit(this)">
+          <i data-lucide="log-in" style="width:2rem;height:2rem;"></i>
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <div class="auth-form-footer">
+        ¿Aún no tienes cuenta? <a href="{% url 'users:register' %}">Regístrate gratis →</a>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item">
+          <span class="material-symbols-outlined">lock</span>
+          Conexión segura
+        </div>
+        <div class="trust-item">
+          <span class="material-symbols-outlined">verified_user</span>
+          Datos encriptados
+        </div>
+        <div class="trust-item">
+          <span class="material-symbols-outlined">support_agent</span>
+          Soporte 24/7
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
+
+<script>
+function showAlert(tipo, mensaje) {
+  if (!window.Swal) { if (mensaje) alert(mensaje); return; }
+
+  const configs = {
+    credenciales: {
+      icon: 'error',
+      title: '\u274C Credenciales incorrectas',
+      html: '<p style="font-size:1.5rem;color:#374151;">El correo o la contrase&ntilde;a no son correctos.<br>Verifica tus datos e intenta de nuevo.</p>',
+      confirmButtonText: 'Intentar de nuevo',
+      confirmButtonColor: '#2563EB',
+      showCancelButton: true,
+      cancelButtonText: '\u00bfOlvidaste tu contrase&ntilde;a?',
+      cancelButtonColor: '#6B7280',
+    },
+    no_confirmado: {
+      icon: 'warning',
+      title: '\u2709\uFE0F Correo sin verificar',
+      html: '<p style="font-size:1.5rem;color:#374151;">Revisa tu bandeja de <strong>Gmail</strong> y haz clic en el enlace de confirmaci&oacute;n que te enviamos al registrarte.</p>',
+      confirmButtonText: 'Entendido',
+      confirmButtonColor: '#D97706',
+      footer: '<a href="/cuenta/recuperar/" style="color:#D97706;">\u00bfNo recibiste el correo? Solicita otro</a>'
+    },
+    google: {
+      icon: 'info',
+      title: '\uD83D\uDD11 Cuenta de Google',
+      html: '<p style="font-size:1.5rem;color:#374151;">Esta cuenta fue creada con <strong>Google</strong>.<br>No tiene contrase&ntilde;a de correo configurada.</p>',
+      confirmButtonText: 'Recuperar contrase&ntilde;a',
+      confirmButtonColor: '#2563EB',
+      showCancelButton: true,
+      cancelButtonText: 'Cancelar',
+      cancelButtonColor: '#6B7280',
+      preConfirm: () => { window.location.href = '/cuenta/recuperar/'; return false; }
+    },
+    rate_limit: {
+      icon: 'warning',
+      title: '\u23F3 Demasiados intentos',
+      html: '<p style="font-size:1.5rem;color:#374151;">Has superado el l&iacute;mite de intentos de inicio de sesi&oacute;n.<br>Espera <strong>unos minutos</strong> e intenta de nuevo.</p>',
+      confirmButtonText: 'Entendido',
+      confirmButtonColor: '#D97706',
+      timer: 10000,
+      timerProgressBar: true,
+    },
+    red: {
+      icon: 'error',
+      title: '\uD83D\uDCF6 Sin conexi&oacute;n',
+      html: '<p style="font-size:1.5rem;color:#374151;">No se pudo conectar con el servidor.<br>Verifica tu conexi&oacute;n a internet e intenta de nuevo.</p>',
+      confirmButtonText: 'Reintentar',
+      confirmButtonColor: '#EF4444',
+      preConfirm: () => { window.location.reload(); return false; }
+    },
+    success: {
+      icon: 'success',
+      title: mensaje || 'Operaci&oacute;n exitosa',
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 4500,
+      timerProgressBar: true,
+      background: '#F0FDF4',
+      color: '#166534'
+    },
+    generico: {
+      icon: 'error',
+      title: 'Error al iniciar sesi&oacute;n',
+      html: `<p style="font-size:1.5rem;color:#374151;">${mensaje || 'Ocurri&oacute; un error inesperado.'}</p>`,
+      confirmButtonText: 'Intentar de nuevo',
+      confirmButtonColor: '#2563EB',
+    }
+  };
+
+  const cfg = configs[tipo] || configs.generico;
+
+  // Si es 'google', manejar la redirecci&oacute;n en el confirm
+  if (tipo === 'google') {
+    Swal.fire(cfg).then((result) => {
+      if (result.isConfirmed) window.location.href = '/cuenta/recuperar/';
+    });
+    return;
+  }
+  // Si es 'credenciales', ofrecer olvid&oacute; contrase&ntilde;a
+  if (tipo === 'credenciales') {
+    Swal.fire(cfg).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        window.location.href = '/cuenta/recuperar/';
+      }
+    });
+    return;
+  }
+
+  Swal.fire(cfg);
+}
+
+function togglePassword(inputId, btnId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.setAttribute('data-lucide', 'eye-off');
+  } else {
+    input.type = 'password';
+    icon.setAttribute('data-lucide', 'eye');
+  }
+  lucide.createIcons();
+}
+
+function handleLoginSubmit(btn) {
+  // Clear previous errors
+  document.getElementById('error_correo').style.display = 'none';
+  document.getElementById('error_clave').style.display = 'none';
+  document.getElementById('id_correo').classList.remove('is-invalid');
+  document.getElementById('id_clave').classList.remove('is-invalid');
+
+  if (!navigator.onLine) { showAlert('warning', 'Sin conexión a internet.'); return; }
+  
+  const correoInput = document.getElementById('id_correo');
+  const claveInput = document.getElementById('id_clave');
+  const correo  = correoInput.value.trim();
+  const clave   = claveInput.value.trim();
+  const emailRe = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  
+  let hasError = false;
+
+  if (!correo) {
+    const errEl = document.getElementById('error_correo');
+    errEl.textContent = 'El correo es obligatorio';
+    errEl.style.display = 'block';
+    correoInput.classList.add('is-invalid');
+    hasError = true;
+  } else if (!emailRe.test(correo)) {
+    const errEl = document.getElementById('error_correo');
+    errEl.textContent = 'Formato de correo no válido';
+    errEl.style.display = 'block';
+    correoInput.classList.add('is-invalid');
+    hasError = true;
+  }
+
+  if (!clave) {
+    const errEl = document.getElementById('error_clave');
+    errEl.textContent = 'La contraseña es obligatoria';
+    errEl.style.display = 'block';
+    claveInput.classList.add('is-invalid');
+    hasError = true;
+  }
+
+  if (hasError) {
+    // Focus first invalid field
+    if (!correo || !emailRe.test(correo)) {
+      correoInput.focus();
+    } else {
+      claveInput.focus();
+    }
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:2rem;height:2rem;animation:spin 1s linear infinite;"></i> Verificando...';
+  lucide.createIcons();
+  document.getElementById('loginForm').submit();
+}
+
+// Clear errors dynamically on input
+document.getElementById('id_correo').addEventListener('input', function() {
+  this.classList.remove('is-invalid');
+  document.getElementById('error_correo').style.display = 'none';
+});
+document.getElementById('id_clave').addEventListener('input', function() {
+  this.classList.remove('is-invalid');
+  document.getElementById('error_clave').style.display = 'none';
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
 {% endblock %}

@@ -5,47 +5,49 @@
 
 {% block admin_content %}
 <!-- ENCABEZADO DE SECCIÓN -->
-<div class="u-flex u-justify-between u-align-center u-mb-4" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
   <div>
-    <h2 style="font-size:2.2rem; font-weight:800; margin:0;">🛰️ Centro de Comando Logístico</h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Gestión de despachos y asignación de flota motorizada.</p>
+    <h2 style="font-size:2.2rem; font-weight:800; margin:0; display:flex; align-items:center; gap:8px; color:var(--ds-text);">
+      <i data-lucide="truck" style="color:var(--ds-primary); width:2.8rem; height:2.8rem;"></i> Centro de Comando Logístico
+    </h2>
+    <p style="font-size:1.3rem; color:var(--ds-text-soft); margin-top:0.4rem;">Gestión de despachos y asignación de flota motorizada.</p>
   </div>
 </div>
 
 <!-- TARJETAS DE MÉTRICAS (SIMETRÍA MPRO) -->
-<div class="g-row u-mb-4">
+<div class="g-row u-mb-4" style="margin-bottom: 30px;">
   <div class="g-col-3">
-    <div class="mpro-card">
+    <div class="mpro-card mpro-card-interactive" style="border-left: 4px solid #F59E0B;">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:#F59E0B; font-size:2.4rem;">pending_actions</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Por Despachar</div>
+        <i data-lucide="clock" style="color:#F59E0B; width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Por Despachar</div>
       </div>
       <div style="font-size:3.2rem; font-weight:800; color:#F59E0B;">{{ stats.pendientes }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card">
+    <div class="mpro-card mpro-card-interactive" style="border-left: 4px solid #3B82F6;">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:#3B82F6; font-size:2.4rem;">local_shipping</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">En Tránsito</div>
+        <i data-lucide="truck" style="color:#3B82F6; width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">En Tránsito</div>
       </div>
       <div style="font-size:3.2rem; font-weight:800; color:#3B82F6;">{{ stats.en_camino }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card">
+    <div class="mpro-card mpro-card-interactive" style="border-left: 4px solid #10B981;">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:#10B981; font-size:2.4rem;">check_circle</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Entregados</div>
+        <i data-lucide="check-circle" style="color:#10B981; width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Entregados</div>
       </div>
       <div style="font-size:3.2rem; font-weight:800; color:#10B981;">{{ stats.entregados }}</div>
     </div>
   </div>
   <div class="g-col-3">
-    <div class="mpro-card">
+    <div class="mpro-card mpro-card-interactive" style="border-left: 4px solid #EF4444;">
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-        <span class="material-symbols-outlined" style="color:#EF4444; font-size:2.4rem;">no_accounts</span>
-        <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Sin Piloto</div>
+        <i data-lucide="user-x" style="color:#EF4444; width:2.4rem; height:2.4rem;"></i>
+        <div style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:700; text-transform:uppercase; letter-spacing:1px;">Sin Piloto</div>
       </div>
       <div style="font-size:3.2rem; font-weight:800; color:#EF4444;">{{ stats.sin_repartidor }}</div>
     </div>
@@ -61,15 +63,15 @@
     <a href="?estado=Entregado" class="g-btn-primary" style="padding: 8px 18px; font-size: 1.2rem; border-radius: 20px; text-decoration: none; transition: 0.3s; {% if stats.filtro_actual != 'Entregado' %}background:#F1F5F9; color:#64748B; box-shadow:none;{% endif %}">Entregados</a>
   </div>
   
-  <div class="g-search-wrapper" style="width: 350px; position:relative;">
-    <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94A3B8; display:flex; align-items:center;"><span class="material-symbols-outlined" style="font-size:1.8rem;">search</span></span>
+  <div class="g-search-wrapper" style="width: 350px; position:relative; display:flex; align-items:center;">
+    <span style="position:absolute; left:12px; display:flex; align-items:center;"><i data-lucide="search" style="width:1.6rem; height:1.6rem; color:#94A3B8;"></i></span>
     <input type="text" id="orderSearch" class="g-search" placeholder="Buscar por # Pedido o Cliente..." style="width: 100%; padding-left: 40px; height:40px; border-radius:8px; border:1px solid #E2E8F0; outline:none; font-size:1.3rem;">
   </div>
 </div>
 
 <!-- TABLA DE DESPACHOS -->
 <div class="mpro-card" style="padding:0;">
-  <div class="g-table-container">
+  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none;">
     <table class="g-table" id="logisticsTable">
       <thead>
         <tr>
@@ -95,7 +97,7 @@
                 {% endif %}
               </div>
               <div style="max-width:200px;">
-                <div style="font-weight:700; font-size:1.3rem;">{{ p.usuario.nombre_mostrado }}</div>
+                <div style="font-weight:700; font-size:1.3rem; color:var(--ds-text);">{{ p.usuario.nombre_mostrado }}</div>
                 <div style="font-size:1.1rem; color:#64748B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{{ p.direccion_envio }}">{{ p.direccion_envio }}</div>
               </div>
             </div>
@@ -104,11 +106,13 @@
           <td>
             {% if p.repartidor %}
               <div style="display:flex; align-items:center; gap:8px;">
-                <span class="material-symbols-outlined" style="font-size:1.6rem; color:#2563EB;">motorcycle</span>
+                <i data-lucide="bike" style="width:1.6rem; height:1.6rem; color:#2563EB;"></i>
                 <span style="font-weight:700; color:#1E293B; font-size:1.2rem;">{{ p.repartidor.nombre_usuario }}</span>
               </div>
             {% else %}
-              <button onclick="openAssignModal('{{ p.id }}', '{{ p.usuario.nombre_mostrado|escapejs }}')" class="g-btn-primary" style="padding:6px 12px; font-size:1.1rem; background:#FEE2E2; color:#DC2626; box-shadow:none; border:none; cursor:pointer; border-radius:8px;">ASIGNAR PILOTO</button>
+              <button onclick="openAssignModal('{{ p.id }}', '{{ p.usuario.nombre_mostrado|escapejs }}')" class="g-btn-primary" style="padding:6px 12px; font-size:1.1rem; background:#FEE2E2; color:#DC2626; box-shadow:none; border:none; cursor:pointer; border-radius:8px; display:inline-flex; align-items:center; gap:4px; font-weight:700;">
+                <i data-lucide="user-plus" style="width:1.2rem; height:1.2rem;"></i> ASIGNAR PILOTO
+              </button>
             {% endif %}
           </td>
           <td>
@@ -124,18 +128,26 @@
           </td>
           <td style="text-align:center;">
             <div style="display:flex; justify-content:center; gap:8px;">
-               <a href="{% url 'admin_order_invoice' p.id %}" target="_blank" class="g-action-btn" title="Ver Factura" style="background:#F1F5F9; border-radius:8px; display:flex; align-items:center; justify-content:center; width:32px; height:32px; text-decoration:none;">📎</a>
+               <a href="{% url 'admin_order_invoice' p.id %}" target="_blank" class="g-action-btn" title="Ver Factura" style="background:#F1F5F9; border-radius:8px; display:flex; align-items:center; justify-content:center; width:32px; height:32px; text-decoration:none; padding:0; border:1px solid var(--ds-border);">
+                 <i data-lucide="file-text" style="width:1.6rem; height:1.6rem; color:var(--ds-text-soft);"></i>
+               </a>
                
                {% if p.estado == 'pending' or p.estado == 'processing' %}
-                 <button onclick="updateStatus('{{ p.id }}', 'Enviado')" class="g-action-btn" style="background:#DBEAFE; color:#1D4ED8; border-radius:8px; border:none; cursor:pointer; width:32px; height:32px;" title="Marcar como Enviado">🚀</button>
+                 <button onclick="updateStatus('{{ p.id }}', 'Enviado')" class="g-action-btn" style="background:#DBEAFE; color:#1D4ED8; border-radius:8px; border:1px solid #BFDBFE; cursor:pointer; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0;" title="Marcar como Enviado">
+                   <i data-lucide="send" style="width:1.6rem; height:1.6rem;"></i>
+                 </button>
                {% endif %}
 
                {% if p.estado == 'shipped' %}
-                 <button onclick="updateStatus('{{ p.id }}', 'Entregado')" class="g-action-btn" style="background:#DCFCE7; color:#16A34A; border-radius:8px; border:none; cursor:pointer; width:32px; height:32px;" title="Confirmar Entrega">✅</button>
+                 <button onclick="updateStatus('{{ p.id }}', 'Entregado')" class="g-action-btn" style="background:#DCFCE7; color:#16A34A; border-radius:8px; border:1px solid #BBF7D0; cursor:pointer; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0;" title="Confirmar Entrega">
+                   <i data-lucide="check-circle" style="width:1.6rem; height:1.6rem;"></i>
+                 </button>
                {% endif %}
 
                {% if p.estado != 'delivered' and p.estado != 'cancelled' %}
-                 <button onclick="updateStatus('{{ p.id }}', 'Cancelado')" class="g-action-btn" style="background:#FEE2E2; color:#DC2626; border-radius:8px; border:none; cursor:pointer; width:32px; height:32px;" title="Anular Pedido">✖️</button>
+                 <button onclick="updateStatus('{{ p.id }}', 'Cancelado')" class="g-action-btn" style="background:#FEE2E2; color:#DC2626; border-radius:8px; border:1px solid #FECACA; cursor:pointer; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0;" title="Anular Pedido">
+                   <i data-lucide="x-circle" style="width:1.6rem; height:1.6rem;"></i>
+                 </button>
                {% endif %}
             </div>
           </td>
@@ -143,8 +155,8 @@
         {% empty %}
         <tr>
           <td colspan="6" style="padding:80px; text-align:center;">
-             <span class="material-symbols-outlined" style="font-size:5rem; color:#CBD5E1; display:block; margin-bottom:15px;">rocket_launch</span>
-             <p style="font-size:1.5rem; color:#94A3B8; font-weight:600;">No hay misiones logísticas activas con este filtro.</p>
+             <i data-lucide="rocket" style="width:5rem; height:5rem; color:#CBD5E1; display:block; margin:0 auto 15px;"></i>
+             <p style="font-size:1.5rem; color:#94A3B8; font-weight:600;">No hay despachos registrados para este periodo.</p>
           </td>
         </tr>
         {% endfor %}
@@ -156,7 +168,9 @@
 <!-- MODAL DE ASIGNACIÓN -->
 <div id="assignModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.6); z-index:999; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
   <div class="mpro-card" style="width:100%; max-width:450px; padding:30px; animation: slideUp 0.3s ease;">
-    <h3 id="modalTitle" style="font-size:1.8rem; font-weight:800; margin-bottom:10px;">Asignar Repartidor</h3>
+    <h3 id="modalTitle" style="font-size:1.8rem; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="user-plus" style="color:var(--ds-primary);"></i> Asignar Repartidor
+    </h3>
     <p style="color:#64748B; font-size:1.2rem; margin-bottom:20px;">Selecciona el piloto disponible para el pedido <span id="orderIdLabel" style="font-family:monospace; font-weight:700; color:var(--ds-primary);"></span></p>
     
     <form id="assignForm" method="post" action="">
@@ -194,6 +208,9 @@
     document.getElementById('orderIdLabel').textContent = '#' + orderId.substring(0,8).toUpperCase();
     document.getElementById('assignModal').style.display = 'flex';
     document.getElementById('assignForm').action = "/admin-panel/logistica/asignar/" + orderId + "/";
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   }
 
   function closeAssignModal() {

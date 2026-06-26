@@ -5,152 +5,445 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ titulo_pagina }}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <style>
     :root {
       font-size: 10px;
-      --ds-bg: #F8FAFC;
-      --ds-surface: #FFFFFF;
-      --ds-text: #0F172A;
-      --ds-text-soft: #64748B;
-      --ds-border: #E2E8F0;
-      --ds-primary: #1D4ED8;
-      --ds-primary-light: #EFF6FF;
-      --ds-accent: #7C3AED;
-      --ds-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      --bg: #F0F2F5;
+      --surface: #FFFFFF;
+      --surface-2: #F8FAFC;
+      --border: #E2E8F0;
+      --text: #0F172A;
+      --text-soft: #64748B;
+      --text-muted: #94A3B8;
+      --primary: #1D4ED8;
+      --primary-light: #EFF6FF;
+      --primary-dark: #1E3A8A;
+      --accent: #7C3AED;
+      --success: #059669;
+      --success-light: #D1FAE5;
+      --warning: #D97706;
+      --warning-light: #FEF3C7;
+      --danger: #DC2626;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 16px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.06);
+      --radius: 1.6rem;
+      --radius-sm: 1rem;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Jost', sans-serif; font-size: 1.4rem; background: var(--ds-bg); color: var(--ds-text); display: flex; height: 100vh; overflow: hidden; }
+    body { font-family: 'Inter', sans-serif; font-size: 1.4rem; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+    a { text-decoration: none; color: inherit; }
 
-    /* SIDEBAR */
-    .sidebar { width: 26rem; background: var(--ds-surface); border-right: 1px solid var(--ds-border); display: flex; flex-direction: column; flex-shrink: 0; }
-    .sb-logo { padding: 3rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--ds-border); margin-bottom: 0; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 2.4rem; letter-spacing: -0.5px; }
-    .sb-logo-icon { width: 3.4rem; height: 3.4rem; background: var(--ds-primary); color: white; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
-    
-    .sb-user { padding: 2rem 3rem; display: flex; align-items: center; gap: 1.2rem; border-bottom: 1px solid var(--ds-border); }
-    .sb-avatar { width: 4.4rem; height: 4.4rem; border-radius: 50%; object-fit: cover; background: var(--ds-primary-light); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.8rem; color: var(--ds-primary); flex-shrink: 0; }
-    .sb-user-name { font-weight: 700; font-size: 1.4rem; color: var(--ds-text); }
-    .sb-user-role { font-size: 1.1rem; color: var(--ds-text-soft); background: var(--ds-primary-light); color: var(--ds-primary); padding: 0.2rem 0.8rem; border-radius: 2rem; font-weight: 600; display: inline-block; margin-top: 0.3rem; }
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 27rem;
+      background: var(--primary-dark);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: -27rem;
+      z-index: 1000;
+      height: 100vh;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sidebar-open .sidebar { left: 0; }
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 999;
+      backdrop-filter: blur(2px);
+    }
+    body.sidebar-open .sidebar-overlay { display: block; }
+
+    .sb-logo {
+      padding: 2rem 2.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sb-logo a { display: block; height: 4.5rem; }
+    .sb-logo img { height: 100%; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
+
+    .sb-user {
+      padding: 2rem 2.5rem;
+      display: flex; align-items: center; gap: 1.4rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+    }
+    .sb-avatar {
+      width: 4.4rem; height: 4.4rem; border-radius: 50%;
+      object-fit: cover;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.8rem; color: white;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.25);
+    }
+    .sb-user-name { font-weight: 600; font-size: 1.4rem; color: #fff; }
+    .sb-user-role {
+      font-size: 1.1rem; color: rgba(255,255,255,0.55);
+      margin-top: 0.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .sb-user-role::before {
+      content: ''; width: 0.6rem; height: 0.6rem;
+      border-radius: 50%; background: #34D399; display: inline-block;
+    }
 
     .sb-nav { padding: 1.5rem 0; flex: 1; overflow-y: auto; }
-    .sb-section { padding: 1rem 3rem 0.5rem; font-size: 1.1rem; font-weight: 700; color: var(--ds-text-soft); letter-spacing: 0.1em; text-transform: uppercase; }
-    .sb-link { display: flex; align-items: center; gap: 1.2rem; padding: 1.1rem 3rem; color: var(--ds-text-soft); text-decoration: none; font-weight: 500; font-size: 1.4rem; position: relative; transition: all 0.2s; }
-    .sb-link:hover { color: var(--ds-primary); background: var(--ds-primary-light); }
-    .sb-link.active { background: var(--ds-primary-light); color: var(--ds-primary); font-weight: 600; }
-    .sb-link.active::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0.4rem; background: var(--ds-primary); border-radius: 0 0.4rem 0.4rem 0; }
-    .sb-icon { font-size: 1.8rem; width: 2rem; text-align: center; }
-    
-    .sb-logout { padding: 2rem 3rem; border-top: 1px solid var(--ds-border); }
-    .sb-logout a { display: flex; align-items: center; gap: 1rem; color: #DC2626; text-decoration: none; font-size: 1.4rem; font-weight: 600; padding: 1rem 1.5rem; border-radius: 1rem; transition: background 0.2s; }
-    .sb-logout a:hover { background: #FEE2E2; }
+    .sb-section {
+      padding: 1.5rem 2.5rem 0.5rem;
+      font-size: 1rem; font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .sb-link {
+      display: flex; align-items: center; gap: 1.2rem;
+      padding: 1.2rem 2.5rem;
+      color: rgba(255,255,255,0.6);
+      font-weight: 500; font-size: 1.4rem;
+      position: relative; transition: all 0.2s;
+      border-radius: 0;
+    }
+    .sb-link:hover { color: #fff; background: rgba(255,255,255,0.07); }
+    .sb-link.active {
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+      font-weight: 600;
+    }
+    .sb-link.active::before {
+      content: '';
+      position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 0.3rem;
+      background: #60A5FA;
+      border-radius: 0 0.4rem 0.4rem 0;
+    }
+    .sb-icon { width: 2.2rem; height: 2.2rem; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; }
 
-    /* MAIN */
-    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    
-    /* TOPBAR */
-    .topbar { height: 7rem; background: var(--ds-surface); border-bottom: 1px solid var(--ds-border); display: flex; align-items: center; justify-content: space-between; padding: 0 4rem; flex-shrink: 0; }
-    .tb-greeting h1 { font-size: 1.8rem; font-weight: 700; }
-    .tb-greeting p { font-size: 1.2rem; color: var(--ds-text-soft); margin-top: 0.2rem; }
-    .tb-right { display: flex; align-items: center; gap: 1.5rem; }
-    .tb-btn { width: 3.8rem; height: 3.8rem; border-radius: 50%; border: 1px solid var(--ds-border); background: var(--ds-surface); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ds-text-soft); font-size: 1.6rem; transition: background 0.2s; }
-    .tb-btn:hover { background: var(--ds-bg); }
-    .tb-date { font-size: 1.2rem; color: var(--ds-text-soft); background: var(--ds-bg); padding: 0.8rem 1.5rem; border-radius: 2rem; border: 1px solid var(--ds-border); }
+    .sb-logout { padding: 2rem 2.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .sb-logout a {
+      display: flex; align-items: center; gap: 1rem;
+      color: rgba(255,255,255,0.5);
+      font-size: 1.4rem; font-weight: 500;
+      padding: 1rem 1.5rem; border-radius: 1rem;
+      transition: all 0.2s;
+    }
+    .sb-logout a:hover { color: #FCA5A5; background: rgba(220, 38, 38, 0.15); }
 
-    /* SCROLL AREA */
-    .dash-scroll { flex: 1; overflow-y: auto; padding: 3rem 4rem; }
+    /* ─── MAIN LAYOUT ─── */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; margin-left: 0; }
 
-    /* STATS CARDS */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 3rem; }
-    .stat-card { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: 1.6rem; padding: 2.4rem; display: flex; align-items: flex-start; gap: 1.6rem; box-shadow: var(--ds-shadow); transition: transform 0.2s; }
-    .stat-card:hover { transform: translateY(-0.3rem); }
-    .stat-icon { width: 5rem; height: 5rem; border-radius: 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; flex-shrink: 0; }
-    .stat-icon.blue  { background: #DBEAFE; }
-    .stat-icon.purple { background: #EDE9FE; }
-    .stat-icon.green  { background: #DCFCE7; }
-    .stat-icon.orange { background: #FEF3C7; }
-    .stat-label { font-size: 1.2rem; color: var(--ds-text-soft); font-weight: 500; margin-bottom: 0.5rem; }
-    .stat-value { font-size: 2.6rem; font-weight: 800; color: var(--ds-text); letter-spacing: -0.05em; }
-    .stat-sub { font-size: 1.1rem; color: var(--ds-text-soft); margin-top: 0.3rem; }
+    /* ─── TOPBAR ─── */
+    .topbar {
+      height: 6.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+    .tb-left { display: flex; align-items: center; gap: 1.5rem; }
+    .sb-toggle-btn {
+      background: none; border: 1px solid var(--border); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      width: 4rem; height: 4rem; color: var(--text); border-radius: 1rem;
+      transition: all 0.2s;
+    }
+    .sb-toggle-btn:hover { background: var(--surface-2); }
+    .tb-breadcrumb { font-size: 1.3rem; color: var(--text-soft); }
+    .tb-breadcrumb strong { color: var(--text); font-weight: 600; }
 
-    /* CARDS GENERALES */
-    .ds-card { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: 1.6rem; box-shadow: var(--ds-shadow); }
-    .card-header-bar { display: flex; justify-content: space-between; align-items: center; padding: 2rem 2.5rem; border-bottom: 1px solid var(--ds-border); }
-    .card-header-bar h2 { font-size: 1.6rem; font-weight: 700; }
-    .card-header-bar a { font-size: 1.3rem; color: var(--ds-primary); font-weight: 600; background: var(--ds-primary-light); padding: 0.6rem 1.4rem; border-radius: 0.8rem; text-decoration: none; transition: opacity 0.2s; }
-    .card-header-bar a:hover { opacity: 0.8; }
+    .tb-right { display: flex; align-items: center; gap: 1rem; }
+    .tb-search {
+      display: none;
+      align-items: center; gap: 1rem;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 3rem; padding: 0.8rem 1.6rem;
+    }
+    .tb-search input {
+      border: none; background: transparent; font-family: 'Inter', sans-serif;
+      font-size: 1.3rem; color: var(--text); outline: none; width: 18rem;
+    }
+    .tb-action-btn {
+      width: 4rem; height: 4rem; border-radius: 1rem;
+      border: 1px solid var(--border);
+      background: var(--surface); display: flex;
+      align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-soft);
+      transition: all 0.2s; position: relative;
+    }
+    .tb-action-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+    .tb-notif-dot {
+      position: absolute; top: 0.6rem; right: 0.6rem;
+      width: 0.8rem; height: 0.8rem;
+      background: var(--danger); border-radius: 50%;
+      border: 2px solid white;
+    }
+    .tb-avatar {
+      width: 3.8rem; height: 3.8rem; border-radius: 50%;
+      object-fit: cover; border: 2px solid var(--primary);
+      cursor: pointer;
+    }
+    .tb-avatar-placeholder {
+      width: 3.8rem; height: 3.8rem; border-radius: 50%;
+      background: var(--primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.5rem; cursor: pointer;
+    }
 
-    /* GRID PRINCIPAL */
-    .main-grid { display: grid; grid-template-columns: 1fr 38rem; gap: 2.5rem; margin-bottom: 2.5rem; }
+    /* ─── SCROLL / CONTENT AREA ─── */
+    .dash-scroll { flex: 1; overflow-y: auto; padding: 2.5rem; }
 
-    /* BANNER BIENVENIDA */
-    .welcome-banner { background: linear-gradient(135deg, #1D4ED8 0%, #7C3AED 100%); border-radius: 1.6rem; padding: 3rem; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; overflow: hidden; position: relative; }
-    .wb-text h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.8rem; }
-    .wb-text p { font-size: 1.4rem; opacity: 0.85; }
-    .wb-badge { font-size: 6rem; opacity: 0.15; position: absolute; right: 3rem; top: 50%; transform: translateY(-50%); }
-    .wb-links { display: flex; gap: 1rem; margin-top: 1.5rem; }
-    .wb-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 1.3rem; font-weight: 600; padding: 0.8rem 1.6rem; border-radius: 0.8rem; text-decoration: none; transition: background 0.2s; }
-    .wb-btn:hover { background: rgba(255,255,255,0.3); color: white; }
-    .wb-btn.solid { background: white; color: var(--ds-primary); }
-    .wb-btn.solid:hover { background: #EFF6FF; color: var(--ds-primary); }
+    /* ─── WELCOME BANNER ─── */
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #2563EB 50%, #7C3AED 100%);
+      border-radius: var(--radius);
+      padding: 3rem 3.5rem;
+      color: white;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2.5rem;
+      position: relative; overflow: hidden;
+    }
+    .welcome-banner::before {
+      content: '';
+      position: absolute; top: -50%; right: -10%;
+      width: 40rem; height: 40rem;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .welcome-banner::after {
+      content: '';
+      position: absolute; bottom: -30%; right: 15%;
+      width: 20rem; height: 20rem;
+      background: radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .wb-text h2 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+    .wb-text p { font-size: 1.4rem; color: rgba(255,255,255,0.75); }
+    .wb-actions { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+    .wb-btn {
+      padding: 1rem 2rem; border-radius: 1rem; font-size: 1.3rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 0.8rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .wb-btn-primary { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
+    .wb-btn-primary:hover { background: rgba(255,255,255,0.3); }
+    .wb-btn-white { background: white; color: var(--primary-dark); border: none; }
+    .wb-btn-white:hover { background: #F0F9FF; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .wb-badge { font-size: 8rem; opacity: 0.12; position: absolute; right: 3rem; top: 50%; transform: translateY(-50%); z-index: 0; }
 
-    /* FAVORITOS PREVIEW */
-    .fav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; padding: 2rem 2.5rem; }
-    .fav-item { display: flex; align-items: center; gap: 1.2rem; background: var(--ds-bg); padding: 1.4rem; border-radius: 1.2rem; border: 1px solid var(--ds-border); text-decoration: none; color: var(--ds-text); transition: all 0.2s; }
-    .fav-item:hover { border-color: var(--ds-primary); transform: translateY(-0.2rem); }
-    .fav-img { width: 5rem; height: 5rem; border-radius: 0.8rem; background: white; object-fit: contain; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; border: 1px solid var(--ds-border); }
-    .fav-name { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.3rem; }
-    .fav-price { font-size: 1.2rem; color: var(--ds-primary); font-weight: 700; }
-    .fav-empty { padding: 4rem 2.5rem; text-align: center; color: var(--ds-text-soft); }
-    .fav-empty span { font-size: 4rem; display: block; margin-bottom: 1rem; }
+    /* ─── KPI CARDS ─── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 2.5rem; }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.4rem;
+      display: flex; align-items: center; gap: 2rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s ease;
+      position: relative; overflow: hidden;
+    }
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .kpi-icon {
+      width: 5.6rem; height: 5.6rem; border-radius: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; flex-shrink: 0;
+    }
+    .kpi-icon.blue { background: #DBEAFE; color: #1D4ED8; }
+    .kpi-icon.purple { background: #EDE9FE; color: #7C3AED; }
+    .kpi-icon.green { background: #D1FAE5; color: #059669; }
+    .kpi-icon.orange { background: #FEF3C7; color: #D97706; }
+    .kpi-label { font-size: 1.2rem; color: var(--text-soft); font-weight: 500; margin-bottom: 0.4rem; }
+    .kpi-value { font-size: 3.2rem; font-weight: 800; color: var(--text); letter-spacing: -0.05em; line-height: 1; }
+    .kpi-sub { font-size: 1.1rem; color: var(--text-muted); margin-top: 0.4rem; }
 
-    /* ACTIVIDAD RECIENTE */
-    .activity-list { padding: 0 2.5rem; }
-    .activity-item { display: flex; align-items: flex-start; gap: 1.4rem; padding: 1.6rem 0; border-bottom: 1px solid var(--ds-border); }
-    .activity-item:last-child { border-bottom: none; }
-    .act-dot { width: 1rem; height: 1rem; border-radius: 50%; flex-shrink: 0; margin-top: 0.5rem; }
-    .act-dot.review { background: var(--ds-primary); }
-    .act-dot.vote { background: var(--ds-accent); }
-    .act-dot.fav { background: #EF4444; }
-    .act-text { font-size: 1.3rem; line-height: 1.6; }
-    .act-text strong { font-weight: 600; }
-    .act-date { font-size: 1.1rem; color: var(--ds-text-soft); margin-top: 0.3rem; }
-    .act-stars { color: #F59E0B; font-size: 1.2rem; }
-    .act-empty { padding: 3rem 2.5rem; text-align: center; color: var(--ds-text-soft); font-size: 1.3rem; }
+    /* ─── CONTENT GRID ─── */
+    .content-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; }
 
-    /* CARD CRÉDITO */
-    .credit-card { background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%); border-radius: 1.6rem; padding: 2.5rem; color: white; box-shadow: 0 10px 30px rgba(124,58,237,0.3); position: relative; overflow: hidden; margin-bottom: 2rem; }
-    .cc-label { font-size: 1.2rem; opacity: 0.85; margin-bottom: 0.8rem; }
-    .cc-amount { font-size: 3.2rem; font-weight: 800; margin-bottom: 3rem; letter-spacing: -0.05em; }
-    .cc-bottom { display: flex; justify-content: space-between; font-size: 1.3rem; }
-    .cc-bg { position: absolute; right: -1rem; bottom: -2rem; font-size: 10rem; opacity: 0.08; }
+    /* ─── CARD BASE ─── */
+    .ds-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .card-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 2rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-head h3 { font-size: 1.6rem; font-weight: 700; display: flex; align-items: center; gap: 0.8rem; }
+    .card-head-link {
+      font-size: 1.2rem; color: var(--primary); font-weight: 600;
+      padding: 0.6rem 1.4rem; border-radius: 0.8rem;
+      background: var(--primary-light); transition: all 0.2s;
+    }
+    .card-head-link:hover { background: #DBEAFE; }
 
-    /* QUICK ACTIONS */
-    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; padding: 2rem 2.5rem; }
-    .qa-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; background: var(--ds-bg); border: 1px solid var(--ds-border); border-radius: 1.2rem; padding: 1.8rem 1rem; text-decoration: none; color: var(--ds-text); font-size: 1.2rem; font-weight: 600; transition: all 0.2s; text-align: center; }
-    .qa-btn:hover { background: var(--ds-primary-light); border-color: var(--ds-primary); color: var(--ds-primary); }
-    .qa-btn span { font-size: 2.4rem; }
+    /* ─── ORDER LIST ─── */
+    .order-list { }
+    .order-item {
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: 1.6rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .order-item:last-child { border-bottom: none; }
+    .order-item:hover { background: var(--surface-2); }
+    .order-icon {
+      width: 4.2rem; height: 4.2rem; border-radius: 1rem;
+      background: var(--primary-light); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; flex-shrink: 0;
+    }
+    .order-info { flex: 1; min-width: 0; }
+    .order-info strong { font-size: 1.4rem; font-weight: 600; display: block; }
+    .order-info span { font-size: 1.2rem; color: var(--text-soft); display: block; margin-top: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .order-meta { text-align: right; flex-shrink: 0; }
+    .order-date { font-size: 1.1rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; justify-content: flex-end; margin-bottom: 0.5rem; }
+    .status-badge {
+      display: inline-block; padding: 0.3rem 1rem;
+      border-radius: 2rem; font-size: 1.1rem; font-weight: 600;
+    }
+    .status-entregado { background: #D1FAE5; color: #065F46; }
+    .status-pendiente { background: #FEF3C7; color: #92400E; }
+    .status-camino { background: #DBEAFE; color: #1E40AF; }
+
+    /* ─── PROFILE CARD ─── */
+    .profile-card-inner { padding: 2.5rem; }
+    .profile-avatar-section {
+      display: flex; align-items: center; gap: 2rem;
+      padding-bottom: 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem;
+    }
+    .profile-avatar-lg {
+      width: 7rem; height: 7rem; border-radius: 50%;
+      object-fit: cover; border: 3px solid var(--primary);
+      flex-shrink: 0;
+    }
+    .profile-avatar-placeholder-lg {
+      width: 7rem; height: 7rem; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 3rem; flex-shrink: 0;
+    }
+    .profile-info-item {
+      display: flex; align-items: center; gap: 1.2rem;
+      font-size: 1.35rem; padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .profile-info-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .profile-info-icon { width: 3.6rem; height: 3.6rem; border-radius: 0.8rem; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+    .profile-info-icon.loc { background: #FEE2E2; color: #DC2626; }
+    .profile-info-icon.tel { background: #D1FAE5; color: #059669; }
+    .profile-info-icon.bio { background: #EDE9FE; color: #7C3AED; }
+    .profile-info-icon.mail { background: #DBEAFE; color: #1D4ED8; }
+
+    /* ─── MEMBER CARD ─── */
+    .member-card {
+      background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 60%, #312E81 100%);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      color: white;
+      position: relative; overflow: hidden;
+    }
+    .member-card::before {
+      content: '';
+      position: absolute; top: -40%; right: -20%;
+      width: 24rem; height: 24rem;
+      background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+    }
+    .member-card-label { font-size: 1.1rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; }
+    .member-card-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .member-card-sub { font-size: 1.2rem; color: rgba(255,255,255,0.6); }
+    .member-card-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 3rem; }
+    .member-card-user { font-size: 1.4rem; font-weight: 600; }
+    .member-card-date { font-size: 1.2rem; color: rgba(255,255,255,0.5); text-align: right; }
+    .member-card-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.5rem 1.2rem; border-radius: 2rem;
+      font-size: 1.1rem; font-weight: 600; margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+    .chip-dot { width: 0.6rem; height: 0.6rem; background: #34D399; border-radius: 50%; }
+
+    /* ─── CHART CARD ─── */
+    .chart-wrapper { padding: 2rem 2.5rem; }
+    .chart-wrapper canvas { max-height: 22rem; width: 100% !important; }
+
+    /* ─── QUICK ACTIONS ─── */
+    .qa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; padding: 2rem 2.5rem; }
+    .qa-btn {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.8rem; padding: 1.6rem 1rem;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 1.2rem; text-decoration: none; color: var(--text);
+      font-size: 1.2rem; font-weight: 600; transition: all 0.2s; text-align: center;
+    }
+    .qa-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+    .qa-icon { width: 4rem; height: 4rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+    .qa-icon.blue { background: #DBEAFE; }
+    .qa-icon.purple { background: #EDE9FE; }
+    .qa-icon.green { background: #D1FAE5; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-soft); }
+    .empty-state .empty-icon { font-size: 4rem; margin-bottom: 1.2rem; display: block; }
+    .empty-state p { font-size: 1.3rem; margin-bottom: 1.5rem; }
+    .empty-state a { color: var(--primary); font-weight: 600; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (min-width: 768px) {
+      .tb-search { display: flex; }
+      .topbar { padding: 0 3rem; }
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar { position: static; left: 0; z-index: auto; }
+      .sidebar-overlay { display: none !important; }
+      .sb-toggle-btn { display: none !important; }
+      .main-area { margin-left: 0; }
+      .content-grid { grid-template-columns: 1fr 35rem; }
+      .dash-scroll { padding: 3rem; }
+    }
+
+    @media (min-width: 1280px) {
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 <body>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- SIDEBAR -->
+<!-- ─── SIDEBAR ─── -->
 <aside class="sidebar">
-  <div class="sb-logo" style="font-family: 'Oswald', sans-serif; color: var(--ds-text);">
-    <a href="/" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
-      <span class="material-symbols-outlined" style="color:var(--ds-primary); font-size:2.8rem;">bolt</span> MIKITECH
+  <div class="sb-logo">
+    <a href="/" style="display: flex; align-items: center; text-decoration: none; height: 4.5rem;">
+      <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #FFFFFF; display: flex; align-items: center; gap: 4px;">
+        <span style="color: #38BDF8;">MIKI</span>TECH
+      </div>
     </a>
   </div>
 
   <div class="sb-user">
     {% if perfil.url_avatar %}
-    <img src="{{ perfil.url_avatar }}" class="sb-avatar" alt="Avatar" style="font-size:0;">
+    <img src="{{ perfil.url_avatar }}" class="sb-avatar" alt="Avatar" style="object-fit:cover;">
     {% else %}
     <div class="sb-avatar">{{ perfil.nombre_mostrado|first|upper }}</div>
     {% endif %}
     <div>
       <div class="sb-user-name">{{ perfil.nombre_mostrado }}</div>
-      <div class="sb-user-role">Usuario</div>
+      <div class="sb-user-role">En línea</div>
     </div>
   </div>
 
@@ -167,207 +460,335 @@
     <a href="{% url 'users:orders' %}" class="sb-link">
       <span class="sb-icon"><span class="material-symbols-outlined">receipt_long</span></span> Mis Pedidos
     </a>
-    <a href="{% url 'users:history' %}" class="sb-link">
-      <span class="sb-icon"><span class="material-symbols-outlined">history</span></span> Historial
-    </a>
     <a href="{% url 'users:reports' %}" class="sb-link">
       <span class="sb-icon"><span class="material-symbols-outlined">bar_chart</span></span> Reportes
     </a>
     <a href="{% url 'users:edit_profile' %}" class="sb-link">
-      <span class="sb-icon"><span class="material-symbols-outlined">settings</span></span> Editar Perfil
+      <span class="sb-icon"><span class="material-symbols-outlined">settings</span></span> Configuración
     </a>
   </nav>
 
   <div class="sb-logout">
     <a href="{% url 'users:logout' %}" onclick="confirmarSalida(event, this.href)">
-      <span><span class="material-symbols-outlined">logout</span></span> Cerrar Sesión
+      <span class="material-symbols-outlined">logout</span> Cerrar Sesión
     </a>
   </div>
 </aside>
 
-<!-- MAIN -->
+<!-- ─── MAIN ─── -->
 <main class="main-area">
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="tb-greeting">
-      <h1>Hola, {{ perfil.nombre_mostrado }} <span class="material-symbols-outlined text-warning">waving_hand</span></h1>
-      <p>Bienvenido de nuevo a tu panel personal</p>
+    <div class="tb-left">
+      <button class="sb-toggle-btn" onclick="toggleSidebar()" title="Menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="tb-breadcrumb">
+        <span>MIKITECH</span> / <strong>Mi Panel</strong>
+      </div>
     </div>
+
     <div class="tb-right">
-      <div class="tb-date"><span class="material-symbols-outlined me-1">calendar_today</span> Marzo 2026</div>
-      <button class="tb-btn" title="Notificaciones"><span class="material-symbols-outlined ms-1">notifications</span></button>
-      <a href="{% url 'users:edit_profile' %}" class="tb-btn" title="Configuración"><span class="material-symbols-outlined ms-1">settings</span></a>
+      <div class="tb-search">
+        <i data-lucide="search" style="width:1.6rem;height:1.6rem;color:var(--text-muted);"></i>
+        <input type="text" placeholder="Buscar productos...">
+      </div>
+
+      <!-- Notificaciones -->
+      <div style="position: relative;">
+        <button class="tb-action-btn" id="notifBtn" title="Notificaciones">
+          <i data-lucide="bell" style="width:1.8rem;height:1.8rem;"></i>
+        </button>
+        <div id="notifMenu" style="display:none; position:absolute; right:0; top:120%; width:30rem; background:white; border:1px solid var(--border); border-radius:1.4rem; box-shadow:var(--shadow-lg); z-index:100; overflow:hidden;">
+          <div style="padding:1.6rem 2rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:700; font-size:1.5rem;">Notificaciones</span>
+          </div>
+          <div style="padding:3rem 2rem; text-align:center; color:var(--text-soft);">
+            <i data-lucide="bell-off" style="width:3rem;height:3rem;margin-bottom:1rem;opacity:0.4;"></i>
+            <p style="font-size:1.3rem;">Sin notificaciones nuevas</p>
+          </div>
+        </div>
+      </div>
+
+      <a href="{% url 'users:edit_profile' %}" class="tb-action-btn" title="Configuración">
+        <i data-lucide="settings" style="width:1.8rem;height:1.8rem;"></i>
+      </a>
+
+      {% if perfil.url_avatar %}
+      <a href="{% url 'users:edit_profile' %}"><img src="{{ perfil.url_avatar }}" class="tb-avatar" alt="Avatar"></a>
+      {% else %}
+      <a href="{% url 'users:edit_profile' %}"><div class="tb-avatar-placeholder">{{ perfil.nombre_mostrado|first|upper }}</div></a>
+      {% endif %}
     </div>
   </header>
 
-  <!-- DASHBOARD SCROLL -->
+  <!-- SCROLL -->
   <div class="dash-scroll">
 
-    <!-- GRID PRINCIPAL -->
-    <div class="main-grid" style="grid-template-columns: 1fr 38rem;">
+    <!-- DJANGO MESSAGES (login exitoso, etc.) -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="miki-success-banner" style="background: linear-gradient(135deg, #059669 0%, #10B981 100%); border-radius: 1.4rem; padding: 2rem 2.5rem; color: white; display: flex; align-items: center; gap: 1.6rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3); animation: bannerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <div style="width: 4.8rem; height: 4.8rem; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div>
+        <div style="font-size: 1.6rem; font-weight: 700;">{{ message }}</div>
+        <div style="font-size: 1.2rem; opacity: 0.8; margin-top: 0.3rem;">Tu sesión está activa y segura.</div>
+      </div>
+    </div>
+    {% endfor %}
+    <style>
+      @keyframes bannerPop{from{opacity:0;transform:translateY(-15px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+    </style>
+    <script>
+      // Auto-ocultar el banner después de 6 segundos
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          document.querySelectorAll('.miki-success-banner').forEach(function(el) {
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-10px)';
+            setTimeout(function() { el.remove(); }, 500);
+          });
+        }, 6000);
+
+        // También mostrar como SweetAlert toast
+        if (typeof Swal !== 'undefined') {
+          {% for message in messages %}
+          Swal.fire({
+            icon: 'success',
+            title: "{{ message|escapejs }}",
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            background: '#F0FDF4',
+            color: '#166534',
+            iconColor: '#16A34A'
+          });
+          {% endfor %}
+        }
+      });
+    </script>
+    {% endif %}
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div class="wb-text" style="position:relative;z-index:1;">
+        <h2>¡Hola, {{ perfil.nombre_mostrado }}! 👋</h2>
+        <p>Bienvenido de nuevo a tu panel personal de MIKITECH</p>
+        <div class="wb-actions">
+          <a href="{% url 'products:list' %}" class="wb-btn wb-btn-white">
+            <span class="material-symbols-outlined" style="font-size:1.8rem;">shopping_bag</span>
+            Ir a la tienda
+          </a>
+          <a href="{% url 'users:orders' %}" class="wb-btn wb-btn-primary">
+            <span class="material-symbols-outlined" style="font-size:1.8rem;">receipt_long</span>
+            Mis Pedidos
+          </a>
+        </div>
+      </div>
+      <div class="wb-badge">🖥️</div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon blue">
+          <span class="material-symbols-outlined">inventory_2</span>
+        </div>
+        <div>
+          <div class="kpi-label">Pedidos Realizados</div>
+          <div class="kpi-value">{{ conteo_pedidos }}</div>
+          <div class="kpi-sub">Total acumulado</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon green">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div>
+          <div class="kpi-label">Pedidos Entregados</div>
+          <div class="kpi-value">{{ pedidos_entregados|default:0 }}</div>
+          <div class="kpi-sub">Completados con éxito</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon purple">
+          <span class="material-symbols-outlined">account_circle</span>
+        </div>
+        <div>
+          <div class="kpi-label">Miembro desde</div>
+          <div class="kpi-value" style="font-size:2rem;">{{ perfil.creado_el|date:"Y" }}</div>
+          <div class="kpi-sub">Cliente MIKITECH</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT GRID -->
+    <div class="content-grid">
 
       <!-- COLUMNA IZQUIERDA -->
       <div style="display:flex; flex-direction:column; gap:2.5rem;">
 
-        <!-- OVERVIEW STATS -->
-        <div class="ds-card" style="padding:2.5rem;">
-          <h2 style="font-size:1.8rem; font-weight:700; margin-bottom: 2rem;">Resumen de Actividad</h2>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem; background: var(--ds-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--ds-border);">
-            
-            <!-- Pedidos -->
-            <div style="background: white; border-radius: 10px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--ds-border);">
-              <div>
-                <div style="font-size:1.3rem; color:var(--ds-text-soft); font-weight:500;">Pedidos Realizados</div>
-                <div style="font-size:2.8rem; font-weight:800; margin-top:0.4rem;">{{ conteo_pedidos }}</div>
-              </div>
-              <div style="background:#E0E7FF; color:var(--ds-primary); padding:0.5rem 1rem; border-radius:30px; font-weight:700; font-size:1.4rem;">
-                <span class="material-symbols-outlined">inventory_2</span>
-              </div>
-            </div>
-
-            <!-- Reseñas / Interacciones -->
-            <div style="background: white; border-radius: 10px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--ds-border);">
-              <div>
-                <div style="font-size:1.3rem; color:var(--ds-text-soft); font-weight:500;">Opiniones Publicadas</div>
-                <div style="font-size:2.8rem; font-weight:800; margin-top:0.4rem;">{{ conteo_resenas }}</div>
-              </div>
-              <div style="background:#DCFCE7; color:#166534; padding:0.5rem 1rem; border-radius:30px; font-weight:700; font-size:1.4rem;">
-                <span class="material-symbols-outlined">star</span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- GRÁFICO TENDENCIA DE GASTOS -->
-        <div class="ds-card" style="padding:2.5rem; margin-top:-1rem;">
-          <h2 style="font-size:1.6rem; font-weight:700; margin-bottom: 2rem;">Tendencia de Gastos</h2>
-          <canvas id="lineChart" style="max-height: 250px; width:100%;"></canvas>
-        </div>
-
-        <!-- SHIPPING / PEDIDOS -->
+        <!-- CHART -->
         <div class="ds-card">
-          <div class="card-header-bar">
-            <h2><span class="material-symbols-outlined text-primary me-2">inventory_2</span> Pedidos Recientes</h2>
-            <a href="{% url 'users:orders' %}">Ver todos</a>
+          <div class="card-head">
+            <h3>
+              <span class="kpi-icon blue" style="width:3.2rem;height:3.2rem;border-radius:0.8rem;font-size:1.6rem;"><span class="material-symbols-outlined">trending_up</span></span>
+              Flujo de Gastos
+            </h3>
           </div>
-          {% if pedidos_recientes %}
-          <div class="activity-list">
-            {% for pedido in pedidos_recientes %}
-            <div class="activity-item" style="align-items:center;">
-              <div class="fav-img" style="background:#F1F5F9; border:none; border-radius: 8px;"><i class="bi bi-bag-check" style="color: #64748B;"></i></div>
-              <div class="act-text" style="flex:1;">
-                <strong>Pedido #{{ pedido.id|stringformat:"s"|slice:":8" }}</strong>
-                <div style="margin-top:0.2rem; display:flex; gap:10px; font-size:1.2rem;">
-                  <span style="color:var(--ds-text-soft);">{{ pedido.direccion_envio|default:"Dirección digital o pendiente"|truncatechars:40 }}</span>
-                </div>
-              </div>
-              <div style="text-align:right;">
-                <div style="font-size:1.1rem; color:var(--ds-text-soft); font-weight:600; display:flex; align-items:center; gap:5px; justify-content:flex-end;">
-                  <span class="material-symbols-outlined">event</span> {{ pedido.creado_el|date:"d/m/Y" }}
-                </div>
-                <span class="sb-user-role" style="font-size:1rem; margin-top:5px; {% if 'Entregado' in pedido.estado %}background:#DCFCE7;color:#166534;{% else %}background:#FEF3C7;color:#92400E;{% endif %}">{{ pedido.estado }}</span>
-              </div>
-            </div>
-            {% endfor %}
+          <div class="chart-wrapper">
+            <canvas id="expensesLineChart"></canvas>
           </div>
-          {% else %}
-          <div class="act-empty">
-            <span style="font-size:3rem; display:block; margin-bottom:1rem;"><span class="material-symbols-outlined text-muted">remove_shopping_cart</span></span>
-            Aún no tienes pedidos. <a href="{% url 'products:list' %}">¡Explorar tienda!</a>
-          </div>
-          {% endif %}
         </div>
 
+        <!-- PEDIDOS RECIENTES -->
+        <div class="ds-card">
+          <div class="card-head">
+            <h3>
+              <span class="kpi-icon blue" style="width:3.2rem;height:3.2rem;border-radius:0.8rem;font-size:1.6rem;"><span class="material-symbols-outlined">receipt_long</span></span>
+              Pedidos Recientes
+            </h3>
+            <a href="{% url 'users:orders' %}" class="card-head-link">Ver todos →</a>
+          </div>
+          <div class="order-list">
+            {% if pedidos_recientes %}
+              {% for pedido in pedidos_recientes %}
+              <div class="order-item">
+                <div class="order-icon">
+                  <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+                <div class="order-info">
+                  <strong>Pedido #{{ pedido.id|stringformat:"s"|slice:":8" }}</strong>
+                  <span>{{ pedido.direccion_envio|default:"Dirección pendiente"|truncatechars:45 }}</span>
+                </div>
+                <div class="order-meta">
+                  <div class="order-date">
+                    <span class="material-symbols-outlined" style="font-size:1.3rem;">calendar_today</span>
+                    {{ pedido.creado_el|date:"d/m/Y" }}
+                  </div>
+                  <span class="status-badge {% if 'Entregado' in pedido.estado %}status-entregado{% elif 'Camino' in pedido.estado %}status-camino{% else %}status-pendiente{% endif %}">
+                    {{ pedido.estado }}
+                  </span>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <span class="empty-icon"><span class="material-symbols-outlined" style="font-size:4rem;color:var(--text-muted);">remove_shopping_cart</span></span>
+                <p>Aún no tienes pedidos realizados.</p>
+                <a href="{% url 'products:list' %}">¡Explorar tienda →</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
 
       </div>
 
       <!-- COLUMNA DERECHA -->
       <div style="display:flex; flex-direction:column; gap:2rem;">
- 
-        <!-- CRÉDITO MIKITECH / CARD BALANCE -->
-        <div class="credit-card">
-          <div class="cc-label">Cuenta MIKITECH</div>
-          <div class="cc-amount" style="font-size:2.4rem;">
-            Miembro Activo
+
+        <!-- MEMBER CARD -->
+        <div class="member-card">
+          <div class="member-card-label">Tu Membresía</div>
+          <div class="member-card-title">MIKITECH</div>
+          <div class="member-card-sub">Hardware de Alto Rendimiento</div>
+          <div style="margin-top:1.5rem;">
+            <div class="member-card-chip">
+              <div class="chip-dot"></div>
+              Miembro Activo
+            </div>
           </div>
-          <div class="cc-bottom">
+          <div class="member-card-bottom">
             <div>
-              <div style="font-size:1.1rem; opacity:0.8; margin-bottom:0.3rem;">Usuario</div>
-              <div style="font-weight:600;">@{{ perfil.nombre_usuario }}</div>
+              <div style="font-size:1.1rem;color:rgba(255,255,255,0.5);margin-bottom:0.3rem;">Usuario</div>
+              <div class="member-card-user">@{{ perfil.nombre_usuario }}</div>
             </div>
-            <div style="font-size:1.1rem; opacity:0.8; text-align:right;">
-              <span style="display:block; margin-bottom:0.3rem;">Registrado el</span>
-              {{ perfil.creado_el|date:"m/y" }}
+            <div class="member-card-date">
+              <div style="margin-bottom:0.2rem;">Registrado</div>
+              {{ perfil.creado_el|date:"m/Y" }}
             </div>
           </div>
-          <div class="cc-bg"><span class="material-symbols-outlined text-white">credit_card</span></div>
         </div>
 
-
-        <!-- POPULAR PRODUCTS / FAVORITOS -->
+        <!-- PERFIL INFO -->
         <div class="ds-card">
-          <div class="card-header-bar">
-            <h2><span class="material-symbols-outlined text-danger me-2">favorite</span> Mis Favoritos</h2>
-            <a href="{% url 'users:favorites' %}">Ver todos</a>
+          <div class="card-head">
+            <h3>
+              <span class="kpi-icon purple" style="width:3.2rem;height:3.2rem;border-radius:0.8rem;font-size:1.6rem;"><span class="material-symbols-outlined">badge</span></span>
+              Mi Información
+            </h3>
+            <a href="{% url 'users:edit_profile' %}" class="card-head-link">Editar</a>
           </div>
-          <div class="fav-grid" style="display:flex; flex-direction:column; grid-template-columns:none; padding:1.5rem 2.5rem;">
-            {% if favoritos_recientes %}
-              {% for favor in favoritos_recientes %}
-              <a href="{% url 'products:detail' favor.producto.enlace %}" class="fav-item" style="justify-content:space-between; border:none; border-bottom:1px solid var(--ds-border); border-radius:0; padding:1.5rem 0;">
-                <div style="display:flex; gap:1.2rem; align-items:center;">
-                  {% if favor.producto.url_imagen_principal %}
-                  <img src="{{ favor.producto.url_imagen_principal }}" alt="" class="fav-img">
-                  {% else %}
-                  <div class="fav-img" style="font-size:2rem;"><span class="material-symbols-outlined">star_border</span></div>
-                  {% endif %}
-                  <div>
-                    <div class="fav-name">{{ favor.producto.nombre|truncatechars:25 }}</div>
-                    <div style="color:var(--ds-text-soft); font-size:1.1rem;">Componente</div>
-                  </div>
-                </div>
-                <div class="fav-price" style="color:var(--ds-text);">{{ favor.producto.precio|currency_cop }}</div>
-              </a>
-              {% endfor %}
-            {% else %}
-              <div class="fav-empty" style="padding: 2rem 0;">
-                <span style="font-size:2rem; margin-bottom:0.5rem;"><span class="material-symbols-outlined text-muted">favorite_border</span></span>
-                <p style="margin:0; font-size:1.3rem;">No tienes favoritos</p>
+          <div class="profile-card-inner">
+            <div class="profile-avatar-section">
+              {% if perfil.url_avatar %}
+              <img src="{{ perfil.url_avatar }}" class="profile-avatar-lg" alt="Avatar">
+              {% else %}
+              <div class="profile-avatar-placeholder-lg">{{ perfil.nombre_mostrado|first|upper }}</div>
+              {% endif %}
+              <div>
+                <div style="font-weight:700;font-size:1.6rem;">{{ perfil.nombre_mostrado }}</div>
+                <div style="color:var(--text-soft);font-size:1.3rem;margin-top:0.3rem;">@{{ perfil.nombre_usuario }}</div>
               </div>
-            {% endif %}
-          </div>
-        </div>
+            </div>
 
-        <!-- INFO PERFIL -->
-        <div class="ds-card">
-          <div class="card-header-bar">
-            <h2><span class="material-symbols-outlined text-primary me-2">badge</span> Mi Información</h2>
-            <a href="{% url 'users:edit_profile' %}">Editar</a>
-          </div>
-          <div style="padding:2rem 2.5rem; display:flex; flex-direction:column; gap:1.4rem;">
             {% if perfil.ciudad or perfil.pais %}
-            <div style="display:flex; align-items:center; gap:1rem; font-size:1.3rem;">
-              <span style="font-size:1.6rem;"><span class="material-symbols-outlined text-danger">location_on</span></span>
+            <div class="profile-info-item">
+              <div class="profile-info-icon loc"><span class="material-symbols-outlined" style="font-size:1.8rem;">location_on</span></div>
               <span>{{ perfil.ciudad }}{% if perfil.ciudad and perfil.pais %}, {% endif %}{{ perfil.pais }}</span>
             </div>
             {% endif %}
+
             {% if perfil.telefono %}
-            <div style="display:flex; align-items:center; gap:1rem; font-size:1.3rem;">
-              <span style="font-size:1.6rem;"><span class="material-symbols-outlined text-success">phone</span></span>
+            <div class="profile-info-item">
+              <div class="profile-info-icon tel"><span class="material-symbols-outlined" style="font-size:1.8rem;">phone</span></div>
               <span>{{ perfil.telefono }}</span>
             </div>
             {% endif %}
+
             {% if perfil.biografia %}
-            <div style="display:flex; align-items:flex-start; gap:1rem; font-size:1.3rem;">
-              <span style="font-size:1.6rem; margin-top:0.2rem;"><span class="material-symbols-outlined text-primary">chat</span></span>
-              <span style="color:var(--ds-text-soft);">{{ perfil.biografia|truncatechars:120 }}</span>
+            <div class="profile-info-item">
+              <div class="profile-info-icon bio"><span class="material-symbols-outlined" style="font-size:1.8rem;">chat</span></div>
+              <span style="color:var(--text-soft);">{{ perfil.biografia|truncatechars:100 }}</span>
             </div>
             {% endif %}
+
             {% if not perfil.ciudad and not perfil.telefono and not perfil.biografia %}
-            <p style="color:var(--ds-text-soft); font-size:1.3rem;">Completa tu perfil para que otros te conozcan.</p>
-            <a href="{% url 'users:edit_profile' %}" style="color:var(--ds-primary); font-size:1.3rem; font-weight:600;">→ Completar perfil</a>
+            <div style="text-align:center;padding:1.5rem 0;">
+              <p style="color:var(--text-soft);font-size:1.3rem;margin-bottom:1rem;">Completa tu perfil</p>
+              <a href="{% url 'users:edit_profile' %}" style="color:var(--primary);font-size:1.3rem;font-weight:600;">→ Completar perfil</a>
+            </div>
             {% endif %}
+          </div>
+        </div>
+
+        <!-- ACCIONES RÁPIDAS -->
+        <div class="ds-card">
+          <div class="card-head">
+            <h3>
+              <span class="kpi-icon orange" style="width:3.2rem;height:3.2rem;border-radius:0.8rem;font-size:1.6rem;"><span class="material-symbols-outlined">bolt</span></span>
+              Acciones Rápidas
+            </h3>
+          </div>
+          <div class="qa-grid">
+            <a href="{% url 'products:list' %}" class="qa-btn">
+              <div class="qa-icon blue"><span class="material-symbols-outlined">shopping_bag</span></div>
+              Comprar
+            </a>
+            <a href="{% url 'users:orders' %}" class="qa-btn">
+              <div class="qa-icon purple"><span class="material-symbols-outlined">receipt_long</span></div>
+              Pedidos
+            </a>
+            <a href="{% url 'users:edit_profile' %}" class="qa-btn">
+              <div class="qa-icon green"><span class="material-symbols-outlined">settings</span></div>
+              Ajustes
+            </a>
           </div>
         </div>
 
@@ -380,24 +801,37 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-open');
+  }
+
   function confirmarSalida(e, url) {
     e.preventDefault();
     Swal.fire({
       title: '¿Deseas cerrar sesión?',
-      text: "Tendrás que volver a ingresar tus credenciales la próxima vez.",
-      icon: 'warning',
+      html: `
+        <div class="d-flex flex-column align-items-center text-center gap-3">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; display: flex; align-items: center; justify-content: center; color: #EF4444; margin-bottom: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </div>
+          <p style="margin: 0; font-size: 1.4rem; color: #64748B; font-weight: 500; line-height: 1.5; font-family: 'Inter', sans-serif;">
+            Tendrás que volver a ingresar tus credenciales para acceder a tu cuenta.
+          </p>
+        </div>
+      `,
       showCancelButton: true,
-      confirmButtonColor: '#1D4ED8',
-      cancelButtonColor: '#E2E8F0',
       confirmButtonText: 'Sí, cerrar sesión',
-      cancelButtonText: '<span style="color:#0F172A">Cancelar</span>',
+      cancelButtonText: 'Cancelar',
       background: '#FFFFFF',
-      backdrop: 'rgba(15, 23, 42, 0.6)',
+      color: '#0F172A',
+      backdrop: 'rgba(15, 23, 42, 0.4)',
+      buttonsStyling: false,
       customClass: {
-        popup: 'border-0',
-        title: 'fs-3 fw-bold text-dark',
-        confirmButton: 'fw-bold rounded-3 px-4',
-        cancelButton: 'fw-bold rounded-3 px-4 shadow-none'
+        popup: 'border-0 rounded-4 shadow-lg p-4',
+        title: 'fs-3 fw-bold text-dark mt-2 mb-1',
+        actions: 'mt-4 d-flex justify-content-center gap-2 w-100',
+        confirmButton: 'btn btn-danger fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1',
+        cancelButton: 'btn btn-light fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1 border border-200'
       }
     }).then((result) => {
       if (result.isConfirmed) {
@@ -408,37 +842,47 @@
 </script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+
+    // Notificaciones
+    const notifBtn = document.getElementById('notifBtn');
+    const notifMenu = document.getElementById('notifMenu');
+    if (notifBtn && notifMenu) {
+      notifBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notifMenu.style.display = notifMenu.style.display === 'block' ? 'none' : 'block';
+      });
+      document.addEventListener('click', function(e) {
+        if (notifMenu && !notifMenu.contains(e.target) && e.target !== notifBtn) {
+          notifMenu.style.display = 'none';
+        }
+      });
+    }
+
+    // Charts
     const rawFechas = "{{ fechas_chart|escapejs }}".replace(/'/g, '"');
     const rawMontos = "{{ montos_chart|escapejs }}".replace(/'/g, '"');
-    
-    // Parse arrays. If empty context, supply defaults.
-    let etiquetas = [];
-    let datos = [];
+    let etiquetas = [], datos = [];
     try {
       etiquetas = JSON.parse(rawFechas);
       datos = JSON.parse(rawMontos);
-    } catch(e) {
-      console.log('No historical data yet');
-    }
+    } catch(e) {}
 
     if (etiquetas.length > 0) {
-      const ctxLine = document.getElementById('lineChart').getContext('2d');
-      
-      // Gradient for line chart
-      let gradient = ctxLine.createLinearGradient(0, 0, 0, 250);
-      gradient.addColorStop(0, 'rgba(29, 78, 216, 0.2)'); // ds-primary
-      gradient.addColorStop(1, 'rgba(29, 78, 216, 0)');
-
+      const ctxLine = document.getElementById('expensesLineChart').getContext('2d');
+      let grad = ctxLine.createLinearGradient(0, 0, 0, 220);
+      grad.addColorStop(0, 'rgba(29, 78, 216, 0.18)');
+      grad.addColorStop(1, 'rgba(29, 78, 216, 0)');
       new Chart(ctxLine, {
         type: 'line',
         data: {
           labels: etiquetas,
           datasets: [{
-            label: 'Gastos por Pedido ($)',
+            label: 'Gastos ($)',
             data: datos,
             borderColor: '#1D4ED8',
-            backgroundColor: gradient,
-            borderWidth: 3,
+            backgroundColor: grad,
+            borderWidth: 2.5,
             fill: true,
             tension: 0.4,
             pointBackgroundColor: '#FFFFFF',
@@ -451,24 +895,15 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
+          plugins: { legend: { display: false } },
           scales: {
-            x: { 
-              grid: { display: false },
-              ticks: { font: { family: "'Inter', sans-serif" } }
-            },
-            y: {
-              beginAtZero: true,
-              grid: { borderDash: [5, 5] },
-              ticks: { precision: 0, font: { family: "'Inter', sans-serif" } }
-            }
+            x: { grid: { display: false }, ticks: { font: { family: "'Inter', sans-serif", size: 11 } } },
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)', borderDash: [4,4] }, ticks: { precision: 0, font: { family: "'Inter', sans-serif", size: 11 } } }
           }
         }
       });
     } else {
-      document.getElementById('lineChart').parentElement.innerHTML = '<div class="act-empty"><span style="font-size:3rem; display:block; margin-bottom:1rem;"><span class="material-symbols-outlined text-muted">trending_up</span></span>Aún no hay suficientes datos para graficar una tendencia.</div>';
+      document.getElementById('expensesLineChart').parentElement.innerHTML = '<div style="text-align:center;padding:4rem 2rem;color:#94A3B8;"><p style="font-size:1.3rem;">Aún no hay datos de gastos para graficar.</p></div>';
     }
   });
 </script>

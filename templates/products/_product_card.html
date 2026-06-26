@@ -1,16 +1,18 @@
 {% load miki_filters %}
 <div class="wix-product" id="product-{{ product.id }}">
   <div class="badge-cat">{{ product.categoria.nombre|default:"General" }}</div>
+  
   {% if product.descuento_activo %}
-  <div style="position:absolute; top:1.2rem; right:1.2rem; background:#EF4444; color:white; font-family:'Jost',sans-serif; font-weight:900; font-size:1.3rem; padding:0.5rem 1rem; border-radius:0.6rem; z-index:2; line-height:1;">
+  <div style="position:absolute; top:1.5rem; right:1.5rem; background:#EF4444; color:white; font-family: 'Outfit', sans-serif; font-weight:900; font-size:1.3rem; padding:0.5rem 1rem; border-radius:0.6rem; z-index:2; line-height:1; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);">
     -{{ product.descuento_porcentaje }}%
   </div>
   {% endif %}
+  
   <a href="{% url 'products:detail' product.enlace %}" class="wix-img-wrapper">
     {% if product.url_imagen_principal %}
       <img src="{{ product.url_imagen_principal }}" alt="{{ product.nombre }}">
     {% else %}
-      <div style="display:flex; align-items:center; justify-content:center; height:100%; font-size: 4.8rem; color:#CBD5E1;">
+      <div style="display:flex; align-items:center; justify-content:center; height:100%; font-size: 4.8rem; color:#475569;">
         <span class="material-symbols-outlined">inventory_2</span>
       </div>
     {% endif %}
@@ -19,33 +21,36 @@
   <div class="wix-p-info">
     <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.8rem;">
       {% if product.existencias > 0 %}
-        <div style="width:0.8rem; height:0.8rem; border-radius:50%; background-color:#10B981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);"></div>
-        <span style="font-size:1.1rem; color:#10B981; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Stock Disponible</span>
+        <div style="width:0.8rem; height:0.8rem; border-radius:50%; background-color:#10B981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.8); animation: pulse-glow 2s infinite;"></div>
+        <span style="font-size:1.1rem; color:#10B981; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family: 'Outfit', sans-serif;">Stock Disponible</span>
       {% else %}
-        <div style="width:0.8rem; height:0.8rem; border-radius:50%; background-color:#EF4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);"></div>
-        <span style="font-size:1.1rem; color:#EF4444; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Agotado</span>
+        <div style="width:0.8rem; height:0.8rem; border-radius:50%; background-color:#EF4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);"></div>
+        <span style="font-size:1.1rem; color:#EF4444; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family: 'Outfit', sans-serif;">Agotado</span>
       {% endif %}
     </div>
-    <a href="{% url 'products:detail' product.enlace %}" class="wix-p-title" style="font-size: 1.4rem; font-weight: 500; color: #0F172A; margin-bottom: 0.6rem; text-decoration: none; display: block; min-height: 4.2rem; overflow: hidden;">
+    
+    <a href="{% url 'products:detail' product.enlace %}" class="wix-p-title">
       {{ product.nombre|truncatechars:45 }}
     </a>
 
     <!-- PRECIO CON O SIN DESCUENTO -->
     {% if product.descuento_activo %}
-    <div style="margin-bottom:0.8rem;">
-      <div style="font-family:'Jost',sans-serif; font-size:1.2rem; color:#94A3B8; text-decoration:line-through; line-height:1.2;">
+    <div style="margin-bottom:0.8rem; display: flex; flex-direction: column; justify-content: flex-end; flex-grow: 1;">
+      <div style="font-family: 'Inter', sans-serif; font-size:1.2rem; color:#64748B; text-decoration:line-through; line-height:1.2; margin-bottom: 0.2rem;">
         {{ product.precio|currency_cop }}
       </div>
-      <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
-        <span style="font-family:'Oswald',sans-serif; font-size:2rem; font-weight:900; color:#EF4444;">
+      <div style="display:flex; align-items:baseline; gap:0.8rem; flex-wrap:wrap;">
+        <span style="font-family: 'Outfit', sans-serif; font-size:2rem; font-weight:800; color:#0284C7;">
           {{ product.precio_con_descuento|currency_cop }}
         </span>
-        <span style="font-family:'Jost',sans-serif; font-size:1.2rem; font-weight:700; color:#EF4444;">Hoy</span>
+        <span style="font-family: 'Outfit', sans-serif; font-size:1rem; font-weight:800; color:#EF4444; text-transform: uppercase; letter-spacing: 0.5px;">Oferta</span>
       </div>
     </div>
     {% else %}
-    <div class="wix-p-price" style="font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: #000000; margin-bottom: 0.8rem; font-weight:700;">
-      {{ product.precio|currency_cop }}
+    <div style="margin-bottom:0.8rem; display: flex; flex-direction: column; justify-content: flex-end; flex-grow: 1;">
+      <div class="wix-p-price" style="font-family: 'Outfit', sans-serif; font-size: 2rem; color: #0284C7; font-weight:800; margin: 0;">
+        {{ product.precio|currency_cop }}
+      </div>
     </div>
     {% endif %}
     

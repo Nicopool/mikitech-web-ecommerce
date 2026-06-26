@@ -3,30 +3,32 @@
 
 {% block content %}
 <style>
-  /* ESTILOS ESPECÍFICOS PARA CHECKOUT PREMIUM MINIMALISTA */
+  /* ESTILOS ESPECÍFICOS PARA CHECKOUT PREMIUM */
   .ck-container {
     max-width: 1200px; margin: 0 auto; padding: 60px 20px;
-    font-family: 'Jost', sans-serif;
-    color: #111;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    color: #F8FAFC;
   }
   .ck-header {
     margin-bottom: 50px;
     text-align: center;
   }
   .ck-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-size: 38px;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 1px;
     text-transform: uppercase;
     margin-bottom: 10px;
+    color: #FFFFFF;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
   }
   .ck-subtitle {
     font-size: 14px;
-    color: #666;
+    color: #94A3B8;
     letter-spacing: 2px;
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .ck-grid {
@@ -39,105 +41,186 @@
     .ck-grid { grid-template-columns: 1fr; }
   }
 
-  /* SECCIONES (TARJETAS MINIMALISTAS) */
+  /* SECCIONES (TARJETAS BLANCO Y NEGRO) */
   .ck-section {
-    background: #fff;
-    border: 1px solid #E5E7EB;
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
     padding: 40px;
     margin-bottom: 30px;
+    border-radius: 20px;
+    color: #0F172A;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   }
   .ck-section-title {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 25px;
     display: flex;
     align-items: center;
     gap: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid #111;
+    color: #0F172A;
+    border-bottom: 2px solid #0F172A;
     padding-bottom: 15px;
   }
   .ck-icon { font-size: 24px; }
 
-  /* FORMULARIOS WIX STYLE */
+  /* FORMULARIOS STYLE */
   .ck-row { display: flex; gap: 20px; margin-bottom: 20px; }
   .ck-group { flex: 1; margin-bottom: 20px; }
   .ck-row .ck-group { margin-bottom: 0; }
   
   .ck-label {
-    display: block; font-size: 13px; font-weight: 600;
-    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; color: #444;
+    display: block; font-size: 12px; font-weight: 700;
+    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; color: #475569;
   }
   .ck-input {
-    width: 100%; padding: 12px 0; border: none; border-bottom: 1px solid #CCC;
-    background: transparent; font-family: 'Jost', sans-serif; font-size: 16px;
-    outline: none; transition: border-color 0.3s;
+    width: 100%; padding: 12px 0; border: none; border-bottom: 1.5px solid #CBD5E1;
+    background: transparent; font-family: 'Inter', sans-serif; font-size: 16px;
+    color: #0F172A; outline: none; transition: border-color 0.3s;
   }
-  .ck-input:focus { border-bottom: 2px solid #111; margin-bottom: -1px; }
+  .ck-input:focus { border-bottom: 2px solid #0F172A; }
+  .ck-input::placeholder { color: #94A3B8; }
 
   /* MÉTODOS DE PAGO */
   .ck-methods {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;
   }
   .ck-method {
-    border: 1px solid #CCC; padding: 20px 10px; text-align: center;
-    cursor: pointer; transition: all 0.2s;
+    border: 1px solid #CBD5E1; padding: 20px 10px; text-align: center;
+    cursor: pointer; transition: all 0.2s; border-radius: 10px; color: #0F172A;
+    background: #F8FAFC;
   }
-  .ck-method:hover { border-color: #111; background: #FAFAFA; }
-  .ck-method.active { border: 2px solid #111; background: #111; color: #FFF; padding: 19px 9px;}
+  .ck-method:hover { border-color: #0F172A; background: #E2E8F0; }
+  .ck-method.active { border: 2px solid #0F172A; background: #0F172A; color: #FFF; padding: 19px 9px;}
   .ck-method-icon { font-size: 26px; margin-bottom: 8px; }
-  .ck-method-name { font-size: 12px; font-weight: 600; letter-spacing: 1px; }
+  .ck-method-name { font-size: 12px; font-weight: 700; letter-spacing: 1px; }
 
   /* RESUMEN ORDEN */
   .ck-summary {
-    background: #FAFAFA;
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
     padding: 40px;
     position: sticky;
     top: 100px;
+    border-radius: 20px;
+    color: #0F172A;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   }
   .ck-summary-title {
-    font-family: 'Oswald', sans-serif;
-    font-size: 22px; font-weight: 700; letter-spacing: 1px;
-    margin-bottom: 30px; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 15px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px; font-weight: 800; letter-spacing: 1px;
+    margin-bottom: 30px; text-transform: uppercase; border-bottom: 2px solid #0F172A; padding-bottom: 15px;
+    color: #0F172A;
   }
 
   .ck-item {
     display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid #E5E7EB; padding-bottom: 20px; margin-bottom: 20px;
+    border-bottom: 1px solid #F1F5F9; padding-bottom: 20px; margin-bottom: 20px;
   }
   .ck-item-info { display: flex; gap: 15px; align-items: center; }
   .ck-item-img {
-    width: 60px; height: 60px; background: #FFF; border: 1px solid #E5E7EB;
+    width: 60px; height: 60px; background: #F8FAFC; border: 1px solid #E2E8F0;
     display: flex; align-items: center; justify-content: center; font-size: 24px;
+    border-radius: 8px; overflow: hidden;
   }
-  .ck-item-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; color:#111;}
-  .ck-item-desc { color: #666; font-size: 13px; }
-  .ck-item-price { font-weight: 700; font-size: 16px; font-family: 'Oswald', sans-serif; }
+  .ck-item-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; color:#0F172A;}
+  .ck-item-desc { color: #64748B; font-size: 13px; }
+  .ck-item-price { font-weight: 700; font-size: 16px; font-family: 'Outfit', sans-serif; color: #0F172A; }
 
-  .ck-totals { margin-bottom: 30px; font-size: 14px; color: #444; }
+  .ck-totals { margin-bottom: 30px; font-size: 14px; color: #475569; }
   .ck-totals-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
-  .ck-totals-val { font-weight: 600; font-family: 'Oswald', sans-serif; font-size: 16px;}
+  .ck-totals-val { font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 16px; color: #0F172A; }
   
   .ck-grand-total {
     display: flex; justify-content: space-between; align-items: center;
-    border-top: 2px solid #111; padding-top: 20px; margin-bottom: 30px;
+    border-top: 2px solid #0F172A; padding-top: 20px; margin-bottom: 30px;
   }
-  .ck-grand-label { font-weight: 700; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; }
-  .ck-grand-val { font-size: 28px; font-weight: 700; font-family: 'Oswald', sans-serif; color: #111;}
+  .ck-grand-label { font-weight: 800; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; color: #0F172A; }
+  .ck-grand-val { font-size: 28px; font-weight: 800; font-family: 'Outfit', sans-serif; color: #0F172A;}
 
   .ck-btn {
-    width: 100%; background: #111; color: white; border: none; padding: 20px;
-    font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 2px;
-    cursor: pointer; transition: background 0.3s; text-transform: uppercase;
+    width: 100%; background: #0F172A; color: white; border: none; padding: 20px;
+    font-family: 'Outfit', sans-serif; font-size: 16px; letter-spacing: 2px;
+    cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+    font-weight: 700; border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
   }
-  .ck-btn:hover { background: #444; }
+  .ck-btn:hover { background: #1E293B; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15, 23, 42, 0.25); }
 
   .ck-trust {
-    text-align: center; color: #10B981; font-weight: 600; font-size: 12px;
+    text-align: center; color: #10B981; font-weight: 700; font-size: 12px;
     margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 8px;
     letter-spacing: 1px;
+  }
+
+  /* ── MOBILE RESPONSIVE ── */
+  @media (max-width: 767px) {
+    .ck-container {
+      padding: 30px 12px;
+    }
+    .ck-header {
+      margin-bottom: 30px;
+    }
+    .ck-title {
+      font-size: 26px;
+    }
+    .ck-section {
+      padding: 24px 16px;
+      margin-bottom: 20px;
+      border-radius: 14px;
+    }
+    .ck-section-title {
+      font-size: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+    }
+    .ck-row {
+      flex-direction: column;
+      gap: 0;
+    }
+    .ck-group {
+      margin-bottom: 16px;
+    }
+    .ck-methods {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 10px;
+    }
+    .ck-summary {
+      padding: 24px 16px;
+      border-radius: 14px;
+      position: static;
+    }
+    .ck-summary-title {
+      font-size: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+    }
+    .ck-grand-val {
+      font-size: 22px;
+    }
+    .ck-grand-label {
+      font-size: 14px;
+    }
+    .ck-btn {
+      padding: 16px;
+      font-size: 14px;
+    }
+    .ck-item-info {
+      gap: 10px;
+    }
+    .ck-item-img {
+      width: 50px;
+      height: 50px;
+    }
+    .ck-item-name {
+      font-size: 13px;
+    }
+    .ck-item-price {
+      font-size: 14px;
+    }
   }
 </style>
 
@@ -308,7 +391,7 @@
 
           // Ocultar sugerencias si se hace clic fuera
           document.addEventListener('click', function(e) {
-            if (e.target !== input && e.target !== suggestionsBox) {
+            if (e.target !== input & e.target !== suggestionsBox) {
               suggestionsBox.style.display = 'none';
             }
           });

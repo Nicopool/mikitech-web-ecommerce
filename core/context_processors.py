@@ -18,18 +18,44 @@ def global_context(request):
     # Conteo de notificaciones (si hay sesión)
     conteo_notificaciones = 0
     notificaciones_previas = []
-    if request.session.get('usuario_id'):
+    usuario_id = request.session.get('usuario_id')
+    
+    if usuario_id:
+        # Si el usuario es admin, asegurar alertas del sistema antes de cargar
+        if request.session.get('rol_usuario') == 'admin':
+            try:
+                from core.admin_views import asegurar_notificaciones_admin
+                asegurar_notificaciones_admin(usuario_id)
+            except Exception as e:
+                print("Error al generar notificaciones de admin:", e)
+                
         from users.models import Notificacion
-        notificaciones_qs = Notificacion.objects.filter(
-            usuario_id=request.session.get('usuario_id'),
-            esta_leida=False
-        ).order_by('-creado_el')
-        conteo_notificaciones = notificaciones_qs.count()
-        notificaciones_previas = list(notificaciones_qs[:5]) # Últimas 5
+        todas_notif_no_leidas = list(
+            Notificacion.objects.filter(
+                usuario_id=usuario_id,
+                esta_leida=False
+            ).order_by('-creado_el')
+        )
+        
+        # Mutar para extraer mensaje visible y link
+        for n in todas_notif_no_leidas:
+            if '|' in n.mensaje:
+                partes = n.mensaje.split('|')
+                n.mensaje_visible = partes[0]
+                n.url_destino = partes[1]
+            else:
+                n.mensaje_visible = n.mensaje
+                n.url_destino = '#'
+                
+        conteo_notificaciones = len(todas_notif_no_leidas)
+        notificaciones_previas = todas_notif_no_leidas[:5]  # Mostrar máximo 5
+    
+    from django.conf import settings
     
     return {
         'nav_categorias': nav_categorias,
         'conteo_carrito': conteo_carrito,
         'conteo_notificaciones': conteo_notificaciones,
         'ultimas_notificaciones': notificaciones_previas,
+        'debug': settings.DEBUG,
     }

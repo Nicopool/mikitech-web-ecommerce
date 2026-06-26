@@ -3,16 +3,20 @@
 {% block page_title %}Moderación de Reseñas — MIKITECH{% endblock %}
 
 {% block admin_content %}
-<div class="u-flex u-justify-between u-align-center u-mb-4">
+<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 30px; display:flex; justify-content:space-between; align-items:center;">
   <div>
-    <h2 style="font-size:2.2rem; font-weight:800;">💬 Moderación de Comunidad</h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Supervisa las experiencias compartidas por los usuarios sobre el hardware.</p>
+    <h2 style="font-size:2.2rem; font-weight:800; color:var(--ds-text); display:flex; align-items:center; gap:8px;">
+      <i data-lucide="message-square" style="width:2.4rem; height:2.4rem; color:var(--ds-primary);"></i> Moderación de Comunidad
+    </h2>
+    <p style="font-size:1.3rem; color:var(--ds-text-soft); margin-top:0.4rem;">Supervisa las experiencias compartidas por los usuarios sobre el hardware.</p>
   </div>
 </div>
 
 <div class="mpro-card" style="padding:0; overflow:visible;">
   <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); display: flex; justify-content: space-between; align-items: center;">
-    <span style="font-weight: 700; color: var(--ds-text);">📋 Registro de Comentarios Técnicos</span>
+    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text); margin:0; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="list" style="width:2rem; height:2rem; color:var(--ds-primary);"></i> Registro de Comentarios Técnicos
+    </h3>
   </div>
   
   <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none;">
@@ -35,22 +39,24 @@
           </td>
           <td style="font-weight: 600;">{{ r.producto.nombre|truncatechars:40 }}</td>
           <td>
-            <span style="color:#F59E0B; font-weight:800; font-size:1.4rem;">{{ r.calificacion }} ★</span>
+            <span style="color:#F59E0B; font-weight:800; font-size:1.4rem; display:flex; align-items:center; gap:3px;">
+              {{ r.calificacion }} <i data-lucide="star" style="width:1.4rem; height:1.4rem; fill:#F59E0B; stroke:none;"></i>
+            </span>
           </td>
           <td style="color:var(--ds-text-soft); font-size:1.2rem; max-width: 300px; line-height: 1.4;">
             "{{ r.comentario|truncatechars:80 }}"
           </td>
           <td style="font-size:1.2rem; color:var(--ds-text-soft);">{{ r.creado_el|date:"d M Y" }}</td>
           <td class="u-text-center">
-            <div style="display:flex; gap:0.5rem; justify-content:center;">
+            <div style="display:flex; gap:0.5rem; justify-content:center; align-items:center;">
               <!-- Notificar -->
-              <button type="button" class="g-action-btn" style="background:#DBEAFE; color:#2563EB; border:1px solid #BFDBFE;" onclick="notificarResena('{{ r.id }}', '{{ r.usuario.nombre_usuario }}')">
-                ✉️ Notificar
+              <button type="button" class="g-action-btn" style="background:#EFF6FF; color:#1D4ED8; border:1px solid #DBEAFE; padding: 6px 12px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor:pointer;" onclick="notificarResena('{{ r.id }}', '{{ r.usuario.nombre_usuario }}')">
+                <i data-lucide="mail" style="width:1.6rem; height:1.6rem;"></i> Notificar
               </button>
               
               <!-- Eliminar -->
-              <button type="button" class="g-action-btn" style="background:#FEE2E2; color:#DC2626; border:1px solid #FECACA;" onclick="confirmarEliminarResena('{{ r.id }}')">
-                🗑️ Eliminar
+              <button type="button" class="g-action-btn" style="background:#FEF2F2; color:#DC2626; border:1px solid #FEE2E2; padding: 6px 12px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;" onclick="confirmarEliminarResena('{{ r.id }}')">
+                <i data-lucide="trash-2" style="width:1.6rem; height:1.6rem;"></i> Eliminar
               </button>
               
               <!-- Formulario oculto para eliminación -->
@@ -82,7 +88,7 @@
 <script>
   function notificarResena(id, usuario) {
     Swal.fire({
-      title: '✉️ Enviar Notificación',
+      title: 'Enviar Notificación',
       text: `Escribe el motivo de la notificación para ${usuario}:`,
       input: 'textarea',
       inputPlaceholder: 'Tu reseña contiene lenguaje inadecuado. Por favor edítala...',
@@ -92,7 +98,7 @@
       showCancelButton: true,
       confirmButtonText: 'Enviar Notificación',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2563EB',
+      confirmButtonColor: '#1D4ED8',
       showLoaderOnConfirm: true,
       inputValidator: (value) => {
         if (!value) {
@@ -109,7 +115,7 @@
 
   function confirmarEliminarResena(id) {
     Swal.fire({
-      title: '🗑️ ¿Eliminar esta reseña?',
+      title: '¿Eliminar esta reseña?',
       text: "Esta acción es irreversible y el comentario desaparecerá del hardware asociado.",
       icon: 'warning',
       showCancelButton: true,

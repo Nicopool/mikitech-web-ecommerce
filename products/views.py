@@ -15,7 +15,7 @@ def lista_productos(petición):
     precio_max = petición.GET.get('precio_max', '')
     ordenar_por = petición.GET.get('orden', '-creado_el')
 
-    productos = Producto.objects.filter(esta_activo=True)
+    productos = Producto.objects.filter(esta_activo=True).select_related('categoria')
 
     # Búsqueda por texto
     if consulta:
@@ -26,9 +26,14 @@ def lista_productos(petición):
             Q(modelo__icontains=consulta)
         )
 
-    # Filtrar por categoría
+    # Filtrar por categoría (acepta UUID o slug)
     if id_categoría:
-        productos = productos.filter(categoria_id=id_categoría)
+        import uuid
+        try:
+            uuid.UUID(id_categoría)
+            productos = productos.filter(categoria_id=id_categoría)
+        except ValueError:
+            productos = productos.filter(categoria__enlace=id_categoría)
 
     # Filtrar por precio
     if precio_min:
@@ -54,10 +59,20 @@ def lista_productos(petición):
 
     # Paginación (12 por página)
     paginador = Paginator(productos, 12)
-    numero_pagina = petición.GET.get('pagina', 1)
+    param_pagina = petición.GET.get('pagina') or petición.GET.get('page') or '1'
+    try:
+        numero_pagina = int(param_pagina)
+        if numero_pagina < 1:
+            numero_pagina = 1
+    except ValueError:
+        numero_pagina = 1
     objetos_pagina = paginador.get_page(numero_pagina)
 
-    categorías = Categoria.objects.all().order_by('nombre')
+    from django.core.cache import cache
+    categorías = cache.get('nav_categorias')
+    if categorías is None:
+        categorías = list(Categoria.objects.all().order_by('nombre'))
+        cache.set('nav_categorias', categorías, 300)
 
     contexto = {
         'productos': objetos_pagina,
@@ -88,30 +103,23 @@ def detalle_producto(petición, enlace):
         esta_activo=True
     ).exclude(id=producto.id)[:4]
 
-    # Verificar si el usuario ya votó o marcó como favorito
+    # Verificar si el usuario ya votó
     usuario_id = petición.session.get('usuario_id')
     ha_votado = False
-    es_favorito = False
     
     if usuario_id:
-        from interactions.models import Voto, Favorito
+        from interactions.models import Voto
         from users.models import Perfil
         try:
             perfil = Perfil.objects.get(id=usuario_id)
             ha_votado = Voto.objects.filter(usuario=perfil, producto=producto).exists()
-            es_favorito = Favorito.objects.filter(usuario=perfil, producto=producto).exists()
         except Perfil.DoesNotExist:
             pass
-
-    from interactions.models import Reseña
-    reseñas = Reseña.objects.filter(producto=producto).select_related('usuario').order_by('-creado_el')
 
     contexto = {
         'producto': producto,
         'productos_relacionados': productos_relacionados,
-        'reseñas': reseñas,
         'ha_votado': ha_votado,
-        'es_favorito': es_favorito,
         'titulo_pagina': f'{producto.nombre} | MIKITECH',
     }
 

@@ -32,4 +32,7 @@ urlpatterns = [
     
     path('contacto/', views.contacto, name='contact'),
     path('blog/', views.blog, name='blog'),
+    path('ping/', views.ping, name='ping'),
 ]
+
+

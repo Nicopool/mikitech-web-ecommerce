@@ -10,13 +10,13 @@ from interactions.models import Reseña, Voto, Favorito
 
 
 def inicio(petición):
-    """Página de inicio con productos destacados y categorías."""
-    productos_destacados = Producto.objects.filter(esta_activo=True, es_destacado=True)[:8]
-    categorías = Categoria.objects.all().order_by('nombre')
-    
+    """Página de inicio con productos destacados. Las categorías vienen del context_processor cacheado."""
+    productos_destacados = Producto.objects.filter(
+        esta_activo=True, es_destacado=True
+    ).select_related('categoria')[:8]
+
     contexto = {
         'productos_destacados': productos_destacados,
-        'categorias': categorías,
         'titulo_pagina': 'MIKITECH — Alta Tecnología y Rendimiento',
     }
     return render(petición, 'core/home.html', contexto)
@@ -32,7 +32,7 @@ def buscar(petición):
     marca = petición_get.get('marca', '')
     orden = petición_get.get('orden', '-creado_el')
 
-    productos = Producto.objects.filter(esta_activo=True)
+    productos = Producto.objects.filter(esta_activo=True).select_related('categoria')
 
     if consulta:
         productos = productos.filter(
@@ -72,15 +72,42 @@ def buscar(petición):
 
     # Paginación (12 por página)
     per_pagina = 12
-    pagina = int(petición_get.get('pagina', 1))
+    param_pagina = petición_get.get('pagina') or petición_get.get('page') or '1'
+    try:
+        pagina = int(param_pagina)
+        if pagina < 1:
+            pagina = 1
+    except ValueError:
+        pagina = 1
     total = productos.count()
     inicio_p = (pagina - 1) * per_pagina
     fin_p = inicio_p + per_pagina
     productos_lista = productos[inicio_p:fin_p]
     total_paginas = (total + per_pagina - 1) // per_pagina
 
-    categorías = Categoria.objects.all().order_by('nombre')
-    marcas = Producto.objects.filter(esta_activo=True).values_list('marca', flat=True).distinct().order_by('marca')
+    from django.core.cache import cache
+    categorías = cache.get('nav_categorias')
+    if categorías is None:
+        categorías = list(Categoria.objects.all().order_by('nombre'))
+        cache.set('nav_categorias', categorías, 300)
+
+    # Marcas cacheadas 10 minutos (cambian raramente)
+    from django.core.cache import cache
+    marcas = cache.get('marcas_activas')
+    if marcas is None:
+        marcas = list(
+            Producto.objects.filter(esta_activo=True, marca__isnull=False)
+            .values_list('marca', flat=True)
+            .distinct().order_by('marca')
+        )
+        cache.set('marcas_activas', marcas, 600)
+
+    current_category = None
+    if enlace_categoría:
+        try:
+            current_category = Categoria.objects.get(enlace=enlace_categoría)
+        except Categoria.DoesNotExist:
+            pass
 
     contexto = {
         'productos': productos_lista,
@@ -95,7 +122,18 @@ def buscar(petición):
         'total': total,
         'pagina': pagina,
         'total_paginas': total_paginas,
+        'current_category': current_category,
         'titulo_pagina': f'Búsqueda: {consulta}' if consulta else 'Catálogo de Productos',
+        # Duplicados de compatibilidad (inglés/español)
+        'products': productos_lista,
+        'categories': categorías,
+        'category_slug': enlace_categoría,
+        'min_price': precio_min,
+        'max_price': precio_max,
+        'brand': marca,
+        'sort': orden,
+        'page': pagina,
+        'total_pages': total_paginas,
     }
     return render(petición, 'core/search.html', contexto)
 
@@ -275,6 +313,7 @@ def cart_status_api(petición):
                 'url_imagen': prod.url_imagen_principal,
                 'descuento_activo': prod.descuento_activo,
                 'porcentaje': prod.descuento_porcentaje if prod.descuento_activo else 0,
+                'existencias': prod.existencias,
             },
             'cantidad': item['cantidad'],
             'total_linea': float(item['total_linea']),
@@ -302,45 +341,52 @@ def carrito(petición):
 
     if petición.method == 'POST':
         from interactions.models import Pedido, DetallePedido
-        
+        from django.db import transaction
+
         usuario_id = petición.session.get('usuario_id')
         direccion = petición.POST.get('address', '') + ', ' + petición.POST.get('city', '') + ' ' + petición.POST.get('zip', '')
         metodo = petición.POST.get('metodo_pago', 'tarjeta')
         estado = 'pending' if metodo == 'efectivo' else 'processing'
-        
+
         cedula_id = petición.POST.get('cedula', '')
         telefono = petición.POST.get('telefono', '')
-        
-        pedido = Pedido.objects.create(
-            usuario_id=usuario_id,
-            estado=estado,
-            monto_total=datos['total'],
-            direccion_envio=direccion,
-            cedula=cedula_id,
-            telefono=telefono,
-            notas=f"Método de pago: {metodo.upper()}"
-        )
-        
-        for item in datos['articulos']:
-            DetallePedido.objects.create(
-                pedido=pedido,
-                producto=item['producto'],
-                cantidad=item['cantidad'],
-                precio_unitario=item['producto'].precio_con_descuento
-            )
-            
-            # (Opcional) Reducir existencias
-            if item['producto'].existencias >= item['cantidad']:
-                item['producto'].existencias -= item['cantidad']
-                item['producto'].save()
 
-        # Notificar al cliente sobre la orden recibida
-        from users.models import Notificacion
-        Notificacion.objects.create(
-            id=uuid.uuid4(),
-            usuario_id=usuario_id,
-            mensaje=f"[Orden Recibida] ¡Hola! Hemos recibido tu pedido #{str(pedido.id)[:8]}. Pronto comenzaremos con el alistamiento técnico.",
-        )
+        with transaction.atomic():
+            pedido = Pedido.objects.create(
+                usuario_id=usuario_id,
+                estado=estado,
+                monto_total=datos['total'],
+                direccion_envio=direccion,
+                cedula=cedula_id,
+                telefono=telefono,
+                notas=f"Método de pago: {metodo.upper()}"
+            )
+
+            # Crear todos los detalles de una sola vez (bulk_create)
+            detalles = []
+            productos_actualizar = []
+            for item in datos['articulos']:
+                detalles.append(DetallePedido(
+                    pedido=pedido,
+                    producto=item['producto'],
+                    cantidad=item['cantidad'],
+                    precio_unitario=item['producto'].precio_con_descuento
+                ))
+                prod = item['producto']
+                prod.existencias = max(0, prod.existencias - item['cantidad'])
+                productos_actualizar.append(prod)
+
+            DetallePedido.objects.bulk_create(detalles)
+            if productos_actualizar:
+                Producto.objects.bulk_update(productos_actualizar, ['existencias'])
+
+            # Notificar al cliente
+            from users.models import Notificacion
+            Notificacion.objects.create(
+                id=uuid.uuid4(),
+                usuario_id=usuario_id,
+                mensaje=f"[Orden Recibida] ¡Hola! Hemos recibido tu pedido #{str(pedido.id)[:8]}. Pronto comenzaremos con el alistamiento técnico.",
+            )
         
         petición.session['cart'] = {}
         petición.session.modified = True
@@ -373,3 +419,11 @@ def blog(petición):
 def puerta_administrador(petición):
     """Página intermedia para acceso administrativo."""
     return redirect('core:admin_gateway') # Redirección a la vista en admin_views para consistencia
+
+
+def ping(petición):
+    """Endpoint simple para pruebas de carga con k6."""
+    from django.http import JsonResponse
+    return JsonResponse({'status': 'ok', 'msg': 'pong'})
+
+

@@ -2,96 +2,188 @@
 {% block nav_categories %}active{% endblock %}
 
 {% block admin_content %}
+<!-- ===== ESTILOS EXTRA DE SOPORTE ===== -->
+<style>
+  /* Contenedor Premium Centrado */
+  .mpro-centered-layout {
+    max-width: 760px;
+    margin: 0 auto;
+  }
 
-<!-- ===== ENCABEZADO ===== -->
-<div class="u-flex u-justify-between u-align-center u-mb-4">
-  <div>
-    <h2 style="font-size:2.4rem; font-weight:800; font-family:'Oswald',sans-serif; color:var(--ds-text);">
-      {% if categoria %}✏️ Editar Categoría{% else %}➕ Nueva Categoría{% endif %}
-    </h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">
-      Organiza tus productos mediante categorías claras y descriptivas.
-    </p>
+  .mpro-premium-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 1.6rem;
+    padding: 3rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2.5rem;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .mpro-premium-card:hover {
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08), 0 10px 15px -8px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Inputs de formulario mejorados con iconos Lucide */
+  .mpro-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .mpro-input-wrapper .mpro-icon {
+    position: absolute;
+    left: 1.4rem;
+    color: #94A3B8;
+    pointer-events: none;
+    width: 1.8rem;
+    height: 1.8rem;
+    transition: color 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mpro-input-with-icon {
+    padding-left: 4.2rem !important;
+  }
+
+  .mpro-input:focus + .mpro-icon {
+    color: var(--ds-primary, #2563EB);
+  }
+
+  /* Cargador multimedia interactivo */
+  .mpro-media-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 1.6rem;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .mpro-dropzone {
+    border: 2px dashed #CBD5E1;
+    border-radius: 1.2rem;
+    background: #FFFFFF;
+    cursor: pointer;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .mpro-dropzone:hover {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+  }
+</style>
+
+<div class="mpro-centered-layout">
+  <!-- ===== ENCABEZADO ===== -->
+  <div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 3rem;">
+    <div>
+      <h2 style="font-size:2.8rem; font-weight:900; font-family: 'Inter', sans-serif; color:var(--ds-text); display:flex; align-items:center; gap:1.2rem;">
+        {% if categoria %}
+          <i data-lucide="edit-3" style="width:2.8rem; height:2.8rem; color:var(--ds-primary);"></i> Editar Categoría
+        {% else %}
+          <i data-lucide="plus-circle" style="width:2.8rem; height:2.8rem; color:var(--ds-primary);"></i> Nueva Categoría
+        {% endif %}
+      </h2>
+      <p style="font-size:1.4rem; color:#64748B; margin-top:0.4rem;">
+        Organiza tus productos mediante categorías claras y descriptivas.
+      </p>
+    </div>
+    <a href="/admin-panel/categorias/" class="g-btn-secondary" style="font-weight: 700; border-radius: 1.2rem;">
+      ← Volver al listado
+    </a>
   </div>
-  <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:#E2E8F0; color:var(--ds-text); box-shadow:none;">
-    ← Volver al listado
-  </a>
-</div>
 
-{% if error %}
-<div class="g-alert g-alert-error" style="margin-bottom: 2.5rem;">
-  <span>{{ error }}</span>
-</div>
-{% endif %}
+  {% if error %}
+  <div class="g-alert g-alert-error" style="margin-bottom: 2.5rem;">
+    <span>{{ error }}</span>
+  </div>
+  {% endif %}
 
-<!-- ===== FORMULARIO ===== -->
-<div style="max-width: 680px;">
-  <div class="mpro-card">
+  <!-- ===== FORMULARIO ===== -->
+  <div class="mpro-premium-card">
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
 
-      <!-- Nombre -->
+      <!-- Nombre de la Categoría -->
       <div style="margin-bottom: 2.5rem;">
         <label class="mpro-label" for="cat-name">Nombre de la Categoría *</label>
-        <input
-          type="text"
-          id="cat-name"
-          name="nombre"
-          class="mpro-input"
-          required
-          value="{{ categoria.nombre|default:'' }}"
-          placeholder="Ej: Procesadores, Tarjetas de Video, RAM..."
-        >
+        <div class="mpro-input-wrapper">
+          <input
+            type="text"
+            id="cat-name"
+            name="nombre"
+            class="mpro-input mpro-input-with-icon"
+            required
+            value="{{ categoria.nombre|default:'' }}"
+            placeholder="Ej: Procesadores, Tarjetas de Video, RAM..."
+          >
+          <i data-lucide="folder" class="mpro-icon"></i>
+        </div>
       </div>
 
-      <!-- Icono -->
+      <!-- Icono / Emoji -->
       <div style="margin-bottom: 2.5rem;">
-        <label class="mpro-label" for="cat-icon">Emoji o Nombre de Icono (Material Symbols)</label>
-        <input
-          type="text"
-          id="cat-icon"
-          name="icono"
-          class="mpro-input"
-          value="{{ categoria.icono|default:'' }}"
-          placeholder="Ej: 🔷  ó  hardware"
-        >
-        <p style="font-size:1.15rem; color:#94A3B8; margin-top:0.6rem;">
-          Puedes usar un emoji directamente o un nombre de Material Symbol como <code>memory</code>, <code>storage</code>, etc.
+        <label class="mpro-label" for="cat-icon">Emoji o Nombre de Icono (Lucide / Icono)</label>
+        <div class="mpro-input-wrapper">
+          <input
+            type="text"
+            id="cat-icon"
+            name="icono"
+            class="mpro-input mpro-input-with-icon"
+            value="{{ categoria.icono|default:'' }}"
+            placeholder="Ej: 🔷  ó  cpu"
+          >
+          <i data-lucide="info" class="mpro-icon"></i>
+        </div>
+        <p style="font-size:1.2rem; color:#94A3B8; margin-top:0.6rem; padding-left: 0.5rem;">
+          Puedes usar un emoji directamente o un nombre de icono Lucide como <code>cpu</code>, <code>database</code>, <code>hard-drive</code>, etc.
         </p>
       </div>
 
-      <!-- Imagen -->
+      <!-- Imagen Multimedia -->
       <div style="margin-bottom: 2.5rem;">
         <label class="mpro-label">Imagen de la Categoría</label>
-        <div style="background:#F8FAFC; border:1px solid var(--ds-border); border-radius:1.6rem; padding:2rem;">
-
-          <!-- Upload desde PC -->
+        <div class="mpro-media-box">
+          <!-- Subir archivo -->
           <input type="file" id="cat-image-file" name="archivo_imagen" accept="image/*" style="display:none;" onchange="previewFile(this)">
-          <label for="cat-image-file" style="display:flex; align-items:center; gap:1rem; padding:1.2rem 2rem; border:1.5px solid var(--ds-primary); border-radius:1rem; cursor:pointer; background:white; color:var(--ds-primary); font-weight:700; font-size:1.3rem; width:fit-content; transition:all 0.25s ease; margin-bottom:1.5rem;" onmouseover="this.style.background='var(--ds-primary)'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='var(--ds-primary)';">
-            <span class="material-symbols-outlined">cloud_upload</span> Subir desde mi PC
+          <label for="cat-image-file" class="mpro-dropzone">
+            <i data-lucide="upload-cloud" style="width:3.6rem; height:3.6rem; color:#3B82F6; margin-bottom:0.8rem;"></i>
+            <span style="font-size:1.4rem; font-weight:700; color:var(--ds-text);">Subir Imagen Local</span>
+            <span style="font-size:1.2rem; color:#94A3B8; margin-top:0.4rem;">Haz click para elegir un archivo de tu PC</span>
           </label>
 
           <!-- URL externa -->
-          <div style="margin-bottom: 1.5rem;">
-            <label style="display:block; font-size:1.2rem; font-weight:600; color:var(--ds-text-soft); margin-bottom:0.8rem;">O pegar URL externa</label>
-            <input
-              type="url"
-              id="cat-image"
-              name="url_imagen"
-              class="mpro-input"
-              style="font-size:1.3rem;"
-              value="{{ categoria.url_imagen|default:'' }}"
-              placeholder="https://ejemplo.com/foto.jpg"
-              oninput="if(!document.getElementById('cat-image-file').value){ document.getElementById('cat-preview').src = this.value || ''; }"
-            >
+          <div style="margin-bottom: 2rem;">
+            <label style="display:block; font-size:1.3rem; font-weight:700; color:var(--ds-text-soft); margin-bottom:0.8rem;">O ingresar URL de imagen externa</label>
+            <div class="mpro-input-wrapper">
+              <input
+                type="url"
+                id="cat-image"
+                name="url_imagen"
+                class="mpro-input mpro-input-with-icon"
+                value="{{ categoria.url_imagen|default:'' }}"
+                placeholder="https://ejemplo.com/foto.jpg"
+                oninput="if(!document.getElementById('cat-image-file').value){ document.getElementById('cat-preview').src = this.value || ''; }"
+              >
+              <i data-lucide="link" class="mpro-icon"></i>
+            </div>
           </div>
 
-          <!-- Preview -->
-          <div style="display:flex; align-items:center; gap:1.5rem;">
-            <span style="font-size:1.2rem; font-weight:600; color:var(--ds-text-soft);">Vista previa:</span>
-            <div style="width:12rem; height:12rem; border:1px solid var(--ds-border); border-radius:1.2rem; overflow:hidden; display:flex; align-items:center; justify-content:center; background:white; box-shadow:0 4px 12px rgba(0,0,0,0.05); flex-shrink:0;">
+          <!-- Previsualización -->
+          <div style="display:flex; align-items:center; gap:2rem; background: white; padding: 1.5rem; border-radius: 1.2rem; border: 1px solid #E2E8F0;">
+            <span style="font-size:1.3rem; font-weight:700; color:var(--ds-text-soft);">Previsualización:</span>
+            <div style="width:10rem; height:10rem; border:1px solid #E2E8F0; border-radius:1rem; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#F8FAFC; box-shadow:inset 0 2px 6px rgba(0,0,0,0.02); flex-shrink:0;">
               <img id="cat-preview" src="{{ categoria.url_imagen|default:'' }}" style="max-width:90%; max-height:90%; object-fit:contain; {% if not categoria.url_imagen %}display:none;{% endif %}" onerror="this.style.display='none'" onload="this.style.display='block'">
-              <span class="material-symbols-outlined" id="cat-preview-placeholder" style="font-size:4rem; color:#CBD5E1; {% if categoria.url_imagen %}display:none;{% endif %}">image</span>
+              <i data-lucide="image" id="cat-preview-placeholder" style="width:3.6rem; height:3.6rem; color:#CBD5E1; {% if categoria.url_imagen %}display:none;{% endif %}"></i>
             </div>
           </div>
         </div>
@@ -99,7 +191,7 @@
 
       <!-- Descripción -->
       <div style="margin-bottom: 3rem;">
-        <label class="mpro-label" for="cat-desc">Descripción</label>
+        <label class="mpro-label" for="cat-desc">Descripción de la Categoría</label>
         <textarea
           id="cat-desc"
           name="descripcion"
@@ -109,13 +201,13 @@
         >{{ categoria.descripcion|default:'' }}</textarea>
       </div>
 
-      <!-- Acciones -->
-      <div style="display:flex; gap:1.5rem; border-top:2px solid var(--ds-border); padding-top:2.5rem;">
-        <button type="submit" class="g-btn-primary" style="padding:1.4rem 4rem; font-size:1.4rem; gap:0.8rem; display:inline-flex; align-items:center;">
-          <span class="material-symbols-outlined">{% if categoria %}save{% else %}add_circle{% endif %}</span>
+      <!-- Acciones de Guardar / Cancelar -->
+      <div style="display:flex; gap:1.5rem; border-top:2px solid #F1F5F9; padding-top:2.5rem;">
+        <button type="submit" class="g-btn-primary" style="padding:1.4rem 4rem; font-size:1.4rem; font-weight:800; border-radius:1.2rem; display:flex; align-items:center; gap:0.8rem; box-shadow:0 8px 25px rgba(37,99,235,0.25);">
+          <i data-lucide="{% if categoria %}save{% else %}plus-circle{% endif %}" style="width:2rem; height:2rem;"></i>
           {% if categoria %}GUARDAR CAMBIOS{% else %}CREAR CATEGORÍA{% endif %}
         </button>
-        <a href="/admin-panel/categorias/" class="g-btn-primary" style="background:transparent; border:1px solid var(--ds-border); color:var(--ds-text-soft); box-shadow:none; padding:1.4rem 2.5rem;">
+        <a href="/admin-panel/categorias/" class="g-btn-secondary" style="padding:1.4rem 2.5rem; font-size:1.4rem; font-weight:700; border-radius:1.2rem;">
           CANCELAR
         </a>
       </div>
@@ -137,6 +229,11 @@ function previewFile(input) {
     reader.readAsDataURL(input.files[0]);
   }
 }
-</script>
 
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+});
+</script>
 {% endblock %}

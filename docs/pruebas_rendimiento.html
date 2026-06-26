@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIKITECH — Reporte de Pruebas de Rendimiento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: #111827;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.15);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.15);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.15);
+      --gradient-main: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 3rem 1.5rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--gradient-main);
+      border: 1px solid var(--border-color);
+      padding: 3rem;
+      border-radius: 24px;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(0,0,0,0) 70%);
+      top: -150px;
+      right: -100px;
+      border-radius: 50%;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+    }
+
+    /* SUMMARY BADGE */
+    .summary-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 0.5rem 1.2rem;
+      border-radius: 9999px;
+      color: #60a5fa;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+    }
+
+    /* GRID */
+    .grid-three {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 15px 35px rgba(59, 130, 246, 0.1);
+    }
+
+    .card-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .icon-load { background: var(--primary-glow); color: #3b82f6; }
+    .icon-stress { background: var(--danger-glow); color: #ef4444; }
+    .icon-mitigation { background: var(--success-glow); color: #10b981; }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* METRICS / RESULTS LIST */
+    .card-stats {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label { color: var(--text-muted); }
+    .stat-val { font-weight: 600; color: #ffffff; }
+
+    /* TABLE SECTION */
+    .table-section {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 24px;
+      background-color: var(--primary);
+      border-radius: 3px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.02);
+      color: #ffffff;
+      font-weight: 600;
+      padding: 1.2rem 1.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.01);
+    }
+
+    /* STATUS BADGES */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 9999px;
+    }
+
+    .status-pill-ok {
+      background: var(--success-glow);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pill-fail {
+      background: var(--danger-glow);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* LIMIT HIGHLIGHT CARD */
+    .limit-alert {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-left: 6px solid var(--warning);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .limit-icon {
+      font-size: 2.5rem;
+    }
+
+    .limit-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .limit-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .limit-desc strong {
+      color: #ffffff;
+    }
+
+    /* MITIGATION PLAN */
+    .mitigation-panel {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1.25rem;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      background-color: var(--primary-glow);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-content h5 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-content p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 1.5rem 1rem; }
+      header { padding: 2rem; }
+      .brand-title { font-size: 2rem; }
+      .grid-three { grid-template-columns: 1fr; }
+      .limit-alert { flex-direction: column; text-align: center; border-left: none; border-top: 6px solid var(--warning); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- HEADER -->
+    <header>
+      <div class="brand-title">MIKITECH E-Commerce</div>
+      <div class="subtitle">Resultados Oficiales de las Pruebas de Rendimiento, Carga y Mitigación del Servidor Local.</div>
+      <div class="summary-badge">
+        🎯 Límite Máximo Estable: ~20-30 Usuarios Simultáneos (runserver)
+      </div>
+    </header>
+
+    <!-- HIGHLIGHT LIMIT ALERT -->
+    <div class="limit-alert">
+      <div class="limit-icon">⚠️</div>
+      <div>
+        <div class="limit-title">Capacidad del Servidor de Desarrollo</div>
+        <div class="limit-desc">
+          El servidor de desarrollo actual (`manage.py runserver`) carga de forma óptima un máximo de <strong>10 a 20 usuarios simultáneos sin ningún error</strong>. A partir de los <strong>30 usuarios simultáneos</strong>, el sistema experimenta una tasa de fallos de conexión del <strong>5.33%</strong>, elevándose al <strong>18.41%</strong> con 80 usuarios concurrentes debido al comportamiento monohilo de Django en desarrollo.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDS FOR TEST TYPES -->
+    <div class="grid-three">
+      
+      <!-- PRUEBA DE CARGA -->
+      <div class="card">
+        <div class="card-icon icon-load">📈</div>
+        <h3 class="card-title">Prueba de Carga</h3>
+        <p class="card-desc">Evalúa el rendimiento de la aplicación bajo un número predecible de usuarios concurrentes de forma constante.</p>
+        <div class="card-stats">
+          <div class="stat-row">
+            <span class="stat-label">VUs Estables:</span>
+            <span class="stat-val" style="color: var(--success);">Hasta 20 VUs</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Tiempo p(95):</span>
+            <span class="stat-val">16.71 ms</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Tasa de Error:</span>
+            <span class="stat-val" style="color: var(--success);">0.00%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRUEBA DE ESTRES -->
+      <div class="card">
+        <div class="card-icon icon-stress">💥</div>
+        <h3 class="card-title">Prueba de Estrés</h3>
+        <p class="card-desc">Evalúa los límites del servidor incrementando progresivamente la concurrencia (ramping) hasta saturarlo por completo.</p>
+        <div class="card-stats">
+          <div class="stat-row">
+            <span class="stat-label">Máx Evaluado:</span>
+            <span class="stat-val" style="color: var(--danger);">90 VUs</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Punto de Quiebre:</span>
+            <span class="stat-val">30 VUs</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Tasa de Fallos Máx:</span>
+            <span class="stat-val" style="color: var(--danger);">18.41%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRUEBA DE MITIGACION -->
+      <div class="card">
+        <div class="card-icon icon-mitigation">🛡️</div>
+        <h3 class="card-title">Prueba de Mitigación</h3>
+        <p class="card-desc">Evalúa la capacidad de recuperación del sistema al remover la sobrecarga y el plan para soportar más tráfico.</p>
+        <div class="card-stats">
+          <div class="stat-row">
+            <span class="stat-label">Recuperación Local:</span>
+            <span class="stat-val" style="color: var(--success);">Automática (100%)</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Solución Prod:</span>
+            <span class="stat-val">Gunicorn + Nginx</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Capacidad Objetivo:</span>
+            <span class="stat-val" style="color: #60a5fa;">1000+ Simultáneos</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RESULTS TABLE -->
+    <div class="table-section">
+      <h3 class="section-title">Resultados del Escalado Progresivo</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Usuarios Concurrentes (VUs)</th>
+              <th>Duración</th>
+              <th>Peticiones Ejecutadas</th>
+              <th>Tiempo de Respuesta p(95)</th>
+              <th>Tasa de Fallos de Conexión</th>
+              <th>Estado de Aceptación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>10</strong></td>
+              <td>15s</td>
+              <td>150</td>
+              <td>16.71 ms</td>
+              <td style="color: var(--success); font-weight: 600;">0.00%</td>
+              <td><span class="status-pill status-pill-ok">✅ Aceptable</span></td>
+            </tr>
+            <tr>
+              <td><strong>30</strong></td>
+              <td>15s</td>
+              <td>450</td>
+              <td>27.67 ms</td>
+              <td style="color: var(--danger); font-weight: 600;">5.33%</td>
+              <td><span class="status-pill status-pill-fail">❌ No Aceptable</span></td>
+            </tr>
+            <tr>
+              <td><strong>50</strong></td>
+              <td>15s</td>
+              <td>750</td>
+              <td>39.76 ms</td>
+              <td style="color: var(--danger); font-weight: 600;">10.00%</td>
+              <td><span class="status-pill status-pill-fail">❌ No Aceptable</span></td>
+            </tr>
+            <tr>
+              <td><strong>80</strong></td>
+              <td>15s</td>
+              <td>1200</td>
+              <td>37.59 ms</td>
+              <td style="color: var(--danger); font-weight: 600;">18.41%</td>
+              <td><span class="status-pill status-pill-fail">❌ No Aceptable</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MITIGATION PLAN PANEL -->
+    <div class="mitigation-panel">
+      <h3 class="section-title">Estrategia de Mitigación y Escalabilidad</h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+        Para evitar caídas y fallos en producción cuando se superen los 30 usuarios simultáneos, se propone la siguiente arquitectura:
+      </p>
+      
+      <div class="step-list">
+        
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h5>Reemplazo del Servidor HTTP de Desarrollo</h5>
+            <p>Sustituir <code>manage.py runserver</code> en producción por un servidor WSGI de grado industrial como <strong>Gunicorn</strong> o <strong>Uvicorn</strong>. Esto permite levantar múltiples trabajadores (workers) y subprocesos para atender solicitudes concurrentemente.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h5>Implementación de Servidor Web Inverso (Nginx)</h5>
+            <p>Usar <strong>Nginx</strong> como proxy inverso frente a Gunicorn. Nginx gestionará de manera ultraeficiente la entrega de archivos estáticos (CSS, JS, imágenes), liberando a Django de esa carga para enfocarse únicamente en peticiones dinámicas.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h5>Pooling de Conexiones de Base de Datos</h5>
+            <p>Habilitar el pool de conexiones a la base de datos de Supabase PostgreSQL mediante <strong>PgBouncer</strong> (puerto 6543) para evitar agotar las conexiones disponibles cuando cientos de hilos concurrentes hagan consultas simultáneas.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h5>Políticas de Rate Limiting y Control de Cola</h5>
+            <p>Configurar límites de peticiones por segundo por dirección IP en Nginx para mitigar posibles ataques de denegación de servicio (DoS) y asegurar un acceso equitativo al ancho de banda del servidor.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

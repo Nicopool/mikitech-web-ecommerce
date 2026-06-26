@@ -33,14 +33,82 @@ def _hacer_peticion(url, datos=None, metodo='POST', token=None):
 
 
 def iniciar_sesion_usuario(correo, clave):
-    """Autenticar usuario con Supabase Auth."""
+    """Autenticar usuario con Supabase Auth o SQLite Local."""
+    if getattr(settings, 'USE_SQLITE', False):
+        from django.db import connection
+        try:
+            with connection.cursor() as cursor:
+                # Asegurar existencia de la tabla local
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS "auth.users" (
+                        id TEXT PRIMARY KEY,
+                        email TEXT UNIQUE,
+                        encrypted_password TEXT,
+                        role TEXT,
+                        email_confirmed_at TIMESTAMP
+                    )
+                    """
+                )
+                cursor.execute(
+                    "SELECT id, email, role, encrypted_password FROM \"auth.users\" WHERE email = %s",
+                    [correo]
+                )
+                row = cursor.fetchone()
+                if row:
+                    user_id, email, role, enc_pass = row
+                    if enc_pass == clave:
+                        return {
+                            'user': {
+                                'id': user_id,
+                                'email': email,
+                                'user_metadata': {'role': role, 'full_name': email.split('@')[0], 'username': email.split('@')[0]}
+                            },
+                            'access_token': 'mock-local-token'
+                        }, None
+                return None, "Credenciales incorrectas (Local SQLite)."
+        except Exception as e:
+            return None, f"Error de base de datos local: {str(e)}"
+
     url = f"{NUCLEO_URL_SUPABASE}/auth/v1/token?grant_type=password"
     datos, error = _hacer_peticion(url, {'email': correo, 'password': clave})
     return datos, error
 
 
 def registrar_usuario(correo, clave, nombre_completo, nombre_usuario, rol='client'):
-    """Registrar un nuevo usuario en Supabase Auth."""
+    """Registrar un nuevo usuario en Supabase Auth o SQLite Local."""
+    if getattr(settings, 'USE_SQLITE', False):
+        from django.db import connection
+        import uuid
+        user_id = str(uuid.uuid4())
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS "auth.users" (
+                        id TEXT PRIMARY KEY,
+                        email TEXT UNIQUE,
+                        encrypted_password TEXT,
+                        role TEXT,
+                        email_confirmed_at TIMESTAMP
+                    )
+                    """
+                )
+                cursor.execute(
+                    "INSERT INTO \"auth.users\" (id, email, encrypted_password, role, email_confirmed_at) VALUES (%s, %s, %s, %s, datetime('now'))",
+                    [user_id, correo, clave, rol]
+                )
+            return {
+                'user': {
+                    'id': user_id,
+                    'email': correo,
+                    'user_metadata': {'full_name': nombre_completo, 'username': nombre_usuario, 'role': rol}
+                },
+                'access_token': 'mock-local-token'
+            }, None
+        except Exception as e:
+            return None, f"Error al registrar usuario local: {str(e)}"
+
     url = f"{NUCLEO_URL_SUPABASE}/auth/v1/signup"
     datos, error = _hacer_peticion(url, {
         'email': correo,
@@ -59,6 +127,9 @@ def registrar_usuario_sql(correo, clave, nombre_completo, nombre_usuario, rol='c
     Fallback: Registrar un usuario directamente en la tabla auth.users vía SQL.
     Se usa cuando Supabase no puede enviar correos de confirmación (error de SMTP).
     """
+    if getattr(settings, 'USE_SQLITE', False):
+        return registrar_usuario(correo, clave, nombre_completo, nombre_usuario, rol)
+
     from django.db import connection
     import json
     import uuid
@@ -101,8 +172,21 @@ def registrar_usuario_sql(correo, clave, nombre_completo, nombre_usuario, rol='c
         return None, str(e)
 
 
-def actualizar_contraseña(token, nueva_clave):
-    """Actualizar la contraseña del usuario en Supabase."""
+def actualizar_contraseña(token, nueva_clave, user_id=None):
+    """Actualizar la contraseña del usuario en Supabase o SQLite Local."""
+    from django.conf import settings
+    if getattr(settings, 'USE_SQLITE', False) and user_id:
+        from django.db import connection
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'UPDATE "auth.users" SET encrypted_password = %s WHERE id = %s',
+                    [nueva_clave, str(user_id)]
+                )
+            return {'user': {'id': user_id}}, None
+        except Exception as e:
+            return None, f"Error actualizando contraseña local: {e}"
+
     url = f"{NUCLEO_URL_SUPABASE}/auth/v1/user"
     datos, error = _hacer_peticion(url, {'password': nueva_clave}, token)
     return datos, error
@@ -152,3 +236,58 @@ def verificar_otp_recuperacion(correo, token_otp, nueva_clave):
         return None, error_actualizacion
         
     return datos_actualizacion, None
+
+
+def subir_a_supabase_storage(nombre_archivo, datos_archivo, content_type=None):
+    """
+    Sube un archivo al bucket 'mikitech' de Supabase Storage.
+    Retorna la URL pública del archivo si es exitoso, o None y el error si falla.
+    """
+    import mimetypes
+    url = f"{NUCLEO_URL_SUPABASE}/storage/v1/object/mikitech/{nombre_archivo}"
+    
+    # MIME type guess if not provided
+    mime = content_type
+    if not mime:
+        mime = mimetypes.guess_type(nombre_archivo)[0] or 'application/octet-stream'
+        
+    cabeceras = {
+        'apikey': CLAVE_SUPABASE,
+        'Authorization': f'Bearer {CLAVE_SUPABASE}',
+        'Content-Type': mime
+    }
+    
+    # Realizar petición POST (creación)
+    req = urllib.request.Request(url, data=datos_archivo, headers=cabeceras, method='POST')
+    
+    try:
+        with urllib.request.urlopen(req) as respuesta:
+            public_url = f"{NUCLEO_URL_SUPABASE}/storage/v1/object/public/mikitech/{nombre_archivo}"
+            return public_url, None
+    except urllib.error.HTTPError as e:
+        # Si ya existe (400/409), intentar actualizar con PUT
+        if e.code in [400, 409]:
+            req_update = urllib.request.Request(url, data=datos_archivo, headers=cabeceras, method='PUT')
+            try:
+                with urllib.request.urlopen(req_update) as respuesta:
+                    public_url = f"{NUCLEO_URL_SUPABASE}/storage/v1/object/public/mikitech/{nombre_archivo}"
+                    return public_url, None
+            except Exception as ex:
+                return None, f"Error al sobreescribir en storage: {str(ex)}"
+        try:
+            cuerpo_error = json.loads(e.read().decode('utf-8'))
+            mensaje = cuerpo_error.get('error') or cuerpo_error.get('message') or str(e)
+        except Exception:
+            mensaje = str(e)
+        return None, f"Error HTTP {e.code} en storage: {mensaje}"
+    except Exception as e:
+        return None, f"Error inesperado de red en storage: {str(e)}"
+
+
+def verificar_token_supabase(token):
+    """
+    Verifica la validez de un token JWT enviando una consulta a la API de Supabase Auth /user.
+    Retorna los datos del usuario si es válido, o None y el error si es inválido.
+    """
+    url = f"{NUCLEO_URL_SUPABASE}/auth/v1/user"
+    return _hacer_peticion(url, token=token, metodo='GET')

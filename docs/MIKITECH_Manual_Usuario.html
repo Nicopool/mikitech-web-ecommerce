@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIKITECH — Manual de Usuario Oficial</title>
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #0f172a;       /* Slate 900 */
+      --primary-light: #1e293b; /* Slate 800 */
+      --accent: #2563eb;        /* Blue 600 */
+      --accent-hover: #1d4ed8;  /* Blue 700 */
+      --accent-light: #dbeafe;  /* Blue 100 */
+      --success: #10b981;       /* Emerald 500 */
+      --success-light: #ecfdf5; /* Emerald 500 light */
+      --warning: #f59e0b;       /* Amber 500 */
+      --warning-light: #fef3c7; /* Amber 100 */
+      --danger: #ef4444;        /* Red 500 */
+      --danger-light: #fee2e2;  /* Red 100 */
+      --bg-body: #f8fafc;       /* Slate 50 */
+      --bg-card: #ffffff;
+      --text: #334155;          /* Slate 700 */
+      --text-main: #0f172a;      /* Slate 900 */
+      --text-muted: #64748b;    /* Slate 500 */
+      --border: #e2e8f0;        /* Slate 200 */
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-main);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* TOP NAVBAR */
+    .navbar {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      background: linear-gradient(135deg, var(--accent) 0%, #3b82f6 100%);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .search-container {
+      position: relative;
+    }
+
+    .search-input {
+      padding: 0.5rem 1rem 0.5rem 2rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      width: 240px;
+      transition: var(--transition);
+      background-color: var(--bg-body);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      width: 300px;
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .btn-word {
+      background-color: #2b579a;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 6px rgba(43, 87, 154, 0.15);
+      text-decoration: none;
+    }
+
+    .btn-word:hover {
+      background-color: #1e3d6b;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(43, 87, 154, 0.25);
+    }
+
+    /* MAIN CONTENT WRAPPER */
+    .app-container {
+      display: flex;
+      flex: 1;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+    }
+
+    /* SIDEBAR NAV */
+    .sidebar {
+      width: 300px;
+      border-right: 1px solid var(--border);
+      padding: 2rem;
+      position: sticky;
+      top: 73px;
+      height: calc(100vh - 73px);
+      overflow-y: auto;
+      background-color: white;
+    }
+
+    .sidebar h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .sidebar-item {
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+
+    .sidebar-link:hover {
+      background-color: var(--bg-body);
+      color: var(--accent);
+      padding-left: 1rem;
+    }
+
+    .sidebar-link.active {
+      background-color: var(--accent-light);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* DOCUMENT CONTENT */
+    .doc-content {
+      flex: 1;
+      padding: 3rem;
+      max-width: 900px;
+      background-color: white;
+      min-height: calc(100vh - 73px);
+    }
+
+    /* TYPOGRAPHY & BLOCKS */
+    .section-block {
+      margin-bottom: 4rem;
+      scroll-margin-top: 100px;
+    }
+
+    .chapter-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background-color: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    h2.chapter-title {
+      font-size: 2.25rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.75rem;
+      color: var(--primary);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin: 2.5rem 0 1rem 0;
+      color: var(--primary-light);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .subsection-title {
+      font-size: 1.125rem;
+      margin: 1.5rem 0 0.75rem 0;
+      color: var(--text-main);
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* QUICK START TIMELINE */
+    .quick-start-box {
+      background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quick-start-box h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .timeline-step {
+      background: white;
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .timeline-step:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--accent);
+    }
+
+    .step-number {
+      position: absolute;
+      top: -12px;
+      left: 1.25rem;
+      background: var(--accent);
+      color: white;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.875rem;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .timeline-step h5 {
+      font-size: 1rem;
+      margin: 0.5rem 0 0.5rem 0;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .timeline-step p {
+      font-size: 0.85rem;
+      margin-bottom: 0;
+      color: var(--text-muted);
+    }
+
+    /* ALERTS / CALLOUTS */
+    .callout {
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius-md);
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      border-left: 4px solid transparent;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .callout-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .callout-body {
+      flex: 1;
+      font-size: 0.9rem;
+    }
+
+    .callout-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .callout-info {
+      background-color: var(--accent-light);
+      border-left-color: var(--accent);
+      color: #1e3a8a;
+    }
+
+    .callout-success {
+      background-color: var(--success-light);
+      border-left-color: var(--success);
+      color: #064e3b;
+    }
+
+    .callout-warning {
+      background-color: var(--warning-light);
+      border-left-color: var(--warning);
+      color: #78350f;
+    }
+
+    .callout-danger {
+      background-color: var(--danger-light);
+      border-left-color: var(--danger);
+      color: #7f1d1d;
+    }
+
+    /* LISTS & BULLETS */
+    ul {
+      margin-bottom: 1.25rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    /* SYSTEM SPECS */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .spec-card {
+      background-color: var(--bg-body);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .spec-card:hover {
+      border-color: var(--text-muted);
+      background-color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .spec-card h6 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .spec-card p {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0;
+    }
+
+    /* TABLES */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    th {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 0.85rem 1rem;
+      border-bottom: 2px solid var(--border);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      color: var(--text);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(37, 99, 235, 0.02);
+    }
+
+    /* DYNAMIC IMAGE CONTAINER WITH DETECT & AUTO HIDE PLACEHOLDER */
+    .image-placeholder-container {
+      margin: 2rem 0;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background-color: var(--bg-body);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .placeholder-box {
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      text-align: center;
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-md);
+      background: white;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .placeholder-box:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background-color: #f8fafc;
+    }
+
+    .placeholder-icon {
+      font-size: 2.25rem;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .placeholder-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .placeholder-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .placeholder-hint code {
+      background-color: #f1f5f9;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    .image-placeholder-container img {
+      width: 100%;
+      height: auto;
+      display: none; /* Hide until successfully loaded */
+      border-radius: var(--radius-md);
+    }
+
+    .image-caption {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 0.75rem 1rem;
+      background-color: white;
+      border-top: 1px solid var(--border);
+      font-style: italic;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      background-color: var(--border);
+      color: var(--text-main);
+    }
+
+    .badge-outline {
+      border: 1px solid var(--border);
+      background-color: transparent;
+      color: var(--text-muted);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem;
+      text-align: center;
+      background-color: var(--bg-body);
+      margin-top: auto;
+    }
+
+    footer p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    /* BACK TO TOP BUTTON */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--accent);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      opacity: 0;
+      visibility: hidden;
+      border: none;
+      z-index: 99;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .back-to-top:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-3px);
+    }
+
+    /* HIGHLIGHT EFFECT */
+    .highlight {
+      background-color: rgba(253, 224, 71, 0.5);
+      border-radius: 2px;
+      padding: 0.1rem 0.2rem;
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none; /* Hide sidebar on mobile/tablet */
+      }
+      
+      .doc-content {
+        padding: 2rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .navbar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .nav-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .search-input:focus {
+        width: 100%;
+      }
+
+      .doc-content {
+        padding: 1.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVBAR -->
+  <nav class="navbar">
+    <div class="brand">
+      <div class="brand-logo">M</div>
+      <div class="brand-text">
+        <h1>MIKITECH</h1>
+        <p>Manual de Usuario Oficial v1.0</p>
+      </div>
+    </div>
+    
+    <div class="nav-actions">
+      <!-- Search Input -->
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="doc-search" onkeyup="searchManual()" placeholder="Buscar en el manual...">
+      </div>
+      
+      <!-- Word Export Button -->
+      <button class="btn-word" onclick="exportToWord()">
+        <span>📄</span> Descargar Word Completo
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN WRAPPER -->
+  <div class="app-container">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <h4>Guía Rápida</h4>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#guia-rapida" class="sidebar-link active" onclick="activateLink(this)">Guía de Inicio Rápido</a></li>
+      </ul>
+
+      <h4>Capítulos</h4>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#capitulo-1" class="sidebar-link" onclick="activateLink(this)">1. Generalidades del Sistema</a></li>
+        <li class="sidebar-item"><a href="#capitulo-2" class="sidebar-link" onclick="activateLink(this)">2. Interfaz Pública</a></li>
+        <li class="sidebar-item"><a href="#capitulo-3" class="sidebar-link" onclick="activateLink(this)">3. Panel de Usuario</a></li>
+        <li class="sidebar-item"><a href="#capitulo-4" class="sidebar-link" onclick="activateLink(this)">4. Panel Administrador</a></li>
+        <li class="sidebar-item"><a href="#capitulo-5" class="sidebar-link" onclick="activateLink(this)">5. Glosario y Soporte</a></li>
+      </ul>
+
+      <h4>Control de Versiones</h4>
+      <div style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">
+        <p><strong>Elaborado por:</strong><br>Nicolas Turca Rubiano</p>
+        <p><strong>SENA 2026</strong><br>Centro de Servicios Financieros</p>
+      </div>
+    </aside>
+
+    <!-- MANUAL CONTENT (Will be exported directly) -->
+    <main class="doc-content" id="manual-root">
+      <div id="manual-content">
+        
+        <!-- INTRO COVER (For Word export cover page) -->
+        <div style="margin-bottom: 3rem; border-bottom: 3px double var(--border); padding-bottom: 2rem;" class="word-cover">
+          <h1 style="font-size: 3rem; line-height: 1.1; margin-bottom: 0.5rem; color: var(--primary);">Manual de Usuario</h1>
+          <h2 style="font-size: 1.5rem; font-weight: 500; color: var(--accent); margin-bottom: 1.5rem;">Plataforma E-Commerce MIKITECH — Versión 1.0</h2>
+          <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 0;">
+            <strong>Elaborado Por:</strong> Nicolas Turca Rubiano <br>
+            <strong>Fecha de Publicación:</strong> Mayo 2026 <br>
+            <strong>Institución:</strong> SENA - Centro de Servicios Financieros
+          </p>
+        </div>
+
+        <!-- 0. GUÍA DE INICIO RÁPIDO -->
+        <section id="guia-rapida" class="section-block">
+          <div class="chapter-badge">Inicio Rápido</div>
+          <h2 class="chapter-title">Guía de Inicio Rápido: Tu Primer Pedido en Mikitech</h2>
+          
+          <p>¡Te damos la bienvenida a <strong>Mikitech</strong>! Esta guía práctica te mostrará paso a paso cómo registrarte en nuestra plataforma, encontrar los mejores componentes para tu hardware y finalizar tu pedido de forma segura en tres sencillos pasos.</p>
+          
+          <div class="quick-start-box">
+            <h3><span>🚀</span> Tu Ruta de Compra Rápida</h3>
+            
+            <div class="timeline">
+              <div class="timeline-step">
+                <span class="step-number">1</span>
+                <h5>Regístrate</h5>
+                <p>Crea tu cuenta de usuario ingresando tu información básica.</p>
+              </div>
+              <div class="timeline-step">
+                <span class="step-number">2</span>
+                <h5>Navega y Agrega</h5>
+                <p>Busca tus componentes o kits y agrégalos a tu carrito.</p>
+              </div>
+              <div class="timeline-step">
+                <span class="step-number">3</span>
+                <h5>Paga Seguro</h5>
+                <p>Configura tus datos de envío, selecciona efectivo o tarjeta y finaliza.</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="subsection-title">1. ¿Cómo crear tu cuenta y unirte a Mikitech?</h3>
+          <p>Para empezar a comprar y registrar tus compras, primero necesitamos conocerte:</p>
+          <ul>
+            <li>Navega a la esquina superior derecha de la página principal.</li>
+            <li>Selecciona la opción <strong>"Crear mi cuenta"</strong>.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Crear mi cuenta -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Botón "Crear mi cuenta" en la barra de navegación</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/registro_cuenta_nav.png</code></div>
+            </div>
+            <img src="static/images/manual/registro_cuenta_nav.png" alt="Opción Crear mi cuenta en cabecera" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 1: Cabecera principal de la tienda apuntando a la opción de registro de cuenta.</div>
+          </div>
+
+          <ul>
+            <li>Llena el formulario con tus datos personales (Nombre completo, email y contraseña segura).</li>
+            <li>Selecciona <strong>"Comenzar a comprar"</strong> para validar el formulario.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Formulario de Registro -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Formulario de Registro de Nuevo Usuario</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/formulario_registro.png</code></div>
+            </div>
+            <img src="static/images/manual/formulario_registro.png" alt="Formulario de registro de usuario" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 2: Formulario de registro de datos personales para la creación de cuenta.</div>
+          </div>
+
+          <h3 class="subsection-title">2. ¿Cómo encontrar y reservar mi primer componente?</h3>
+          <p>En Mikitech tenemos piezas y kits especializados para potenciar cualquier tipo de computadora. Así puedes encontrar la tuya:</p>
+          <ul>
+            <li>Usa la <strong>barra de búsqueda global</strong> en la parte superior si sabes exactamente qué pieza necesitas, o bien navega libremente por nuestro <strong>Catálogo de productos</strong>.</li>
+            <li>Filtra por categorías tecnológicas para afinar tus resultados.</li>
+          </ul>
+          
+          <div class="callout callout-info">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body">
+              <strong>Tip de Hardware:</strong> ¿Sientes que tu PC está lenta? Un SSD (Unidad de Estado Sólido) mejora drásticamente la velocidad de arranque de tu sistema operativo y reduce drásticamente los tiempos de carga de tus programas y juegos favoritos.
+            </div>
+          </div>
+
+          <!-- IMAGE PLACEHOLDER: Catálogo y Buscador -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Catálogo de Hardware y Barra de Búsqueda Activa</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/catalogo_buscador.png</code></div>
+            </div>
+            <img src="static/images/manual/catalogo_buscador.png" alt="Buscador y catálogo de productos" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 3: Catálogo público con barra de búsqueda global y filtros de componentes.</div>
+          </div>
+
+          <h3 class="subsection-title">3. ¿Cómo finalizar tu compra de forma segura?</h3>
+          <p>Una vez que tengas todos los componentes listos en tu carrito, es hora de concretar el pedido:</p>
+          <ul>
+            <li>Haz clic en el ícono del carrito para revisar tu selección. Revisa que los componentes y las cantidades sean correctos.</li>
+            <li>Avanza al Checkout e ingresa tus datos de envío y facturación.</li>
+            <li>Selecciona tu método de pago preferido (Tarjeta de Crédito o Efectivo contra entrega para pruebas).</li>
+            <li>Confirma la transacción. ¡Listo! Recibirás un correo electrónico de forma automática con la confirmación detallada del pedido y la información logística del envío.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Checkout Exitoso -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Resumen final de compra y confirmación de orden</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/compra_exitosa.png</code></div>
+            </div>
+            <img src="static/images/manual/compra_exitosa.png" alt="Checkout exitoso y confirmación" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 4: Ventana de confirmación de pedido exitoso con número de orden.</div>
+          </div>
+        </section>
+
+        <!-- CAPÍTULO 1 -->
+        <section id="capitulo-1" class="section-block">
+          <div class="chapter-badge">Capítulo 1</div>
+          <h2 class="chapter-title">Generalidades del Sistema</h2>
+          
+          <h3 class="section-title">1.1 Propósito del sistema</h3>
+          <p>La plataforma <strong>Mikitech</strong> tiene como fin centralizar el 100% de la capacidad operativa de la compañía <strong>TechSolutions S.A.S.</strong>, optimizando la gestión de inventarios técnicos y agilizando el flujo de ventas mediante analítica de datos comerciales en tiempo real.</p>
+          
+          <h3 class="section-title">1.2 Requisitos técnicos obligatorios</h3>
+          <p>Para garantizar una excelente usabilidad, navegación fluida y el rendimiento óptimo del sistema, tu dispositivo debe satisfacer los siguientes requisitos mínimos y recomendados de hardware y software:</p>
+          
+          <div class="spec-grid">
+            <div class="spec-card">
+              <h6>Procesador</h6>
+              <p>Intel Core i5 o superior (o AMD Ryzen equivalente)</p>
+            </div>
+            <div class="spec-card">
+              <h6>Memoria RAM</h6>
+              <p>8 GB mínimo (16 GB recomendados)</p>
+            </div>
+            <div class="spec-card">
+              <h6>Almacenamiento</h6>
+              <p>500 MB libres en Unidad de Estado Sólido (SSD)</p>
+            </div>
+            <div class="spec-card">
+              <h6>Navegador Web</h6>
+              <p>Google Chrome, Mozilla Firefox o Microsoft Edge actualizados</p>
+            </div>
+          </div>
+
+          <h3 class="section-title">1.3 INTRODUCCIÓN</h3>
+          <p>Bienvenido al Manual de Usuario de <strong>Mikitech</strong>. Este documento ha sido detalladamente estructurado para proporcionar una guía instructiva sobre el funcionamiento integral de nuestra plataforma de comercio electrónico, especializada en la distribución y asesoramiento de componentes tecnológicos de alto rendimiento. El objetivo primordial es que tanto el usuario comprador final como el administrador del sistema puedan navegar y operar las interfaces con total claridad, garantizando una experiencia de compra y control eficiente en la adquisición de hardware avanzado.</p>
+          
+          <h3 class="section-title">1.4 Alcance del Sistema</h3>
+          <p>La plataforma Mikitech está diseñada para centralizar la búsqueda, selección, apartado y compra segura de hardware informático avanzado, permitiendo a los clientes acceder a fichas técnicas sumamente detalladas y gestionar el seguimiento de sus pedidos en tiempo real. Adicionalmente, integra robustas herramientas administrativas de control financiero, monitoreo logístico, control de stock y moderación de opiniones de clientes que facilitan la toma de decisiones corporativas.</p>
+        </section>
+
+        <!-- CAPÍTULO 2 -->
+        <section id="capitulo-2" class="section-block">
+          <div class="chapter-badge">Capítulo 2</div>
+          <h2 class="chapter-title">Interfaz Pública (Fuera de Sesión)</h2>
+          <p>Este capítulo detalla la navegación inicial cuando se ingresa a la plataforma sin haberse autenticado, guiando al usuario desde la visualización de los componentes hasta la configuración del proceso de registro.</p>
+          
+          <div class="callout callout-info">
+            <div class="callout-body">
+              Al ingresar por primera vez a la web, se encontrará en la interfaz pública de navegación. Para desbloquear todas las funciones del carrito y realizar compras, debe autenticarse:
+              <ul>
+                <li><strong>Si es un usuario nuevo:</strong> Haga clic en "Registrarse" en la barra superior y complete el formulario. Una vez completado, el sistema iniciará sesión de forma automática y lo redirigirá al Panel de Usuario.</li>
+                <li><strong>Si ya tiene cuenta registrada:</strong> Seleccione "Iniciar Sesión", ingrese sus credenciales (correo electrónico y contraseña) para acceder directamente a su perfil.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- IMAGE PLACEHOLDER: Home Pública -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Vista Principal de la Interfaz Pública (Home)</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/home_publico.png</code></div>
+            </div>
+            <img src="static/images/manual/home_publico.png" alt="Home pública de Mikitech" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 5: Pantalla de bienvenida pública de la plataforma.</div>
+          </div>
+
+          <h3 class="section-title">2.1 Navegación y Selección de Hardware</h3>
+          
+          <h4 class="subsection-title">2.1.1 Volver al inicio</h4>
+          <p>Si durante su navegación en el catálogo o el blog desea regresar a la pantalla principal, puede seleccionar el logotipo de <strong>Mikitech</strong> ubicado en la esquina superior izquierda del menú en cualquier momento para regresar inmediatamente a la Home principal.</p>
+
+          <h4 class="subsection-title">2.1.2 Ver detalles del producto</h4>
+          <p>Navegue por el catálogo público de productos y haga clic sobre cualquier componente técnico (ej. "Robito" o tarjetas gráficas) para acceder a su ficha detallada. En esta página podrá visualizar imágenes del componente, precio unitario de venta, descripción de rendimiento y especificaciones técnicas completas.</p>
+
+          <!-- IMAGE PLACEHOLDER: Ficha de Detalle de Producto -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Ficha de Especificaciones de Componente</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/detalle_producto.png</code></div>
+            </div>
+            <img src="static/images/manual/detalle_producto.png" alt="Detalle de ficha de producto" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 6: Ficha técnica detallada de componentes con descripción y botón de carrito.</div>
+          </div>
+
+          <h4 class="subsection-title">2.1.4 Agregar al carrito</h4>
+          <p>Dentro de la ficha de detalle de cualquier producto, seleccione el botón de <strong>"Agregar al carrito"</strong> para separar el componente temporalmente e iniciar la estructuración del pedido.</p>
+
+          <h3 class="section-title">2.2 Proceso de Pago (Checkout)</h3>
+          
+          <h4 class="subsection-title">2.2.5 Revisar tu carrito</h4>
+          <p>Haga clic en el ícono flotante del carrito en el encabezado. Se desplegará un panel lateral o vista completa de su carrito de compras donde podrá verificar el subtotal acumulado de su orden, así como ajustar la cantidad de unidades que desea adquirir usando los botones <strong>(-)</strong> y <strong>(+)</strong> o eliminar elementos no deseados.</p>
+
+          <!-- IMAGE PLACEHOLDER: Vista del Carrito de Compras -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Vista de Detalle y Modificación del Carrito</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/carrito_compras.png</code></div>
+            </div>
+            <img src="static/images/manual/carrito_compras.png" alt="Vista del carrito de compras" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 7: Despliegue del carrito de compras con control de cantidades e importes.</div>
+          </div>
+
+          <h4 class="subsection-title">2.2.6 Procede al pago</h4>
+          <p>Una vez confirmada la cantidad correcta de productos, haga clic en el botón <strong>"Proceder al Pago"</strong>. El sistema lo guiará hacia la pasarela de facturación final, donde podrá configurar sus datos personales de entrega y el método de pago correspondiente.</p>
+
+          <h3 class="section-title">2.3 ¿Cómo ingresar a tu cuenta de Mikitech?</h3>
+          
+          <h4 class="subsection-title">2.3.1 Acceder a tu perfil</h4>
+          <p>Seleccione el botón de <strong>"Iniciar Sesión"</strong> en la barra superior para ingresar a la ventana de autenticación del sistema.</p>
+
+          <div class="callout callout-warning">
+            <span class="callout-icon">⚠️</span>
+            <div class="callout-body">
+              <strong>Alerta de compra:</strong> Si intentas finalizar un pedido como invitado sin haber iniciado sesión, el sistema guardará temporalmente los componentes seleccionados en tu carrito y te mostrará el siguiente recordatorio en pantalla: <em>"Para asegurar tus componentes y finalizar la compra, por favor ingresa a tu cuenta"</em>.
+            </div>
+          </div>
+
+          <!-- IMAGE PLACEHOLDER: Login de Usuario -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Ventana de Iniciar Sesión (Login de Clientes)</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/login_usuario.png</code></div>
+            </div>
+            <img src="static/images/manual/login_usuario.png" alt="Login de clientes" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 8: Formulario de ingreso de credenciales de usuario.</div>
+          </div>
+
+          <h4 class="subsection-title">2.3.2 Ingresa tu correo electrónico</h4>
+          <p>Escribe la dirección de correo con la cual registraste originalmente tu cuenta en la plataforma (por ejemplo: <code>turcanicolas1@gmail.com</code>).</p>
+
+          <h4 class="subsection-title">2.3.3 Ingreso de Contraseña</h4>
+          <p>Digite su clave de seguridad de forma privada en el campo de texto protegido del formulario.</p>
+
+          <div class="callout callout-info">
+            <span class="callout-icon">💡</span>
+            <div class="callout-body">
+              <strong>Tip de navegación:</strong> Si quieres asegurarte de haber ingresado tu contraseña correctamente antes de enviar el formulario, haz clic en el ícono del "ojo" situado a la derecha del campo de contraseña para hacer visible la clave por un momento.
+            </div>
+          </div>
+
+          <h4 class="subsection-title">2.3.4 Accede a tu cuenta</h4>
+          <p>Seleccione el botón <strong>"Acceder a mi cuenta"</strong> para validar sus credenciales. Una vez confirmado el registro correcto del usuario por el servidor de base de datos, se habilitará el acceso inmediato al panel de control personal de compras (User Dashboard).</p>
+        </section>
+
+        <!-- CAPÍTULO 3 -->
+        <section id="capitulo-3" class="section-block">
+          <div class="chapter-badge">Capítulo 3</div>
+          <h2 class="chapter-title">Tu Panel de Usuario</h2>
+          <p>Desde su espacio personal de cliente, usted puede administrar su cuenta, configurar detalles de perfil, auditar facturas pasadas y monitorear sus entregas activas.</p>
+          
+          <h3 class="section-title">Resumen de Funciones Principales</h3>
+          <ul>
+            <li><strong>Historial de compras:</strong> Revise detalladamente los componentes adquiridos en pedidos anteriores.</li>
+            <li><strong>Pedidos activos:</strong> Realice seguimiento logístico en tiempo real a las entregas de hardware en preparación o ruta.</li>
+            <li><strong>Reservas pendientes:</strong> Compruebe el stock reservado y el plazo de vigencia para concretar el pago.</li>
+            <li><strong>Descarga de facturas:</strong> Descargue en formato PDF el comprobante fiscal y comercial digital de cualquiera de sus compras.</li>
+          </ul>
+
+          <h3 class="section-title">2.4 Gestión de Cuenta y Analítica</h3>
+          
+          <h4 class="subsection-title">2.4.1 Abre el menú de tu perfil</h4>
+          <p>Haga clic sobre su foto o ícono de avatar de usuario en la esquina superior derecha para desplegar el menú de opciones rápidas del perfil, desde donde podrá navegar a sus configuraciones de cuenta o cerrar sesión de forma segura.</p>
+
+          <!-- IMAGE PLACEHOLDER: Perfil Dropdown -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Menú Desplegable del Perfil del Cliente</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/perfil_dropdown.png</code></div>
+            </div>
+            <img src="static/images/manual/perfil_dropdown.png" alt="Menú desplegable del perfil" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 9: Menú flotante del perfil del usuario con accesos a la configuración de cuenta.</div>
+          </div>
+
+          <h4 class="subsection-title">2.4.2 Ve a tu panel principal (Dashboard)</h4>
+          <p>Seleccione la opción <strong>"Dashboard"</strong> en el menú desplegable para retornar a la vista general de la cuenta. En esta pantalla se le presentará un resumen analítico con sus gastos acumulados, cantidad de compras exitosas y listado de sus interacciones con el catálogo.</p>
+
+          <!-- IMAGE PLACEHOLDER: Dashboard de Usuario -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Panel de Control de Compras del Cliente (User Dashboard)</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/dashboard_usuario.png</code></div>
+            </div>
+            <img src="static/images/manual/dashboard_usuario.png" alt="Dashboard del usuario" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 10: Dashboard del cliente con métricas de consumo y saludo personalizado.</div>
+          </div>
+
+          <h4 class="subsection-title">2.4.7 Haz seguimiento a tus pedidos recientes</h4>
+          <p>En la sección central del dashboard de usuario, revise el panel de órdenes recientes. Podrá observar los estados de envío de su hardware de forma gráfica y enterarse de la fecha de entrega estimada en su domicilio.</p>
+
+          <!-- IMAGE PLACEHOLDER: Seguimiento de Pedidos -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Módulo de Seguimiento y Historial de Órdenes</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/pedidos_recientes.png</code></div>
+            </div>
+            <img src="static/images/manual/pedidos_recientes.png" alt="Seguimiento de pedidos en el panel de usuario" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 11: Módulo interactivo de seguimiento de envío en tiempo real.</div>
+          </div>
+
+          <h4 class="subsection-title">2.4.8 Selecciona "Catálogo"</h4>
+          <p>Haga clic en la opción <strong>"Catálogo"</strong> de su panel lateral para visualizar rápidamente aquellos artículos que tiene pendientes en su lista de deseos o para descubrir nuevas ofertas tecnológicas del día.</p>
+
+          <h4 class="subsection-title">2.4.9 Descubre el catálogo completo</h4>
+          <p>Acceda de lleno a la visualización total de los productos de alto rendimiento disponibles en Mikitech para armar presupuestos y añadir nuevos periféricos a su estación de juego o trabajo.</p>
+
+          <h3 class="section-title">3.1 Administración y Selección Avanzada</h3>
+          
+          <h4 class="subsection-title">3.2 Dashboard de Control</h4>
+          <p>Al estar registrado, visualice la barra superior donde se muestra su saludo personalizado, indicando formalmente que se encuentra autenticado dentro del sistema.</p>
+
+          <h4 class="subsection-title">3.3.3 Filtra por categoría</h4>
+          <p>Utilice la barra de filtrado rápido por categorías técnicas (kits por objetivo, periféricos, audio y video) para clasificar y acotar la oferta del catálogo técnico en pocos segundos.</p>
+
+          <h4 class="subsection-title">3.3.4 Elige tu producto</h4>
+          <p>Haga clic sobre la tarjeta del componente que le interese para verificar detalladamente sus especificaciones y preparar el proceso de compra final.</p>
+
+          <h4 class="subsection-title">3.3.5 Agrega al carrito</h4>
+          <p>Presione el ícono del carrito para agregar este hardware específico a su orden activa.</p>
+
+          <h4 class="subsection-title">3.3.6 Verifica tu selección</h4>
+          <p>Abre el panel rápido del carrito para corroborar que el componente y su precio unitario se hayan cargado de forma correcta antes de dirigirse a la zona de pagos.</p>
+
+          <h3 class="section-title">3.2 Formalización del Pedido</h3>
+          <p><strong>Revisa tu carrito (Botón de Pago):</strong> Diríjase a la pasarela de pago para revisar el costo consolidado de la orden, incluyendo cargos adicionales de entrega e IVA aplicado si corresponde.</p>
+          <p><strong>3.3 Procede al pago:</strong> Haga clic en la opción <strong>"Proceder al pago"</strong> para ingresar al formulario oficial de dirección de entrega.</p>
+          <p><strong>FINALIZAR COMPRA:</strong> Revise detalladamente que todo el stock solicitado sea correcto y pulse en <strong>"Finalizar compra"</strong> para consolidar su reserva de componentes.</p>
+
+          <h3 class="section-title">3.2 Registro de Información de Envío</h3>
+          <p>Proporcione detalladamente los siguientes datos logísticos para garantizar que los despachadores de Mikitech localicen su dirección física correctamente:</p>
+          <ol>
+            <li><strong>Nombre:</strong> Registre sus nombres y apellidos completos (ej. <em>Nicolás Turca</em>) para identificar al receptor del paquete.</li>
+            <li><strong>Teléfono:</strong> Ingrese su número de contacto telefónico celular (ej. <em>3054793561</em>) para coordinar la entrega en portería o domicilio.</li>
+            <li><strong>Correo:</strong> Confirme su correo electrónico activo (ej. <em>turcanicolas1@gmail.com</em>) para el envío automático de la confirmación física de compra.</li>
+            <li><strong>Dirección:</strong> Indique la dirección física de correspondencia (ej. <em>Calle 98 #68b42</em>), especificando si es apartamento, oficina o conjunto residencial.</li>
+            <li><strong>Ciudad:</strong> Defina la ciudad de despacho del hardware (ej. <em>Bogotá</em>).</li>
+            <li><strong>Código Postal:</strong> Registre el código postal correspondiente a su sector de residencia (ej. <em>111121</em>).</li>
+          </ol>
+
+          <!-- IMAGE PLACEHOLDER: Formulario de Envio -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Formulario de Dirección de Envío en Pasarela</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/checkout_formulario.png</code></div>
+            </div>
+            <img src="static/images/manual/checkout_formulario.png" alt="Formulario de envío de mercancía" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 12: Interfaz para el registro de los datos de envío durante el checkout.</div>
+          </div>
+
+          <h3 class="section-title">3.3 Pasarela de Pago y Validación</h3>
+          <ol>
+            <li><strong>Datos de Facturación:</strong> Seleccione su tipo de identificación fiscal (Cédula de Ciudadanía, Pasaporte, etc.) e ingrese el número correspondiente (ej. <em>1070920195</em>) para la emisión formal de su factura de compra.</li>
+            <li><strong>Método de pago:</strong> Seleccione su método transaccional preferido (Tarjeta de crédito/débito electrónica o Efectivo).</li>
+          </ol>
+          
+          <div class="callout callout-info">
+            <strong>Selección de Efectivo (Test):</strong> Opción transaccional de prueba de flujo que permite validar el proceso logístico simulando un pago contra entrega en puntos físicos.
+          </div>
+
+          <!-- IMAGE PLACEHOLDER: Pasarela Pago -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Selección de Métodos de Pago Habilitados</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/pasarela_pago.png</code></div>
+            </div>
+            <img src="static/images/manual/pasarela_pago.png" alt="Pasarela de pago y métodos de pago" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 13: Pasarela de checkout enfocando la selección del método de pago.</div>
+          </div>
+
+          <p><strong>3. Paga y confirma:</strong> Seleccione el botón <strong>"Pagar y Confirmar"</strong>. Ante la alerta de confirmación del navegador, haga clic sobre la opción <strong>"Sí, Confirmar Pedido"</strong> para formalizar y finalizar la compra del componente tecnológico.</p>
+
+          <h3 class="section-title">3.7 Post-Venta y Seguimiento</h3>
+          <p><strong>Seguimiento de compras (Ver mis pedidos):</strong> Acceda directamente al módulo histórico y logístico de la cuenta para observar en cuál estado se encuentra la orden (ej. <em>"Pendiente", "Preparado", "En Ruta" o "Entregado"</em>).</p>
+          <p><strong>Revisa el detalle de tu pedido:</strong> Despliegue la tarjeta del pedido para verificar la lista de hardware comprado, los impuestos locales facturados y la fecha estimada de llegada de su paquete.</p>
+
+          <h3 class="section-title">Generación de Facturas y Reportes</h3>
+          <ul>
+            <li><strong>Historial de compras:</strong> Consulte la lista consolidada de todas las órdenes finalizadas en la plataforma desde el inicio del registro de su cuenta.</li>
+            <li><strong>Verifica tus reportes de gastos:</strong> Seleccione el botón de <strong>"Reportes"</strong> en su panel para generar estadísticas gráficas interactivas que reflejan el dinero invertido en hardware y cómo se distribuye su presupuesto mensual de tecnología.</li>
+            <li><strong>Genera tu factura en PDF:</strong> Haga clic sobre el botón de <strong>"Factura PDF"</strong> en la orden para descargar el documento oficial.</li>
+            <li><strong>Guarda o imprime tu documento:</strong> El sistema de seguridad solicitará una validación de descarga; presione la opción de <strong>"Sí y generar"</strong> para abrir y guardar o imprimir de inmediato la factura legal generada por Mikitech.</li>
+            <li><strong>Página de FACTURA:</strong> Permite visualizar de forma interactiva el documento tributario finalizado, listo para su almacenamiento local.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Factura PDF -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Factura Digital de Compra en formato interactivo (PDF)</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/factura_pdf.png</code></div>
+            </div>
+            <img src="static/images/manual/factura_pdf.png" alt="Vista previa de factura digital" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 14: Vista de factura digital comercial generada por el sistema.</div>
+          </div>
+
+          <h3 class="section-title">4.1 Gestión de Perfil y Seguridad</h3>
+          <p><strong>Ajusta tu información personal (Editar Perfil):</strong> Ingrese a la sección de ajustes de su cuenta de usuario y haga clic en <strong>"Editar Perfil"</strong> para corregir nombres, actualizar números de contacto o cargar una nueva foto de avatar. Para finalizar, guarde los cambios pulsando sobre <strong>"Guardar Cambios"</strong>.</p>
+
+          <!-- IMAGE PLACEHOLDER: Editar Perfil -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Panel para Editar Información del Usuario</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/editar_perfil.png</code></div>
+            </div>
+            <img src="static/images/manual/editar_perfil.png" alt="Formulario de edición de perfil" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 15: Configuración de información de contacto y edición de avatar de usuario.</div>
+          </div>
+
+          <p><strong>Cierra tu sesión de forma segura (Logout):</strong> Al concluir con sus gestiones o transacciones en la plataforma, seleccione la opción <strong>"Cerrar Sesión"</strong> del menú de perfil. Presione <strong>"Sí, cerrar sesión"</strong> en el modal de advertencia para borrar las credenciales activas del navegador y proteger sus datos bancarios y personales.</p>
+        </section>
+
+        <!-- CAPÍTULO 4 -->
+        <section id="capitulo-4" class="section-block">
+          <div class="chapter-badge">Capítulo 4</div>
+          <h2 class="chapter-title">Panel Administrador del Sistema</h2>
+          <p>Módulo de acceso restringido diseñado específicamente para el equipo de control interno, gerencia y logística de Mikitech.</p>
+          
+          <div class="callout callout-danger">
+            <span class="callout-icon">🔒</span>
+            <div class="callout-body">
+              <strong>Control de Seguridad (Área Restringida):</strong> Con el fin de salvaguardar el inventario y la información privada de los clientes registrados, antes de ingresar a la ventana de login administrativo deberá pasar por un portal de seguridad de doble factor (2FA). Tenga a la mano su clave exclusiva de verificación del SENA para validar su acceso.
+            </div>
+          </div>
+
+          <!-- IMAGE PLACEHOLDER: Seguridad Restringida -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Filtro Inicial 2FA de Área Restringida</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/seguridad_restringida.png</code></div>
+            </div>
+            <img src="static/images/manual/seguridad_restringida.png" alt="Pantalla de verificación de área restringida" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 16: Control de seguridad y filtro por PIN exclusivo de administración.</div>
+          </div>
+
+          <h3 class="section-title">4.3 ¿Cómo ingresar a la consola de administración?</h3>
+          <p>Para garantizar el cumplimiento de las políticas de ciberseguridad corporativas, la autenticación consta de dos filtros obligatorios:</p>
+          
+          <h4 class="subsection-title">Paso 1: Filtro de verificación de red</h4>
+          <ul>
+            <li>Ingrese al portal público de Mikitech y seleccione la opción de <strong>"Área Restringida"</strong> en el pie de página.</li>
+            <li>Digita el código o clave maestra de seguridad de administración de TechSolutions.</li>
+            <li>Pulse en <strong>"Verificar acceso"</strong> para habilitar el login corporativo.</li>
+          </ul>
+
+          <h4 class="subsection-title">Paso 2: Inicio de sesión corporativo (Login Admin)</h4>
+          <ul>
+            <li>Escriba el correo institucional registrado ante el sistema (ej. <code>turcanicolas1@gmail.com</code>).</li>
+            <li>Ingrese la contraseña corporativa correspondiente.</li>
+            <li>Seleccione el botón de <strong>"Acceder al Panel"</strong> para iniciar la validación del backend. Al confirmarse el acceso, el sistema redirigirá al administrador al Dashboard del Panel de Administración del Sistema.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Login Admin -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Formulario de Login Corporativo para Administradores</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/login_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/login_admin.png" alt="Login administrativo" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 17: Interfaz del formulario de inicio de sesión administrativo corporativo.</div>
+          </div>
+
+          <h3 class="section-title">4.4 Monitoreo de tu Operación (Dashboard Admin)</h3>
+          <p>Desde la consola central, el administrador cuenta con una visualización en tiempo real sobre la salud de la tienda:</p>
+          <ul>
+            <li><strong>Volver al inicio:</strong> Haga clic en el logotipo de Mikitech para regresar inmediatamente al tablero de control central.</li>
+            <li><strong>Revisa tus métricas:</strong> Analice las estadísticas diarias de ventas brutas, cantidad de usuarios nuevos registrados, tickets de soporte y pedidos procesados.</li>
+            <li><strong>Verifica nuevos ingresos:</strong> Inspeccione de forma rápida los últimos artículos que han sido registrados por los gestores de stock.</li>
+            <li><strong>Controla productos activos:</strong> Verifique si las referencias importadas (ej. Curiosity2 o Robito) se encuentran configuradas con stock visible para los compradores finales.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Dashboard Administrador -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Consola de Monitoreo Central (Dashboard Administrativo)</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/dashboard_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/dashboard_admin.png" alt="Dashboard de administrador" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 18: Panel de administración con resumen de KPI y estado del negocio.</div>
+          </div>
+
+          <h3 class="section-title">1. Gestión Avanzada de Inventario y Usuarios</h3>
+          <p>Permite mantener el control detallado sobre los componentes almacenados en bodega y el estado de la comunidad de clientes:</p>
+          <ul>
+            <li><strong>Revisa tu inventario:</strong> Acceda al listado principal de existencias de hardware de la plataforma para verificar unidades disponibles, precios de compra e impuestos de importación.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Inventario Admin -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Lista Maestra de Inventario y Stock de Hardware</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/inventario_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/inventario_admin.png" alt="Tabla de inventario administrador" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 19: Listado principal para auditoría y control de existencias.</div>
+          </div>
+
+          <ul>
+            <li><strong>Edita un producto:</strong> Seleccione cualquier producto para modificar información técnica como nombres, precios de lista, descripción de compatibilidad o porcentaje de descuento activo.
+              <ul>
+                <li><em>Selección de Nombre de Producto:</em> Actualice el nombre del componente (ej. <em>Curiosity2</em>).</li>
+                <li><em>Destaca ofertas especiales:</em> Active el indicador de promoción para que el componente resalte en las secciones de descuento del catálogo público.</li>
+                <li><em>Guarda y verifica:</em> Presione "Guardar" y verifique que las modificaciones de precios o descripciones se muestren correctamente en la Home de la tienda.</li>
+              </ul>
+            </li>
+            <li><strong>Visualización panel de Curiosity2:</strong> Permite al administrador inspeccionar en detalle el estado de este componente especializado.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Editar Producto Admin -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Formulario para Edición de Detalles de Producto</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/editar_producto_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/editar_producto_admin.png" alt="Formulario de edición de producto admin" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 20: Ficha del editor de stock modificando el componente Curiosity2.</div>
+          </div>
+
+          <h3 class="section-title">4.3 Logística, Finanzas y Clasificación</h3>
+          <ul>
+            <li><strong>Gestión de Logística y Despachos:</strong> Ingrese al panel logístico para asignar repartidores locales a pedidos con destino en Bogotá y actualizar los estados de envío de forma manual.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Logistica Admin -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Tablero de Asignación y Despacho de Pedidos (Repartidores)</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/logistica_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/logistica_admin.png" alt="Tablero de logística y asignación de despachos" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 21: Módulo logístico de asignación de pedidos a pilotos de entrega.</div>
+          </div>
+
+          <ul>
+            <li><strong>Verifica los ingresos de caja:</strong> Monitoree en tiempo real la facturación total capturada en el sistema de ventas (ej. <em>$10.000.000 COP</em>).</li>
+            <li><strong>Revisa detalles del cliente:</strong> Seleccione el nombre de un cliente (ej. <em>Nicolás Turca</em>) para auditar su dirección registrada y datos logísticos asociados.</li>
+            <li><strong>Audita el Listado Maestro:</strong> Realice descargas del inventario consolidado para procesos contables externos o revisiones de inventario físico.</li>
+            <li><strong>Organiza tu catálogo (Categorías):</strong> Cree nuevas categorías en la base de datos (como <em>Monitores, Tarjetas Gráficas, Refrigeración</em>) para estructurar mejor la categorización del catálogo y optimizar los filtros del cliente.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Categorias Admin -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Módulo de Gestión de Categorías de Hardware</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/categorias_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/categorias_admin.png" alt="Módulo de gestión de categorías" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 22: Panel de creación y edición de categorías de productos.</div>
+          </div>
+
+          <h3 class="section-title">4.7 Comunicación y Moderación</h3>
+          <ul>
+            <li><strong>Moderación de Reseñas:</strong> Acceda al buzón de comentarios de los usuarios para responder a sus calificaciones o reportar comentarios de spam.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Reseñas Admin -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Centro de Moderación de Reseñas y Comentarios</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/resenas_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/resenas_admin.png" alt="Panel de moderación de reseñas" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 23: Bandeja de moderación de opiniones de compradores.</div>
+          </div>
+
+          <ul>
+            <li><strong>Análisis financiero y reportes:</strong> Revise mediante gráficos analíticos el crecimiento del volumen de ventas mensuales de Mikitech. Permite la exportación directa de reportes y de la bitácora contable.</li>
+          </ul>
+
+          <!-- IMAGE PLACEHOLDER: Reportes Admin -->
+          <div class="image-placeholder-container">
+            <div class="placeholder-box">
+              <div class="placeholder-icon">📸</div>
+              <div class="placeholder-text">Captura de Pantalla: Módulo Financiero y Reportes Gráficos de Ventas</div>
+              <div class="placeholder-hint">Ubica la imagen en: <code>static/images/manual/reportes_admin.png</code></div>
+            </div>
+            <img src="static/images/manual/reportes_admin.png" alt="Gráficas financieras de administración" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" onload="this.style.display='block'; this.previousElementSibling.style.display='none';">
+            <div class="image-caption">Figura 24: Bitácora de reportes estadísticos y crecimiento de ventas.</div>
+          </div>
+
+          <ul>
+            <li><strong>Cierre de jornada (Logout Admin):</strong> Haga clic sobre su saludo de administrador (ej. <em>¡Hola, NickTur!</em>) para abrir la configuración del panel administrativo y seleccione <strong>"Cerrar sesión"</strong> para desconectarse de la consola y bloquear accesos no autorizados a la base de datos.</li>
+          </ul>
+        </section>
+
+        <!-- CAPÍTULO 5 -->
+        <section id="capitulo-5" class="section-block">
+          <div class="chapter-badge">Capítulo 5</div>
+          <h2 class="chapter-title">Glosario de Términos y Soporte</h2>
+          
+          <h3 class="section-title">Glosario Técnico de Hardware</h3>
+          <p>Con el fin de facilitar la comprensión de las especificaciones y características de nuestros productos especializados de alto rendimiento, se definen los siguientes términos técnicos:</p>
+          
+          <ul>
+            <li><strong>GPU (Unidad de Procesamiento Gráfico):</strong> Coprocesador dedicado al procesamiento y renderizado de gráficos 3D, imágenes y video de alta definición. Clave para estaciones de diseño o computadoras gaming.</li>
+            <li><strong>SSD (Unidad de Estado Sólido):</strong> Dispositivo de almacenamiento secundario no volátil que utiliza memoria flash para almacenar datos. Ofrece velocidades de lectura y escritura drásticamente superiores a los discos mecánicos tradicionales.</li>
+            <li><strong>Dashboard:</strong> Interfaz gráfica interactiva que compila y presenta métricas, estadísticas, gráficos analíticos y accesos directos de control de usuario o administración.</li>
+            <li><strong>Checkout:</strong> Fase final transaccional del comercio electrónico en la cual el usuario formaliza sus datos de envío, selecciona la pasarela de pago y consolida el pedido.</li>
+          </ul>
+
+          <h3 class="section-title">1. Solución de Problemas Frecuentes (FAQ)</h3>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Problema Detectado</th>
+                  <th style="width: 35%;">Posible Causa</th>
+                  <th style="width: 40%;">Solución Recomendada</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>No puedo iniciar sesión en mi cuenta</strong></td>
+                  <td>Las credenciales de correo electrónico o contraseña de acceso son incorrectas.</td>
+                  <td>Verifique que el correo electrónico ingresado sea el correcto. Si olvidó su contraseña, use el enlace "Recuperar Contraseña" para recibir instrucciones en su correo.</td>
+                </tr>
+                <tr>
+                  <td><strong>El producto no se añade al carrito de compras</strong></td>
+                  <td>La sesión de navegación ha expirado o el producto seleccionado ya no cuenta con stock disponible en bodega.</td>
+                  <td>Recargue la página de Mikitech en su navegador para reiniciar la sesión y verifique que el indicador de stock del componente muestre unidades disponibles.</td>
+                </tr>
+                <tr>
+                  <td><strong>No se genera la factura de compra en formato PDF</strong></td>
+                  <td>El navegador web tiene activado el bloqueo de ventanas emergentes (pop-ups) para el sitio web de Mikitech.</td>
+                  <td>Desactive temporalmente el bloqueador de ventanas emergentes de su navegador para Mikitech, recargue la página del pedido y vuelva a intentar la descarga.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="section-title">2. Canales de Soporte y Contacto</h3>
+          <p>Si experimenta dificultades técnicas o requiere asistencia personalizada con su pedido, puede contactarnos a través de los siguientes canales:</p>
+          <ul>
+            <li><strong>Correo Electrónico de Soporte:</strong> <a href="mailto:soporte@mikitech.com">soporte@mikitech.com</a></li>
+            <li><strong>Horario de Atención al Cliente:</strong> Lunes a Viernes de 8:00 AM a 6:00 PM (Hora local Colombia).</li>
+            <li><strong>Ubicación de Oficina Central:</strong> Bogotá D.C., Colombia.</li>
+          </ul>
+
+          <h3 class="section-title">3. Control de Versiones</h3>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Versión</th>
+                  <th>Fecha de Publicación</th>
+                  <th>Autor Principal</th>
+                  <th>Institución Académica</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1.0.0 (Inicial)</strong></td>
+                  <td>Mayo 2026</td>
+                  <td>Nicolás Turca Rubiano</td>
+                  <td>SENA - Centro de Servicios Financieros</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-success" style="margin-top: 3rem; text-align: center;">
+            <div class="callout-body">
+              <strong>“GRACIAS POR CONFIAR EN MIKITECH”</strong><br>
+              Estamos comprometidos con proporcionarle componentes de alto rendimiento para llevar su tecnología al siguiente nivel.
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2026 MIKITECH. Todos los derechos reservados. Desarrollado bajo estándares del SENA.</p>
+    <p style="font-size: 0.75rem; margin-top: 0.5rem;">TechSolutions S.A.S. — Bogotá, Colombia</p>
+  </footer>
+
+  <!-- BACK TO TOP BUTTON -->
+  <button class="back-to-top" id="back-btn" onclick="scrollToTop()">
+    <span>▲</span>
+  </button>
+
+  <script>
+    // Scroll Spy for sidebar links
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.section-block');
+      const navLinks = document.querySelectorAll('.sidebar-link');
+      let currentSectionId = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= (sectionTop - 120)) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSectionId}`) {
+          link.classList.add('active');
+        }
+      });
+
+      // Back to top button visibility
+      const backBtn = document.getElementById('back-btn');
+      if (pageYOffset > 300) {
+        backBtn.classList.add('visible');
+      } else {
+        backBtn.classList.remove('visible');
+      }
+    });
+
+    function activateLink(element) {
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      element.classList.add('active');
+    }
+
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+
+    // Interactive search in the manual text
+    function searchManual() {
+      const query = document.getElementById('doc-search').value.toLowerCase().trim();
+      const content = document.getElementById('manual-content');
+      
+      // Remove existing highlights
+      removeHighlights(content);
+
+      if (query.length < 3) return; // Only search for 3+ chars
+
+      // Walk text nodes and highlight matches
+      highlightText(content, query);
+    }
+
+    function removeHighlights(element) {
+      const highlights = element.querySelectorAll('.highlight');
+      highlights.forEach(span => {
+        const parent = span.parentNode;
+        parent.replaceChild(document.createTextNode(span.textContent), span);
+        parent.normalize(); // merge text nodes
+      });
+    }
+
+    function highlightText(element, query) {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+      const nodesToReplace = [];
+
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        // Avoid highlighting inside table tags metadata or scripts
+        if (node.parentNode.tagName === 'SCRIPT' || 
+            node.parentNode.tagName === 'STYLE' || 
+            node.parentNode.className === 'highlight' ||
+            node.parentNode.className === 'placeholder-hint' ||
+            node.parentNode.tagName === 'CODE') {
+          continue;
+        }
+        
+        const index = node.nodeValue.toLowerCase().indexOf(query);
+        if (index >= 0) {
+          nodesToReplace.push({ node, index });
+        }
+      }
+
+      // Replace nodes backwards so index is not affected
+      for (let i = nodesToReplace.length - 1; i >= 0; i--) {
+        const { node, index } = nodesToReplace[i];
+        if (!node.parentNode) continue;
+        
+        const match = node.nodeValue.substring(index, index + query.length);
+        const before = node.nodeValue.substring(0, index);
+        const after = node.nodeValue.substring(index + query.length);
+
+        const beforeNode = document.createTextNode(before);
+        const highlightNode = document.createElement('span');
+        highlightNode.className = 'highlight';
+        highlightNode.appendChild(document.createTextNode(match));
+        const afterNode = document.createTextNode(after);
+
+        const parent = node.parentNode;
+        parent.insertBefore(beforeNode, node);
+        parent.insertBefore(highlightNode, node);
+        parent.insertBefore(afterNode, node);
+        parent.removeChild(node);
+      }
+    }
+
+    // CLIENT-SIDE WORD EXPORT (.doc) WITH STYLING
+    function exportToWord() {
+      // Create HTML structure for Word
+      const contentHtml = document.getElementById('manual-content').innerHTML;
+      
+      const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' 
+            xmlns:w='urn:schemas-microsoft-com:office:word' 
+            xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+              <title>Manual de Usuario Mikitech</title>
+              <meta charset='utf-8'>
+              <style>
+                body {
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  line-height: 1.6;
+                  color: #333333;
+                  padding: 20px;
+                }
+                .word-cover {
+                  margin-bottom: 50px;
+                  border-bottom: 3px double #0f172a;
+                  padding-bottom: 30px;
+                  page-break-after: always;
+                }
+                h1 {
+                  color: #0f172a;
+                  font-size: 28pt;
+                  font-weight: bold;
+                  margin-bottom: 10px;
+                }
+                h2 {
+                  color: #2563eb;
+                  font-size: 18pt;
+                  margin-top: 30px;
+                  margin-bottom: 15px;
+                  border-bottom: 1px solid #e2e8f0;
+                  padding-bottom: 5px;
+                  page-break-before: always; /* Each major section on a new page */
+                }
+                h3 {
+                  color: #1e293b;
+                  font-size: 14pt;
+                  margin-top: 20px;
+                  margin-bottom: 10px;
+                }
+                h4 {
+                  color: #334155;
+                  font-size: 12pt;
+                  margin-top: 15px;
+                  margin-bottom: 5px;
+                  font-weight: bold;
+                }
+                p {
+                  margin-bottom: 12px;
+                  font-size: 10.5pt;
+                }
+                ul, ol {
+                  margin-bottom: 15px;
+                  padding-left: 20px;
+                }
+                li {
+                  margin-bottom: 5px;
+                  font-size: 10.5pt;
+                }
+                code {
+                  font-family: Consolas, monospace;
+                  background-color: #f1f5f9;
+                  padding: 2px 4px;
+                  font-size: 9.5pt;
+                }
+                .chapter-badge {
+                  display: none; /* Hide UI badges in Word */
+                }
+                .quick-start-box {
+                  background-color: #eff6ff;
+                  border: 1px solid #bfdbfe;
+                  padding: 15px;
+                  margin-bottom: 20px;
+                }
+                .timeline {
+                  margin-top: 15px;
+                }
+                .timeline-step {
+                  margin-bottom: 15px;
+                  padding-bottom: 10px;
+                  border-bottom: 1px dashed #bfdbfe;
+                }
+                .timeline-step:last-child {
+                  border-bottom: none;
+                }
+                .step-number {
+                  font-weight: bold;
+                  color: #2563eb;
+                }
+                .callout {
+                  background-color: #f8fafc;
+                  border-left: 4px solid #64748b;
+                  padding: 12px 15px;
+                  margin: 15px 0;
+                }
+                .callout-info {
+                  background-color: #eff6ff;
+                  border-left-color: #2563eb;
+                }
+                .callout-success {
+                  background-color: #ecfdf5;
+                  border-left-color: #10b981;
+                }
+                .callout-warning {
+                  background-color: #fef3c7;
+                  border-left-color: #f59e0b;
+                }
+                .callout-danger {
+                  background-color: #fee2e2;
+                  border-left-color: #ef4444;
+                }
+                .spec-grid {
+                  margin: 15px 0;
+                }
+                .spec-card {
+                  background-color: #f8fafc;
+                  border: 1px solid #e2e8f0;
+                  padding: 10px;
+                  margin-bottom: 8px;
+                }
+                table {
+                  border-collapse: collapse;
+                  width: 100%;
+                  margin: 20px 0;
+                }
+                th, td {
+                  border: 1px solid #cbd5e1;
+                  padding: 10px;
+                  font-size: 9.5pt;
+                }
+                th {
+                  background-color: #f8fafc;
+                  font-weight: bold;
+                  color: #0f172a;
+                }
+                /* Styles for image placeholders in Word */
+                .image-placeholder-container {
+                  border: 1px dashed #cbd5e1;
+                  background-color: #f8fafc;
+                  padding: 15px;
+                  margin: 15px 0;
+                  text-align: center;
+                }
+                .placeholder-box {
+                  border: none;
+                  background: transparent;
+                  padding: 0;
+                }
+                .placeholder-icon {
+                  font-size: 20pt;
+                }
+                .placeholder-text {
+                  font-weight: bold;
+                  font-size: 10pt;
+                  color: #333333;
+                }
+                .placeholder-hint {
+                  font-size: 8.5pt;
+                  color: #666666;
+                }
+                .image-caption {
+                  font-size: 8.5pt;
+                  color: #666666;
+                  font-style: italic;
+                  margin-top: 5px;
+                }
+              </style>
+            </head>
+            <body>`;
+      const footer = "</body></html>";
+      
+      const fileContent = header + contentHtml + footer;
+      
+      // Blob for download
+      const blob = new Blob(['\ufeff' + fileContent], {
+        type: 'application/msword;charset=utf-8'
+      });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'MIKITECH_Manual_Usuario.doc';
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

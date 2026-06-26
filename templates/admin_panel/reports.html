@@ -4,282 +4,1026 @@
 {% block page_title %}Reportes y Análisis — MIKITECH{% endblock %}
 
 {% block admin_content %}
-<!-- CABECERA PROFESIONAL (PRINT-READY) -->
-<div class="report-header" style="display:none; margin-bottom:40px; border-bottom:3px solid var(--ds-primary); padding-bottom:20px;">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; align-items:center; gap:15px;">
-      <img src="{% static 'img/logo.png' %}" alt="Logo MIKITECH" style="height:60px;">
-      <div>
-        <h1 style="font-size:2.8rem; font-weight:800; color:var(--ds-secondary); margin:0;">MIKITECH — B.I. REPORT</h1>
-        <p style="font-size:1.2rem; color:var(--ds-text-soft); font-weight:600; margin:0;">Software de Gestión Técnica v2026.04</p>
-      </div>
-    </div>
-    <div style="text-align:right; font-size:1.1rem; line-height:1.4;">
-      <p style="margin:0;"><strong>FECHA GENERACIÓN:</strong> {{ now|date:"d/m/Y H:i" }}</p>
-      <p style="margin:0;"><strong>OPERADOR:</strong> {{ request.session.nombre_usuario|default:"Administrador" }}</p>
-      <p style="margin:0;"><strong>PERIODO:</strong> {{ estadisticas.filtro_actual|upper }}</p>
-    </div>
-  </div>
-</div>
-
-<div class="u-flex u-justify-between u-align-center u-mb-4" style="margin-bottom: 40px;" id="no-print">
-  <div>
-    <h2 style="font-size:2.4rem; font-weight:800; margin:0;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 10px; color:var(--ds-primary);">analytics</span> Inteligencia de Negocio</h2>
-    <p style="font-size:1.3rem; color:#64748B; margin-top:0.4rem;">Métricas clave de rendimiento y herramientas de extracción de datos.</p>
-  </div>
-  <div style="display:flex; gap: 15px;">
-    <form method="GET" action="" style="margin:0; display:flex; align-items:center; gap:10px;">
-      <span style="font-size:1.2rem; color:var(--ds-text-soft);">Filtro temporal:</span>
-      <select name="dias" onchange="this.form.submit()" style="padding: 10px 15px; border-radius: 8px; border: 1px solid var(--ds-border); outline: none; font-size: 13px; background: var(--ds-bg); color: var(--ds-text); font-weight:600;">
-        <option value="all" {% if estadisticas.filtro_actual == 'all' %}selected{% endif %}>Análisis Global Histórico</option>
-        <option value="7" {% if estadisticas.filtro_actual == '7' %}selected{% endif %}>Última Semana (7D)</option>
-        <option value="30" {% if estadisticas.filtro_actual == '30' %}selected{% endif %}>Último Mes (30D)</option>
-        <option value="90" {% if estadisticas.filtro_actual == '90' %}selected{% endif %}>Último Trimestre (90D)</option>
-      </select>
-    </form>
-    <button class="g-btn-primary" onclick="window.print()" style="display:flex; align-items:center; gap:8px;">
-        <span class="material-symbols-outlined">print</span> GENERAR PDF PROFESIONAL
-    </button>
-  </div>
-</div>
-
-<!-- PANEL DE MÉTRICAS GLOBALES -->
-<div class="g-row u-mb-4" style="margin-bottom: 40px;">
-  <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #2563EB; background: linear-gradient(145deg, #ffffff, #f1f5f9);">
-      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#2563EB; margin-bottom:10px;">inventory_2</span>
-      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Hardware Total</div>
-      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.inventario_total }}</div>
-      <div style="font-size:1.1rem; color:#10B981; font-weight:600;">+{{ estadisticas.nuevos_productos }} NUEVOS</div>
-    </div>
-  </div>
-  <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #7C3AED; background: linear-gradient(145deg, #ffffff, #f5f3ff);">
-      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#7C3AED; margin-bottom:10px;">payments</span>
-      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Ingresos (Periodo)</div>
-      <div style="font-size:2.8rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.ingresos_periodo|currency_cop }}</div>
-      <div style="font-size:1.1rem; color:#6366f1; font-weight:600;">{{ estadisticas.pedidos_total }} OPERACIONES</div>
-    </div>
-  </div>
-  <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #10B981; background: linear-gradient(145deg, #ffffff, #f0fdf4);">
-      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#10B981; margin-bottom:10px;">groups</span>
-      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Audiencia Total</div>
-      <div style="font-size:3.2rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.total_usuarios }}</div>
-      <div style="font-size:1.1rem; color:#10B981; font-weight:600;">CLIENTES ACTIVOS</div>
-    </div>
-  </div>
-  <div class="g-col-3">
-    <div class="mpro-card u-text-center" style="padding: 30px 20px; border-radius:16px; border-left: 6px solid #F59E0B; background: linear-gradient(145deg, #ffffff, #fffbeb);">
-      <span class="material-symbols-outlined" style="font-size:3.5rem; color:#F59E0B; margin-bottom:10px;">monitoring</span>
-      <div style="font-size:1.2rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing: 1px;">Ticket Promedio</div>
-      <div style="font-size:2.4rem; font-weight:800; color:#0F172A; margin-top: 10px;">{{ estadisticas.ticket_promedio|currency_cop }}</div>
-      <div style="font-size:1.1rem; color:#d97706; font-weight:600;">VALOR POR PEDIDO</div>
-    </div>
-  </div>
-</div>
-
-<!-- GRÁFICO DE RENDIMIENTO -->
-<div class="mpro-card u-mb-4" style="margin-bottom: 40px; padding: 30px; border-radius:16px;">
-  <div style="border-bottom:1px solid #E2E8F0; padding-bottom:1.5rem; margin-bottom:2rem; display: flex; justify-content: space-between; align-items: center;">
-    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);"><span class="material-symbols-outlined" style="vertical-align: middle;">bar_chart</span> Curva de Ingresos (COP Millones)</h3>
-    <span style="font-size:13px; color:var(--ds-text-soft); font-weight:600;">HISTORIAL DE LOS ÚLTIMOS 6 MESES</span>
-  </div>
-  <div style="position: relative; height: 350px; width: 100%;">
-    <canvas id="ventasChart"></canvas>
-  </div>
-</div>
-
-<!-- TABLA DE REPORTES DETALLADA (CRUD COMPLETO) -->
-<div class="mpro-card" style="padding:0; overflow:hidden; margin-bottom: 40px; border-radius:16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--ds-border);">
-  <div style="padding: 2.5rem; border-bottom: 1px solid var(--ds-border); background: var(--ds-bg); display: flex; justify-content: space-between; align-items: center;">
-    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text); margin:0;"><span class="material-symbols-outlined" style="vertical-align: middle;">receipt_long</span> Registro Completo de Transacciones</h3>
-    <div style="display:flex; gap:15px; align-items:center;">
-        <div style="position:relative;">
-          <span class="material-symbols-outlined" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ds-text-soft);">search</span>
-          <input type="text" id="transactionSearch" placeholder="Buscar pedido, cliente..." style="padding:8px 12px 0 35px; border-radius:8px; border:1px solid var(--ds-border); font-size:1.3rem; outline:none; width:250px;">
-        </div>
-        <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; font-weight:700; padding:8px 15px; border-radius:8px; font-size:1.2rem;">{{ pedidos|length }} OPERACIONES</span>
-    </div>
-  </div>
-  
-  <div class="g-table-container" style="border:none; border-radius:0; box-shadow:none; overflow-x:auto;">
-    <table class="g-table" style="width:100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background:var(--ds-bg-alt);">
-          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">REF. PEDIDO</th>
-          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">FECHA/HORA</th>
-          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">CLIENTE & DOCUMENTO</th>
-          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">HARDWARE ADQUIRIDO</th>
-          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px;">MONTO TOTAL</th>
-          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px; text-align:center;">ESTADO</th>
-          <th style="padding:15px 20px; font-size:1.2rem; text-transform:uppercase; letter-spacing:1px; text-align:center;">ACCIÓN</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for pedido in pedidos %}
-        <tr style="border-bottom:1px solid #F1F5F9; transition: background 0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-          <td style="padding:20px; font-family:'Inter', monospace; font-weight:700; color:var(--ds-secondary);">#{{ pedido.id|stringformat:"s"|slice:":8"|upper }}</td>
-          <td style="padding:20px; font-size:1.3rem; color:#475569;">
-            <div style="font-weight:700;">{{ pedido.creado_el|date:"d M Y" }}</div>
-            <div style="font-size:1.1rem; opacity:0.7;">{{ pedido.creado_el|date:"h:i A" }}</div>
-          </td>
-          <td style="padding:20px; font-size:1.3rem;">
-            <div style="font-weight:800; color:var(--ds-primary);">{{ pedido.usuario.nombre_mostrado }}</div>
-            <div style="font-size:1.1rem; color:#64748B; margin-top:4px;">ID: {{ pedido.cedula|default:"N/A" }} | Tel: {{ pedido.telefono|default:"N/A" }}</div>
-          </td>
-          <td style="padding:20px; font-size:1.2rem; max-width: 250px;">
-            <div style="display:flex; flex-wrap:wrap; gap:5px;">
-                {% for item in pedido.detalles.all %}
-                   <span style="background:#F1F5F9; color:#475569; padding:2px 8px; border-radius:4px; font-size:1.1rem; white-space:nowrap; border:1px solid #E2E8F0;">
-                     {{ item.cantidad }}x {{ item.producto.nombre|truncatechars:15 }}
-                   </span>
-                {% endfor %}
-            </div>
-          </td>
-          <td style="padding:20px; font-size:1.5rem; font-weight:800; color:#0F172A;">
-            {{ pedido.monto_total|currency_cop }}
-            <div style="font-size:1rem; color:#10B981; font-weight:600;">IVA INC. (19%)</div>
-          </td>
-          <td style="padding:20px; text-align:center;">
-            {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}
-              <span class="mpro-badge" style="background:#FEF3C7; color:#D97706; padding:6px 12px; font-weight:700; border-radius:20px; box-shadow: 0 0 10px rgba(217, 119, 6, 0.2);">PENDIENTE</span>
-            {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
-              <span class="mpro-badge" style="background:#DBEAFE; color:#1D4ED8; padding:6px 12px; font-weight:700; border-radius:20px; box-shadow: 0 0 10px rgba(29, 78, 216, 0.2);">EN CAMINO</span>
-            {% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
-              <span class="mpro-badge" style="background:#D1FAE5; color:#059669; padding:6px 12px; font-weight:700; border-radius:20px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);">ENTREGADO</span>
-            {% else %}
-              <span class="mpro-badge" style="background:#FEE2E2; color:#DC2626; padding:6px 12px; font-weight:700; border-radius:20px;">{{ pedido.estado|upper }}</span>
-            {% endif %}
-          </td>
-          <td style="padding:20px; text-align:center;">
-             <a href="{% url 'admin_order_invoice' pedido.id %}" target="_blank" class="g-btn-primary" style="padding:8px 15px; font-size:1.1rem; background:transparent; border:2px solid var(--ds-primary); color:var(--ds-primary); box-shadow:none; font-weight:700;">VER FACTURA</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="7" style="padding:60px; text-align:center; color:#64748B; font-size:1.5rem;">No hay registros de transacciones para este periodo.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- HERRAMIENTAS DE EXPORTACIÓN -->
-<div class="mpro-card" style="margin-bottom: 40px; border-radius:16px;" id="no-print">
-  <div style="border-bottom:1px solid #E2E8F0; padding-bottom:1.5rem; margin-bottom:3rem;">
-    <h3 style="font-size:1.8rem; font-weight:800; color: var(--ds-text);">📂 Exportación de Activos</h3>
-  </div>
-  <div class="g-row">
-    <div class="g-col-4">
-      <div style="border:1px solid #E2E8F0; border-radius:1.2rem; padding:2rem; background:#F8FAFC; height: 100%; display: flex; flex-direction: column; transition: all 0.3s ease;">
-        <h4 style="font-size:1.5rem; font-weight:800; margin-bottom:1rem; color: #1E293B;">Inventario Crítico</h4>
-        <p style="font-size:1.2rem; color:#64748B; margin-bottom:2rem; flex: 1; line-height: 1.5;">Relación detallada de existencias, precios y márgenes de hardware activo.</p>
-        <button class="g-btn-primary u-w-full" style="background:#1E293B; box-shadow: none;">Descargar CSV</button>
-      </div>
-    </div>
-    <div class="g-col-4">
-        <div style="border:1px solid #E2E8F0; border-radius:1.2rem; padding:2rem; background:#F8FAFC; height: 100%; display: flex; flex-direction: column; transition: all 0.3s ease;">
-          <h4 style="font-size:1.5rem; font-weight:800; margin-bottom:1rem; color: #1E293B;">Directorio de Clientes</h4>
-          <p style="font-size:1.2rem; color:#64748B; margin-bottom:2rem; flex: 1; line-height: 1.5;">Base de datos de contacto para segmentación de campañas y CRM.</p>
-          <button class="g-btn-primary u-w-full" style="background:#1E293B; box-shadow: none;">Descargar CSV</button>
-        </div>
-      </div>
-      <div class="g-col-4">
-        <div style="border:1px solid #E2E8F0; border-radius:1.2rem; padding:2rem; background:#F8FAFC; height: 100%; display: flex; flex-direction: column; transition: all 0.3s ease;">
-          <h4 style="font-size:1.5rem; font-weight:800; margin-bottom:1rem; color: #1E293B;">Análisis de Opinión</h4>
-          <p style="font-size:1.2rem; color:#64748B; margin-bottom:2rem; flex: 1; line-height: 1.5;">Compilación de reseñas y calificaciones para control de calidad.</p>
-          <button class="g-btn-primary u-w-full" style="background:#1E293B; box-shadow: none;">Descargar CSV</button>
-        </div>
-      </div>
-  </div>
-</div>
+<!-- Tailwind CSS CDN (Scoped for this view) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          techbg: '#F0F2F5',
+          techsurface: '#FFFFFF',
+          techborder: '#E2E8F0',
+          techaccent: '#1D4ED8',
+          techgreen: '#059669',
+          techamber: '#D97706',
+          techred: '#DC2626',
+        }
+      }
+    }
+  }
+</script>
 
 <style>
+  body.g-admin-layout { background-color: #F0F2F5 !important; }
+  .g-main-wrapper { background: #F0F2F5 !important; }
+
+  /* ── REPORTS: Tabla en px para evitar herencia del 62.5% html font-size ── */
+  #transactionsTable {
+    font-size: 15px !important;
+  }
+  #transactionsTable th {
+    font-size: 12px !important;
+    padding: 18px 24px !important;
+  }
+  #transactionsTable td {
+    font-size: 15px !important;
+    padding: 20px 24px !important;
+  }
+  #transactionsTable tbody tr {
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+  }
+  #transactionsTable tbody tr:hover {
+    background-color: #F0F7FF !important;
+    box-shadow: inset 3px 0 0 #1D4ED8;
+  }
+
   @media print {
-    #no-print, .g-sidebar, .g-topbar, .g-btn-primary, .sb-logo, .sb-nav { display: none !important; }
+    #no-print, .g-sidebar, .g-topbar, .print-hidden { display: none !important; }
     .report-header { display: block !important; }
-    .g-main-wrapper { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
-    .mpro-card { border: 1px solid #E2E8F0 !important; box-shadow: none !important; padding: 10px !important; margin-bottom: 20px !important; page-break-inside: avoid; }
-    body { background: white !important; font-size: 10pt; }
-    h2, h3 { color: black !important; margin-top: 5px !important; }
-    .g-table th { background: #F1F5F9 !important; color: black !important; -webkit-print-color-adjust: exact; }
-    .mpro-badge { border: 1px solid #CBD5E1 !important; color: black !important; -webkit-print-color-adjust: exact; }
+    .g-main-wrapper { margin-left: 0 !important; padding: 0 !important; width: 100% !important; background: white !important; }
+    body { background: white !important; color: black !important; }
   }
 </style>
 
+
+
+<!-- CONTENEDOR PRINCIPAL FLEX PARA RESPONSIVIDAD -->
+<div id="reportContent" style="display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;">
+
+  <!-- HERO STRIP: Métricas clave + Título + Acciones -->
+  <div style="
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 60%, #1D4ED8 100%);
+    border-radius: 20px;
+    padding: 3.2rem 3.6rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(29, 78, 216, 0.2);
+    width: 100%;
+    box-sizing: border-box;
+  " class="print-hidden">
+
+    <!-- Fondo decorativo -->
+    <div style="position:absolute; top:-40px; right:-40px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,0.04); pointer-events:none;"></div>
+    <div style="position:absolute; bottom:-60px; right:200px; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.03); pointer-events:none;"></div>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:2rem; position:relative; z-index:1;">
+      
+      <!-- Lado izquierdo: Título + KPIs -->
+      <div>
+        <div style="display:flex; align-items:center; gap:1.2rem; margin-bottom:2rem;">
+          <div style="width:4.4rem; height:4.4rem; border-radius:14px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+            <i data-lucide="bar-chart-3" style="width:2.2rem; height:2.2rem; color:white;"></i>
+          </div>
+          <div>
+            <h2 style="font-size:3rem; font-weight:800; color:#FFFFFF; margin:0; letter-spacing:-0.02em;">Centro de Reportes</h2>
+            <p style="font-size:1.55rem; color:rgba(255,255,255,0.55); margin-top:0.3rem; font-weight:500;">{{ pedidos|length }} transacciones &middot; {{ estadisticas.filtro_actual|upper }} días</p>
+          </div>
+        </div>
+
+        <!-- KPIs inline -->
+        <div style="display:flex; gap:2rem; flex-wrap:wrap;">
+          <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:1.6rem 2.4rem; backdrop-filter:blur(10px); min-width:18rem;">
+            <div style="font-size:1.3rem; color:rgba(255,255,255,0.55); font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.6rem;">Facturación</div>
+            <div style="font-size:2.8rem; font-weight:900; color:#34D399; line-height:1;">{{ estadisticas.ingresos_periodo|currency_cop }}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:1.6rem 2.4rem; backdrop-filter:blur(10px); min-width:16rem;">
+            <div style="font-size:1.3rem; color:rgba(255,255,255,0.55); font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.6rem;">Pedidos</div>
+            <div style="font-size:2.8rem; font-weight:900; color:#FFFFFF; line-height:1;">{{ estadisticas.pedidos_total }}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:1.6rem 2.4rem; backdrop-filter:blur(10px); min-width:16rem;">
+            <div style="font-size:1.3rem; color:rgba(255,255,255,0.55); font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.6rem;">Ticket Promedio</div>
+            <div style="font-size:2.8rem; font-weight:900; color:#60A5FA; line-height:1;">{{ estadisticas.ticket_promedio|currency_cop }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lado derecho: Filtro + Acciones -->
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:1.2rem;" class="export-hidden">
+        <form method="GET" action="" style="margin:0;">
+          <div style="display:flex; align-items:center; gap:0.8rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:0.8rem 1.4rem; backdrop-filter:blur(10px);">
+            <i data-lucide="calendar" style="width:1.8rem; height:1.8rem; color:rgba(255,255,255,0.7);"></i>
+            <select name="dias" onchange="this.form.submit()" style="background:transparent; border:none; color:white; font-size:1.5rem; font-weight:600; outline:none; cursor:pointer; font-family:'Inter',sans-serif;">
+              <option value="all" style="color:#0F172A; background:white;" {% if estadisticas.filtro_actual == 'all' %}selected{% endif %}>Global Histórico</option>
+              <option value="7"   style="color:#0F172A; background:white;" {% if estadisticas.filtro_actual == '7'   %}selected{% endif %}>Última Semana</option>
+              <option value="30"  style="color:#0F172A; background:white;" {% if estadisticas.filtro_actual == '30'  %}selected{% endif %}>Último Mes</option>
+              <option value="90"  style="color:#0F172A; background:white;" {% if estadisticas.filtro_actual == '90'  %}selected{% endif %}>Último Trimestre</option>
+            </select>
+          </div>
+        </form>
+        <div style="display:flex; gap:12px;">
+          <button onclick="exportarReporteCSV()" style="display:flex; align-items:center; gap:0.8rem; background:rgba(255,255,255,0.12); border:1.5px solid rgba(255,255,255,0.25); border-radius:12px; padding:1.2rem 2.2rem; color:white; font-size:1.5rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; backdrop-filter:blur(10px);"
+            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+            <i data-lucide="file-spreadsheet" style="width:1.6rem; height:1.6rem;"></i> Exportar Excel / CSV
+          </button>
+          <button onclick="exportarReportePDF(this)" style="display:flex; align-items:center; gap:0.8rem; background:rgba(255,255,255,0.12); border:1.5px solid rgba(255,255,255,0.25); border-radius:12px; padding:1.2rem 2.2rem; color:white; font-size:1.5rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; backdrop-filter:blur(10px);"
+            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+            <i data-lucide="download" style="width:1.6rem; height:1.6rem;"></i> Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN DEL GRÁFICO (NUEVO / PREMIUM AESTHETICS) -->
+  <div class="print-hidden" style="
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid var(--ds-border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    padding: 24px;
+    width: 100%;
+    box-sizing: border-box;
+  ">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="trending-up" style="color: #1D4ED8; width: 2rem; height: 2rem;"></i> Tendencia de Facturación
+      </h3>
+      <span style="font-size: 12px; font-weight: 600; color: #64748B; background: #F1F5F9; padding: 4px 10px; border-radius: 12px;">Últimos 6 meses (COP Millones)</span>
+    </div>
+    <div style="height: 250px; position: relative; width: 100%;">
+      <canvas id="ventasChart"></canvas>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL DE TRANSACCIONES (HISTORIAL DE FACTURACIÓN) -->
+  <div class="print-hidden" style="
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid var(--ds-border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    padding: 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-sizing: border-box;
+  ">
+
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="receipt" style="color: #059669; width: 2rem; height: 2rem;"></i> Historial de Facturas
+      </h3>
+    </div>
+
+    <!-- Barra de filtros premium -->
+    <div style="
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      width: 100%;
+      box-sizing: border-box;
+    " class="print-hidden export-hidden">
+      
+      <!-- Entrada de búsqueda -->
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 260px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 0 14px;
+        transition: all 0.2s;
+      " onfocusin="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF'; this.style.boxShadow='0 0 0 3px rgba(29, 78, 216, 0.08)';" onfocusout="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC'; this.style.boxShadow='none';">
+        <i data-lucide="search" style="width:1.6rem; height:1.6rem; color:#64748B; flex-shrink:0;"></i>
+        <input type="text" id="transactionSearch" placeholder="Buscar factura por referencia, cliente..." style="border:none; outline:none; font-size:14px; font-family:'Inter',sans-serif; color:#0F172A; width:100%; padding:12px 0; background:transparent;">
+      </div>
+
+      <!-- Filtro de Estado -->
+      <div style="position: relative; min-width: 160px; flex: 0 1 auto;">
+        <select id="statusFilter" style="
+          width: 100%;
+          padding: 12px 16px;
+          padding-right: 36px;
+          border-radius: 10px;
+          border: 1px solid #E2E8F0;
+          font-size: 14px;
+          font-family: 'Inter', sans-serif;
+          background: #F8FAFC;
+          color: #0F172A;
+          outline: none;
+          cursor: pointer;
+          font-weight: 500;
+          appearance: none;
+          -webkit-appearance: none;
+          transition: all 0.2s;
+        " onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';" onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <option value="all">Todos los estados</option>
+          <option value="PENDIENTE">🟡 Pendiente</option>
+          <option value="EN CAMINO">🔵 En Camino</option>
+          <option value="ENTREGADO">🟢 Entregado</option>
+          <option value="CANCELADO">🔴 Cancelado</option>
+        </select>
+        <i data-lucide="chevron-down" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748B; pointer-events: none;"></i>
+      </div>
+
+      <!-- Filtro de Pago -->
+      <div style="position: relative; min-width: 180px; flex: 0 1 auto;">
+        <select id="paymentFilter" style="
+          width: 100%;
+          padding: 12px 16px;
+          padding-right: 36px;
+          border-radius: 10px;
+          border: 1px solid #E2E8F0;
+          font-size: 14px;
+          font-family: 'Inter', sans-serif;
+          background: #F8FAFC;
+          color: #0F172A;
+          outline: none;
+          cursor: pointer;
+          font-weight: 500;
+          appearance: none;
+          -webkit-appearance: none;
+          transition: all 0.2s;
+        " onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';" onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <option value="all">Todos los métodos de pago</option>
+          <option value="TARJETA">Tarjeta de Crédito</option>
+          <option value="EFECTIVO">Efectivo / Contraentrega</option>
+          <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+        </select>
+        <i data-lucide="chevron-down" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748B; pointer-events: none;"></i>
+      </div>
+
+      <!-- Rango de Fechas -->
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap; flex: 1 1 auto; min-width: 280px;">
+        <div style="position: relative; flex: 1; min-width: 120px;">
+          <input type="date" id="startDateFilter" title="Desde" style="
+            width: 100%;
+            padding: 12px 14px;
+            padding-left: 38px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+          " onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';" onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <i data-lucide="calendar" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748B; pointer-events: none;"></i>
+        </div>
+        <span style="font-size: 14px; color: #94A3B8; font-weight: 600;">→</span>
+        <div style="position: relative; flex: 1; min-width: 120px;">
+          <input type="date" id="endDateFilter" title="Hasta" style="
+            width: 100%;
+            padding: 12px 14px;
+            padding-left: 38px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+          " onfocus="this.style.borderColor='#1D4ED8'; this.style.background='#FFFFFF';" onblur="this.style.borderColor='#E2E8F0'; this.style.background='#F8FAFC';">
+          <i data-lucide="calendar" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748B; pointer-events: none;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE HISTORIAL DE FACTURAS -->
+    <div id="billingTableContainer" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+      <div style="overflow-x:auto; width: 100%; border-radius: 12px; border: 1px solid var(--ds-border); box-sizing: border-box;">
+        <table style="width:100%; border-collapse:collapse; text-align:left; min-width: 900px;" id="transactionsTable">
+          <thead>
+            <tr style="background:#F8FAFF; border-bottom:1.5px solid var(--ds-border);">
+              <th onclick="sortTable(0, 'transactionsTable')" style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
+                <div style="display:flex; align-items:center; gap:6px;">REF. <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
+              </th>
+              <th onclick="sortTable(1, 'transactionsTable')" style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:nowrap;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
+                <div style="display:flex; align-items:center; gap:6px;">FECHA <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
+              </th>
+              <th style="width: 22%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">CLIENTE</th>
+              <th style="width: 14%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PAGO</th>
+              <th style="width: 20%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">PRODUCTOS</th>
+              <th onclick="sortTable(5, 'transactionsTable')" style="width: 12%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; cursor:pointer; white-space:nowrap; user-select:none;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='transparent'">
+                <div style="display:flex; align-items:center; gap:6px;">MONTO <i data-lucide="chevrons-up-down" style="width:1.4rem; height:1.4rem; opacity:0.5;"></i></div>
+              </th>
+              <th style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; text-align:center;">ESTADO</th>
+              <th style="width: 10%; padding:16px 20px; font-size:12px; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; text-align:center;" class="print-hidden">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pedido in pedidos %}
+            <tr class="billing-row-data" style="border-bottom:1px solid var(--ds-border); transition:all 0.15s ease;"
+                onmouseover="this.style.background='#F0F7FF'; this.style.boxShadow='inset 3px 0 0 #1D4ED8';"
+                onmouseout="this.style.background=''; this.style.boxShadow='';"
+                data-status="{% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}PENDIENTE{% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}EN CAMINO{% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}ENTREGADO{% else %}CANCELADO{% endif %}"
+                data-payment="{% if 'tarjeta' in pedido.notas|lower %}TARJETA{% elif 'efectivo' in pedido.notas|lower %}EFECTIVO{% else %}TRANSFERENCIA{% endif %}"
+                data-date="{{ pedido.creado_el|date:'Y-m-d' }}"
+                data-search="{{ pedido.id|stringformat:'s'|lower }} {{ pedido.usuario.nombre_mostrado|lower }} {{ pedido.direccion_envio|lower }}">
+
+              <!-- REF -->
+              <td style="padding:20px 24px; font-family:monospace; font-size:15px; font-weight:800; color:#1D4ED8; white-space:nowrap;">
+                #{{ pedido.id|stringformat:"s"|slice:":8"|upper }}
+              </td>
+
+              <!-- FECHA -->
+              <td style="padding:20px 24px; white-space:nowrap;">
+                <span style="display:block; font-weight:700; font-size:15px; color:var(--ds-text);">{{ pedido.creado_el|date:"d M Y" }}</span>
+                <span style="display:block; font-size:13px; color:var(--ds-text-soft); margin-top:3px;">{{ pedido.creado_el|date:"h:i A" }}</span>
+              </td>
+
+              <!-- CLIENTE -->
+              <td style="padding:20px 24px;">
+                <span style="display:block; font-weight:800; font-size:15px; color:var(--ds-text);">{{ pedido.usuario.nombre_mostrado }}</span>
+                <span style="display:block; font-size:13px; color:var(--ds-text-soft); margin-top:3px;">{{ pedido.cedula|default:"N/A" }} · {{ pedido.telefono|default:"N/A" }}</span>
+              </td>
+
+              <!-- METODO PAGO -->
+              <td style="padding:20px 24px; white-space:nowrap;">
+                {% if 'tarjeta' in pedido.notas|lower %}
+                  <span style="display:inline-flex; align-items:center; gap:6px; background:#EFF6FF; color:#1D4ED8; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;"><i data-lucide="credit-card" style="width:14px; height:14px;"></i> Tarjeta</span>
+                {% elif 'efectivo' in pedido.notas|lower %}
+                  <span style="display:inline-flex; align-items:center; gap:6px; background:#ECFDF5; color:#059669; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;"><i data-lucide="banknote" style="width:14px; height:14px;"></i> Efectivo</span>
+                {% else %}
+                  <span style="display:inline-flex; align-items:center; gap:6px; background:#F3F4F6; color:#6B7280; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700;"><i data-lucide="landmark" style="width:14px; height:14px;"></i> Transferencia</span>
+                {% endif %}
+              </td>
+
+              <!-- PRODUCTOS -->
+              <td style="padding:20px 24px; max-width:220px;">
+                <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                  {% for item in pedido.detalles.all %}
+                  <span style="background:#F8FAFF; border:1px solid #E2E8F0; color:#475569; padding:4px 10px; border-radius:8px; font-size:13px; font-weight:600; white-space:nowrap;">
+                    {{ item.cantidad }}× {{ item.producto.nombre|truncatechars:18 }}
+                  </span>
+                  {% endfor %}
+                </div>
+              </td>
+
+              <!-- MONTO -->
+              <td class="py-4 px-6 font-black text-sm text-slate-900">
+                {{ pedido.monto_total|currency_cop }}
+                <span class="block text-[9px] text-techgreen font-bold tracking-wider mt-0.5">IVA INC. (19%)</span>
+              </td>
+
+              <!-- ESTADO -->
+              <td class="py-4 px-6 text-center">
+                {% if pedido.estado == 'pending' or pedido.estado == 'Pendiente' or pedido.estado == 'processing' %}
+                  <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#FEF3C7; color:#92400E; border:1.5px solid #FDE68A;">PENDIENTE</span>
+                {% elif pedido.estado == 'shipped' or pedido.estado == 'Enviado' %}
+                  <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#DBEAFE; color:#1E40AF; border:1.5px solid #BFDBFE;">EN CAMINO</span>
+                {% elif pedido.estado == 'delivered' or pedido.estado == 'Entregado' %}
+                  <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#DCFCE7; color:#166534; border:1.5px solid #BBF7D0;">ENTREGADO</span>
+                {% else %}
+                  <span style="display:inline-block; padding:5px 14px; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; border-radius:20px; background:#FEE2E2; color:#991B1B; border:1.5px solid #FECACA;">CANCELADO</span>
+                {% endif %}
+              </td>
+
+              <!-- ACCIONES -->
+              <td style="padding:16px 24px; text-align:center;" class="print-hidden">
+                <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
+                  <button
+                    onclick="descargarFacturaPDF('{{ pedido.id }}', this)"
+                    title="Descargar factura en PDF"
+                    style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:6px; background:transparent; color:#64748B; border:none; cursor:pointer; transition:all 0.2s;"
+                    onmouseover="this.style.color='#059669'; this.style.background='#ECFDF5';"
+                    onmouseout="this.style.color='#64748B'; this.style.background='transparent';">
+                    <i data-lucide="download" style="width:16px; height:16px;"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row-billing"><td colspan="8" class="py-12 text-center text-[#64748B]">Ningún registro de ventas o facturas encontrado en el sistema.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACIÓN FACTURAS -->
+      <div style="border-top:1px solid #E2E8F0; padding-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; width:100%; box-sizing:border-box;" class="print-hidden export-hidden">
+        <div style="font-size:14px; color:var(--ds-text-soft); font-weight:500;">
+          Mostrando <strong style="color:var(--ds-text);" id="visibleBillingCount">0</strong> de
+          <strong style="color:var(--ds-text);" id="totalBillingCount">0</strong> facturas
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button id="prevBillingBtn" disabled
+            style="padding:8px 18px; border:1.5px solid var(--ds-border); border-radius:8px; font-size:13px; font-weight:600; color:var(--ds-text-soft); background:white; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;"
+            onmouseover="if(!this.disabled){this.style.borderColor='#1D4ED8'; this.style.color='#1D4ED8';}" onmouseout="this.style.borderColor='var(--ds-border)'; this.style.color='var(--ds-text-soft)';">
+            ← Anterior
+          </button>
+          <span id="pageBillingLabel" style="font-size:13px; font-weight:700; color:var(--ds-text); padding:0 8px;">Pág. 1 / 1</span>
+          <button id="nextBillingBtn" disabled
+            style="padding:8px 18px; border:1.5px solid var(--ds-border); border-radius:8px; font-size:13px; font-weight:600; color:var(--ds-text-soft); background:white; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;"
+            onmouseover="if(!this.disabled){this.style.borderColor='#1D4ED8'; this.style.color='#1D4ED8';}" onmouseout="this.style.borderColor='var(--ds-border)'; this.style.color='var(--ds-text-soft)';">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    // 1. Lógica del Buscador
+    // 1. SISTEMA DE FILTRADO TRANSACCIONAL DINÁMICO EN EL CLIENTE
     const searchInput = document.getElementById('transactionSearch');
-    const tableBody = document.querySelector('.g-table tbody');
-    const rows = tableBody.querySelectorAll('tr');
+    const statusSelect = document.getElementById('statusFilter');
+    const paymentSelect = document.getElementById('paymentFilter');
+    const startDateInput = document.getElementById('startDateFilter');
+    const endDateInput = document.getElementById('endDateFilter');
 
-    searchInput.addEventListener('input', function() {
-      const query = this.value.toLowerCase().trim();
-      rows.forEach(row => {
-        if (row.classList.contains('empty-row')) return;
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
+    const rows = document.querySelectorAll('.billing-row-data');
+    
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    
+    let filteredRows = Array.from(rows);
+
+    function updateTableUI() {
+      // Paginación
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      rows.forEach(r => r.style.display = 'none');
+      filteredRows.slice(start, end).forEach(r => r.style.display = '');
+
+      // Estado vacío
+      const emptyRow = document.querySelector('.empty-row-billing');
+      if (emptyRow) {
+        emptyRow.style.display = filteredRows.length === 0 ? '' : 'none';
+      }
+
+      // Conteo
+      document.getElementById('visibleBillingCount').textContent = filteredRows.length;
+      document.getElementById('totalBillingCount').textContent = rows.length;
+      const totalPages = Math.ceil(filteredRows.length / itemsPerPage) || 1;
+      document.getElementById('pageBillingLabel').textContent = `Pág. ${currentPage} / ${totalPages}`;
+      document.getElementById('prevBillingBtn').disabled = currentPage === 1;
+      document.getElementById('nextBillingBtn').disabled = currentPage === totalPages;
+    }
+
+    function applyFilters() {
+      const query = searchInput.value.toLowerCase().trim();
+      const selectedStatus = statusSelect.value;
+      const selectedPayment = paymentSelect.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      filteredRows = Array.from(rows).filter(row => {
+        const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+        const rowStatus = row.getAttribute('data-status');
+        const rowPayment = row.getAttribute('data-payment');
+        const rowDate = row.getAttribute('data-date');
+
+        const matchesSearch = textContent.includes(query);
+        const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
+        const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
+        
+        let matchesDate = true;
+        if (startDate && rowDate < startDate) matchesDate = false;
+        if (endDate && rowDate > endDate) matchesDate = false;
+
+        return matchesSearch && matchesStatus && matchesPayment && matchesDate;
       });
-    });
 
-    // 2. Gráfico Premium (Area Chart)
-    const ctx = document.getElementById('ventasChart').getContext('2d');
-    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(29, 78, 216, 0.4)');   
-    gradient.addColorStop(1, 'rgba(29, 78, 216, 0.0)');   
+      currentPage = 1;
+      updateTableUI();
+    }
 
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: {{ chart_labels|safe }},
-        datasets: [{
-          label: 'Ingresos Mensuales',
-          data: {{ chart_data|safe }},
-          borderColor: '#1D4ED8',
-          borderWidth: 4,
-          backgroundColor: gradient,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#1D4ED8',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 6,
-          pointHoverRadius: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#0F172A',
-            titleFont: { family: 'Inter', size: 14, weight: 'bold' },
-            bodyFont: { family: 'Inter', size: 14 },
-            padding: 15,
-            cornerRadius: 10,
-            displayColors: false,
-            callbacks: {
-              label: function(context) { return '$ ' + context.raw + ' COP Millones'; }
-            }
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: { color: '#F1F5F9', drawBorder: false },
-            ticks: { font: { family: 'Inter', size: 12 }, color: '#64748B', callback: function(val) { return '$' + val + 'M'; } }
-          },
-          x: {
-            grid: { display: false },
-            ticks: { font: { family: 'Inter', size: 12, weight: '600' }, color: '#475569' }
-          }
-        }
+    // Registrar Eventos de Filtro
+    searchInput.addEventListener('input', applyFilters);
+    statusSelect.addEventListener('change', applyFilters);
+    paymentSelect.addEventListener('change', applyFilters);
+    startDateInput.addEventListener('change', applyFilters);
+    endDateInput.addEventListener('change', applyFilters);
+
+    // Controles de Paginación
+    document.getElementById('prevBillingBtn').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        updateTableUI();
       }
     });
+
+    document.getElementById('nextBillingBtn').addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        updateTableUI();
+      }
+    });
+
+    // Carga inicial
+    applyFilters();
+
+    // Función de exportación de reporte a Excel/CSV en base a las filas filtradas
+    window.exportarReporteCSV = function() {
+      let csvContent = "\uFEFF"; // BOM para acentos en Excel
+      csvContent += ["Referencia", "Fecha", "Cliente", "Detalles Cliente", "Método de Pago", "Monto", "Estado"].join(";") + "\r\n";
+      
+      filteredRows.forEach(row => {
+        const ref = row.cells[0].textContent.trim().replace(/#/g, '');
+        const date = row.cells[1].textContent.trim().replace(/\s+/g, ' ');
+        const clientName = row.querySelector('td:nth-child(3) span:first-child').textContent.trim();
+        const clientInfo = row.querySelector('td:nth-child(3) span:last-child').textContent.trim().replace(/·/g, '-');
+        const payment = row.getAttribute('data-payment');
+        
+        // Obtener monto de forma limpia (sin IVA ni saltos de línea)
+        const amountText = row.cells[5].textContent.trim().split('\n')[0].trim();
+        const amount = amountText.replace(/[^\d]/g, '');
+        
+        const status = row.getAttribute('data-status');
+        
+        const line = [ref, date, clientName, clientInfo, payment, amount, status].map(val => {
+          let cleanVal = val.replace(/"/g, '""');
+          return `"${cleanVal}"`;
+        }).join(";");
+        
+        csvContent += line + "\r\n";
+      });
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "Reporte_Facturacion_MIKITECH.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      if (window.adminToast) {
+        window.adminToast.success('Reporte Excel/CSV exportado correctamente');
+      }
+    };
+
+    // 2. CONFIGURACIÓN DEL GRÁFICO (CHART.JS LIGHT MODE NEON BLUE)
+    const canvas = document.getElementById('ventasChart');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      let gradient = ctx.createLinearGradient(0, 0, 0, 250);
+      gradient.addColorStop(0, 'rgba(29, 78, 216, 0.15)'); // Glow azul
+      gradient.addColorStop(1, 'rgba(29, 78, 216, 0.0)');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ chart_labels|safe }},
+          datasets: [{
+            label: 'Ingresos Mensuales',
+            data: {{ chart_data|safe }},
+            borderColor: '#1D4ED8',
+            borderWidth: 3,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#1D4ED8',
+            pointBorderColor: '#FFFFFF',
+            pointBorderWidth: 2.5,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1E293B',
+              borderColor: '#E2E8F0',
+              borderWidth: 1,
+              titleColor: '#FFFFFF',
+              titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+              bodyColor: '#38BDF8',
+              bodyFont: { family: 'Inter', size: 12, weight: 'bold' },
+              padding: 12,
+              cornerRadius: 4,
+              displayColors: false,
+              callbacks: {
+                label: function(context) { return '$ ' + context.raw + ' COP Millones'; }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(226, 232, 240, 0.8)', drawBorder: false },
+              ticks: { 
+                font: { family: 'Inter', size: 10 }, 
+                color: '#64748B', 
+                callback: function(val) { return '$' + val + 'M'; } 
+              }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: 'Inter', size: 10, weight: '600' }, color: '#64748B' }
+            }
+          }
+        }
+      });
+    }
   });
+
+  // 3. LÓGICA DE ORDENACIÓN DE TABLA
+  let sortDirections = {
+    'transactionsTable': [true, true, true, true, true, true, true]
+  };
+  function sortTable(colIdx, tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr.billing-row-data"));
+    const ascending = sortDirections[tableId][colIdx];
+    
+    rows.sort((rowA, rowB) => {
+      let cellA = rowA.cells[colIdx].textContent.trim();
+      let cellB = rowB.cells[colIdx].textContent.trim();
+
+      if (colIdx === 5) {
+        cellA = parseFloat(cellA.replace(/[^\d]/g, '')) || 0;
+        cellB = parseFloat(cellB.replace(/[^\d]/g, '')) || 0;
+      }
+
+      if (cellA < cellB) return ascending ? -1 : 1;
+      if (cellA > cellB) return ascending ? 1 : -1;
+      return 0;
+    });
+
+    sortDirections[tableId][colIdx] = !ascending;
+    rows.forEach(row => tbody.appendChild(row));
+    
+    const itemsPerPage = 10;
+    const query = document.getElementById('transactionSearch').value.toLowerCase().trim();
+    const selectedStatus = document.getElementById('statusFilter').value;
+    const selectedPayment = document.getElementById('paymentFilter').value;
+    const startDate = document.getElementById('startDateFilter').value;
+    const endDate = document.getElementById('endDateFilter').value;
+
+    const allBillingRows = document.querySelectorAll('.billing-row-data');
+    const filtered = Array.from(allBillingRows).filter(row => {
+      const textContent = row.getAttribute('data-search') || row.textContent.toLowerCase();
+      const rowStatus = row.getAttribute('data-status');
+      const rowPayment = row.getAttribute('data-payment');
+      const rowDate = row.getAttribute('data-date');
+
+      const matchesSearch = textContent.includes(query);
+      const matchesStatus = selectedStatus === 'all' || rowStatus === selectedStatus;
+      const matchesPayment = selectedPayment === 'all' || rowPayment === selectedPayment;
+      
+      let matchesDate = true;
+      if (startDate && rowDate < startDate) matchesDate = false;
+      if (endDate && rowDate > endDate) matchesDate = false;
+
+      return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+    });
+
+    allBillingRows.forEach(r => r.style.display = 'none');
+    filtered.slice(0, itemsPerPage).forEach(r => r.style.display = '');
+  }
 </script>
 
+<!-- jsPDF + html2canvas para descarga de PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/**
+ * descargarFacturaPDF(pedidoId, btn)
+ * Abre la factura en un iframe oculto, la captura con html2canvas y genera el PDF.
+ */
+async function descargarFacturaPDF(pedidoId, btn) {
+  const icon = btn.querySelector('i');
+  btn.disabled = true;
+  const originalStyle = btn.className;
+  btn.className = "inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 bg-amber-50 cursor-not-allowed";
+  
+  if (icon) icon.setAttribute('data-lucide', 'loader');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  let spinInterval = null;
+  let rotation = 0;
+  if (icon) {
+    spinInterval = setInterval(() => {
+      rotation = (rotation + 30) % 360;
+      icon.style.transform = `rotate(${rotation}deg)`;
+    }, 50);
+  }
+
+  try {
+    const response = await fetch(`/admin-panel/logistica/factura/${pedidoId}/?format=json`);
+    if (!response.ok) throw new Error('Error al obtener los datos de la factura');
+    const orderData = await response.json();
+
+    const amount   = orderData.monto_total;
+    const tax      = amount * 0.19;
+    const subtotal = amount - tax;
+    const fmt      = new Intl.NumberFormat('es-CO');
+
+    let itemsHtml = '';
+    orderData.detalles.forEach(function(item, index) {
+      const itemTotal = item.cantidad * item.precio;
+      itemsHtml += `
+        <tr style="border-bottom:1px solid #E2E8F0; background:${index % 2 === 0 ? '#FFFFFF' : '#F8FAFC'};">
+          <td style="padding:14px 12px; font-size:12px; color:#64748B; font-weight:600;">${(index + 1).toString().padStart(2, '0')}</td>
+          <td style="padding:14px 12px; font-size:13px; color:#0F172A; font-weight:600;">${item.nombre}</td>
+          <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center;">${fmt.format(item.precio)}</td>
+          <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center; font-weight:700;">${item.cantidad}</td>
+          <td style="padding:14px 12px; font-size:13px; color:#0F172A; text-align:right; font-weight:700;">${fmt.format(itemTotal)}</td>
+        </tr>`;
+    });
+
+    if (orderData.detalles.length === 0) {
+      itemsHtml = `<tr><td colspan="5" style="padding:24px; text-align:center; color:#94A3B8; font-size:13px;">Sin productos registrados.</td></tr>`;
+    }
+
+    const invoiceHtml = `
+      <div style="font-family:Arial,Helvetica,sans-serif; background:#FFFFFF; color:#0F172A; width:794px; padding:48px 56px; box-sizing:border-box;">
+
+        <!-- ── HEADER ── -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:28px; border-bottom:3px solid #1D4ED8; margin-bottom:36px;">
+          <div>
+            <div style="font-size:32px; font-weight:900; letter-spacing:2px; color:#0F172A; line-height:1;">
+              <span style="color:#1D4ED8;">⚡ MIKI</span>TECH
+            </div>
+            <div style="font-size:12px; color:#64748B; margin-top:6px; font-weight:500;">Componentes y Hardware de Alto Rendimiento</div>
+            <div style="font-size:11px; color:#94A3B8; margin-top:3px;">mikitech.com &nbsp;|&nbsp; soporte@mikitech.com</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:36px; font-weight:900; color:#1D4ED8; letter-spacing:-1px; line-height:1;">FACTURA</div>
+            <div style="margin-top:14px;">
+              <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">N.° de Referencia</div>
+              <div style="font-size:16px; font-weight:800; color:#1D4ED8; margin-top:2px;">#${orderData.order_id.substring(0, 8).toUpperCase()}</div>
+            </div>
+            <div style="margin-top:10px;">
+              <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Fecha de Emisión</div>
+              <div style="font-size:14px; font-weight:700; color:#0F172A; margin-top:2px;">${orderData.creado_el}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── BILLING INFO ── -->
+        <div style="display:flex; justify-content:space-between; margin-bottom:36px; gap:24px;">
+          <div style="flex:1; background:#EFF6FF; border-radius:12px; padding:20px 24px; border-left:4px solid #1D4ED8;">
+            <div style="font-size:11px; font-weight:800; color:#1D4ED8; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Facturar a</div>
+            <div style="font-size:17px; font-weight:800; color:#0F172A; margin-bottom:6px;">${orderData.cliente_nombre}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Usuario: @${orderData.cliente_username}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Identificación: ${orderData.cedula}</div>
+            <div style="font-size:12px; color:#475569; font-weight:500;">Tel: ${orderData.cliente_telefono}</div>
+          </div>
+          <div style="flex:1; background:#F8FAFC; border-radius:12px; padding:20px 24px; border-left:4px solid #E2E8F0;">
+            <div style="font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Información del Pedido</div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Dirección:</span>
+              <span style="margin-left:6px; color:#0F172A; font-weight:600;">${orderData.direccion_envio}</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Envío:</span>
+              <span style="color:#16A34A; font-weight:700; margin-left:6px;">GRATIS</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
+              <span style="font-weight:700; color:#0F172A;">Puntos ganados:</span>
+              <span style="color:#7C3AED; font-weight:700; margin-left:6px;">${Math.floor(amount / 100000)} pts</span>
+            </div>
+            <div style="font-size:12px; color:#475569; font-weight:500;">
+              <span style="font-weight:700; color:#0F172A;">Garantía:</span>
+              <span style="margin-left:6px;">1 año en componentes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LINE ITEMS TABLE ── -->
+        <table style="width:100%; border-collapse:collapse; margin-bottom:32px; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
+          <thead>
+            <tr style="background:linear-gradient(135deg,#1D4ED8,#7C3AED); color:#FFFFFF;">
+              <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:48px;">#</th>
+              <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;">Descripción del Producto</th>
+              <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:110px;">Precio Unit.</th>
+              <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:70px;">Cant.</th>
+              <th style="padding:14px 12px; text-align:right; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:120px;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <!-- ── TOTALS ── -->
+        <div style="display:flex; justify-content:flex-end; margin-bottom:48px;">
+          <div style="width:300px; background:#F8FAFC; border-radius:14px; border:1px solid #E2E8F0; overflow:hidden;">
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
+              <span>Subtotal (sin IVA):</span>
+              <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(subtotal))} COP</span>
+            </div>
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
+              <span>IVA (19%):</span>
+              <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(tax))} COP</span>
+            </div>
+            <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#16A34A; font-weight:600;">
+              <span>Envío:</span>
+              <span style="font-weight:700;">GRATIS</span>
+            </div>
+            <div style="padding:20px; background:linear-gradient(135deg,#1D4ED8,#7C3AED); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:15px; font-weight:800; color:#FFFFFF;">TOTAL A PAGAR:</span>
+              <span style="font-size:20px; font-weight:900; color:#FFFFFF;">${fmt.format(amount)} COP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── FOOTER ── -->
+        <div style="border-top:1px solid #E2E8F0; padding-top:20px; text-align:center;">
+          <div style="font-size:11px; color:#94A3B8; font-weight:500; line-height:1.7;">
+            Gracias por tu compra en MIKITECH. Esta es una representación electrónica válida de tu pedido.<br>
+            Garantía de 1 año en todos los componentes. Para soporte: soporte@mikitech.com
+          </div>
+          <div style="margin-top:10px; font-size:12px; font-weight:800; color:#1D4ED8; letter-spacing:1px;">
+            <span style="color:#38BDF8;">MIKI</span>TECH &nbsp;·&nbsp; mikitech.com
+          </div>
+        </div>
+      </div>`;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:absolute; top:0; left:-9999px; width:794px; background:#FFFFFF; z-index:-1; pointer-events:none;';
+    wrapper.innerHTML = invoiceHtml;
+    document.body.appendChild(wrapper);
+
+    await new Promise(r => requestAnimationFrame(r));
+
+    const canvas = await html2canvas(wrapper, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: 794,
+    });
+
+    document.body.removeChild(wrapper);
+
+    let jsPDFClass;
+    if (window.jspdf && window.jspdf.jsPDF) {
+      jsPDFClass = window.jspdf.jsPDF;
+    } else if (window.jsPDF) {
+      jsPDFClass = window.jsPDF;
+    } else {
+      throw new Error('La librería jsPDF no está cargada.');
+    }
+
+    const pdf = new jsPDFClass({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    let heightLeft = pdfHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - pdfHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`Factura-${pedidoId.slice(0, 8).toUpperCase()}-MIKITECH.pdf`);
+
+    if (window.adminToast) window.adminToast.success('PDF descargado correctamente');
+
+  } catch (err) {
+    console.error('Error generando PDF:', err);
+    if (window.adminToast) window.adminToast.error('Error al generar el PDF: ' + err.message);
+    else alert('Error al generar el PDF: ' + err.message);
+  } finally {
+    clearInterval(spinInterval);
+    if (icon) {
+      icon.style.transform = '';
+      icon.setAttribute('data-lucide', 'download');
+    }
+    btn.disabled = false;
+    btn.className = originalStyle;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+
+/**
+ * exportarReportePDF(btn)
+ * Genera un PDF del reporte capturando el contenido HTML,
+ * lo convierte a un Blob y lo descarga automáticamente sin abrir el diálogo de impresión.
+ */
+async function exportarReportePDF(btn) {
+  const icon = btn.querySelector('i');
+  btn.disabled = true;
+  const originalStyle = btn.className;
+  const originalContent = btn.innerHTML;
+  
+  btn.style.opacity = '0.7';
+  btn.style.cursor = 'not-allowed';
+  btn.innerHTML = '<i data-lucide="loader"></i> Exportando...';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  let spinInterval = null;
+  let rotation = 0;
+  const loaderIcon = btn.querySelector('i');
+  if (loaderIcon) {
+    spinInterval = setInterval(() => {
+      rotation = (rotation + 30) % 360;
+      loaderIcon.style.transform = `rotate(${rotation}deg)`;
+    }, 50);
+  }
+
+  try {
+    // Ocultar elementos interactivos/filtros
+    const hiddenElements = document.querySelectorAll('.export-hidden');
+    hiddenElements.forEach(el => el.style.setProperty('display', 'none', 'important'));
+
+    // Esperar un momento para asegurar el renderizado
+    await new Promise(r => setTimeout(r, 300));
+
+    const reportEl = document.getElementById('reportContent');
+    const canvas = await html2canvas(reportEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#F0F2F5',
+      logging: false
+    });
+
+    // Restaurar elementos ocultos
+    hiddenElements.forEach(el => el.style.display = '');
+
+    let jsPDFClass;
+    if (window.jspdf && window.jspdf.jsPDF) {
+      jsPDFClass = window.jspdf.jsPDF;
+    } else if (window.jsPDF) {
+      jsPDFClass = window.jsPDF;
+    } else {
+      throw new Error('La librería jsPDF no está cargada.');
+    }
+    const pdf = new jsPDFClass({
+      orientation: 'portrait',
+      unit: 'px',
+      format: 'a4',
+      compress: true,
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgW = pageWidth;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    let yOffset = 0;
+    let pageCount = 0;
+    while (yOffset < imgH) {
+      if (pageCount > 0) pdf.addPage();
+      pdf.addImage(
+        canvas.toDataURL('image/jpeg', 0.95),
+        'JPEG',
+        0,
+        -yOffset,
+        imgW,
+        imgH
+      );
+      yOffset += pageHeight;
+      pageCount++;
+    }
+
+    pdf.save('Reporte-Facturacion-MIKITECH.pdf');
+
+    if (window.adminToast) window.adminToast.success('PDF descargado correctamente');
+
+  } catch (err) {
+    console.error('Error generando PDF:', err);
+    if (window.adminToast) window.adminToast.error('Error al generar el PDF del reporte. Intenta de nuevo.');
+    else alert('Error al generar el PDF.');
+  } finally {
+    clearInterval(spinInterval);
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.innerHTML = originalContent;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+}
+</script>
 {% endblock %}
