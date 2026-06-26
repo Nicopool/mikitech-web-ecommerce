@@ -28,18 +28,16 @@
   }
 
   .contact-header h1 {
-    font-size: 4rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #F8FAFC 0%, #94A3B8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 3.6rem;
+    font-weight: 700;
+    color: #0F1111;
     margin-bottom: 15px;
     letter-spacing: -0.025em;
   }
 
   .contact-header p {
     font-size: 1.6rem;
-    color: #94A3B8;
+    color: #565959;
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
@@ -61,29 +59,16 @@
 
   /* Tarjeta de Información (Izquierda) */
   .info-card {
-    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
-    border: 1px solid #334155;
-    border-radius: 20px;
+    background: #FFFFFF;
+    border: 1px solid #D5D9D9;
+    border-radius: 8px;
     padding: 40px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  }
-
-  /* Efecto de luz de fondo */
-  .info-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 250px;
-    height: 250px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
-    z-index: 1;
-    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   }
 
   .info-details {
@@ -94,7 +79,7 @@
   .info-title {
     font-size: 2.2rem;
     font-weight: 700;
-    color: #FFF;
+    color: #0F1111;
     margin-bottom: 25px;
   }
 
@@ -108,34 +93,35 @@
   .info-icon {
     width: 48px;
     height: 48px;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    border-radius: 12px;
+    background: #F0F2F2;
+    border: 1px solid #D5D9D9;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #38BDF8;
+    color: #FF9900;
     flex-shrink: 0;
     transition: all 0.3s ease;
   }
 
   .info-item:hover .info-icon {
-    background: #38BDF8;
-    color: #0F172A;
+    background: #FF9900;
+    color: #FFFFFF;
+    border-color: #FF9900;
     transform: scale(1.05) translateY(-2px);
-    box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+    box-shadow: 0 4px 10px rgba(255, 153, 0, 0.2);
   }
 
   .info-text h3 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #F8FAFC;
+    color: #0F1111;
     margin: 0 0 5px 0;
   }
 
   .info-text p {
     font-size: 1.4rem;
-    color: #94A3B8;
+    color: #565959;
     margin: 0;
     line-height: 1.5;
   }
@@ -144,13 +130,13 @@
     position: relative;
     z-index: 2;
     margin-top: 40px;
-    border-top: 1px solid #334155;
+    border-top: 1px solid #E7E7E7;
     padding-top: 30px;
   }
 
   .info-socials p {
     font-size: 1.4rem;
-    color: #94A3B8;
+    color: #565959;
     margin-bottom: 15px;
   }
 
@@ -162,33 +148,31 @@
   .social-icon-btn {
     width: 44px;
     height: 44px;
-    background: #1E293B;
-    border: 1px solid #334155;
-    border-radius: 10px;
+    background: #F0F2F2;
+    border: 1px solid #D5D9D9;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #94A3B8;
+    color: #475569;
     transition: all 0.3s ease;
     cursor: pointer;
   }
 
   .social-icon-btn:hover {
-    background: #F8FAFC;
-    color: #0F172A;
-    border-color: #F8FAFC;
+    background: #E3E6E6;
+    color: #0F1111;
+    border-color: #D5D9D9;
     transform: translateY(-3px);
   }
 
-  /* Tarjeta de Formulario (Derecha) - Glassmorphism */
+  /* Tarjeta de Formulario (Derecha) */
   .form-card {
-    background: rgba(30, 41, 59, 0.4);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
+    background: #FFFFFF;
+    border: 1px solid #D5D9D9;
+    border-radius: 8px;
     padding: 40px;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   }
 
   .contact-form {
@@ -216,39 +200,37 @@
   }
 
   .form-label {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #E2E8F0;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0F1111;
   }
 
   .form-input {
     width: 100%;
-    padding: 14px 18px;
-    font-size: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    background: rgba(15, 23, 42, 0.6);
-    color: #FFF;
-    transition: all 0.3s ease;
+    padding: 12px 15px;
+    font-size: 1.4rem;
+    border: 1px solid #D5D9D9;
+    border-radius: 4px;
+    background: #FFFFFF;
+    color: #0F1111;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
     font-family: inherit;
   }
 
   .form-input::placeholder {
-    color: #475569;
+    color: #767676;
   }
 
   .form-input:focus {
     outline: none;
-    border-color: #38BDF8;
-    background: rgba(15, 23, 42, 0.8);
-    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+    border-color: #E77600;
+    background: #FFFFFF;
+    box-shadow: 0 0 3px 2px rgba(228, 121, 17, 0.5);
   }
 
   select.form-input {
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230F1111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 18px center;
     background-size: 16px;
@@ -262,46 +244,30 @@
 
   .btn-submit {
     position: relative;
-    padding: 16px 32px;
-    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
-    color: #FFF;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.6rem;
-    font-weight: 700;
+    padding: 12px 28px;
+    background: #FFD814;
+    color: #0F1111;
+    border: 1px solid #FCD200;
+    border-radius: 20px;
+    font-size: 1.5rem;
+    font-weight: 500;
     cursor: pointer;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 10px 20px rgba(2, 132, 199, 0.2);
-  }
-
-  .btn-submit::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: all 0.6s ease;
+    box-shadow: 0 2px 5px rgba(213,217,217,.5);
   }
 
   .btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 30px rgba(2, 132, 199, 0.4);
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284C7 100%);
-  }
-
-  .btn-submit:hover::after {
-    left: 100%;
+    background: #F7CA00;
+    border-color: #F2C200;
   }
 
   .btn-submit:active {
-    transform: translateY(1px);
+    background: #F0B800;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15) inset;
   }
 </style>
 
