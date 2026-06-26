@@ -308,30 +308,30 @@
     
     .cd-footer { padding: 3rem; border-top: 1px solid #E2E8F0; background: rgba(255, 255, 255, 0.98); }
     .cd-total { display: flex; justify-content: space-between; margin-bottom: 2.5rem; font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 700; text-transform: uppercase; color: #0F172A; }
-    .cd-btn { display: block; width: 100%; padding: 1.8rem; background: linear-gradient(135deg, #0284C7 0%, #0284C7 100%); color: white; text-align: center; text-transform: uppercase; font-family: 'Outfit', sans-serif; font-size: 1.5rem; letter-spacing: 1.5px; border-radius: 0.8rem; transition: all 0.3s; font-weight: 600; min-height: 4.4rem; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3); }
-    .cd-btn:hover { background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4); }
+    .cd-btn { display: block; width: 100%; padding: 1.4rem; background: #FFD814; color: #0F1111; border: 1px solid #FCD200; text-align: center; text-transform: uppercase; font-family: 'Outfit', sans-serif; font-size: 1.4rem; letter-spacing: 1px; border-radius: 20px; transition: all 0.2s; font-weight: 600; min-height: 4.4rem; box-shadow: 0 2px 5px rgba(213,217,217,.5); }
+    .cd-btn:hover { background: #F7CA00; border-color: #F2C200; transform: translateY(-1px); }
     
     /* HAMBURGER */
     .hamburger { width: 4.4rem; height: 4.4rem; display: flex; flex-direction: column; justify-content: center; gap: 0.5rem; cursor: pointer; margin-left: 1rem; padding: 1rem; align-items: center; }
-    .hamburger span { display: block; height: 0.2rem; width: 2.4rem; background: #1E293B; border-radius: 0.2rem; transition: all 0.3s; }
+    .hamburger span { display: block; height: 0.2rem; width: 2.4rem; background: #FFFFFF; border-radius: 0.2rem; transition: all 0.3s; }
+    .hamburger:hover span { background: #FF9900; }
     
     /* DRAWER */
     .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; }
-    .drawer { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-left: 1px solid #E2E8F0; z-index: 201; color: #1E293B; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.8, 0, 0.2, 1); }
+    .drawer { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: #FFFFFF; border-left: 1px solid #E2E8F0; z-index: 201; color: #0F1111; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.8, 0, 0.2, 1); }
     
     body.drawer-open .drawer-overlay { opacity: 1; visibility: visible; }
     body.drawer-open .drawer { right: 0; }
     
-    .drawer-close { position: absolute; top: 3rem; right: 3rem; cursor: pointer; padding: 1rem; display: flex; align-items: center; justify-content: center; min-height: 4.4rem; min-width: 4.4rem; font-size: 2.4rem; }
-    .drawer-close svg { stroke: #0F172A; fill: none; }
+    .drawer-nav { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; flex: 1; padding: 3rem 2rem; gap: 1rem; }
+    .drawer-nav a { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 600; color: #0F1111; padding: 1.2rem 1.5rem; border-radius: 6px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; text-decoration: none; border-bottom: 1px solid #F3F3F3; }
+    .drawer-nav a:hover { color: #FF9900; background: #F7FAFA; }
+    .drawer-nav a i, .drawer-nav a svg { color: #565959; }
+    .drawer-nav a:hover i, .drawer-nav a:hover svg { color: #FF9900; }
     
-    .drawer-nav { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 3rem; }
-    .drawer-nav a { font-family: 'Outfit', sans-serif; font-size: 2.6rem; font-weight: 600; color: #1E293B; transition: color 0.2s; min-height: 4.4rem; display: flex; align-items: center; }
-    .drawer-nav a:hover { color: #0284C7; }
-    
-    .drawer-social { display: flex; justify-content: center; gap: 2rem; padding-bottom: 5rem; font-size: 1.8rem; }
-    .drawer-social svg { fill: #0F172A; cursor: pointer; transition: fill 0.2s; }
-    .drawer-social svg:hover { fill: #0284C7; }
+    .drawer-social { display: flex; justify-content: center; gap: 2rem; padding: 3rem 0; border-top: 1px solid #E2E8F0; background: #F8FAFC; font-size: 1.8rem; }
+    .drawer-social svg { fill: #0F1111; cursor: pointer; transition: fill 0.2s; }
+    .drawer-social svg:hover { fill: #FF9900; }
     
     /* Ajustes responsivos para notificaciones y otros en base.html */
     @media (max-width: 767px) {
@@ -668,8 +668,8 @@
   <!-- NAVBAR -->
   <nav class="nav-wix">
     <a href="{% url 'core:home' %}" class="nav-logo" style="display: flex; align-items: center; text-decoration: none; height: auto;">
-      <div style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
-        <span style="color: #0284C7;">MIKI</span>TECH
+      <div style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #FFFFFF; display: flex; align-items: center; gap: 4px;">
+        <span style="color: #FF9900;">MIKI</span>TECH
       </div>
     </a>
     
@@ -762,24 +762,41 @@
   <div class="drawer-overlay" onclick="document.body.classList.remove('drawer-open')"></div>
   
   <div class="drawer">
-    <div class="drawer-close" onclick="document.body.classList.remove('drawer-open')">
-      <i data-lucide="x"></i>
+    <div style="padding: 2.5rem 3rem; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; background: #131921; color: #FFFFFF;">
+      <div style="font-family: 'Outfit', 'Inter', sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: 1px;">
+        <span style="color: #FF9900;">MIKI</span>TECH
+      </div>
+      <div onclick="document.body.classList.remove('drawer-open')" style="cursor: pointer; color: #FFFFFF; font-size: 2.4rem; display: flex; align-items: center; justify-content: center; width: 3.6rem; height: 3.6rem;">
+        <i data-lucide="x"></i>
+      </div>
     </div>
     
     <nav class="drawer-nav">
       <!-- Buscador móvil -->
-      <form action="{% url 'core:search' %}" method="GET" style="width: 80%; margin: 0 auto; position: relative; display: flex; align-items: center;">
-        <button type="submit" style="position: absolute; left: 1.2rem; background: none; border: none; padding: 0; color: #94A3B8; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">
-          <i data-lucide="search" style="width: 1.6rem; height: 1.6rem;"></i>
+      <form action="{% url 'core:search' %}" method="GET" style="position: relative; display: flex; align-items: center; margin-bottom: 2rem; width: 100%;">
+        <input type="text" name="q" placeholder="Buscar hardware..." value="{{ query|default:'' }}" style="width: 100%; background: #F3F3F3; border: 1px solid #D5D9D9; border-radius: 4px; padding: 1.2rem 4.5rem 1.2rem 1.5rem; color: #0F1111; font-size: 1.4rem; outline: none; transition: all 0.2s;">
+        <button type="submit" style="position: absolute; right: 0; top: 0; bottom: 0; background: #FEBD69; border: 1px solid #D5D9D9; border-left: none; border-radius: 0 4px 4px 0; padding: 0 1.5rem; color: #111; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="search" style="width: 1.8rem; height: 1.8rem;"></i>
         </button>
-        <input type="text" name="q" class="drawer-search-input" placeholder="Buscar hardware..." value="{{ query|default:'' }}" style="width: 100%; background: #2D3748; border: 1px solid #4A5568; border-radius: 20px; padding: 1rem 1.6rem 1rem 3.8rem; color: #FFF; font-size: 1.4rem; outline: none;">
       </form>
 
-      <a href="{% url 'core:home' %}">Inicio</a>
-      <a href="{% url 'products:list' %}">Tienda</a>
-      <a href="{% url 'core:contact' %}">Contacto</a>
+      <a href="{% url 'core:home' %}">
+        <i data-lucide="home" style="width: 2rem; height: 2rem;"></i>
+        Inicio
+      </a>
+      <a href="{% url 'products:list' %}">
+        <i data-lucide="shopping-bag" style="width: 2rem; height: 2rem;"></i>
+        Tienda
+      </a>
+      <a href="{% url 'core:contact' %}">
+        <i data-lucide="mail" style="width: 2rem; height: 2rem;"></i>
+        Contacto
+      </a>
       {% if request.session.usuario_id %}
-        <a href="{% url 'users:logout' %}" style="font-size: 18px; margin-top: 20px; opacity: 0.7;">Terminar Sesión</a>
+        <a href="{% url 'users:logout' %}" style="color: #DC2626;">
+          <i data-lucide="log-out" style="width: 2rem; height: 2rem; color: #DC2626;"></i>
+          Terminar Sesión
+        </a>
       {% endif %}
     </nav>
     
@@ -822,8 +839,8 @@
   <footer class="miki-footer">
     <div class="footer-grid">
       <div class="footer-col">
-        <a href="{% url 'core:home' %}" style="display:block; margin-bottom:2.5rem; font-family:'Helvetica', Arial, sans-serif; font-size:2.4rem; color:#0F172A; font-weight:800; letter-spacing:2px; text-decoration:none;">
-          MIKITECH
+        <a href="{% url 'core:home' %}" style="display:inline-flex; align-items:center; gap:4px; margin-bottom:2.5rem; font-family:'Outfit', 'Inter', sans-serif; font-size:2.4rem; color:#0F172A; font-weight:900; letter-spacing:1.5px; text-decoration:none;">
+          <span style="color:#FF9900;">MIKI</span>TECH
         </a>
         <p>Expertos en hardware de alta gama. Ofrecemos lo último en tecnología de computación, optimizando el rendimiento para gamers and profesionales exigentes.</p>
         <div class="footer-social">
