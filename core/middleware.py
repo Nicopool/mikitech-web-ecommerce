@@ -78,7 +78,11 @@ class RoleVerificationMiddleware:
         return self.get_response(request)
 
     def _verificar_y_sincronizar_rol(self, request):
-        """Sincroniza el rol de sesión con el valor actual en la base de datos."""
+        """Autentica al usuario por token JWT o Sesión, y precarga su Perfil, Rol y Permisos."""
+        # Inicializar atributos por defecto en la petición para evitar AttributeError en las vistas
+        request.perfil_usuario = None
+        request.permisos_usuario = []
+
         # Solo actuar en rutas protegidas
         if not any(request.path.startswith(ruta) for ruta in self.RUTAS_VERIFICACION):
             return
@@ -87,28 +91,54 @@ class RoleVerificationMiddleware:
         if any(request.path.startswith(ruta) for ruta in self.RUTAS_EXCLUIDAS):
             return
 
-        usuario_id = request.session.get('usuario_id')
+        usuario_id = None
+        token = None
+
+        # 1. Comprobar cabecera Authorization (JWT)
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            from django.conf import settings
+            if token == 'mock-local-token' and getattr(settings, 'USE_SQLITE', False):
+                usuario_id = request.session.get('usuario_id') or 'mock-local-user-id'
+            else:
+                from users.supabase_auth import verificar_token_supabase
+                datos_user, error = verificar_token_supabase(token)
+                if datos_user:
+                    usuario_id = datos_user.get('id')
+
+        # 2. Si no hay JWT, recurrir a la sesión tradicional
+        if not usuario_id:
+            usuario_id = request.session.get('usuario_id')
+
         if not usuario_id:
             return
 
         try:
             from users.models import Perfil
-            perfil = Perfil.objects.only('rol', 'esta_activo').get(id=usuario_id)
+            # Precargar rol_rbac y permisos asociados en una sola consulta optimizada
+            perfil = Perfil.objects.select_related('rol_rbac').prefetch_related('rol_rbac__permisos').get(id=usuario_id)
 
             # Cuenta desactivada → invalidar sesión inmediatamente
             if not perfil.esta_activo:
                 request.session.flush()
                 return
 
-            # Sincronizar el rol con el valor real de la base de datos
+            request.perfil_usuario = perfil
+            request.permisos_usuario = list(perfil.rol_rbac.permisos.values_list('codigo', flat=True)) if perfil.rol_rbac else []
+
+            # Sincronizar sesión (para mantener retrocompatibilidad de cookies)
             rol_en_sesion = request.session.get('rol_usuario')
-            if rol_en_sesion != perfil.rol:
+            if rol_en_sesion != perfil.rol or request.session.get('usuario_id') != str(perfil.id):
+                request.session['usuario_id'] = str(perfil.id)
                 request.session['rol_usuario'] = perfil.rol
+                request.session['permisos_usuario'] = request.permisos_usuario
+                if token:
+                    request.session['token_acceso'] = token
                 request.session.modified = True
 
-        except Exception:
-            # Si el perfil no existe o hay error de BD, no interrumpir la petición
-            # — los decoradores individuales se encargarán de redirigir si hace falta
+        except Exception as e:
+            # En caso de error (por ejemplo, perfil no existe en BD), no interrumpir la petición
             pass
 
     def _enforce_strict_panel_isolation(self, request):

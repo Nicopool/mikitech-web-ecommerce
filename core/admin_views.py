@@ -9,6 +9,7 @@ from django.contrib import messages
 from products.models import Producto, Categoria, ImagenProducto
 from interactions.models import Reseña, Pedido
 from users.models import Perfil, Notificacion
+from users.decorators import requiere_permiso
 import os
 from django.core.files.storage import default_storage
 
@@ -264,6 +265,7 @@ def cerrar_sesion_administrador(petición):
 
 
 @requerir_administrador
+@requiere_permiso('ver_reportes')
 def tablero_administrador(petición):
     """Estadísticas principales del panel con filtro de tiempo (Semana, Mes, Año, Todo)."""
     from django.db.models import Sum, F

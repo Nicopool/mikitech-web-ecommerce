@@ -50,6 +50,7 @@ class TestUserPanelIntegration(unittest.TestCase):
                         address TEXT,
                         city TEXT,
                         country TEXT DEFAULT 'Colombia',
+                        role_id TEXT,
                         role TEXT DEFAULT 'client',
                         is_active INTEGER DEFAULT 1,
                         created_at TIMESTAMP,

@@ -269,3 +269,12 @@ def subir_a_supabase_storage(nombre_archivo, datos_archivo, content_type=None):
         return None, f"Error HTTP {e.code} en storage: {mensaje}"
     except Exception as e:
         return None, f"Error inesperado de red en storage: {str(e)}"
+
+
+def verificar_token_supabase(token):
+    """
+    Verifica la validez de un token JWT enviando una consulta a la API de Supabase Auth /user.
+    Retorna los datos del usuario si es válido, o None y el error si es inválido.
+    """
+    url = f"{NUCLEO_URL_SUPABASE}/auth/v1/user"
+    return _hacer_peticion(url, token=token, metodo='GET')
