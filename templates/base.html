@@ -650,6 +650,81 @@
         letter-spacing: 0.5px;
       }
     }
+    
+    /* MICRO-INTERACTIONS: CLICK/TAP SCALE FEEDBACK */
+    .btn-buy:active,
+    .btn-view:active,
+    .btn-submit:active,
+    .btn-action:active,
+    .social-icon-btn:active,
+    .nav-action-btn:active,
+    .bottom-nav-item:active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease;
+    }
+    
+    /* Bottom Navigation - Default Hidden */
+    .bottom-nav {
+      display: none;
+    }
+    
+    /* RESPONSIVE TYPOGRAPHY & BODY LAYOUT FOR MOBILE */
+    @media (max-width: 767px) {
+      body {
+        padding-bottom: 7.5rem; /* Evita que la barra inferior tape el contenido */
+      }
+      h1 {
+        font-size: 2.4rem !important; /* 28px */
+      }
+      h2 {
+        font-size: 2.0rem !important; /* 20px */
+      }
+      /* Bottom Navigation Bar Styles */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 6rem;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid #D5D9D9;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 999;
+        padding-bottom: env(safe-area-inset-bottom);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #565959;
+        text-decoration: none;
+        flex: 1;
+        height: 100%;
+        font-size: 1.1rem;
+        font-weight: 600;
+        gap: 2px;
+        transition: color 0.15s ease;
+      }
+      .bottom-nav-item i, .bottom-nav-item svg {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+        stroke-width: 2.2;
+      }
+      .bottom-nav-item:hover, .bottom-nav-item.active {
+        color: #FF9900;
+      }
+      .bottom-nav-item:hover i, .bottom-nav-item:hover svg,
+      .bottom-nav-item.active i, .bottom-nav-item.active svg {
+        color: #FF9900;
+      }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Inyección de Vite para React -->
@@ -890,6 +965,31 @@
 
     </div>
   </footer>
+  
+  <!-- BOTTOM NAVIGATION BAR (MOBILE ONLY) -->
+  <nav class="bottom-nav">
+    <a href="{% url 'core:home' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+      <i data-lucide="home"></i>
+      <span>Inicio</span>
+    </a>
+    <a href="javascript:void(0)" onclick="openMobileSearch()" class="bottom-nav-item">
+      <i data-lucide="search"></i>
+      <span>Buscar</span>
+    </a>
+    <a href="javascript:void(0)" onclick="toggleCartDrawer()" class="bottom-nav-item" style="position: relative;">
+      <i data-lucide="shopping-cart"></i>
+      <span>Carrito</span>
+      <strong id="cart-counter-mobile" style="position: absolute; top: 2px; right: 20%; background: #FF9900; color: #FFFFFF; border-radius: 50%; min-width: 1.6rem; height: 1.6rem; padding: 0 0.3rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 1px solid #FFFFFF;">{{ conteo_carrito }}</strong>
+    </a>
+    <a href="{% if request.session.usuario_id %}{% url 'users:profile' %}{% else %}{% url 'users:login' %}{% endif %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'login' %}active{% endif %}">
+      <i data-lucide="user"></i>
+      <span>Cuenta</span>
+    </a>
+    <a href="javascript:void(0)" onclick="document.body.classList.add('drawer-open')" class="bottom-nav-item">
+      <i data-lucide="menu"></i>
+      <span>Menú</span>
+    </a>
+  </nav>
   {% endif %}
   <!-- SWEETALERT2 GLOBAL LOGIC -->
   <script>
@@ -973,6 +1073,7 @@
             const footer = document.getElementById('cart-drawer-footer');
             const subtotalEl = document.getElementById('cd-subtotal');
             const counter = document.getElementById('cart-counter');
+            const counterMobile = document.getElementById('cart-counter-mobile');
 
             // Limpiar sin innerHTML
             while (container.firstChild) container.removeChild(container.firstChild);
@@ -1047,6 +1148,7 @@
                 if (footer) footer.style.display = 'block';
                 if (subtotalEl) subtotalEl.textContent = data.total_formateado;
                 if (counter) counter.textContent = data.total_articulos;
+                if (counterMobile) counterMobile.textContent = data.total_articulos;
             } else {
                 const emptyDiv = document.createElement('div');
                 emptyDiv.style.cssText = 'text-align:center; padding-top:10rem; color:#94A3B8;';
@@ -1064,6 +1166,7 @@
 
                 if (footer) footer.style.display = 'none';
                 if (counter) counter.textContent = '0';
+                if (counterMobile) counterMobile.textContent = '0';
             }
             lucide.createIcons();
         } catch (e) { console.error('Error al cargar carrito drawer:', e); }
@@ -1115,7 +1218,9 @@
                 }
                 // Actualizar contador del header inmediatamente
                 const counter = document.getElementById('cart-counter');
+                const counterMobile = document.getElementById('cart-counter-mobile');
                 if (counter) counter.textContent = data.total_items;
+                if (counterMobile) counterMobile.textContent = data.total_items;
                 
                 updateCartDrawer();
             }
@@ -1161,7 +1266,9 @@
                 }
                 // Actualizar contador inmediatamente
                 const counter = document.getElementById('cart-counter');
+                const counterMobile = document.getElementById('cart-counter-mobile');
                 if (counter) counter.textContent = data.total_items;
+                if (counterMobile) counterMobile.textContent = data.total_items;
 
                 // Abrir drawer o actualizarlo
                 if (!document.body.classList.contains('cart-open')) {
@@ -1212,6 +1319,14 @@
         } catch (e) {
             console.error(e);
         }
+    }
+
+    function openMobileSearch() {
+      document.body.classList.add('drawer-open');
+      setTimeout(() => {
+        const input = document.querySelector('.drawer-nav input[name="q"]');
+        if (input) input.focus();
+      }, 300);
     }
   </script>
 
