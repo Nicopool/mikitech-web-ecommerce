@@ -314,26 +314,43 @@ def crear_producto(petición):
     """Procesamiento y vista para la creación de nuevos productos."""
     categorías = Categoria.objects.all().order_by('nombre')
     if petición.method == 'POST':
-        nombre = petición.POST.get('nombre', '').strip()
-        id_categoria = petición.POST.get('id_categoria', '')
-        precio = petición.POST.get('precio', '0')
-        existencias = petición.POST.get('existencias', '0')
-        marca = petición.POST.get('marca', '').strip()
-        descripcion = petición.POST.get('descripcion', '').strip()
-        descripcion_corta = petición.POST.get('descripcion_corta', '').strip()
-        es_destacado = petición.POST.get('es_destacado') == 'on'
-        descuento_porcentaje = int(petición.POST.get('descuento_porcentaje', '0') or '0')
-        descuento_expira_str = petición.POST.get('descuento_expira_el', '').strip()
-        descuento_expira_el = None
-        if descuento_expira_str:
-            from django.utils import timezone
-            from datetime import datetime
-            try:
-                descuento_expira_el = datetime.fromisoformat(descuento_expira_str).astimezone(timezone.utc)
-            except ValueError:
-                pass
+        try:
+            nombre = petición.POST.get('nombre', '').strip()
+            if not nombre:
+                raise ValueError('El nombre del producto es obligatorio.')
 
-        if nombre:
+            precio_str = petición.POST.get('precio', '').strip()
+            if not precio_str:
+                raise ValueError('El precio es obligatorio.')
+            try:
+                precio_val = float(precio_str)
+            except ValueError:
+                raise ValueError('El precio debe ser un número válido.')
+
+            existencias_str = petición.POST.get('existencias', '').strip()
+            if not existencias_str:
+                raise ValueError('Las existencias son obligatorias.')
+            try:
+                existencias_val = int(existencias_str)
+            except ValueError:
+                raise ValueError('Las existencias deben ser un número entero válido.')
+
+            id_categoria = petición.POST.get('id_categoria', '')
+            marca = petición.POST.get('marca', '').strip()
+            descripcion = petición.POST.get('descripcion', '').strip()
+            descripcion_corta = petición.POST.get('descripcion_corta', '').strip()
+            es_destacado = petición.POST.get('es_destacado') == 'on'
+            descuento_porcentaje = int(petición.POST.get('descuento_porcentaje', '0') or '0')
+            descuento_expira_str = petición.POST.get('descuento_expira_el', '').strip()
+            descuento_expira_el = None
+            if descuento_expira_str:
+                from django.utils import timezone
+                from datetime import datetime
+                try:
+                    descuento_expira_el = datetime.fromisoformat(descuento_expira_str).astimezone(timezone.utc)
+                except ValueError:
+                    pass
+
             from django.utils.text import slugify
             base_enlace = slugify(nombre)
             enlace = base_enlace
@@ -342,50 +359,54 @@ def crear_producto(petición):
                 enlace = f"{base_enlace}-{contador}"
                 contador += 1
 
-            try:
-                cat = Categoria.objects.get(id=id_categoria)
-                nuevo_prod = Producto.objects.create(
-                    id=uuid.uuid4(),
-                    categoria=cat,
-                    nombre=nombre,
-                    enlace=enlace,
-                    precio=float(precio),
-                    existencias=int(existencias),
-                    marca=marca,
-                    descripcion=descripcion,
-                    descripcion_corta=descripcion_corta,
-                    es_destacado=es_destacado,
-                    descuento_porcentaje=descuento_porcentaje,
-                    descuento_expira_el=descuento_expira_el,
-                    esta_activo=True,
-                )
-                
-                # Imagen Principal
-                if 'archivo_imagen' in petición.FILES:
-                    archivo = petición.FILES['archivo_imagen']
-                    nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
-                    nuevo_prod.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
-                    nuevo_prod.save()
+            cat = Categoria.objects.get(id=id_categoria)
+            nuevo_prod = Producto.objects.create(
+                id=uuid.uuid4(),
+                categoria=cat,
+                nombre=nombre,
+                enlace=enlace,
+                precio=precio_val,
+                existencias=existencias_val,
+                marca=marca,
+                descripcion=descripcion,
+                descripcion_corta=descripcion_corta,
+                es_destacado=es_destacado,
+                descuento_porcentaje=descuento_porcentaje,
+                descuento_expira_el=descuento_expira_el,
+                esta_activo=True,
+            )
+            
+            # Imagen Principal
+            if 'archivo_imagen' in petición.FILES:
+                archivo = petición.FILES['archivo_imagen']
+                nombre_unico = f"products/{uuid.uuid4()}{os.path.splitext(archivo.name)[1]}"
+                nuevo_prod.url_imagen_principal = guardar_archivo_hibrido(nombre_unico, archivo)
+                nuevo_prod.save()
 
-                # Galería de Imágenes
-                if 'archivos_galeria' in petición.FILES:
-                    for f in petición.FILES.getlist('archivos_galeria'):
-                        nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
-                        url_extra = guardar_archivo_hibrido(nombre_extra, f)
-                        ImagenProducto.objects.create(
-                            producto=nuevo_prod,
-                            url_imagen=url_extra
-                        )
-                
-                messages.success(petición, f'Producto "{nombre}" creado con éxito.')
-                messages.success(petición, f'Producto "{nombre}" creado con éxito.')
-                return redirect('/admin-panel/productos/')
-            except Exception as e:
-                return render(petición, 'admin_panel/product_form.html', {
-                    'categorias': categorías,
-                    'error': f'Error al guardar el producto: {str(e)}',
-                    'titulo_pagina': 'Crear Producto — MIKITECH',
-                })
+            # Galería de Imágenes
+            if 'archivos_galeria' in petición.FILES:
+                for f in petición.FILES.getlist('archivos_galeria'):
+                    nombre_extra = f"products/gallery/{uuid.uuid4()}{os.path.splitext(f.name)[1]}"
+                    url_extra = guardar_archivo_hibrido(nombre_extra, f)
+                    ImagenProducto.objects.create(
+                        producto=nuevo_prod,
+                        url_imagen=url_extra
+                    )
+            
+            messages.success(petición, f'Producto "{nombre}" creado con éxito.')
+            return redirect('/admin-panel/productos/')
+        except ValueError as e:
+            return render(petición, 'admin_panel/product_form.html', {
+                'categorias': categorías,
+                'error': str(e),
+                'titulo_pagina': 'Crear Producto — MIKITECH',
+            })
+        except Exception as e:
+            return render(petición, 'admin_panel/product_form.html', {
+                'categorias': categorías,
+                'error': f'Error al guardar el producto: {str(e)}',
+                'titulo_pagina': 'Crear Producto — MIKITECH',
+            })
 
     return render(petición, 'admin_panel/product_form.html', {
         'categorias': categorías,
