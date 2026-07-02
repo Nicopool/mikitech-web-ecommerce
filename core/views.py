@@ -403,7 +403,8 @@ def carrito(petición):
         petición.session.modified = True
         return render(petición, 'core/checkout.html', {
             'exito': True, 
-            'titulo_pagina': 'Compra Exitosa — MIKITECH'
+            'titulo_pagina': 'Compra Exitosa — MIKITECH',
+            'ultimo_pedido': pedido,
         })
 
     contexto = {

@@ -447,7 +447,7 @@
 
               <!-- ACCIONES -->
               <td class="py-4 px-5 align-middle">
-                <div style="display:flex; gap:0.8rem; justify-content:center;">
+                <div style="display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap;">
                   <button class="order-btn order-btn-detail"
                     onclick="showDetail('{{ order.id }}','{{ order.estado }}','{{ order.monto_total }}','{{ order.creado_el|date:'d/m/Y H:i' }}', '{{ order.direccion_envio|escapejs }}', '{{ order.repartidor.nombre_usuario|default:'Asignando...'|escapejs }}', '{{ order.notas|default:'Sin notas'|escapejs }}', '{{ order.notas_repartidor|default:''|escapejs }}')">
                     <span class="material-symbols-outlined" style="font-size:1.6rem;">info</span> Detalles
@@ -457,6 +457,10 @@
                     <span class="material-symbols-outlined" style="font-size:1.6rem;">local_shipping</span> Rastrear
                   </button>
                   {% endif %}
+                  <button class="order-btn" style="background:#16A34A; color:white; border:none;"
+                    onclick="descargarFactura('{{ order.id|stringformat:'s' }}', '{{ order.creado_el|date:'d/m/Y' }}', '{{ order.monto_total|stringformat:'.2f' }}', [ {% for det in order.detalles.all %}{ 'nombre': '{{ det.producto.nombre|escapejs }}', 'cantidad': {{ det.cantidad|stringformat:'d' }}, 'precio': {{ det.precio_unitario|stringformat:'.2f' }} }{% if not forloop.last %},{% endif %}{% endfor %} ])">
+                    <span class="material-symbols-outlined" style="font-size:1.6rem;">description</span> Factura PDF
+                  </button>
                 </div>
               </td>
             </tr>
@@ -1005,6 +1009,103 @@ window.trackOrder = function(id, status, driverName) {
   modalEl.addEventListener('shown.bs.modal', shownHandler);
   modal.show();
 };
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+var perfilFactura = {
+  name: '{{ perfil.nombre_mostrado|escapejs }}',
+  username: '@{{ perfil.nombre_usuario|escapejs }}',
+  telefono: '{{ perfil.telefono|default:"+57 300 000 0000"|escapejs }}',
+  email: '{{ perfil.nombre_usuario|escapejs }}@mikitech.com',
+};
+function descargarFactura(orderId, orderDate, orderTotal, items) {
+  Swal.fire({ title: 'Generando Factura...', html: 'Preparando tu factura para descarga automática.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+  const amount = parseFloat(orderTotal.toString().replace(/,/g, '.')) || 0;
+  const tax = amount * 0.19;
+  const subtotal = amount - tax;
+  const fmt = new Intl.NumberFormat('es-CO');
+  let itemsHtml = '';
+  items.forEach(function(item, index) {
+    const itemTotal = item.cantidad * item.precio;
+    itemsHtml += '<tr style="border-bottom:1px solid #E2E8F0;background:' + (index % 2 === 0 ? '#FFFFFF' : '#F8FAFC') + ';">';
+    itemsHtml += '<td style="padding:14px 12px;font-size:12px;color:#64748B;font-weight:600;">' + String(index + 1).padStart(2, '0') + '</td>';
+    itemsHtml += '<td style="padding:14px 12px;font-size:13px;color:#0F172A;font-weight:600;">' + item.nombre + '</td>';
+    itemsHtml += '<td style="padding:14px 12px;font-size:12px;color:#475569;text-align:center;">' + fmt.format(item.precio) + '</td>';
+    itemsHtml += '<td style="padding:14px 12px;font-size:12px;color:#475569;text-align:center;font-weight:700;">' + item.cantidad + '</td>';
+    itemsHtml += '<td style="padding:14px 12px;font-size:13px;color:#0F172A;text-align:right;font-weight:700;">' + fmt.format(itemTotal) + '</td></tr>';
+  });
+  if (items.length === 0) itemsHtml = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#94A3B8;font-size:13px;">Sin productos registrados.</td></tr>';
+  const invoiceHtml = '<div style="font-family:Arial,Helvetica,sans-serif;background:#FFFFFF;color:#0F172A;width:794px;padding:48px 56px;box-sizing:border-box;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:28px;border-bottom:3px solid #2563EB;margin-bottom:36px;">' +
+    '<div><div style="font-size:32px;font-weight:900;letter-spacing:2px;color:#0F172A;line-height:1;"><span style="color:#FF9900;">MIKI</span>TECH</div>' +
+    '<div style="font-size:12px;color:#64748B;margin-top:6px;font-weight:500;">Componentes y Hardware de Alto Rendimiento</div>' +
+    '<div style="font-size:11px;color:#94A3B8;margin-top:3px;">mikitech.com | soporte@mikitech.com</div></div>' +
+    '<div style="text-align:right;"><div style="font-size:36px;font-weight:900;color:#2563EB;letter-spacing:-1px;line-height:1;">FACTURA</div>' +
+    '<div style="margin-top:14px;"><div style="font-size:11px;color:#64748B;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">N.\u00B0 de Referencia</div>' +
+    '<div style="font-size:16px;font-weight:800;color:#2563EB;margin-top:2px;">#' + orderId.substring(0, 8).toUpperCase() + '</div></div>' +
+    '<div style="margin-top:10px;"><div style="font-size:11px;color:#64748B;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Fecha de Emisi\u00F3n</div>' +
+    '<div style="font-size:14px;font-weight:700;color:#0F172A;margin-top:2px;">' + orderDate + '</div></div></div></div>' +
+    '<div style="display:flex;justify-content:space-between;margin-bottom:36px;gap:24px;">' +
+    '<div style="flex:1;background:#EFF6FF;border-radius:12px;padding:20px 24px;border-left:4px solid #FF9900;">' +
+    '<div style="font-size:11px;font-weight:800;color:#2563EB;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Facturar a</div>' +
+    '<div style="font-size:17px;font-weight:800;color:#0F172A;margin-bottom:6px;">' + perfilFactura.name + '</div>' +
+    '<div style="font-size:12px;color:#475569;font-weight:500;margin-bottom:3px;">Usuario: ' + perfilFactura.username + '</div>' +
+    '<div style="font-size:12px;color:#475569;font-weight:500;margin-bottom:3px;">Email: ' + perfilFactura.email + '</div>' +
+    '<div style="font-size:12px;color:#475569;font-weight:500;">Tel: ' + perfilFactura.telefono + '</div></div>' +
+    '<div style="flex:1;background:#F8FAFC;border-radius:12px;padding:20px 24px;border-left:4px solid #E2E8F0;">' +
+    '<div style="font-size:11px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Informaci\u00F3n del Pedido</div>' +
+    '<div style="font-size:12px;color:#475569;font-weight:500;margin-bottom:6px;"><span style="font-weight:700;color:#0F172A;">Estado:</span><span style="background:#DCFCE7;color:#16A34A;padding:2px 10px;border-radius:20px;font-weight:700;font-size:11px;margin-left:6px;">Recibido</span></div>' +
+    '<div style="font-size:12px;color:#475569;font-weight:500;margin-bottom:6px;"><span style="font-weight:700;color:#0F172A;">Envio:</span><span style="color:#16A34A;font-weight:700;margin-left:6px;">GRATIS</span></div>' +
+    '<div style="font-size:12px;color:#475569;font-weight:500;"><span style="font-weight:700;color:#0F172A;">Garantia:</span><span style="margin-left:6px;">1 ano en componentes</span></div></div></div>' +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:32px;border-radius:12px;overflow:hidden;border:1px solid #E2E8F0;">' +
+    '<thead><tr style="background:linear-gradient(135deg,#2563EB,#7C3AED);color:#FFFFFF;">' +
+    '<th style="padding:14px 12px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;width:48px;">#</th>' +
+    '<th style="padding:14px 12px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;">Descripcion del Producto</th>' +
+    '<th style="padding:14px 12px;text-align:center;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;width:110px;">Precio Unit.</th>' +
+    '<th style="padding:14px 12px;text-align:center;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;width:70px;">Cant.</th>' +
+    '<th style="padding:14px 12px;text-align:right;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;width:120px;">Subtotal</th></tr></thead>' +
+    '<tbody>' + itemsHtml + '</tbody></table>' +
+    '<div style="display:flex;justify-content:flex-end;margin-bottom:48px;">' +
+    '<div style="width:300px;background:#F8FAFC;border-radius:14px;border:1px solid #E2E8F0;overflow:hidden;">' +
+    '<div style="padding:16px 20px;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;font-size:13px;color:#64748B;font-weight:500;"><span>Subtotal (sin IVA):</span><span style="font-weight:600;color:#0F172A;">' + fmt.format(Math.round(subtotal)) + ' COP</span></div>' +
+    '<div style="padding:16px 20px;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;font-size:13px;color:#64748B;font-weight:500;"><span>IVA (19%):</span><span style="font-weight:600;color:#0F172A;">' + fmt.format(Math.round(tax)) + ' COP</span></div>' +
+    '<div style="padding:16px 20px;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;font-size:13px;color:#16A34A;font-weight:600;"><span>Envio:</span><span style="font-weight:700;">GRATIS</span></div>' +
+    '<div style="padding:20px;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:15px;font-weight:800;color:#FFFFFF;">TOTAL A PAGAR:</span><span style="font-size:20px;font-weight:900;color:#FFFFFF;">' + fmt.format(amount) + ' COP</span></div></div></div>' +
+    '<div style="border-top:1px solid #E2E8F0;padding-top:20px;text-align:center;">' +
+    '<div style="font-size:11px;color:#94A3B8;font-weight:500;line-height:1.7;">Gracias por tu compra en MIKITECH. Esta es una representacion electronica valida de tu pedido.<br>Garantia de 1 ano en todos los componentes. Para soporte: soporte@mikitech.com</div>' +
+    '<div style="margin-top:10px;font-size:12px;font-weight:800;color:#2563EB;letter-spacing:1px;"><span style="color:#FF9900;">MIKI</span>TECH &nbsp;.&nbsp; mikitech.com</div></div></div>';
+  const pdfFileName = 'Factura_' + orderId.substring(0, 8).toUpperCase() + '_' + orderDate.replace(/\//g, '-') + '.pdf';
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'position:absolute;top:0;left:-9999px;width:794px;background:#FFFFFF;z-index:-1;pointer-events:none';
+  wrapper.innerHTML = invoiceHtml;
+  document.body.appendChild(wrapper);
+  requestAnimationFrame(function() {
+    html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0, windowWidth: 794 })
+    .then(function(canvas) {
+      document.body.removeChild(wrapper);
+      var jsPDFClass = window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : window.jsPDF;
+      if (!jsPDFClass) { Swal.close(); Swal.fire({ icon: 'error', title: 'Error', text: 'La librería jsPDF no está cargada.', background: '#FFFFFF' }); return; }
+      const pdf = new jsPDFClass({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = pdfHeight, position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+      while (heightLeft > 0) { position = heightLeft - pdf.internal.pageSize.getHeight(); pdf.addPage(); pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight); heightLeft -= pdf.internal.pageSize.getHeight(); }
+      pdf.save(pdfFileName);
+      Swal.close();
+      Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true, background: '#DCFCE7', color: '#15803D', icon: 'success', title: 'Factura descargada correctamente' });
+    })
+    .catch(function(err) {
+      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+      Swal.close();
+      Swal.fire({ icon: 'error', title: 'Error al generar la factura', text: 'No se pudo crear el PDF. Intenta de nuevo.', background: '#FFFFFF' });
+    });
+  });
+}
 </script>
 </body>
 </html>
