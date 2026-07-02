@@ -233,46 +233,35 @@
 
       {# ═══ ALERTAS DE ERROR DEL SERVIDOR ═══ #}
       {% if error %}
-      <div id="server-error-banner" style="background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
-        {% if error_tipo == 'credenciales' %}
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.</span>
-        {% elif error_tipo == 'no_confirmado' %}
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span style="color: #92400E; font-size: 1.35rem; font-weight: 600;">Correo no verificado. Revisa tu bandeja de Gmail y haz clic en el enlace de confirmación.</span>
-        {% elif error_tipo == 'google' %}
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span style="color: #1E40AF; font-size: 1.35rem; font-weight: 600;">Esta cuenta usa Google. Inicia sesión con Google o <a href="{% url 'users:forgot_password' %}" style="color:#1D4ED8;">recupera tu contraseña</a>.</span>
-        {% elif error_tipo == 'rate_limit' %}
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span style="color: #92400E; font-size: 1.35rem; font-weight: 600;">Demasiados intentos fallidos. Espera unos minutos antes de intentar de nuevo.</span>
-        {% elif error_tipo == 'red' %}
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-          <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">Sin conexión con el servidor. Verifica tu internet e intenta de nuevo.</span>
-        {% else %}
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-          <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">{{ error }}</span>
-        {% endif %}
+      <div id="server-error-banner" style="background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:0.2rem;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div>
+          <span style="color: #991B1B; font-size: 1.35rem; font-weight: 600;">
+            {% if error_tipo == 'credenciales' %}
+              Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.
+            {% elif error_tipo == 'no_confirmado' %}
+              Correo no verificado. Revisa tu bandeja de Gmail y haz clic en el enlace de confirmación.
+            {% elif error_tipo == 'google' %}
+              Esta cuenta fue creada con Google. No tiene contraseña configurada.
+            {% elif error_tipo == 'rate_limit' %}
+              Demasiados intentos fallidos. Espera unos minutos antes de intentar de nuevo.
+            {% elif error_tipo == 'red' %}
+              Sin conexión con el servidor. Verifica tu internet e intenta de nuevo.
+            {% else %}
+              {{ error }}
+            {% endif %}
+          </span>
+          {% if error_tipo == 'credenciales' %}
+          <div style="margin-top:0.8rem;">
+            <a href="{% url 'users:forgot_password' %}" style="color:#2563EB;font-size:1.3rem;font-weight:600;text-decoration:underline;">¿Olvidaste tu contraseña?</a>
+          </div>
+          {% elif error_tipo == 'no_confirmado' %}
+          <div style="margin-top:0.8rem;">
+            <a href="{% url 'users:forgot_password' %}" style="color:#D97706;font-size:1.3rem;font-weight:600;text-decoration:underline;">Solicitar nuevo enlace de verificación</a>
+          </div>
+          {% endif %}
+        </div>
       </div>
-
-      {# Lanzar SweetAlert específico según el tipo de error #}
-      <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        {% if error_tipo == 'credenciales' %}
-          showAlert('credenciales');
-        {% elif error_tipo == 'no_confirmado' %}
-          showAlert('no_confirmado');
-        {% elif error_tipo == 'google' %}
-          showAlert('google');
-        {% elif error_tipo == 'rate_limit' %}
-          showAlert('rate_limit');
-        {% elif error_tipo == 'red' %}
-          showAlert('red');
-        {% else %}
-          showAlert('generico', "{{ error|escapejs }}");
-        {% endif %}
-      });
-      </script>
       {% endif %}
 
       {% if messages %}
@@ -282,18 +271,12 @@
         <span style="color: #166534; font-size: 1.35rem; font-weight: 600;">{{ message }}</span>
       </div>
       {% endfor %}
-      <script>
-        document.addEventListener("DOMContentLoaded",function(){
-          {% for message in messages %}showAlert('success',"{{ message|escapejs }}");{% endfor %}
-        });
-      </script>
       {% endif %}
       {% if success %}
       <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 1rem; padding: 1.4rem 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.2rem; animation: bannerSlide 0.4s ease;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <span style="color: #166534; font-size: 1.35rem; font-weight: 600;">{{ success }}</span>
       </div>
-      <script>document.addEventListener("DOMContentLoaded",function(){showAlert('success',"{{ success|escapejs }}")});</script>
       {% endif %}
       <style>@keyframes bannerSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}</style>
 
