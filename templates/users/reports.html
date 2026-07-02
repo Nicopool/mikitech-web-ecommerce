@@ -4,116 +4,493 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page_title }}</title>
+  <title>{{ titulo_pagina }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- jsPDF + html2canvas para descarga real de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-  html { font-size: 10px; }
-  :root {
-    --ds-bg: #F8FAFC; --ds-surface: #FFFFFF; --ds-text: #0F172A;
-    --ds-text-soft: #64748B; --ds-border: #E2E8F0;
-    --ds-primary: #1D4ED8; --ds-primary-light: #EFF6FF;
-    --ds-accent: #7C3AED;
-    --ds-shadow: 0 4px 20px rgba(0,0,0,0.04);
-  }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Inter', sans-serif; font-size:1.4rem; background:var(--ds-bg); color:var(--ds-text); display:flex; height:100vh; overflow:hidden; }
-
-    /* SIDEBAR MOBILE-FIRST */
-    .sidebar { width: 26rem; background: var(--ds-surface); border-right: 1px solid var(--ds-border); display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: -26rem; z-index: 1000; height: 100vh; transition: left 0.3s ease; }
-    body.sidebar-open .sidebar { left: 0; }
-    
-    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); z-index: 999; }
-    body.sidebar-open .sidebar-overlay { display: block; }
-
-    .sb-logo { padding:3rem; display:flex; align-items:center; gap:1rem; border-bottom:1px solid var(--ds-border); font-family:'Inter', sans-serif; font-weight:800; font-size:2.4rem; letter-spacing:-0.5px; }
-    .sb-logo-icon { width:3.4rem; height:3.4rem; background:var(--ds-primary); color:white; border-radius:1rem; display:flex; align-items:center; justify-content:center; font-size:1.8rem; }
-    .sb-user { padding:2rem 3rem; display:flex; align-items:center; gap:1.2rem; border-bottom:1px solid var(--ds-border); }
-    .sb-avatar { width:4.4rem; height:4.4rem; border-radius:50%; object-fit:cover; background:var(--ds-primary-light); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.8rem; color:var(--ds-primary); flex-shrink:0; }
-    .sb-user-name { font-weight:700; font-size:1.4rem; color:var(--ds-text); }
-    .sb-user-role { font-size:1.1rem; color:var(--ds-primary); background:var(--ds-primary-light); padding:0.2rem 0.8rem; border-radius:2rem; font-weight:600; display:inline-block; margin-top:0.3rem; }
-    .sb-nav { padding:1.5rem 0; flex:1; overflow-y:auto; }
-    .sb-section { padding:1rem 3rem 0.5rem; font-size:1.1rem; font-weight:700; color:var(--ds-text-soft); letter-spacing:0.1em; text-transform:uppercase; }
-    .sb-link { display:flex; align-items:center; gap:1.2rem; padding:1.1rem 3rem; color:var(--ds-text-soft); text-decoration:none; font-weight:500; font-size:1.4rem; position:relative; transition:all 0.2s; }
-    .sb-link:hover { color:var(--ds-primary); background:var(--ds-primary-light); }
-    .sb-link.active { background:var(--ds-primary-light); color:var(--ds-primary); font-weight:600; }
-    .sb-link.active::before { content:""; position:absolute; left:0; top:0; bottom:0; width:0.4rem; background:var(--ds-primary); border-radius:0 0.4rem 0.4rem 0; }
-    .sb-icon { font-size:1.8rem; width:2rem; text-align:center; }
-    .sb-logout { padding:2rem 3rem; border-top:1px solid var(--ds-border); }
-    .sb-logout a { display:flex; align-items:center; gap:1rem; color:#DC2626; text-decoration:none; font-size:1.4rem; font-weight:600; padding:1rem 1.5rem; border-radius:1rem; transition:background 0.2s; }
-    .sb-logout a:hover { background:#FEE2E2; }
- 
-    /* MAIN AREA */
-    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; width: 100%; }
-    
-    /* TOPBAR */
-    .topbar { height:7rem; background:var(--ds-surface); border-bottom:1px solid var(--ds-border); display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; flex-shrink:0; }
-    .topbar h1 { font-size:1.6rem; font-weight:800; display:flex; align-items:center; gap:0.5rem; margin:0; }
-    .topbar p { display:none; }
-    
-    /* BUTTON TOGGLE SIDEBAR */
-    .sb-toggle-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 4.4rem; height: 4.4rem; color: var(--ds-text); margin-right: 0.5rem; border: 1px solid var(--ds-border); border-radius: 50%; }
-
-    /* CONTENT AREA */
-    .content-area { flex:1; overflow-y:auto; padding:1.5rem; }
-
-    /* Responsive queries */
-    @media (min-width: 768px) {
-      .topbar { padding: 0 4rem; }
-      .topbar h1 { font-size: 2rem; }
-      .topbar p { display: block; font-size: 1.2rem; color: var(--ds-text-soft); margin-top: 0.3rem; margin-bottom: 0; }
-      .content-area { padding: 3rem 4rem; }
+    :root {
+      --primary: #2563EB;
+      --primary-light: #DBEAFE;
+      --primary-dark: #1E3A8A;
+      --surface: #F5F7FA;
+      --surface-white: #FFFFFF;
+      --border: #E2E8F0;
+      --text: #0F1111;
+      --text-soft: #475569;
+      --text-muted: #94A3B8;
+      --brand-orange: #FF9900;
+      --success: #16A34A;
+      --success-light: #DCFCE7;
+      --warning: #D97706;
+      --warning-light: #FEF3C7;
+      --danger: #DC2626;
+      --danger-light: #FEE2E2;
+      --info: #0284C7;
+      --radius: 0.8rem;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 10px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.4rem;
+      background: var(--surface);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    .material-symbols-outlined {
+      font-size: 1em;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      flex-shrink: 0;
     }
 
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 26rem;
+      background: var(--surface-white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0;
+      left: -26rem;
+      z-index: 1000;
+      height: 100vh;
+      transition: left 0.3s ease;
+    }
+    body.sidebar-open .sidebar { left: 0; }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 999;
+    }
+    body.sidebar-open .sidebar-overlay { display: block; }
+    .sb-logo {
+      padding: 2.8rem 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Outfit', 'Inter', sans-serif;
+    }
+    .sb-logo a { display: flex; align-items: center; text-decoration: none; }
+    .sb-logo-text {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .sb-logo-text .orange { color: var(--brand-orange); }
+    .sb-user {
+      padding: 2rem 3rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sb-avatar {
+      width: 4.4rem; height: 4.4rem;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .sb-user-name { font-weight: 700; font-size: 1.4rem; }
+    .sb-user-role {
+      font-size: 1.1rem;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 0.2rem 0.8rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 0.3rem;
+    }
+    .sb-nav { padding: 1.5rem 0; flex: 1; overflow-y: auto; }
+    .sb-section {
+      padding: 1rem 3rem 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .sb-link {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.1rem 3rem;
+      color: var(--text-soft);
+      font-weight: 500;
+      font-size: 1.4rem;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .sb-link:hover { color: var(--primary); background: var(--primary-light); }
+    .sb-link.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .sb-link.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0.4rem;
+      background: var(--primary);
+      border-radius: 0 0.4rem 0.4rem 0;
+    }
+    .sb-icon { font-size: 1.8rem; width: 2rem; text-align: center; }
+    .sb-logout {
+      padding: 2rem 3rem;
+      border-top: 1px solid var(--border);
+    }
+    .sb-logout a {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--danger);
+      font-size: 1.4rem;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      transition: background 0.2s;
+    }
+    .sb-logout a:hover { background: var(--danger-light); }
+
+    /* ─── MAIN ─── */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
+
+    .topbar {
+      height: 7rem;
+      background: var(--surface-white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      flex-shrink: 0;
+      gap: 1rem;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+    .topbar h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 0;
+      white-space: nowrap;
+    }
+    .topbar h1 .material-symbols-outlined { font-size: 2rem; color: var(--primary); }
+    .topbar p {
+      font-size: 1.2rem;
+      color: var(--text-soft);
+      margin: 0;
+      white-space: nowrap;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+    .sb-toggle-btn {
+      background: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 4.4rem;
+      height: 4.4rem;
+      color: var(--text);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    /* ─── STAT CARDS ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+      gap: 1.6rem;
+      margin-bottom: 2.4rem;
+    }
+    .stat-card {
+      background: var(--surface-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.6rem;
+      box-shadow: var(--shadow);
+    }
+    .stat-icon {
+      width: 4.8rem;
+      height: 4.8rem;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      flex-shrink: 0;
+    }
+    .stat-icon.blue { background: var(--primary-light); color: var(--primary); }
+    .stat-icon.green { background: var(--success-light); color: var(--success); }
+    .stat-icon.orange { background: var(--warning-light); color: var(--warning); }
+    .stat-info { min-width: 0; }
+    .stat-value { font-size: 2.4rem; font-weight: 800; line-height: 1.2; }
+    .stat-label { font-size: 1.2rem; color: var(--text-soft); font-weight: 500; }
+
+    /* ─── REPORT CARD ─── */
+    .report-card {
+      background: var(--surface-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .report-header {
+      padding: 2rem 2.4rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .report-header h2 {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 0;
+    }
+    .report-header h2 .material-symbols-outlined { color: var(--primary); font-size: 2rem; }
+    .report-header p {
+      font-size: 1.3rem;
+      color: var(--text-soft);
+      margin: 0;
+    }
+    .report-actions {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1.6rem;
+      border-radius: var(--radius);
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent;
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { background: var(--surface); border-color: var(--text-soft); }
+    .btn-sm { padding: 0.5rem 1rem; font-size: 1.1rem; border-radius: 0.6rem; }
+
+    /* ─── FILTERS BAR ─── */
+    .filters-bar {
+      padding: 1.2rem 2.4rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .filters-bar label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-soft);
+    }
+    .filter-input {
+      padding: 0.6rem 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      font-size: 1.3rem;
+      font-family: 'Inter', sans-serif;
+      background: var(--surface-white);
+      color: var(--text);
+      outline: none;
+    }
+    .filter-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    select.filter-input { cursor: pointer; }
+
+    /* ─── TABLE ─── */
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.3rem;
+    }
+    thead {
+      background: #F8FAFC;
+      border-bottom: 2px solid var(--border);
+    }
+    th {
+      padding: 1.4rem 1.6rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: left;
+      white-space: nowrap;
+    }
+    td {
+      padding: 1.4rem 1.6rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody tr { transition: background 0.15s; }
+    tbody tr:hover { background: #F8FAFC; }
+    tbody tr.row-delivered { background: #F0FDF4 !important; }
+    tbody tr.row-delivered:hover { background: #DCFCE7 !important; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem 1.2rem;
+      border-radius: 2rem;
+      font-size: 1.15rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      text-transform: capitalize;
+    }
+    .badge-dot {
+      width: 0.8rem;
+      height: 0.8rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .badge-completed { background: var(--success-light); color: var(--success); }
+    .badge-completed .badge-dot { background: var(--success); }
+    .badge-shipped { background: var(--primary-light); color: var(--primary); }
+    .badge-shipped .badge-dot { background: var(--primary); }
+    .badge-pending { background: var(--warning-light); color: var(--warning); }
+    .badge-pending .badge-dot { background: var(--warning); }
+    .badge-cancelled { background: var(--danger-light); color: var(--danger); }
+    .badge-cancelled .badge-dot { background: var(--danger); }
+    .badge-default { background: #F1F5F9; color: var(--text-soft); }
+    .badge-default .badge-dot { background: var(--text-muted); }
+
+    .text-primary { color: var(--primary); }
+    .text-soft { color: var(--text-soft); }
+    .text-muted { color: var(--text-muted); }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .fw-bold { font-weight: 700; }
+    .fw-800 { font-weight: 800; }
+    .fs-5 { font-size: 1.5rem; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      text-align: center;
+      padding: 6rem 2rem;
+    }
+    .empty-state .icon { font-size: 5rem; margin-bottom: 1.5rem; display: block; }
+    .empty-state h4 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .empty-state p { color: var(--text-soft); font-size: 1.3rem; }
+
+    /* ─── TOAST ─── */
+    .toast-container {
+      position: fixed;
+      bottom: 2.5rem;
+      right: 2.5rem;
+      z-index: 9999;
+    }
+    .custom-toast {
+      background: var(--primary);
+      color: white;
+      padding: 1.5rem 2.5rem;
+      border-radius: 1.2rem;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      transform: translateY(6rem);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .custom-toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (min-width: 768px) {
+      .topbar { padding: 0 3rem; }
+      .content-area { padding: 3rem; }
+      .topbar h1 { font-size: 2rem; }
+    }
     @media (min-width: 1024px) {
       .sidebar { position: static; left: 0; z-index: auto; }
       .sidebar-overlay { display: none !important; }
       .sb-toggle-btn { display: none !important; }
     }
-    .content-area { flex:1; overflow-y:auto; padding:1.5rem; }
-
-  /* REPORTES ESPECIALES */
-  .report-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(28rem, 1fr)); gap:2rem; }
-  .report-card { background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:1.6rem; padding:2.5rem; display:flex; flex-direction:column; gap:1.5rem; transition:all 0.2s; }
-  .report-card:hover { transform:translateY(-0.3rem); box-shadow:0 8px 24px rgba(0,0,0,0.08); }
-  .report-icon { width:5rem; height:5rem; border-radius:1.2rem; display:flex; align-items:center; justify-content:center; font-size:2.4rem; background:linear-gradient(135deg, #1D4ED8, #7C3AED); }
-  .report-title { font-size:1.6rem; font-weight:700; }
-  .report-desc { font-size:1.3rem; color:var(--ds-text-soft); line-height:1.6; }
-  .btn-pdf { background:linear-gradient(135deg, #1D4ED8, #7C3AED); color:white; border:none; padding:1.2rem 2rem; border-radius:1rem; font-size:1.3rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.8rem; transition:opacity 0.2s; width:100%; justify-content:center; }
-  .btn-pdf:hover { opacity:0.9; }
-
-    .toast-container { position:fixed; bottom:2.5rem; right:2.5rem; z-index:9999; }
-    .custom-toast { background:var(--ds-primary); color:white; padding:1.5rem 2.5rem; border-radius:1.2rem; font-size:1.4rem; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.15); transform:translateY(6rem); opacity:0; transition:all 0.4s cubic-bezier(0.16,1,0.3,1); }
-    .custom-toast.show { transform:translateY(0); opacity:1; }
-
-    /* ── BADGES & ROW OVERRIDES ── */
-    .badge-status { display:inline-flex; align-items:center; gap:0.6rem; padding:0.5rem 1.2rem; border-radius:2rem; font-size:1.15rem; font-weight:600; font-family:'Inter', sans-serif; text-transform: capitalize; }
-    .status-completed { background:#DCFCE7; color:#16A34A; }
-    .status-shipped { background:#DBEAFE; color:#1D4ED8; }
-    .status-pending { background:#FEF3C7; color:#D97706; }
-    .status-cancelled { background:#FEE2E2; color:#DC2626; }
-
-    .miki-table th { padding: 1.8rem 2rem !important; font-size: 1.15rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ds-text-soft); }
-    .miki-table td { padding: 1.8rem 2rem !important; vertical-align: middle; }
-    .miki-table tbody tr.row-delivered { background-color: #F0FDF4 !important; }
-    .miki-table tbody tr.row-delivered:hover { background-color: #DCFCE7 !important; }
   </style>
-
 </head>
 <body>
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 <aside class="sidebar">
-  <div class="sb-logo" style="border-bottom: 1px solid var(--ds-border);">
-    <a href="/" style="display: flex; align-items: center; text-decoration: none; height: 4.5rem;">
-      <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
-        <span style="color: #FF9900;">MIKI</span>TECH
+  <div class="sb-logo">
+    <a href="/">
+      <div class="sb-logo-text">
+        <span class="orange">MIKI</span>TECH
       </div>
     </a>
   </div>
@@ -133,152 +510,135 @@
     <a href="/cuenta/perfil/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">grid_view</span></span> Dashboard</a>
     <a href="/productos/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">shopping_cart</span></span> Catálogo</a>
     <div class="sb-section" style="margin-top:1.5rem;">Mi Cuenta</div>
-
     <a href="/cuenta/pedidos/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">receipt_long</span></span> Mis Pedidos</a>
     <a href="/cuenta/reportes/" class="sb-link active"><span class="sb-icon"><span class="material-symbols-outlined">bar_chart</span></span> Reportes</a>
     <a href="/cuenta/perfil/editar/" class="sb-link"><span class="sb-icon"><span class="material-symbols-outlined">settings</span></span> Editar Perfil</a>
   </nav>
-  <div class="sb-logout"><a href="{% url 'users:logout' %}" onclick="confirmarSalida(event, this.href)"><span><span class="material-symbols-outlined">logout</span></span> Cerrar Sesión</a></div>
+  <div class="sb-logout"><a href="{% url 'users:logout' %}" onclick="confirmarSalida(event, this.href)"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</a></div>
 </aside>
 
 <main class="main-area">
   <header class="topbar">
-    <button class="sb-toggle-btn" onclick="toggleSidebar()" title="Menú">
-      <span class="material-symbols-outlined">menu</span>
-    </button>
-    <div>
-      <h1><span class="material-symbols-outlined" style="font-size:inherit;">bar_chart</span> Centro de Reportes</h1>
-      <p>Gestiona y descarga tus reportes en formato PDF y Excel.</p>
+    <div class="topbar-left">
+      <button class="sb-toggle-btn" onclick="toggleSidebar()" title="Menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div>
+        <h1><span class="material-symbols-outlined">bar_chart</span> Centro de Reportes</h1>
+        <p>Gestiona y descarga tus reportes en PDF</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" onclick="generatePDF('actividad')">
+        <span class="material-symbols-outlined" style="font-size:1.6rem;">download</span> Reporte Actividad
+      </button>
+      <button class="btn btn-success" onclick="exportCSV()">
+        <span class="material-symbols-outlined" style="font-size:1.6rem;">table_chart</span> Exportar CSV
+      </button>
     </div>
   </header>
 
   <div class="content-area">
-    
-    <!-- CONTENEDOR UNIFICADO DE REPORTES (ESTILO CRUD PREMIUM) -->
-    <div class="card" style="border-radius:1.6rem; border:1px solid var(--ds-border); box-shadow:var(--ds-shadow); overflow:hidden; background:var(--ds-surface);">
-      
-      <!-- TOOLBAR DE ACCIONES GLOBALES -->
-      <div style="background:var(--ds-surface); border-bottom:1px solid var(--ds-border); padding:3rem; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:2rem;">
-        <div>
-          <h2 style="font-size:2.2rem; font-weight:800; margin-bottom:0.5rem;">📋 Listado Maestro de Reportes</h2>
-          <p style="color:var(--ds-text-soft); font-size:1.4rem;">Gestiona facturas, matrices de datos y consolidados en un solo lugar.</p>
-        </div>
-        
-        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
-          <!-- Botón Global PDF -->
-          <button class="btn" style="background:var(--ds-primary); color:white; font-weight:700; border-radius:1rem; padding:1rem 2rem; display:flex; align-items:center; gap:0.8rem;" onclick="generatePDF('actividad')">
-            <span><span class="material-symbols-outlined">bar_chart</span></span> Reporte Actividad (PDF)
-          </button>
-          
-          <!-- Botones Globales EXCEL -->
-          <button class="btn" style="background:#10B981; color:white; font-weight:700; border-radius:1rem; padding:1rem 2rem; display:flex; align-items:center; gap:0.8rem;" onclick="Swal.fire('Excel', 'Matriz de datos generada.', 'success')">
-            <span>📈</span> Matriz (.xlsx)
-          </button>
-          
-          <button class="btn" style="background:#059669; color:white; font-weight:700; border-radius:1rem; padding:1rem 2rem; display:flex; align-items:center; gap:0.8rem;" onclick="Swal.fire('Excel', 'Consolidado generado.', 'success')">
-             <span>📁</span> Consolidado (.xlsx)
-          </button>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue"><span class="material-symbols-outlined">receipt_long</span></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ conteo_pedidos }}</div>
+          <div class="stat-label">Pedidos Totales</div>
         </div>
       </div>
-
-      <!-- BARRA DE BÚSQUEDA Y FILTRO -->
-      <div style="background:var(--ds-bg); padding:1.5rem 3rem; border-bottom:1px solid var(--ds-border); display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:1rem;">
-           <span style="font-size:1.3rem; font-weight:700; color:var(--ds-text-soft); text-transform:uppercase; letter-spacing:0.05em;">Filtros de Búsqueda</span>
-        </div>
-        
-        <div style="display:flex; align-items:center; gap:1.5rem;">
-          <label for="dateFilter" style="font-size:1.3rem; font-weight:600; color:var(--ds-text);">Buscar por Fecha:</label>
-          <div style="position:relative;">
-            <input type="date" id="dateFilter" class="form-control" style="width:18rem; font-size:1.3rem; border-radius:0.8rem; background:white; font-weight:600;">
-          </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><span class="material-symbols-outlined">star</span></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ conteo_resenas }}</div>
+          <div class="stat-label">Reseñas</div>
         </div>
       </div>
-
-      <!-- TABLA DE DATOS -->
-      <div class="card-body p-0">
-        <div class="miki-table-wrap" style="border:none; border-radius:0;">
-          <table class="miki-table" id="reports-orders-table">
-            <thead>
-              <tr>
-                <th style="padding:1.5rem 2rem;">ID PEDIDO</th>
-                <th>ESTADO</th>
-                <th>FECHA REGISTRO</th>
-                <th>VALOR TOTAL</th>
-                <th class="text-center">FACTURACIÓN</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {% for order in orders %}
-              <tr data-date="{{ order.creado_el|date:'Y-m-d' }}" class="{% if order.estado == 'delivered' %}row-delivered{% endif %}" style="transition:all 0.2s;">
-                <td class="fw-bold" style="color:var(--ds-primary); padding:1.5rem 2rem;">#{{ order.id|stringformat:"s"|upper|slice:":8" }}...</td>
-                <td>
-                  {% if order.estado == 'delivered' %}
-                  <span class="badge-status status-completed font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Entregado
-                  </span>
-                  {% elif order.estado == 'shipped' %}
-                  <span class="badge-status status-shipped font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> En Camino
-                  </span>
-                  {% elif order.estado == 'pending' or order.estado == 'processing' %}
-                  <span class="badge-status status-pending font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Pendiente
-                  </span>
-                  {% elif order.estado == 'cancelled' %}
-                  <span class="badge-status status-cancelled font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-red-500"></span> Cancelado
-                  </span>
-                  {% else %}
-                  <span class="badge-status status-pending font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> {{ order.estado|title }}
-                  </span>
-                  {% endif %}
-                </td>
-
-                <td style="color:var(--ds-text-soft); font-weight:500;">{{ order.creado_el|date:"d M Y" }}</td>
-                <td class="fw-bold" style="font-size:1.5rem;">{{ order.monto_total|currency_cop }}</td>
-                <td class="text-center">
-                  {% if order.estado == 'delivered' %}
-                  <button class="btn btn-sm" style="background:#ECFDF5; color:#047857; font-weight:700; border:1px solid #10B981; border-radius:0.8rem; padding:0.6rem 1.2rem; display:inline-flex; align-items:center; gap:0.5rem;" 
-                    onclick="generateInvoice('{{ order.id|stringformat:'s' }}', '{{ order.creado_el|date:'d/m/Y' }}', '{{ order.monto_total|stringformat:'.2f' }}', [ {% for det in order.detalles.all %}{ 'nombre': '{{ det.producto.nombre|escapejs }}', 'cantidad': {{ det.cantidad|stringformat:'d' }}, 'precio': {{ det.precio_unitario|stringformat:'.2f' }} }{% if not forloop.last %},{% endif %}{% endfor %} ])">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Factura PDF
-                  </button>
-                  {% else %}
-                  <button class="btn btn-sm" style="background:var(--ds-primary-light); color:var(--ds-primary); font-weight:700; border:1px solid var(--ds-primary); border-radius:0.8rem; padding:0.6rem 1.2rem; display:inline-flex; align-items:center; gap:0.5rem;" 
-                    onclick="generateInvoice('{{ order.id|stringformat:'s' }}', '{{ order.creado_el|date:'d/m/Y' }}', '{{ order.monto_total|stringformat:'.2f' }}', [ {% for det in order.detalles.all %}{ 'nombre': '{{ det.producto.nombre|escapejs }}', 'cantidad': {{ det.cantidad|stringformat:'d' }}, 'precio': {{ det.precio_unitario|stringformat:'.2f' }} }{% if not forloop.last %},{% endif %}{% endfor %} ])">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Factura PDF
-                  </button>
-                  {% endif %}
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="5" class="text-center" style="padding:8rem 4rem; color:var(--ds-text-soft);">
-                  <div style="font-size:5rem; margin-bottom:1.5rem;">📭</div>
-                  <h4 style="font-weight:700; color:var(--ds-text);">No se encontraron pedidos</h4>
-                  <p>Realiza una compra en el catálogo para generar reportes.</p>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+      <div class="stat-card">
+        <div class="stat-icon orange"><span class="material-symbols-outlined">thumb_up</span></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ conteo_votos }}</div>
+          <div class="stat-label">Votos</div>
         </div>
       </div>
     </div>
 
-    <!-- PREVIEW GENERADO (Renders behind the page for auto-download capture) -->
-    <div id="pdf-preview" style="position: fixed; top: 0; left: 0; width: 800px; z-index: -1000; pointer-events: none; background: white;">
-      <div class="card" style="border-radius:1.6rem; border:1px solid var(--ds-border); background:var(--ds-surface);">
-        <div class="card-header" style="background:var(--ds-surface); border-bottom:1px solid var(--ds-border); padding:2rem 2.5rem; font-size:1.6rem; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-          <span id="pdf-preview-title">Vista Previa del Reporte</span>
-          <button class="btn btn-success" style="font-size:1.3rem; display:flex; align-items:center; gap:0.6rem;" onclick="downloadPDF()"
-            id="btn-download-pdf">
-            <span class="material-symbols-outlined" style="font-size:1.8rem;">download</span> Descargar PDF
-          </button>
+    <!-- Reports Table -->
+    <div class="report-card">
+      <div class="report-header">
+        <div>
+          <h2><span class="material-symbols-outlined">assignment</span> Historial de Pedidos</h2>
+          <p>Listado completo de tus pedidos con facturación</p>
         </div>
-        <div class="card-body p-4" id="pdf-content" style="font-size:1.4rem;"></div>
+      </div>
+
+      <div class="filters-bar">
+        <label for="dateFilter">Fecha:</label>
+        <input type="date" id="dateFilter" class="filter-input" style="width:16rem;">
+        <label for="statusFilter">Estado:</label>
+        <select id="statusFilter" class="filter-input" style="width:14rem;">
+          <option value="">Todos</option>
+          <option value="delivered">Entregado</option>
+          <option value="shipped">En Camino</option>
+          <option value="pending">Pendiente</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+        <button class="btn btn-sm btn-outline" onclick="limpiarFiltros()">
+          <span class="material-symbols-outlined" style="font-size:1.4rem;">close</span> Limpiar
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Pedido</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th class="text-center">Factura</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+            <tr data-date="{{ order.creado_el|date:'Y-m-d' }}" data-status="{{ order.estado }}" class="{% if order.estado == 'delivered' %}row-delivered{% endif %}">
+              <td class="fw-bold text-primary">#{{ order.id|stringformat:"s"|upper|slice:":8" }}..</td>
+              <td>
+                {% if order.estado == 'delivered' %}
+                <span class="badge badge-completed"><span class="badge-dot"></span> Entregado</span>
+                {% elif order.estado == 'shipped' %}
+                <span class="badge badge-shipped"><span class="badge-dot"></span> En Camino</span>
+                {% elif order.estado == 'pending' or order.estado == 'processing' %}
+                <span class="badge badge-pending"><span class="badge-dot"></span> Pendiente</span>
+                {% elif order.estado == 'cancelled' %}
+                <span class="badge badge-cancelled"><span class="badge-dot"></span> Cancelado</span>
+                {% else %}
+                <span class="badge badge-default"><span class="badge-dot"></span> {{ order.estado|title }}</span>
+                {% endif %}
+              </td>
+              <td class="text-soft fw-500">{{ order.creado_el|date:"d M Y" }}</td>
+              <td class="fw-bold fs-5">{{ order.monto_total|currency_cop }}</td>
+              <td class="text-center">
+                <button class="btn btn-sm {% if order.estado == 'delivered' %}btn-success{% else %}btn-primary{% endif %}"
+                  onclick="generateInvoice('{{ order.id|stringformat:'s' }}', '{{ order.creado_el|date:'d/m/Y' }}', '{{ order.monto_total|stringformat:'.2f' }}', [ {% for det in order.detalles.all %}{ 'nombre': '{{ det.producto.nombre|escapejs }}', 'cantidad': {{ det.cantidad|stringformat:'d' }}, 'precio': {{ det.precio_unitario|stringformat:'.2f' }} }{% if not forloop.last %},{% endif %}{% endfor %} ])">
+                  <span class="material-symbols-outlined" style="font-size:1.4rem;">description</span> PDF
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <span class="icon"><span class="material-symbols-outlined" style="font-size:5rem;">inbox</span></span>
+                  <h4>No se encontraron pedidos</h4>
+                  <p>Realiza una compra en el catálogo para generar reportes.</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -286,10 +646,23 @@
 
 <div class="toast-container"><div class="custom-toast" id="toast"></div></div>
 
+<!-- PDF Preview (hidden) -->
+<div id="pdf-preview" style="position:fixed;top:0;left:0;width:800px;z-index:-1000;pointer-events:none;background:white;">
+  <div class="report-card">
+    <div class="card-header" style="padding:2rem 2.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span id="pdf-preview-title" style="font-size:1.6rem;font-weight:700;">Vista Previa</span>
+      <button class="btn btn-success" onclick="downloadPDF()" id="btn-download-pdf">
+        <span class="material-symbols-outlined" style="font-size:1.6rem;">download</span> Descargar PDF
+      </button>
+    </div>
+    <div style="padding:2.4rem;" id="pdf-content"></div>
+  </div>
+</div>
+
 <script>
 function showToast(msg) {
   Swal.fire({
-    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, 
+    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
     timerProgressBar: true, background: '#111111', color: '#ffffff', icon: 'success', title: msg
   });
 }
@@ -299,11 +672,11 @@ function confirmarSalida(e, url) {
   Swal.fire({
     title: '¿Deseas cerrar sesión?',
     html: `
-      <div class="d-flex flex-column align-items-center text-center gap-3">
-        <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; display: flex; align-items: center; justify-content: center; color: #EF4444; margin-bottom: 8px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:1.2rem;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;color:#EF4444;">
+          <span class="material-symbols-outlined" style="font-size:2.8rem;">logout</span>
         </div>
-        <p style="margin: 0; font-size: 1.4rem; color: #64748B; font-weight: 500; line-height: 1.5; font-family: 'Inter', sans-serif;">
+        <p style="margin:0;font-size:1.4rem;color:#64748B;font-weight:500;line-height:1.5;font-family:'Inter',sans-serif;">
           Tendrás que volver a ingresar tus credenciales para acceder a tu cuenta.
         </p>
       </div>
@@ -311,21 +684,13 @@ function confirmarSalida(e, url) {
     showCancelButton: true,
     confirmButtonText: 'Sí, cerrar sesión',
     cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#DC2626',
+    cancelButtonColor: '#64748B',
     background: '#FFFFFF',
     color: '#0F172A',
     backdrop: 'rgba(15, 23, 42, 0.4)',
-    buttonsStyling: false,
-    customClass: {
-      popup: 'border-0 rounded-4 shadow-lg p-4',
-      title: 'fs-3 fw-bold text-dark mt-2 mb-1',
-      actions: 'mt-4 d-flex justify-content-center gap-2 w-100',
-      confirmButton: 'btn btn-danger fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1',
-      cancelButton: 'btn btn-light fw-bold rounded-3 px-4 py-2 fs-5 flex-grow-1 border border-200'
-    }
   }).then((result) => {
-    if (result.isConfirmed) {
-      window.location.href = url;
-    }
+    if (result.isConfirmed) window.location.href = url;
   });
 }
 
@@ -338,50 +703,34 @@ var profileData = {
 var reportsData = {
   actividad: {
     title: 'Reporte de Actividad General',
-    reviews: {{ review_count|default:0 }},
-    votes: {{ vote_count|default:0 }}
-  },
-  resenas: {
-    title: 'Mis Reseñas',
-    items: [{% for r in reviews %}{ product:'{{ r.product.name|truncatechars:35|escapejs }}', rating:{{ r.rating|default:0 }}, date:'{{ r.created_at|date:"d/m/Y" }}' },{% endfor %}]
-  },
-  pedidos: {
-    title: 'Historial de Pedidos',
-    note: {% if conteo_pedidos > 0 %}'Has realizado {{ conteo_pedidos }} pedidos.'{% else %}'No se han registrado pedidos aún.'{% endif %}
+    reviews: {{ conteo_resenas|default:0 }},
+    votes: {{ conteo_votos|default:0 }}
   }
 };
 
 function generatePDF(type) {
   var data = reportsData[type];
   if (!data) return;
-
   var content = document.getElementById('pdf-content');
   var titleEl = document.getElementById('pdf-preview-title');
-
   if (titleEl) titleEl.textContent = data.title;
   content.innerHTML = '';
 
-  // Show SweetAlert spinner
   Swal.fire({
     title: 'Generando Reporte...',
     html: 'Por favor espera un momento mientras creamos el PDF.',
     allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
+    didOpen: () => { Swal.showLoading(); }
   });
 
   var headerDiv = document.createElement('div');
   headerDiv.style.cssText = 'border-bottom:2px solid #E2E8F0; margin-bottom:2rem; padding-bottom:2rem; display:flex; justify-content:space-between; align-items:center;';
-
   var logoEl = document.createElement('div');
   logoEl.style.cssText = 'font-size:2rem; font-weight:900; letter-spacing:1px; font-family:\'Inter\',sans-serif; color:#0F172A;';
-  logoEl.innerHTML = '<span style="color:#FF9900;">⚡ MIKI</span>TECH';
-
+  logoEl.innerHTML = '<span style="color:#FF9900;">MIKI</span>TECH';
   var metaEl = document.createElement('div');
   metaEl.style.cssText = 'text-align:right; font-size:1.2rem; color:#64748B;';
   metaEl.innerHTML = profileData.name + ' (' + profileData.username + ')<br>Generado: ' + profileData.date;
-
   headerDiv.appendChild(logoEl);
   headerDiv.appendChild(metaEl);
   content.appendChild(headerDiv);
@@ -400,7 +749,6 @@ function generatePDF(type) {
     });
     thead += '</tr></thead>';
     tbl.innerHTML = thead;
-    
     var tbody = document.createElement('tbody');
     var all_items = [];
     {% for r in reviews %}
@@ -409,7 +757,6 @@ function generatePDF(type) {
     {% for v in votes %}
       all_items.push({ type:'Voto', product:'{{ v.product.name|escapejs }}', detail:'👍 Me Gusta', date:'{{ v.created_at|date:"d/m/Y" }}' });
     {% endfor %}
-
     if (all_items.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:3rem; color:#94A3B8;">No hay actividad registrada.</td></tr>';
     } else {
@@ -425,411 +772,57 @@ function generatePDF(type) {
     }
     tbl.appendChild(tbody);
     content.appendChild(tbl);
-
-  } else if (type === 'resenas') {
-    var tbl = document.createElement('table');
-    tbl.style.cssText = 'width:100%; border-collapse:collapse;';
-    var thead = '<thead><tr>';
-    ['#', 'Producto', 'Calificación', 'Fecha'].forEach(function(h) {
-      thead += '<th style="background:#F8FAFC; padding:1rem; text-align:left; font-size:1.2rem; font-weight:700; border:1px solid #E2E8F0;">'+h+'</th>';
-    });
-    thead += '</tr></thead>';
-    tbl.innerHTML = thead;
-    var tbody = document.createElement('tbody');
-    if (data.items.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem; color:#64748B;">No has escrito reseñas aún.</td></tr>';
-    } else {
-      data.items.forEach(function(r, i) {
-        var stars = ''; for(var s=0;s<5;s++) stars += s<r.rating?'★':'☆';
-        var tr = '<tr>';
-        [i+1, r.product, stars, r.date].forEach(function(v) {
-          tr += '<td style="padding:1rem; border:1px solid #E2E8F0; font-size:1.3rem;">'+v+'</td>';
-        });
-        tr += '</tr>';
-        tbody.innerHTML += tr;
-      });
-    }
-    tbl.appendChild(tbody);
-    content.appendChild(tbl);
-
-  } else if (type === 'pedidos') {
-    content.innerHTML = '<p style="color:#64748B; font-style:italic; font-size:1.4rem; padding:2rem; background:#F8FAFC; border-radius:1rem; border:1px solid #E2E8F0;">'+data.note+'</p>';
   }
-
-  // Trigger download immediately
   setTimeout(downloadPDF, 500);
 }
 
-function showInvoiceToast(msg) {
-  showToast(msg.replace('✅', '[OK]'));
-}
-
-function generateInvoice(orderId, orderDate, orderTotal, items) {
-  // Show loading spinner immediately
-  Swal.fire({
-    title: 'Generando Factura...',
-    html: 'Preparando tu factura para descarga automática.',
-    allowOutsideClick: false,
-    didOpen: () => { Swal.showLoading(); }
-  });
-
-  // Parse and compute amounts
-  const amount   = parseFloat(orderTotal.toString().replace(/,/g, '.')) || 0;
-  const tax      = amount * 0.19;
-  const subtotal = amount - tax;
-  const fmt      = new Intl.NumberFormat('es-CO');
-
-  // Build line-items rows
-  let itemsHtml = '';
-  items.forEach(function(item, index) {
-    const itemTotal = item.cantidad * item.precio;
-    itemsHtml += `
-      <tr style="border-bottom:1px solid #E2E8F0; background:${index % 2 === 0 ? '#FFFFFF' : '#F8FAFC'};">
-        <td style="padding:14px 12px; font-size:12px; color:#64748B; font-weight:600;">${(index + 1).toString().padStart(2, '0')}</td>
-        <td style="padding:14px 12px; font-size:13px; color:#0F172A; font-weight:600;">${item.nombre}</td>
-        <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center;">${fmt.format(item.precio)}</td>
-        <td style="padding:14px 12px; font-size:12px; color:#475569; text-align:center; font-weight:700;">${item.cantidad}</td>
-        <td style="padding:14px 12px; font-size:13px; color:#0F172A; text-align:right; font-weight:700;">${fmt.format(itemTotal)}</td>
-      </tr>`;
-  });
-
-  if (items.length === 0) {
-    itemsHtml = `<tr><td colspan="5" style="padding:24px; text-align:center; color:#94A3B8; font-size:13px;">Sin productos registrados.</td></tr>`;
+function exportCSV() {
+  var rows = document.querySelectorAll('#reports-orders-table tbody tr');
+  if (!rows.length) {
+    Swal.fire({ icon: 'info', title: 'Sin datos', text: 'No hay pedidos para exportar.', background: '#FFFFFF' });
+    return;
   }
-
-  // Build the complete invoice HTML
-  const invoiceHtml = `
-    <div style="font-family:Arial,Helvetica,sans-serif; background:#FFFFFF; color:#0F172A; width:794px; padding:48px 56px; box-sizing:border-box;">
-
-      <!-- ── HEADER ── -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:28px; border-bottom:3px solid #1D4ED8; margin-bottom:36px;">
-        <div>
-          <div style="font-size:32px; font-weight:900; letter-spacing:2px; color:#0F172A; line-height:1;">
-            <span style="color:#FF9900;">⚡ MIKI</span>TECH
-          </div>
-          <div style="font-size:12px; color:#64748B; margin-top:6px; font-weight:500;">Componentes y Hardware de Alto Rendimiento</div>
-          <div style="font-size:11px; color:#94A3B8; margin-top:3px;">mikitech.com &nbsp;|&nbsp; soporte@mikitech.com</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:36px; font-weight:900; color:#1D4ED8; letter-spacing:-1px; line-height:1;">FACTURA</div>
-          <div style="margin-top:14px;">
-            <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">N.° de Referencia</div>
-            <div style="font-size:16px; font-weight:800; color:#1D4ED8; margin-top:2px;">#${orderId.substring(0, 8).toUpperCase()}</div>
-          </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Fecha de Emisión</div>
-            <div style="font-size:14px; font-weight:700; color:#0F172A; margin-top:2px;">${orderDate}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── BILLING INFO ── -->
-      <div style="display:flex; justify-content:space-between; margin-bottom:36px; gap:24px;">
-        <div style="flex:1; background:#EFF6FF; border-radius:12px; padding:20px 24px; border-left:4px solid #FF9900;">
-          <div style="font-size:11px; font-weight:800; color:#1D4ED8; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Facturar a</div>
-          <div style="font-size:17px; font-weight:800; color:#0F172A; margin-bottom:6px;">${profileData.name}</div>
-          <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Usuario: ${profileData.username}</div>
-          <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Email: {{ perfil.nombre_usuario }}@mikitech.com</div>
-          <div style="font-size:12px; color:#475569; font-weight:500;">Tel: {% if perfil.telefono %}{{ perfil.telefono }}{% else %}+57 300 000 0000{% endif %}</div>
-        </div>
-        <div style="flex:1; background:#F8FAFC; border-radius:12px; padding:20px 24px; border-left:4px solid #E2E8F0;">
-          <div style="font-size:11px; font-weight:800; color:#64748B; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Información del Pedido</div>
-          <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
-            <span style="font-weight:700; color:#0F172A;">Estado:</span>
-            <span style="background:#DCFCE7; color:#16A34A; padding:2px 10px; border-radius:20px; font-weight:700; font-size:11px; margin-left:6px;">Entregado</span>
-          </div>
-          <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
-            <span style="font-weight:700; color:#0F172A;">Envío:</span>
-            <span style="color:#16A34A; font-weight:700; margin-left:6px;">GRATIS</span>
-          </div>
-          <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:6px;">
-            <span style="font-weight:700; color:#0F172A;">Puntos ganados:</span>
-            <span style="color:#7C3AED; font-weight:700; margin-left:6px;">${Math.floor(amount / 100000)} pts</span>
-          </div>
-          <div style="font-size:12px; color:#475569; font-weight:500;">
-            <span style="font-weight:700; color:#0F172A;">Garantía:</span>
-            <span style="margin-left:6px;">1 año en componentes</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── LINE ITEMS TABLE ── -->
-      <table style="width:100%; border-collapse:collapse; margin-bottom:32px; border-radius:12px; overflow:hidden; border:1px solid #E2E8F0;">
-        <thead>
-          <tr style="background:linear-gradient(135deg,#1D4ED8,#7C3AED); color:#FFFFFF;">
-            <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:48px;">#</th>
-            <th style="padding:14px 12px; text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;">Descripción del Producto</th>
-            <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:110px;">Precio Unit.</th>
-            <th style="padding:14px 12px; text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:70px;">Cant.</th>
-            <th style="padding:14px 12px; text-align:right; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; width:120px;">Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${itemsHtml}
-        </tbody>
-      </table>
-
-      <!-- ── TOTALS ── -->
-      <div style="display:flex; justify-content:flex-end; margin-bottom:48px;">
-        <div style="width:300px; background:#F8FAFC; border-radius:14px; border:1px solid #E2E8F0; overflow:hidden;">
-          <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
-            <span>Subtotal (sin IVA):</span>
-            <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(subtotal))} COP</span>
-          </div>
-          <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#64748B; font-weight:500;">
-            <span>IVA (19%):</span>
-            <span style="font-weight:600; color:#0F172A;">${fmt.format(Math.round(tax))} COP</span>
-          </div>
-          <div style="padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; font-size:13px; color:#16A34A; font-weight:600;">
-            <span>Envío:</span>
-            <span style="font-weight:700;">GRATIS</span>
-          </div>
-          <div style="padding:20px; background:linear-gradient(135deg,#1D4ED8,#7C3AED); display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:15px; font-weight:800; color:#FFFFFF;">TOTAL A PAGAR:</span>
-            <span style="font-size:20px; font-weight:900; color:#FFFFFF;">${fmt.format(amount)} COP</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── FOOTER ── -->
-      <div style="border-top:1px solid #E2E8F0; padding-top:20px; text-align:center;">
-        <div style="font-size:11px; color:#94A3B8; font-weight:500; line-height:1.7;">
-          Gracias por tu compra en MIKITECH. Esta es una representación electrónica válida de tu pedido.<br>
-          Garantía de 1 año en todos los componentes. Para soporte: soporte@mikitech.com
-        </div>
-        <div style="margin-top:10px; font-size:12px; font-weight:800; color:#1D4ED8; letter-spacing:1px;">
-          <span style="color:#FF9900;">MIKI</span>TECH &nbsp;·&nbsp; mikitech.com
-        </div>
-      </div>
-    </div>`;
-
-  // Build a clean filename: Factura_ORDERID_DATE.pdf
-  const safeDateStr  = orderDate.replace(/\//g, '-');
-  const safeOrderId  = orderId.substring(0, 8).toUpperCase();
-  const pdfFileName  = `Factura_${safeOrderId}_${safeDateStr}.pdf`;
-
-  // Create an isolated off-screen container so html2canvas captures cleanly
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = [
-    'position:absolute',
-    'top:0',
-    'left:-9999px',
-    'width:794px',
-    'background:#FFFFFF',
-    'z-index:-1',
-    'pointer-events:none'
-  ].join(';');
-  wrapper.innerHTML = invoiceHtml;
-  document.body.appendChild(wrapper);
-
-  // Allow the browser one frame to lay out the injected HTML before capturing
-  requestAnimationFrame(function() {
-    html2canvas(wrapper, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: 794,
-      onclone: function(clonedDoc) {
-        const el = clonedDoc.querySelector('[data-invoice-wrapper]') || clonedDoc.body.lastElementChild;
-        if (el) {
-          el.style.position = 'relative';
-          el.style.left = '0';
-          el.style.top = '0';
-        }
-      }
-    }).then(function(canvas) {
-      document.body.removeChild(wrapper);
-
-      let jsPDFClass;
-      if (window.jspdf && window.jspdf.jsPDF) {
-        jsPDFClass = window.jspdf.jsPDF;
-      } else if (window.jsPDF) {
-        jsPDFClass = window.jsPDF;
-      } else {
-        throw new Error('La librería jsPDF no está cargada.');
-      }
-      const pdf       = new jsPDFClass({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const imgData   = canvas.toDataURL('image/png');
-      const pdfWidth  = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      let heightLeft = pdfHeight;
-      let position   = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save(pdfFileName);
-      Swal.close();
-
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 4000,
-        timerProgressBar: true,
-        background: '#DCFCE7',
-        color: '#15803D',
-        icon: 'success',
-        title: `✅ Factura ${pdfFileName} descargada`
-      });
-    }).catch(function(err) {
-      if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
-      console.error('Error al generar factura PDF:', err);
-      Swal.close();
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al generar la factura',
-        text: 'No se pudo crear el PDF. Por favor intenta de nuevo.',
-        background: '#FFFFFF'
-      });
-    });
+  var csv = '\uFEFFID,Estado,Fecha,Total\n';
+  rows.forEach(function(row) {
+    var cells = row.querySelectorAll('td');
+    if (cells.length < 4) return;
+    var id = cells[0].textContent.trim();
+    var estado = cells[1].textContent.trim();
+    var fecha = cells[2].textContent.trim();
+    var total = cells[3].textContent.trim();
+    csv += '"' + id + '","' + estado + '","' + fecha + '","' + total + '"\n';
   });
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'pedidos_mikitech_' + new Date().toISOString().slice(0,10) + '.csv';
+  link.click();
+  URL.revokeObjectURL(link.href);
+  showToast('CSV exportado correctamente');
 }
 
-function downloadPDF() {
-  const content = document.getElementById('pdf-content');
-  const titleEl = document.getElementById('pdf-preview-title');
-  const fileName = (titleEl ? titleEl.textContent.trim().replace(/[^a-z0-9]/gi,'_').toLowerCase() : 'reporte_mikitech') + '.pdf';
-
-  html2canvas(content, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: '#ffffff',
-    logging: true, // Enable logging to help diagnose issues if any persist
-    scrollX: 0,
-    scrollY: 0,
-    windowWidth: 800,
-    onclone: (clonedDoc) => {
-      const preview = clonedDoc.getElementById('pdf-preview');
-      if (preview) {
-        preview.style.position = 'relative';
-        preview.style.zIndex = '9999';
-        preview.style.left = '0';
-        preview.style.top = '0';
-        preview.style.visibility = 'visible';
-        preview.style.opacity = '1';
-        preview.style.display = 'block';
-        preview.style.background = '#ffffff';
-      }
-      const pContent = clonedDoc.getElementById('pdf-content');
-      if (pContent) {
-        pContent.style.position = 'relative';
-        pContent.style.zIndex = '9999';
-        pContent.style.left = '0';
-        pContent.style.top = '0';
-        pContent.style.visibility = 'visible';
-        pContent.style.opacity = '1';
-        pContent.style.display = 'block';
-        pContent.style.background = '#ffffff';
-      }
-    }
-  }).then(function(canvas) {
-    let jsPDFClass;
-    if (window.jspdf && window.jspdf.jsPDF) {
-      jsPDFClass = window.jspdf.jsPDF;
-    } else if (window.jsPDF) {
-      jsPDFClass = window.jsPDF;
-    } else {
-      throw new Error('La librería jsPDF no está cargada.');
-    }
-    const pdf = new jsPDFClass({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const imgData = canvas.toDataURL('image/png');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let heightLeft = pdfHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - pdfHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-    }
-
-    pdf.save(fileName);
-    Swal.close();
-
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      background: '#DCFCE7',
-      color: '#15803D',
-      icon: 'success',
-      title: '✅ Reporte PDF descargado correctamente'
-    });
-  }).catch(function(err) {
-    console.error('Error al generar PDF:', err);
-    Swal.close();
-    Swal.fire({
-      icon: 'error',
-      title: 'Error al generar PDF',
-      text: 'Intenta de nuevo.',
-      background: '#fff'
-    });
-  });
-}
-
-function toggleSidebar() {
-  document.body.classList.toggle('sidebar-open');
+function limpiarFiltros() {
+  document.getElementById('dateFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  var rows = document.querySelectorAll('#reports-orders-table tbody tr');
+  rows.forEach(function(r) { r.style.display = ''; });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Lógica para notificaciones flotantes toast al recargar/cargar la página
-  const recentDeliveries = {{ recent_deliveries|safe|default:"[]" }};
-  if (recentDeliveries && recentDeliveries.length > 0) {
-    recentDeliveries.forEach(function(delivery, index) {
-      setTimeout(() => {
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 5000,
-          timerProgressBar: true,
-          background: '#DCFCE7',
-          color: '#15803D',
-          icon: 'success',
-          title: `El pedido #${delivery.id_corto}... ha sido marcado como entregado`
-        });
-      }, index * 800);
-    });
-  }
-
-  // Lógica para filtrar por fecha la tabla de pedidos
   var dateFilter = document.getElementById('dateFilter');
-  if(dateFilter) {
-    dateFilter.addEventListener('change', function() {
-      var selectedDate = this.value;
-      var rows = document.querySelectorAll('#reports-orders-table tbody tr[data-date]');
-      
-      rows.forEach(function(row) {
-        if (!selectedDate) {
-          row.style.display = '';
-        } else {
-          row.style.display = (row.getAttribute('data-date') === selectedDate) ? '' : 'none';
-        }
-      });
+  var statusFilter = document.getElementById('statusFilter');
+  function aplicarFiltros() {
+    var selectedDate = dateFilter.value;
+    var selectedStatus = statusFilter.value;
+    var rows = document.querySelectorAll('#reports-orders-table tbody tr');
+    rows.forEach(function(row) {
+      var matchDate = !selectedDate || row.getAttribute('data-date') === selectedDate;
+      var matchStatus = !selectedStatus || row.getAttribute('data-status') === selectedStatus;
+      row.style.display = (matchDate && matchStatus) ? '' : 'none';
     });
   }
+  if (dateFilter) dateFilter.addEventListener('change', aplicarFiltros);
+  if (statusFilter) statusFilter.addEventListener('change', aplicarFiltros);
 });
 </script>
 </body>
