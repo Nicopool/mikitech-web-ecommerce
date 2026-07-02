@@ -344,8 +344,7 @@ def crear_producto(petición):
             descuento_expira_str = petición.POST.get('descuento_expira_el', '').strip()
             descuento_expira_el = None
             if descuento_expira_str:
-                from django.utils import timezone
-                from datetime import datetime
+                from datetime import datetime, timezone
                 try:
                     descuento_expira_el = datetime.fromisoformat(descuento_expira_str).astimezone(timezone.utc)
                 except ValueError:
@@ -490,8 +489,7 @@ def editar_producto(petición, id_producto):
                 producto.descuento_porcentaje = 0
             desc_exp_str = petición.POST.get('descuento_expira_el', '').strip()
             if desc_exp_str:
-                from django.utils import timezone
-                from datetime import datetime
+                from datetime import datetime, timezone
                 try:
                     producto.descuento_expira_el = datetime.fromisoformat(desc_exp_str).astimezone(timezone.utc)
                 except ValueError:
