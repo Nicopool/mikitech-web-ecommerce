@@ -69,7 +69,34 @@ export default function AdminLayout() {
               <button className="hover:text-primary transition-colors"><Bell className="w-5 h-5" /></button>
               <button className="hover:text-primary transition-colors"><Settings className="w-5 h-5" /></button>
               <div className="h-6 w-[1px] bg-outline-variant"></div>
-              <button className="bg-primary text-on-primary font-headline text-xs font-bold px-4 py-2 rounded-sm uppercase tracking-wider hover:brightness-110 transition-all">Cerrar Sesión</button>
+              <button
+                onClick={() => {
+                  const Swal = (window as any).Swal;
+                  if (Swal) {
+                    Swal.fire({
+                      title: '¿Cerrar sesión?',
+                      text: 'Estás a punto de salir del panel de administración.',
+                      icon: 'warning',
+                      showCancelButton: true,
+                      confirmButtonColor: '#DC2626',
+                      cancelButtonColor: '#64748B',
+                      confirmButtonText: 'Sí, cerrar sesión',
+                      cancelButtonText: 'Cancelar',
+                      background: '#FFFFFF',
+                      color: '#0F1111',
+                    }).then((result: any) => {
+                      if (result.isConfirmed) {
+                        window.location.href = '/admin-panel/logout/';
+                      }
+                    });
+                  } else {
+                    window.location.href = '/admin-panel/logout/';
+                  }
+                }}
+                className="bg-primary text-on-primary font-headline text-xs font-bold px-4 py-2 rounded-sm uppercase tracking-wider hover:brightness-110 transition-all"
+              >
+                Cerrar Sesión
+              </button>
             </div>
           </div>
         </header>

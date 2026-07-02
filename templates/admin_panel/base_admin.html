@@ -98,7 +98,7 @@
       <a href="/" target="_blank" class="g-btn-secondary" style="font-size: 12px; padding: 8px 14px; border-radius: 20px; height: 3.8rem; display: inline-flex; align-items: center; justify-content: center; margin: 0;">
         <i data-lucide="external-link" style="width: 1.4rem; height: 1.4rem;"></i> Ver Tienda
       </a>
-      <a href="{% url 'admin_logout' %}" class="g-btn-ghost" style="height: 3.8rem; display: inline-flex; align-items: center; justify-content: center; margin: 0;">
+      <a href="#" onclick="event.preventDefault(); confirmarCerrarSesion();" class="g-btn-ghost" style="height: 3.8rem; display: inline-flex; align-items: center; justify-content: center; margin: 0;">
         <i data-lucide="log-out" style="width: 1.5rem; height: 1.5rem;"></i> Cerrar Sesión
       </a>
     </div>
@@ -148,6 +148,26 @@
 
 </main>
 
+<script>
+function confirmarCerrarSesion() {
+  Swal.fire({
+    title: '¿Cerrar sesión?',
+    text: 'Estás a punto de salir del panel de administración.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#DC2626',
+    cancelButtonColor: '#64748B',
+    confirmButtonText: 'Sí, cerrar sesión',
+    cancelButtonText: 'Cancelar',
+    background: '#FFFFFF',
+    color: '#0F1111',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = '{% url "admin_logout" %}';
+    }
+  });
+}
+</script>
 <!-- SweetAlert2 Toast Config (igual que User Dashboard) -->
 <script>
   const AdminToast = Swal.mixin({
