@@ -113,7 +113,7 @@
   <div class="sb-logo" style="border-bottom: 1px solid var(--ds-border);">
     <a href="/" style="display: flex; align-items: center; text-decoration: none; height: 4.5rem;">
       <div style="font-family: 'Helvetica', Arial, sans-serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 1.5px; color: #0F172A; display: flex; align-items: center; gap: 4px;">
-        <span style="color: #38BDF8;">MIKI</span>TECH
+        <span style="color: #FF9900;">MIKI</span>TECH
       </div>
     </a>
   </div>
@@ -376,7 +376,7 @@ function generatePDF(type) {
 
   var logoEl = document.createElement('div');
   logoEl.style.cssText = 'font-size:2rem; font-weight:900; letter-spacing:1px; font-family:\'Inter\',sans-serif; color:#0F172A;';
-  logoEl.innerHTML = '<span style="color:#1D4ED8;">⚡ MIKI</span>TECH';
+  logoEl.innerHTML = '<span style="color:#FF9900;">⚡ MIKI</span>TECH';
 
   var metaEl = document.createElement('div');
   metaEl.style.cssText = 'text-align:right; font-size:1.2rem; color:#64748B;';
@@ -415,7 +415,7 @@ function generatePDF(type) {
     } else {
       all_items.forEach(function(item) {
         var tr = '<tr style="border-bottom:1px solid #F1F5F9;">';
-        tr += '<td style="padding:15px; font-size:13px; font-weight:600; color:#1D4ED8;">'+item.type+'</td>';
+        tr += '<td style="padding:15px; font-size:13px; font-weight:600; color:#FF9900;">'+item.type+'</td>';
         tr += '<td style="padding:15px; font-size:13px;">'+item.product+'</td>';
         tr += '<td style="padding:15px; font-size:13px; color:#475569;">'+item.detail+'</td>';
         tr += '<td style="padding:15px; font-size:12px; color:#94A3B8;">'+item.date+'</td>';
@@ -505,7 +505,7 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
       <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:28px; border-bottom:3px solid #1D4ED8; margin-bottom:36px;">
         <div>
           <div style="font-size:32px; font-weight:900; letter-spacing:2px; color:#0F172A; line-height:1;">
-            <span style="color:#1D4ED8;">⚡ MIKI</span>TECH
+            <span style="color:#FF9900;">⚡ MIKI</span>TECH
           </div>
           <div style="font-size:12px; color:#64748B; margin-top:6px; font-weight:500;">Componentes y Hardware de Alto Rendimiento</div>
           <div style="font-size:11px; color:#94A3B8; margin-top:3px;">mikitech.com &nbsp;|&nbsp; soporte@mikitech.com</div>
@@ -525,7 +525,7 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
 
       <!-- ── BILLING INFO ── -->
       <div style="display:flex; justify-content:space-between; margin-bottom:36px; gap:24px;">
-        <div style="flex:1; background:#EFF6FF; border-radius:12px; padding:20px 24px; border-left:4px solid #1D4ED8;">
+        <div style="flex:1; background:#EFF6FF; border-radius:12px; padding:20px 24px; border-left:4px solid #FF9900;">
           <div style="font-size:11px; font-weight:800; color:#1D4ED8; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;">Facturar a</div>
           <div style="font-size:17px; font-weight:800; color:#0F172A; margin-bottom:6px;">${profileData.name}</div>
           <div style="font-size:12px; color:#475569; font-weight:500; margin-bottom:3px;">Usuario: ${profileData.username}</div>
@@ -598,7 +598,7 @@ function generateInvoice(orderId, orderDate, orderTotal, items) {
           Garantía de 1 año en todos los componentes. Para soporte: soporte@mikitech.com
         </div>
         <div style="margin-top:10px; font-size:12px; font-weight:800; color:#1D4ED8; letter-spacing:1px;">
-          <span style="color:#38BDF8;">MIKI</span>TECH &nbsp;·&nbsp; mikitech.com
+          <span style="color:#FF9900;">MIKI</span>TECH &nbsp;·&nbsp; mikitech.com
         </div>
       </div>
     </div>`;
