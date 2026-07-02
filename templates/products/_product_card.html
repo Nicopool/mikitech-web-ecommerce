@@ -13,9 +13,9 @@
     <i data-lucide="heart" style="width:1.6rem; height:1.6rem; color:#EF4444; fill:none; stroke-width:2.2;"></i>
   </button>
   
-  <a href="{% url 'products:detail' product.enlace %}" class="wix-img-wrapper" style="position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+  <a href="{% url 'products:detail' product.enlace %}" class="wix-img-wrapper">
     {% if product.url_imagen_principal %}
-      <img src="{{ product.url_imagen_principal }}" alt="{{ product.nombre }}" loading="lazy" style="max-width:100%; max-height:100%; object-fit:contain;">
+      <img src="{{ product.url_imagen_principal }}" alt="{{ product.nombre }}" loading="lazy">
     {% else %}
       <div style="display:flex; align-items:center; justify-content:center; height:100%; width:100%; background:#F3F3F3;">
         <i data-lucide="package" style="width:4.8rem; height:4.8rem; color:#A2A6A6; stroke-width:1.2;"></i>
