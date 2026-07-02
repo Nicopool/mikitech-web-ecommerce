@@ -107,17 +107,13 @@ def vista_ingreso(petición):
             petición.session['rol_usuario'] = 'client'
             petición.session['avatar_url']  = ''
 
-        proxima_url = petición.GET.get('next', '')
-        if not proxima_url or proxima_url == '/cuenta/perfil/':
-            rol = perfil.rol if perfil else 'client'
-            if rol == 'admin':
-                proxima_url = '/admin-panel/'
-                petición.session['pasarela_administrador_superada'] = True
-            elif rol == 'repartidor':
-                proxima_url = '/repartidor/'
-                petición.session['pasarela_repartidor_superada'] = True
-            else:
-                proxima_url = '/cuenta/perfil/'
+        proxima_url = petición.GET.get('next', '/cuenta/perfil/')
+        if perfil and perfil.rol in ['admin', 'repartidor']:
+            return render(petición, 'users/login.html', {
+                'error': f'Acceso denegado: Las cuentas de {perfil.rol} deben ingresar a través de su portal específico, no por el acceso de clientes.',
+                'correo': correo,
+                'next': petición.POST.get('next', '')
+            })
 
         nombre = perfil.nombre_mostrado if perfil else 'Usuario'
         messages.success(petición, f'✅ ¡Login exitoso! Bienvenido de vuelta a tu panel, {nombre}.')
